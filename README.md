@@ -2,9 +2,6 @@
 
 MSc Data Science and Artificial Intelligence, Emirates Aviation University.
 
-I work on applied machine learning for health and on production mobile applications. My interest is
-in the part that comes after a model reports a good score: whether the evaluation was honest, what
-the errors cost, and whether anyone can reproduce the result.
 
 ### Projects
 
@@ -16,7 +13,7 @@ applied to training data only, and evaluation on accuracy, precision, recall, F1
 `Python` `TensorFlow/Keras` `scikit-learn` `Jupyter`
 
 **[cervical-screening-survey-instrument](https://github.com/engabdullaalmulla-dev/cervical-screening-survey-instrument)**
-A twelve-item survey measuring how healthcare and health-data professionals view automated risk
+A twelve item survey measuring how healthcare and health-data professionals view automated risk
 prediction in cervical screening, and how they weigh a missed positive case against an unnecessary
 referral. Published with its objective mapping and consent text.
 `Survey design` `Research methods`
