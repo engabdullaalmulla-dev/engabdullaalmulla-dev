@@ -142,8 +142,10 @@ export function GameScreen({ state, dispatch, yourMemory, assist, onQuit }: Prop
 
   const prompt = buildPrompt(state, yourTurn, revealIsYours);
   const held = state.held;
+  // During the opening look the cards are already face-up in your own grid,
+  // so the tray would only be showing you the same card twice.
   const trayCard =
-    revealIsYours && reveal
+    revealIsYours && reveal && reveal.reason !== 'opening'
       ? playerById(state, reveal.targets[0].playerId)?.slots[reveal.targets[0].slot] ?? null
       : yourTurn && held
         ? held
