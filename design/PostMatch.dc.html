@@ -23,7 +23,7 @@
 <div style="width: 390px; height: 844px; background: #F1ECE0; font-family: Archivo, Helvetica, Arial, sans-serif; color: #17140F; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- scoreline -->
-  <div style="background: #17140F; color: #F1ECE0; padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 14px;">
+  <div style="background: #17140F; color: #F1ECE0; padding: 22px 20px 16px; display: flex; flex-direction: column; gap: 14px;">
     <div style="font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: #A79C84;">Full time · Thu 10 Sep</div>
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex-grow: 1;">
@@ -47,20 +47,20 @@
   </div>
 
   <!-- highlights -->
-  <div style="margin: 16px 20px 0; border: 1.5px solid #17140F; background: #F7F4EC; display: flex; flex-direction: column;">
-    <div class="tap" style="display: flex; align-items: center; gap: 13px; padding: 15px;">
+  <div style="margin: 12px 20px 0; border: 1.5px solid #17140F; background: #F7F4EC; display: flex; flex-direction: column;">
+    <div class="tap" onClick="{{ togglePlay }}" style="display: flex; align-items: center; gap: 13px; padding: 15px;">
       <div style="width: 46px; height: 46px; background: #C1402F; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="#F7F4EC"></path></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="{{playIcon}}" fill="#F7F4EC"></path></svg>
       </div>
       <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1;">
         <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 20px; text-transform: uppercase; line-height: 1;">Your 3 clips are up</div>
-        <div style="font-family: Newsreader, Georgia, serif; font-size: 13px; color: #6E6553;">Both goals and the block on the line.</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 13px; color: #6E6553;">{{clipCaption}}</div>
       </div>
       <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#17140F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
     </div>
     <div style="display: flex; gap: 6px; padding: 0 15px 15px;">
       <sc-for list="{{clips}}" as="c" hint-placeholder-count="3">
-        <div style="flex-grow: 1; height: 54px; background: {{c.bg}}; display: flex; align-items: flex-end; padding: 7px;">
+        <div class="tap" onClick="{{ c.pick }}" style="flex-grow: 1; height: 54px; background: {{c.bg}}; border: 2px solid {{c.ring}}; display: flex; align-items: flex-end; padding: 5px;">
           <span style="font-size: 9.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #F7F4EC;">{{c.label}}</span>
         </div>
       </sc-for>
@@ -68,7 +68,7 @@
   </div>
 
   <!-- ratings -->
-  <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+  <div style="padding: 14px 20px 0; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
     <div style="display: flex; align-items: baseline; justify-content: space-between;">
       <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 22px; text-transform: uppercase;">Who played well?</div>
       <div style="font-size: 12px; font-weight: 700; color: #6E6553;">{{ratedCount}}/4</div>
@@ -76,7 +76,7 @@
     <div style="font-family: Newsreader, Georgia, serif; font-size: 13px; color: #6E6553; line-height: 1.4; margin-top: -6px;">Two taps. This is what moves people up and down tiers, so the games stay honest.</div>
 
     <sc-for list="{{mates}}" as="m" hint-placeholder-count="4">
-      <div style="display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: {{m.rowBg}}; border: 1.5px solid {{m.rowBorder}};">
+      <div style="display: flex; align-items: center; gap: 11px; padding: 10px 13px; background: {{m.rowBg}}; border: 1.5px solid {{m.rowBorder}};">
         <div style="width: 34px; height: 34px; background: #17140F; color: #F1ECE0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0;">{{m.initials}}</div>
         <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
           <div style="font-size: 14px; font-weight: 700;">{{m.name}}</div>
@@ -93,7 +93,7 @@
   </div>
 
   <!-- tier progress -->
-  <div style="margin: 14px 20px 24px; background: #E6DFCF; padding: 15px; display: flex; flex-direction: column; gap: 9px;">
+  <div style="margin: 12px 20px 20px; background: #E6DFCF; padding: 15px; display: flex; flex-direction: column; gap: 9px;">
     <div style="display: flex; align-items: baseline; justify-content: space-between;">
       <div style="font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #6E6553;">Tier 4 → Tier 5</div>
       <div style="font-size: 12px; font-weight: 700; color: #C1402F;">38 to go</div>
@@ -110,7 +110,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { votes: {} };
+    this.state = { votes: {}, clip: 0, playing: false };
   }
 
   renderVals() {
@@ -150,14 +150,29 @@ class Component extends DCLogic {
       };
     });
 
+    const clipDefs = [
+      { label: "0'12 goal", caption: 'Near post, first time.', bg: '#3A342A' },
+      { label: "1'04 block", caption: 'Cleared off the line.', bg: '#4A4335' },
+      { label: "2'31 goal", caption: 'Second of the night.', bg: '#2E3F37' },
+    ];
+
+    const sel = this.state.clip;
+    const playing = this.state.playing;
+
+    const clips = clipDefs.map((c, i) => ({
+      label: c.label,
+      bg: c.bg,
+      ring: i === sel ? '#C1402F' : 'transparent',
+      pick: () => this.setState({ clip: i, playing: false }),
+    }));
+
     return {
       mates: mates,
       ratedCount: Object.keys(votes).length,
-      clips: [
-        { label: "0'12 goal", bg: '#3A342A' },
-        { label: "1'04 block", bg: '#4A4335' },
-        { label: "2'31 goal", bg: '#2E3F37' },
-      ],
+      clips: clips,
+      playIcon: playing ? 'M8 5h3v14H8zM13 5h3v14h-3z' : 'M8 5.5v13l11-6.5z',
+      clipCaption: playing ? 'Playing — ' + clipDefs[sel].label : clipDefs[sel].caption,
+      togglePlay: () => this.setState({ playing: !playing }),
     };
   }
 }

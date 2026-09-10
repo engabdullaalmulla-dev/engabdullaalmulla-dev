@@ -33,7 +33,7 @@
         <div style="font-size: 12px; font-weight: 600;">Al Quoz Sports Park · Pitch 3</div>
       </div>
       <div style="display: flex; flex-direction: column; align-items: flex-end;">
-        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 40px; line-height: .86;">{{checkedIn}}<span style="font-size: 22px; opacity: .7;">/14</span></div>
+        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 40px; line-height: .86;">{{checkedIn}}<span style="font-size: 22px; opacity: .7;">/13</span></div>
         <div style="font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .85;">Checked in</div>
       </div>
     </div>
@@ -68,11 +68,17 @@
         <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 17px; color: #6E6553;">{{p.tier}}</div>
       </div>
     </sc-for>
+
+    <div style="display: flex; align-items: center; gap: 9px; padding-top: 2px;">
+      <div style="height: 1px; background: #D8CFB9; flex-grow: 1;"></div>
+      <div style="font-size: 11px; font-weight: 700; color: #8A8069;">7 more booked</div>
+      <div style="height: 1px; background: #D8CFB9; flex-grow: 1;"></div>
+    </div>
   </div>
 
   <!-- action -->
   <div style="padding: 16px 20px 24px; display: flex; flex-direction: column; gap: 11px;">
-    <div class="tap" style="min-height: 54px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1.5px solid #17140F; display: flex; align-items: center; justify-content: center; gap: 9px;">
+    <div class="tap" onClick="{{ build }}" style="min-height: 54px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1.5px solid {{ctaBorder}}; display: flex; align-items: center; justify-content: center; gap: 9px;">
       <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px; letter-spacing: .04em; text-transform: uppercase;">{{ctaLabel}}</span>
     </div>
     <div style="display: flex; align-items: flex-start; gap: 8px;">
@@ -88,7 +94,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { present: { rk: true, ma: true, ds: true } };
+    this.state = { present: { rk: true, ma: true, ds: true }, built: false };
   }
 
   renderVals() {
@@ -120,15 +126,22 @@ class Component extends DCLogic {
         toggle: () => {
           const next = Object.assign({}, this.state.present);
           if (next[p.id]) { delete next[p.id]; } else { next[p.id] = true; }
-          this.setState({ present: next });
+          this.setState({ present: next, built: false });
         },
       };
     });
 
     const count = Object.keys(present).length;
     const ready = count >= 6;
+    const built = this.state.built && ready;
+
+    let label = 'Waiting on players';
+    if (built) { label = 'Teams sent to everyone'; }
+    else if (ready) { label = 'Build the teams'; }
 
     return {
+      build: () => { if (ready) { this.setState({ built: !this.state.built }); } },
+      ctaBorder: ready ? '#17140F' : '#D8CFB9',
       roster: roster,
       checkedIn: count,
       figures: [
@@ -136,8 +149,8 @@ class Component extends DCLogic {
         { value: '210', label: 'Your fee (AED)', color: '#2E7D57' },
         { value: '1', label: 'Spot open', color: '#C1402F' },
       ],
-      ctaLabel: ready ? 'Build the teams' : 'Waiting on players',
-      ctaBg: ready ? '#17140F' : 'transparent',
+      ctaLabel: label,
+      ctaBg: built ? '#2E7D57' : (ready ? '#17140F' : 'transparent'),
       ctaFg: ready ? '#F1ECE0' : '#8A8069',
     };
   }

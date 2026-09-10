@@ -10,10 +10,10 @@
     { "file": "System.dc.html", "x": 0, "y": 1928, "w": 1240, "h": 980, "title": "Design system" }
   ],
   "annotations": [
-    { "id": "brief", "x": 0, "y": -190, "w": 700, "text": "MATCHDAY — a pickup-football app built against the twenty gaps in CeleBreak and Stranger Soccer.\n\nDirection: matchday programme. Warm stock, letterpress weight, one dark chalkboard surface reserved for team sheets and the resale moment. Every screen here is live — tap the filters, the fixtures, the toggles, the votes." },
+    { "id": "brief", "x": 0, "y": -330, "w": 700, "text": "MATCHDAY — a pickup-football app built against the twenty gaps in CeleBreak and Stranger Soccer.\n\nDirection: matchday programme. Warm stock, letterpress weight, one dark chalkboard surface reserved for team sheets and the resale moment. Every screen here is live — tap the filters, the fixtures, the toggles, the votes." },
     { "id": "flow-note", "x": 1880, "y": 0, "w": 300, "text": "THE CORE LOOP\n\nFind a game → see the balanced sides → release your spot and get cash back → rate the people you played with.\n\nScreen 3 is the one to try first. It is the whole competitive argument in a single interaction: no cut-off, no forfeited credits, and the sides stay even because the seat gets refilled." },
     { "id": "retention-note", "x": 1410, "y": 964, "w": 300, "text": "THE RETENTION SPINE\n\nNeither incumbent has any of this. The passport makes your standing portable between cities, the season makes next Thursday matter, and host mode turns the organisers they compete with into supply." },
-    { "id": "system-note", "x": 1300, "y": 1928, "w": 320, "text": "WHY THIS DIRECTION\n\nBoth incumbents are accused in their own reviews of being money grabs with no community. A printed-programme language reads as football-club, not marketplace — it buys back the exact ground they lost.\n\nProgramme red is the only action colour: one primary action per screen, never three competing buttons." }
+    { "id": "system-note", "x": 1340, "y": 1928, "w": 320, "text": "WHY THIS DIRECTION\n\nBoth incumbents are accused in their own reviews of being money grabs with no community. A printed-programme language reads as football-club, not marketplace — it buys back the exact ground they lost.\n\nProgramme red is the only action colour: one primary action per screen, never three competing buttons." }
   ],
   "launch": { "view": "canvas" }
 }

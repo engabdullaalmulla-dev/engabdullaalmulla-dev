@@ -60,6 +60,11 @@
           <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px; color: #EDE7D8; min-width: 26px; text-align: right;">{{p.tier}}</div>
         </div>
       </sc-for>
+      <div style="display: flex; align-items: center; gap: 9px; padding-top: 2px;">
+        <div style="height: 1px; background: #2E3F37; flex-grow: 1;"></div>
+        <div style="font-size: 11px; font-weight: 700; color: #6E8579;">6 more confirmed</div>
+        <div style="height: 1px; background: #2E3F37; flex-grow: 1;"></div>
+      </div>
     </div>
   </sc-if>
 
@@ -88,22 +93,26 @@
             <svg viewBox="0 0 24 24" width="15" height="17" aria-hidden="true"><path d="M8.5 2.2 12 3.6l3.5-1.4 4.2 2.3-1.9 4-2-1v13.3H7.2V7.5l-2 1-1.9-4z" fill="none" stroke="#EDE7D8" stroke-width="1.6"></path></svg>
             <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 17px; text-transform: uppercase; letter-spacing: .03em;">Skins</span>
           </div>
-          <sc-for list="{{skins}}" as="s" hint-placeholder-count="7">
+          <sc-for list="{{skins}}" as="s" hint-placeholder-count="6">
             <div style="display: flex; align-items: center; gap: 8px; animation: chalkIn .3s ease both; animation-delay: {{s.delay}};">
               <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 15px; color: #6E8579; min-width: 15px;">{{s.tier}}</div>
               <div style="font-size: 13px; font-weight: 600;">{{s.name}}</div>
             </div>
           </sc-for>
+          <div style="display: flex; align-items: center; gap: 8px; animation: chalkIn .3s ease both; animation-delay: .42s;">
+            <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 15px; color: #6E8579; min-width: 15px;">—</div>
+            <div style="font-size: 13px; font-weight: 600; color: #7FD1A6;">1 shirt open</div>
+          </div>
         </div>
       </div>
 
       <div style="border: 1.5px solid #3D5147; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; align-items: baseline; justify-content: space-between;">
           <div style="font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #8FA79A;">Balance</div>
-          <div style="font-size: 12px; font-weight: 700; color: #7FD1A6;">0.2 tier gap</div>
+          <div style="font-size: 12px; font-weight: 700; color: #7FD1A6;">0.3 tier gap</div>
         </div>
         <div style="height: 7px; background: #2B3A33; overflow: hidden;">
-          <div style="height: 7px; background: #7FD1A6; animation: meterIn .7s cubic-bezier(.2,.9,.3,1) both;"></div>
+          <div style="width: 92%; height: 7px; background: #7FD1A6; animation: meterIn .7s cubic-bezier(.2,.9,.3,1) both;"></div>
         </div>
         <div style="font-family: Newsreader, Georgia, serif; font-size: 13px; line-height: 1.4; color: #A9BDB2;">Built from the tiers of everyone who actually checked in. If it runs away by three, we swap two players at half time.</div>
       </div>
@@ -113,8 +122,8 @@
 
   <!-- footer CTA -->
   <div style="padding: 16px 20px 26px; display: flex; flex-direction: column; gap: 11px; border-top: 1.5px solid #2E3F37;">
-    <div class="tap" style="min-height: 54px; background: #C1402F; color: #F7F4EC; display: flex; align-items: center; justify-content: center; gap: 9px;">
-      <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px; letter-spacing: .04em; text-transform: uppercase;">Take the last shirt — AED 45</span>
+    <div class="tap" onClick="{{ join }}" style="min-height: 54px; background: {{ctaBg}}; color: #F7F4EC; display: flex; align-items: center; justify-content: center; gap: 9px;">
+      <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px; letter-spacing: .04em; text-transform: uppercase;">{{ctaLabel}}</span>
     </div>
     <div style="display: flex; align-items: flex-start; gap: 8px;">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7FD1A6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
@@ -129,7 +138,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { tab: 'squad' };
+    this.state = { tab: 'squad', joined: false };
   }
 
   renderVals() {
@@ -189,7 +198,6 @@ class Component extends DCLogic {
       { tier: '4', name: 'Andrés V.' },
       { tier: '3', name: 'Paolo N.' },
       { tier: '3', name: 'Nabil E.' },
-      { tier: '3', name: 'Kwame O.' },
     ];
 
     const stagger = (list, offset) => list.map((x, i) => ({
@@ -198,7 +206,12 @@ class Component extends DCLogic {
       delay: (offset + i * 0.055) + 's',
     }));
 
+    const joined = this.state.joined;
+
     return {
+      ctaLabel: joined ? "You're in — Thu 19:00" : 'Take the last shirt — AED 45',
+      ctaBg: joined ? '#2E7D57' : '#C1402F',
+      join: () => this.setState({ joined: !joined }),
       tabs: tabs,
       isSquad: tab === 'squad',
       isTeams: tab === 'teams',

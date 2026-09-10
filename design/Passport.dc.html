@@ -69,7 +69,7 @@
 
     <sc-if value="{{isForm}}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #6E6553;">Last six</div>
+        <div style="font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #6E6553;">Last six · most recent right</div>
         <div style="display: flex; gap: 6px;">
           <sc-for list="{{form}}" as="r" hint-placeholder-count="6">
             <div style="flex-grow: 1; height: 46px; background: {{r.bg}}; color: {{r.fg}}; display: flex; align-items: center; justify-content: center; font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px;">{{r.result}}</div>
@@ -153,8 +153,8 @@ class Component extends DCLogic {
     });
 
     const formDefs = [
-      { result: 'W', win: true }, { result: 'W', win: true }, { result: 'D', win: null },
-      { result: 'L', win: false }, { result: 'W', win: true }, { result: 'W', win: true },
+      { result: 'W', win: true }, { result: 'W', win: true }, { result: 'W', win: true },
+      { result: 'L', win: false }, { result: 'D', win: null }, { result: 'W', win: true },
     ];
     const form = formDefs.map((f) => ({
       result: f.result,
@@ -199,7 +199,7 @@ class Component extends DCLogic {
     }));
 
     const cityDefs = [
-      { name: 'Dubai', meta: '41 games · home', live: true },
+      { name: 'Dubai', meta: '38 games · home', live: true },
       { name: 'Abu Dhabi', meta: '3 games', live: true },
       { name: 'Doha', meta: 'Ready when you land', live: true },
       { name: 'Riyadh', meta: 'Ready when you land', live: true },
