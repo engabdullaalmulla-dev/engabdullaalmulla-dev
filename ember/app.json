@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Ember",
+    "slug": "ember",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "ember",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#14100E",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#14100E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.almulla.ember"
+    },
+    "android": {
+      "package": "dev.almulla.ember",
+      "adaptiveIcon": {
+        "backgroundColor": "#14100E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
