@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #C1402F; } a:hover { color: #97301F; }
+    * { -webkit-tap-highlight-color: transparent; }
+    .tap { cursor: pointer; transition: transform .14s ease, background .14s ease, border-color .14s ease; }
+    .tap:active { transform: scale(.96); }
+    @keyframes riseIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #F1ECE0; font-family: Archivo, Helvetica, Arial, sans-serif; color: #17140F; display: flex; flex-direction: column; overflow: hidden;">
+
+  <!-- head -->
+  <div style="background: #2E7D57; color: #F7F4EC; padding: 26px 20px 18px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;">Host mode</div>
+      <div style="border: 1.5px solid #F7F4EC; padding: 4px 7px; font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;">You play free</div>
+    </div>
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 36px; line-height: .9; text-transform: uppercase;">Thu 19:00</div>
+        <div style="font-size: 12px; font-weight: 600;">Al Quoz Sports Park · Pitch 3</div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end;">
+        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 40px; line-height: .86;">{{checkedIn}}<span style="font-size: 22px; opacity: .7;">/14</span></div>
+        <div style="font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .85;">Checked in</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- takings -->
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5px; background: #C9BFA8; border-bottom: 1.5px solid #C9BFA8;">
+    <sc-for list="{{figures}}" as="f" hint-placeholder-count="3">
+      <div style="background: #F1ECE0; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 24px; line-height: 1; color: {{f.color}};">{{f.value}}</div>
+        <div style="font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #6E6553;">{{f.label}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- roster -->
+  <div style="padding: 16px 20px 0; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 21px; text-transform: uppercase;">Tonight's roster</div>
+      <div style="font-size: 11px; font-weight: 700; color: #6E6553;">Tap to check in</div>
+    </div>
+
+    <sc-for list="{{roster}}" as="p" hint-placeholder-count="6">
+      <div class="tap" onClick="{{ p.toggle }}" style="display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: {{p.bg}}; border: 1.5px solid {{p.border}}; animation: riseIn .22s ease both; animation-delay: {{p.delay}};">
+        <div style="width: 30px; height: 30px; border: 1.5px solid {{p.boxBorder}}; background: {{p.boxBg}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="{{p.tick}}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+          <div style="font-size: 14px; font-weight: 700; color: {{p.nameColor}};">{{p.name}}</div>
+          <div style="font-size: 11.5px; color: {{p.metaColor}};">{{p.meta}}</div>
+        </div>
+        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 17px; color: #6E6553;">{{p.tier}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- action -->
+  <div style="padding: 16px 20px 24px; display: flex; flex-direction: column; gap: 11px;">
+    <div class="tap" style="min-height: 54px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1.5px solid #17140F; display: flex; align-items: center; justify-content: center; gap: 9px;">
+      <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px; letter-spacing: .04em; text-transform: uppercase;">{{ctaLabel}}</span>
+    </div>
+    <div style="display: flex; align-items: flex-start; gap: 8px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#6E6553" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 12.5px; color: #4A4335; line-height: 1.4;">No-shows are flagged automatically — you never have to chase anyone for money.</div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { present: { rk: true, ma: true, ds: true } };
+  }
+
+  renderVals() {
+    const present = this.state.present;
+
+    const rosterDefs = [
+      { id: 'rk', initials: 'RK', name: 'Rami K.', meta: '98% reliable · 63 games', tier: '4' },
+      { id: 'ma', initials: 'MA', name: 'Marco A.', meta: '100% reliable · 88 games', tier: '5' },
+      { id: 'ds', initials: 'DS', name: 'Deepak S.', meta: '94% reliable · 12 games', tier: '4' },
+      { id: 'jt', initials: 'JT', name: 'Jonas T.', meta: 'First game — say hello', tier: '3' },
+      { id: 'pn', initials: 'PN', name: 'Paolo N.', meta: 'Missed last week', tier: '3' },
+      { id: 'oz', initials: 'OZ', name: 'Omar Z.', meta: '96% reliable · 34 games', tier: '2' },
+    ];
+
+    const roster = rosterDefs.map((p, i) => {
+      const on = !!present[p.id];
+      return {
+        name: p.name,
+        meta: p.meta,
+        tier: p.tier,
+        bg: on ? '#F7F4EC' : 'transparent',
+        border: on ? '#2E7D57' : '#D8CFB9',
+        boxBg: on ? '#2E7D57' : 'transparent',
+        boxBorder: on ? '#2E7D57' : '#C9BFA8',
+        tick: on ? '#F7F4EC' : 'transparent',
+        nameColor: on ? '#17140F' : '#4A4335',
+        metaColor: on ? '#6E6553' : '#8A8069',
+        delay: (i * 0.04) + 's',
+        toggle: () => {
+          const next = Object.assign({}, this.state.present);
+          if (next[p.id]) { delete next[p.id]; } else { next[p.id] = true; }
+          this.setState({ present: next });
+        },
+      };
+    });
+
+    const count = Object.keys(present).length;
+    const ready = count >= 6;
+
+    return {
+      roster: roster,
+      checkedIn: count,
+      figures: [
+        { value: '13', label: 'Booked', color: '#17140F' },
+        { value: '210', label: 'Your fee (AED)', color: '#2E7D57' },
+        { value: '1', label: 'Spot open', color: '#C1402F' },
+      ],
+      ctaLabel: ready ? 'Build the teams' : 'Waiting on players',
+      ctaBg: ready ? '#17140F' : 'transparent',
+      ctaFg: ready ? '#F1ECE0' : '#8A8069',
+    };
+  }
+}
+</script>
+</body>
+</html>

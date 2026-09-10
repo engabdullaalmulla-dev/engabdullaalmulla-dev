@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #C1402F; } a:hover { color: #97301F; }
+  </style>
+</helmet>
+
+<div style="width: 1240px; height: 980px; background: #F1ECE0; font-family: Archivo, Helvetica, Arial, sans-serif; color: #17140F; padding: 40px; display: flex; flex-direction: column; gap: 26px; box-sizing: border-box; overflow: hidden;">
+
+  <!-- masthead -->
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; padding-bottom: 18px; border-bottom: 4px solid #17140F;">
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <div style="font-size: 11px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: #6E6553;">Design system</div>
+      <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 60px; line-height: .86; text-transform: uppercase;">Matchday programme</div>
+    </div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; line-height: 1.5; color: #4A4335; max-width: 44ch;">Printed football culture, not a booking desk. Warm stock, letterpress weight, one chalkboard surface reserved for team sheets — so the moments that matter look different from the moments that don't.</div>
+  </div>
+
+  <!-- colour -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 10.5px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; color: #6E6553;">Colour — two accents, one dark surface</div>
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px;">
+      <sc-for list="{{swatches}}" as="s" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="height: 78px; background: {{s.hex}}; border: 1.5px solid {{s.ring}};"></div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 12px; font-weight: 800;">{{s.name}}</div>
+            <div style="font-size: 11px; color: #6E6553; font-variant-numeric: tabular-nums;">{{s.hex}}</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 11.5px; color: #6E6553; line-height: 1.35;">{{s.role}}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- type -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 10.5px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; color: #6E6553;">Type — three faces, strict roles</div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;">
+
+      <div style="border: 1.5px solid #17140F; background: #F7F4EC; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;">Anton</div>
+          <div style="font-size: 10.5px; color: #6E6553;">Display · one weight</div>
+        </div>
+        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 44px; line-height: .9; text-transform: uppercase;">19:00 Bibs 6–5</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12.5px; color: #6E6553; line-height: 1.4;">Times, scores, tiers, headlines. Wood-type condensed — it carries the programme feel and sets every number on the pitch.</div>
+      </div>
+
+      <div style="border: 1.5px solid #C9BFA8; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;">Archivo</div>
+          <div style="font-size: 10.5px; color: #6E6553;">Interface · 400–800</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 20px; font-weight: 800;">Take the last shirt</div>
+          <div style="font-size: 14px; font-weight: 700;">Al Quoz Sports Park</div>
+          <div style="font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: #6E6553;">Checked in · 12 of 14</div>
+        </div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12.5px; color: #6E6553; line-height: 1.4;">Labels, buttons, names, data. Tabular figures throughout so tables and scores line up.</div>
+      </div>
+
+      <div style="border: 1.5px solid #C9BFA8; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;">Newsreader</div>
+          <div style="font-size: 10.5px; color: #6E6553;">Editorial · 400–600</div>
+        </div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; line-height: 1.45; color: #17140F;">Cancel whenever you like. If the waitlist takes your spot, the money goes back to your card — not into a wallet you can only spend here.</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12.5px; color: #6E6553; line-height: 1.4;">Every sentence the app says in its own voice. Serif is what stops a policy reading like terms and conditions.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- components -->
+  <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+    <div style="font-size: 10.5px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; color: #6E6553;">Components</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px;">
+
+      <!-- buttons -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #8A8069;">Actions</div>
+        <div style="min-height: 52px; background: #C1402F; color: #F7F4EC; display: flex; align-items: center; justify-content: center;">
+          <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 18px; letter-spacing: .04em; text-transform: uppercase;">Take a spot</span>
+        </div>
+        <div style="min-height: 52px; border: 1.5px solid #17140F; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 13px; font-weight: 700;">Can't make it?</span>
+        </div>
+        <div style="min-height: 52px; border: 1.5px solid #D8CFB9; color: #8A8069; display: flex; align-items: center; justify-content: center;">
+          <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 18px; text-transform: uppercase;">Waiting on players</span>
+        </div>
+      </div>
+
+      <!-- badges -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #8A8069;">Tier &amp; status</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <sc-for list="{{tags}}" as="t" hint-placeholder-count="5">
+            <div style="border: 1.5px solid {{t.color}}; color: {{t.color}}; background: {{t.bg}}; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 5px 8px;">{{t.label}}</div>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+          <div style="width: 46px; height: 46px; border: 2px solid #17140F; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="font-size: 7px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #6E6553;">Tier</div>
+            <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 24px; line-height: .84;">4</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 11.5px; font-weight: 800;">Earned, not chosen</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 11.5px; color: #6E6553; line-height: 1.3;">Moves with results and votes.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- fill meter -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #8A8069;">Fill meter</div>
+        <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+          <sc-for list="{{shirts}}" as="s" hint-placeholder-count="14">
+            <svg viewBox="0 0 24 24" width="18" height="20" aria-hidden="true"><path d="M8.5 2.2 12 3.6l3.5-1.4 4.2 2.3-1.9 4-2-1v13.3H7.2V7.5l-2 1-1.9-4z" fill="{{s.fill}}" stroke="{{s.stroke}}" stroke-width="1.4"></path></svg>
+          </sc-for>
+        </div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; color: #6E6553; line-height: 1.4;">Shirts, never a progress bar. A half-empty rack of bibs reads instantly as a game that needs you.</div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+          <div style="height: 7px; flex-grow: 1; background: #D3C9B2; overflow: hidden;">
+            <div style="width: 88%; height: 7px; background: #2E7D57;"></div>
+          </div>
+          <div style="font-size: 11px; font-weight: 800; color: #2E7D57;">0.2</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #8A8069;">Balance gap</div>
+      </div>
+
+      <!-- board -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #8A8069;">Board surface</div>
+        <div style="background: #1E2A24; color: #EDE7D8; padding: 16px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
+          <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 2px solid #D9534F;">
+            <svg viewBox="0 0 24 24" width="14" height="16" aria-hidden="true"><path d="M8.5 2.2 12 3.6l3.5-1.4 4.2 2.3-1.9 4-2-1v13.3H7.2V7.5l-2 1-1.9-4z" fill="#D9534F"></path></svg>
+            <span style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 16px; text-transform: uppercase;">Bibs</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <sc-for list="{{board}}" as="b" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 14px; color: #6E8579; min-width: 14px;">{{b.tier}}</div>
+                <div style="font-size: 12.5px; font-weight: 600;">{{b.name}}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 11.5px; color: #A9BDB2; line-height: 1.35; margin-top: 2px;">The only dark surface in the app. Reserved for team sheets and the moment a spot is being resold.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1240,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const shirts = [];
+    for (let i = 0; i < 14; i++) {
+      shirts.push(i < 12
+        ? { fill: '#17140F', stroke: '#17140F' }
+        : { fill: 'none', stroke: '#C9BFA8' });
+    }
+
+    return {
+      swatches: [
+        { name: 'Stock', hex: '#F1ECE0', ring: '#C9BFA8', role: 'The page. Warm newsprint, never white.' },
+        { name: 'Card', hex: '#F7F4EC', ring: '#C9BFA8', role: 'Lifted surfaces and the open fixture.' },
+        { name: 'Ink', hex: '#17140F', ring: '#17140F', role: 'Type, rules, the scoreline band.' },
+        { name: 'Rule', hex: '#C9BFA8', ring: '#C9BFA8', role: 'Hairlines, dividers, empty shirts.' },
+        { name: 'Programme red', hex: '#C1402F', ring: '#C1402F', role: 'One action per screen. Nothing else.' },
+        { name: 'Pitch green', hex: '#2E7D57', ring: '#2E7D57', role: 'Confirmed, refunded, balanced, present.' },
+        { name: 'Board', hex: '#1E2A24', ring: '#1E2A24', role: 'Team sheets and the resale moment.' },
+      ],
+      tags: [
+        { label: 'Tier 4', color: '#17140F', bg: 'transparent' },
+        { label: "You're in", color: '#F7F4EC', bg: '#2E7D57' },
+        { label: '2 spots left', color: '#C1402F', bg: 'transparent' },
+        { label: 'Full — waitlist', color: '#8A8069', bg: 'transparent' },
+        { label: 'You play free', color: '#F7F4EC', bg: '#2E7D57' },
+      ],
+      shirts: shirts,
+      board: [
+        { tier: '5', name: 'Marco A.' },
+        { tier: '4', name: 'Rami K.' },
+        { tier: '4', name: 'You' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
