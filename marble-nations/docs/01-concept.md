@@ -59,8 +59,8 @@ The loop is deliberately short at the bottom and long at the top: a single match
 is under a minute, a World Cup campaign is seven matches for your nation and 104
 in the tournament around it.
 
-Each match opens with an arena card naming which of the nine challenges you are
-about to watch, and the arena itself is interactive: tap a marble to follow it,
+Each match opens with an arena card naming which of the twenty-five challenges
+you are about to watch, and the arena itself is interactive: tap a marble to follow it,
 drag and pinch the camera, tap to cheer, tap a goal in the ticker to see it
 again. None of that can change the score, which is the point.
 

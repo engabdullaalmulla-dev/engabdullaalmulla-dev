@@ -13,8 +13,9 @@ qualification journey on top of it:
   named;
 - a functioning knockout bracket including the eight best third-placed teams,
   extra time and penalty shoot-outs;
-- nine genuinely different arenas plus the penalty challenge, each announced by
-  its own arena card;
+- twenty-five genuinely different arenas plus the penalty challenge, each with
+  its own mechanic, palette and arena card, and each auto-calibrated to its
+  target scoring rate;
 - flag marbles for 107 nations, drawn procedurally, identified by FIFA trigramme;
 - an interactive live arena — tap to follow a marble, drag and pinch the camera,
   tap to cheer, tap a goal to watch it again — none of which can alter a result;
@@ -33,7 +34,7 @@ both at ruleset 2026.x with sources upgraded to governing-body regulations.
 
 **Modes:** Authentic and Arcade.
 
-**Arenas:** the nine head-to-head arenas, the penalty challenge, and the
+**Arenas:** the twenty-five head-to-head arenas, the penalty challenge, and the
 multi-marble **Survival Bowl** for arcade play — many nations in one bowl,
 knocked out gradually until one is left. Designed, not yet built.
 
@@ -47,7 +48,7 @@ multiplayer.
 | Area | Work |
 |---|---|
 | Rulesets | Re-source both editions to FIFA and AFC regulation documents plus amendments; replace the approximate AFC seeding order with the published ranking; resolve or retain the Annex C flag |
-| Arenas | Build Survival Bowl; a second variation pass on Grand Arena; audio design |
+| Arenas | Build Survival Bowl; per-arena audio beds; a playtest pass to cut or rework any arena that reads as a variant of another |
 | Flags | Review the stylised central charges (Mexico, Iran, Wales, Sri Lanka, Bhutan, Afghanistan, Serbia, Egypt, Oman, Brunei, Vanuatu) and upgrade the ones that read poorly at marble scale; add the abstract-marble accessibility/rights fallback |
 | Platform | Port simulation and tournament layers to Swift against golden-file tests; SpriteKit renderer; SwiftUI screens |
 | Commerce | StoreKit integration with all purchase states and restore |

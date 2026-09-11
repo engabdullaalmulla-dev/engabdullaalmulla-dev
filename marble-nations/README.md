@@ -11,7 +11,7 @@ Working title. Naming options are in [docs/01-concept.md](docs/01-concept.md).
 
 **Playable prototype (local):** `prototype/` — open `prototype/index.html` from any static
 server. Two complete, verified competitions (World Cup 2026 finals, and the full
-five-round Asian qualification journey), **nine distinct arenas**, penalty
+five-round Asian qualification journey), **twenty-five distinct arenas**, penalty
 shoot-outs, save/resume, an authentic mode and an arcade mode. Every nation is a
 **flag marble** identified by its FIFA trigramme. Real marble physics, not
 pre-recorded animation: every scoreline is counted from marbles crossing a goal
@@ -25,7 +25,7 @@ line, and a match takes **45–55 seconds** to watch.
 |---|---|
 | [docs/01-concept.md](docs/01-concept.md) | The concept, the naming shortlist, the core loop, the acceptance test |
 | [docs/02-match-mechanic.md](docs/02-match-mechanic.md) | How a football fixture becomes a marble contest, and how marble events become a scoreline |
-| [docs/03-arenas.md](docs/03-arenas.md) | The arena family, escalation, and procedural variation with validation |
+| [docs/03-arenas.md](docs/03-arenas.md) | All 25 arenas, escalation by tier, procedural variation, and how they are calibrated |
 | [docs/04-competition-rulesets.md](docs/04-competition-rulesets.md) | The ruleset method, the two encoded editions, sources and flags |
 | [docs/05-architecture.md](docs/05-architecture.md) | Tournament engine, marble simulation, determinism, save format |
 | [docs/06-ux-and-screens.md](docs/06-ux-and-screens.md) | User journey and the five screens |
@@ -53,13 +53,21 @@ node tools/validate.mjs 400         # simulation: determinism, balance, scorelin
 node tools/tournament-test.mjs 40   # tournament: draw constraints, brackets, campaigns
 ```
 
-`validate.mjs` proves each arena is exactly 180°-symmetric in its colliders,
-fields, hazards and spawns, then plays a few thousand matches and checks that
-neither end of the pitch is worth anything, that scorelines look like football,
-that every match finishes inside 60 seconds, and that watching a match and
-skipping it give the same result. The symmetry check earned its place
+`validate.mjs` proves each of the 25 arenas is exactly 180°-symmetric in its
+colliders, fields, hazards and spawns, then plays thousands of matches and checks
+that neither end of the pitch is worth anything, that scorelines look like
+football, that every match finishes inside 60 seconds, and that watching a match
+and skipping it give the same result. The symmetry check earned its place
 immediately: it caught a three-armed turnstile that was quietly worth 65% of
 results to one end.
+
+```bash
+node tools/calibrate.mjs 200 --write    # re-tune every arena's scoring rate
+```
+
+`calibrate.mjs` binary-searches each arena's forward drive until it hits its
+target goals-per-match, then writes `src/sim/tuning.js`. Twenty-five arenas
+cannot be hand-tuned one at a time and stay consistent; this is how they do.
 
 `tournament-test.mjs` plays whole campaigns and checks the draw obeys its
 constraints, the bracket is wired correctly, all 495 possible third-place

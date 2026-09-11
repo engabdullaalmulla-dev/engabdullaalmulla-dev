@@ -13,7 +13,7 @@ import { listCompetitions, COMPETITIONS } from './data/competitions/index.js';
 import { team, CONFEDERATIONS } from './data/teams.js';
 import { teamChip, marbleBackground } from './ui/marble.js';
 import { makeRenderer } from './ui/render.js';
-import { ARENA_META } from './sim/arenas.js';
+import { ARENA_META, ARENA_IDS } from './sim/arenas.js';
 import * as store from './engine/storage.js';
 
 // --- tiny DOM helpers -------------------------------------------------------
@@ -915,6 +915,7 @@ function liveScreen(app) {
 
   function finishMatch() {
     if (S.live.replay) { go('result'); return; }
+    store.recordArena(fixture.arenaId);
     const res = resultOf(m);
     playFixture(c, S.live.fixture, res);
     playRestOfMatchday(c, S.live.fixture);
@@ -1077,6 +1078,23 @@ function cabinetScreen(root) {
         h('div', { style: 'font-weight:700' }, `${team(t.nation).name}`),
         h('div', { class: 'tiny muted' }, `${t.competition} ${t.edition}`)),
       t.mode === 'arcade' ? h('span', { class: 'pill warn' }, 'arcade') : h('span', { class: 'pill ok' }, 'authentic')));
+  }
+
+  pad.appendChild(h('h3', {}, `Arena index · ${Object.keys(cab.arenas || {}).length}/${ARENA_IDS.length}`));
+  pad.appendChild(h('p', {}, 'Twenty-five arenas. Tier 1 turns up in group stages, tier 5 only in a final. Every one of them is exactly symmetric end to end — none of them favours a nation.'));
+  const tiers = [...new Set(ARENA_IDS.map(id => ARENA_META[id].tier))].sort();
+  for (const tier of tiers) {
+    pad.appendChild(h('div', { class: 'tierhead' }, `TIER ${tier}`));
+    for (const id of ARENA_IDS.filter(i => ARENA_META[i].tier === tier)) {
+      const n = (cab.arenas || {})[id] || 0;
+      const meta = ARENA_META[id];
+      pad.appendChild(h('div', { class: 'arow' + (n ? '' : ' locked') },
+        h('span', { class: 'anum' }, String(ARENA_IDS.indexOf(id) + 1).padStart(2, '0')),
+        h('div', { class: 'spread' },
+          h('div', { class: 'anm' }, meta.name),
+          h('div', { class: 'tiny muted' }, meta.rule)),
+        h('span', { class: 'pill' + (n ? ' ok' : '') }, n ? `${n}` : '—')));
+    }
   }
 
   pad.appendChild(h('h3', {}, 'Campaign history'));

@@ -243,6 +243,14 @@ tr.me td{font-weight:650}
 .ncell.on .code{color:var(--accent)}
 .ncell .cf{font-size:9px;color:var(--dim);letter-spacing:.06em;font-weight:600}
 
+.tierhead{font:600 11px/1 var(--display);letter-spacing:.14em;color:var(--dim);margin:14px 0 7px}
+.arow{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);
+  border-radius:var(--radius-sm);background:var(--surface);margin-bottom:6px}
+.arow .anum{font:700 13px/1 var(--display);color:var(--dim);letter-spacing:.06em;min-width:22px}
+.arow .anm{font-weight:650;font-size:13.5px}
+.arow.locked{opacity:.48}
+.arow.locked .anm{font-weight:500}
+
 /* ---------- misc ---------- */
 .seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;margin-bottom:10px}
 .seg button{flex:1;padding:9px 6px;border-radius:8px;border:none;background:none;color:var(--muted);

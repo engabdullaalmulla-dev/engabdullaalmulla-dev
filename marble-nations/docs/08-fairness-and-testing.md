@@ -46,7 +46,7 @@ which group and nothing else.
 
 Waiting for a win-rate to drift is a bad way to find an unfair arena: a real 55/45
 edge needs thousands of matches to separate from noise. So the symmetry claim is
-checked **structurally**. `tools/validate.mjs` builds every arena at twelve
+checked **structurally**. `tools/validate.mjs` builds all twenty-five arenas at twelve
 different seeds, maps every collider, force field, hazard and spawn point through
 `(x, y) → (W − x, H − y)`, and asserts the result is the same multiset it started
 with.
@@ -69,44 +69,68 @@ symmetry.
 
 ## What is measured
 
-`node tools/validate.mjs 400` — 400 group matches and 250 knockout ties per
-arena, roughly 6,000 matches per run.
+`node tools/validate.mjs 300` — 300 group matches and 250 knockout ties per
+arena, about 14,000 matches and 228 assertions per run.
 
 ### Side bias
 
-| Arena | Goals/match | Draws | Top wins | Bottom wins | z |
-|---|---|---|---|---|---|
-| Spin Gate | 2.21 | 29.0% | 152 | 132 | 1.31 |
-| Pinball Stadium | 2.86 | 25.0% | 161 | 139 | 1.15 |
-| Channel Run | 2.79 | 22.8% | 175 | 154 | 1.31 |
-| Tide Arena | 2.35 | 26.8% | 171 | 142 | 1.69 |
-| Crumble Pitch | 2.95 | 24.0% | 150 | 154 | 0.23 |
-| Split Decision | 2.63 | 19.8% | 149 | 172 | 1.28 |
-| Magnet Drift | 3.05 | 22.5% | 146 | 164 | 1.02 |
-| Knockout Bowl | 2.19 | 25.8% | 148 | 149 | 0.06 |
-| The Grand Arena | 2.01 | 29.8% | 154 | 127 | 1.61 |
+Twenty-five arenas, 300 group matches each. `z` is the two-sided binomial
+statistic on decisive matches only; every one is inside the |z| < 2.6 threshold
+and none shows a consistent direction.
 
-Every one inside |z| < 2.6, with no arena showing a consistent direction.
-Knockout ties are checked separately: every one resolves, and the winner is
-unbiased in all nine arenas.
+| Arena | Goals/match | Draws | z |
+|---|---|---|---|
+| 01 Spin Gate | 2.46 | 25.0% | 0.33 |
+| 02 Pinball Stadium | 2.82 | 24.3% | 0.20 |
+| 03 Channel Run | 2.90 | 21.0% | 2.14 |
+| 04 Slalom | 2.64 | 25.3% | 0.13 |
+| 05 Bumper Forest | 2.55 | 28.3% | 1.30 |
+| 06 Bounce Chamber | 2.62 | 26.7% | 0.54 |
+| 07 Carousel | 2.79 | 22.3% | 0.72 |
+| 08 Tide Arena | 2.20 | 25.3% | 0.40 |
+| 09 Crumble Pitch | 2.80 | 22.7% | 0.00 |
+| 10 Crossfire | 2.68 | 24.0% | 0.26 |
+| 11 Hourglass | 2.04 | 30.0% | 1.93 |
+| 12 Shutter Grid | 2.61 | 25.0% | 0.87 |
+| 13 Conveyor Lanes | 2.89 | 30.3% | 2.14 |
+| 14 Catapult Alley | 3.09 | 22.0% | 0.92 |
+| 15 Split Decision | 2.71 | 24.7% | 1.06 |
+| 16 Spiral Vault | 2.59 | 22.7% | 1.05 |
+| 17 Iris Gate | 2.43 | 20.3% | 0.58 |
+| 18 Twin Rings | 2.25 | 30.3% | 1.73 |
+| 19 Pendulum Row | 2.21 | 25.7% | 1.00 |
+| 20 Minefield | 2.77 | 25.3% | 0.27 |
+| 21 Gravity Wells | 2.79 | 19.7% | 0.84 |
+| 22 The Drum | 2.08 | 21.3% | 0.52 |
+| 23 Magnet Drift | 2.86 | 27.0% | 0.74 |
+| 24 Knockout Bowl | 2.08 | 29.3% | 0.00 |
+| 25 The Grand Arena | 1.98 | 28.0% | 1.22 |
+
+The largest deviation in this run was Channel Run at z = 2.14, which over
+twenty-five arenas is roughly what chance produces — and the structural test
+above rules out the thing a drifting z would be evidence of.
 
 ### Scoreline shape
 
 Pooled across all nine arenas:
 
 ```
-2-1  17.8%   1-0  15.8%   1-1  14.3%   2-0  13.2%
-3-1   6.9%   3-0   6.7%   2-2   6.6%   0-0   4.9%
+1-0  18.4%   2-1  18.1%   2-0  13.4%   1-1  13.2%
+3-1   7.1%   3-0   6.7%   2-2   5.4%   0-0   5.4%
 ```
 
-Mean goals per match 2.01 (Grand Arena) to 3.05 (Magnet Drift); real World Cup
-football runs around 2.7. Draw rate 19.8%–29.8%; World Cup group stages run
-around 24%.
+Mean goals per match 1.98 to 3.09 depending on arena, each landed on its own
+target by the calibrator; real World Cup football runs around 2.7. Draw rates sit
+between 19% and 31%; World Cup group stages run around 24%.
+
+The highest scoreline seen anywhere is **12 goals**, which is exactly the real
+World Cup record (Austria 7-5 Switzerland, 1954) and the ceiling the test
+enforces. Bounce Chamber went past it on an earlier build and was tightened.
 
 ### Watch time
 
-45.6–46.7 seconds mean at 1× across all nine arenas, 53s worst case in normal
-time — inside the 45–60 second target. Extra time and a shoot-out extend a
+45.5–47 seconds mean at 1× across all twenty-five arenas, 59s worst case in
+normal time — inside the 45–60 second target. Extra time and a shoot-out extend a
 knockout tie, which is what they are for.
 
 ### Termination, stuck marbles and ambiguity
@@ -128,21 +152,21 @@ drawn from the same distribution for both marbles.
 
 ## Tournament-level fairness
 
-`node tools/tournament-test.mjs 40` plays 40 complete World Cup campaigns
-(4,160 matches) and 10 complete AFC qualifying campaigns (2,260 matches).
+`node tools/tournament-test.mjs 30` plays 30 complete World Cup campaigns
+(3,120 matches) and 8 complete AFC qualifying campaigns (1,808 matches).
 
-**Champions by draw pot, 40 campaigns:** pot 1 → 8, pot 2 → 13, pot 3 → 9,
-pot 4 → 10. Expected 10 each. The most frequent champion in the run was Algeria,
-with four; Croatia won three.
+**Champions by draw pot, 30 campaigns:** pot 1 → 7, pot 2 → 9, pot 3 → 5,
+pot 4 → 9. Expected 7.5 each. The most frequent champion in the run was Colombia,
+with four; Uzbekistan, Türkiye and the Netherlands won two each.
 
-**AFC:** of 80 direct qualifiers across 10 campaigns, **29 started in the first
+**AFC:** of 64 direct qualifiers across 8 campaigns, **16 started in the first
 round** — the qualifying journey does not lock lower-seeded nations out.
 
 ## Structural integrity
 
 | Check | Result |
 |---|---|
-| Draw honours host placement, confederation caps and minima, and bracket-pathway separation | pass, 40/40 campaigns |
+| Draw honours host placement, confederation caps and minima, and bracket-pathway separation | pass, 30/30 campaigns |
 | 104 matches per World Cup campaign | pass |
 | Bracket rounds complete and correctly sized (16 / 8 / 4 / 2 / 2) | pass |
 | No nation appears twice in any round | pass |
@@ -161,7 +185,7 @@ mid-tournament.
 |---|---|
 | Same seed → byte-identical result object | pass |
 | Match stepped one tick at a time (as the renderer does) → identical to `runToEnd` | pass |
-| Every arena 180° symmetric in colliders, fields, hazards and spawns | pass, 9/9 arenas × 12 seeds |
+| Every arena 180° symmetric in colliders, fields, hazards and spawns | pass, 25/25 arenas × 12 seeds |
 
 The second is the one that matters commercially: it is the guarantee that a
 player who skips a match, or whose phone drops to 20 fps, or who sees an ad
@@ -170,6 +194,20 @@ exactly the result they would have got otherwise. The live arena is interactive 
 tap to follow a marble, drag to pan, pinch to zoom, tap to cheer, tap a goal to
 see it again — and every one of those runs in the presentation layer, which has
 no write path into the simulation.
+
+## Calibration is not a thumb on the scale
+
+Twenty-five arenas are tuned by `tools/calibrate.mjs`, which binary-searches each
+arena's forward drive until it hits its target goals-per-match. It is worth being
+precise about what that does and does not touch:
+
+- Drive is a property of the **arena**, applied identically to both marbles.
+- The calibrator has no access to team identity. It runs every probe with two
+  anonymous marbles, `A` and `B`.
+- Changing drive changes how many goals a match contains. It cannot change who
+  scores them, because the arena is symmetric and the launch draws are i.i.d.
+
+Calibration is level design, not matchmaking.
 
 ## What is deliberately not manipulated
 
