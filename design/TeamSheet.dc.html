@@ -77,8 +77,8 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#14141B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
         </div>
         <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-          <div class="impact" style="font-size: 17px;">DEAD EVEN</div>
-          <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66; line-height: 1.4;">Sorted on everyone's level. Three goals in it and we swap two at half time.</div>
+          <div class="impact" style="font-size: 17px;">{{balance.verdict}}</div>
+          <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66; line-height: 1.4;">{{balance.why}}</div>
         </div>
       </div>
     </sc-if>
@@ -216,6 +216,12 @@ class Component extends DCLogic {
       tabs: tabs,
       isPitch: tab === 'pitch',
       isList: tab === 'list',
+      // The meter has to be able to say the sides are uneven — a balancer that
+      // always shows a green tick burns the meter the first lopsided night.
+      balance: {
+        verdict: 'DEAD EVEN',
+        why: 'Both sides within 0.2 of a level. The two strongest players are split, keepers one each.',
+      },
       pitch: pitch,
       squad: squad,
       ctaLabel: joined ? "YOU'RE IN · SHIRT 8" : 'TAKE THE LAST SHIRT · AED 45',

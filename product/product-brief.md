@@ -74,11 +74,11 @@ If we take off-peak inventory on revenue share instead of renting it, our downsi
 ## 6. Scope by release
 
 ### R0 — Prove one slot · weeks 0–4 · *no app*
-A booking page, a payment link and a WhatsApp group. Everything else manual.
+A booking page, a payment link and a WhatsApp group. Everything else manual. Week-by-week detail, the dataset schema and the kill criteria are in `specs/r0-runbook.md`.
 - **Goal:** the same weekly game sells out three weeks running.
-- **Exit criterion:** 3 consecutive sell-outs on one fixed slot. Not signups. Not downloads.
+- **Exit criteria:** 3 consecutive sell-outs on one fixed slot · a venue arrangement the economics survive · week-1 → week-2 return above a third. Not signups. Not downloads.
 - **Explicitly out:** native app, ratings, host tools, anything automated.
-- **Why:** we must know the fill rate before anyone writes app code.
+- **Why:** we must know the fill rate before anyone writes app code — and the results paperwork (C8, M6) is the only output of this phase that cannot be reconstructed later.
 
 ### R1 — The app you can book on · weeks 4–12
 - **Goal:** three fixed weekly slots at 70%+ fill, refund guarantee live and used.
@@ -87,7 +87,7 @@ A booking page, a payment link and a WhatsApp group. Everything else manual.
 
 ### R2 — The loop · weeks 12–20
 - **Goal:** week-12 repeat ≥ 40%, no-show < 8%.
-- **Ships:** earned level rating, auto team balancing at check-in, post-match voting, reliability score and its consequences, score entry.
+- **Ships:** earned level rating (`specs/ranking.md`), auto team balancing at check-in (`specs/balancer.md`), post-match voting, reliability score and its consequences, score entry.
 - **Explicitly out:** anything that doesn't move repeat or no-shows.
 
 ### R3 — Reasons to come back · weeks 20–32
@@ -160,12 +160,17 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 |---|---|---|---|---|---|
 | D1 | Check-in (QR at the pitch) | G07 | P0 | R1 | NS |
 | D2 | **Auto team balancing from who actually checked in** | G06 | P0 | R2 | RPT |
-| D3 | Half-time rebalance prompt past a 3-goal gap | G06 | P2 | R2 | RPT |
+| D3 | Half-time rebalance prompt past a 3-goal gap — proposed, never applied | G06 | P2 | R2 | RPT |
 | D4 | Pitch / formation view with shirt numbers | G06 | P1 | R2 | RPT |
 | D5 | Bib and shirt-number assignment | G06 | P1 | R2 | — |
 | D6 | Score entry (host or any player, with confirmation) | G11 | P0 | R2 | — |
 | D7 | Goal and assist attribution | G11 | P1 | R3 | FREQ |
 | D8 | **Sides named after the night's real fixture, on big-match nights only** | G11 | P1 | R2 | FREQ |
+| D9 | Exhaustive-search balancer — every legal split scored, not a greedy draft | G06 | P0 | R2 | RPT |
+| D10 | Variety — pair history so the same split never repeats week on week | G06 | P1 | R2 | RPT |
+| D11 | Minimum-change re-solve when someone drops after the sheet is out | G06 | P1 | R2 | NS |
+| D12 | "Why am I on this side?" — one line, on tap, never names anyone weaker | G06 | P2 | R2 | RPT |
+| D13 | The balancer says when it **can't** balance tonight's crowd | G06 | P1 | R2 | RPT |
 
 ### E · Reliability & behaviour
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -261,6 +266,9 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | M3 | Weather / venue-failure cancellation flow with automatic refunds | G02 | P0 | R1 | RPT |
 | M4 | Underwriting cap — max guaranteed games per venue per month | Risk | P0 | R1 | — |
 | M5 | Chargeback and fraud handling | — | P1 | R2 | — |
+| M6 | **The R0 results spreadsheet — three tabs, filled the same night** | G05 | P0 | **R0** | — |
+| M7 | Manual resale-and-refund flow run by hand in WhatsApp | G02 | P0 | **R0** | RPT |
+| M8 | Goal difference recorded and reportable as a distribution | G06 | P0 | **R0** | RPT |
 
 ### N · Growth
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -292,7 +300,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | P3 | Lapse detection — reach out at three missed weeks, not thirteen | G07 | P1 | R3 | RPT |
 | P4 | Win-back offer tuned to why they stopped | G07 | P2 | R4 | RPT |
 
-**Count:** 119 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 127 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 
