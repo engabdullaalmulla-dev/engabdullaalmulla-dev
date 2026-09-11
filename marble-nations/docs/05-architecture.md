@@ -80,6 +80,16 @@ directly.
 - **Competition modules** own their own structure: `start()` builds the first
   round, `advance()` reads the completed round and builds the next one. Each is
   explicit code for one edition, with `sources` and `flags` attached.
+- **Competitions compose.** Road to Glory holds no qualifying or finals logic of
+  its own: it delegates to the AFC module until qualification ends, runs the
+  play-off tournament, then hands the World Cup module a substituted 48-team
+  field and delegates again. Three things make that work:
+  `wc2026.start(c, rng, { pots, push:false })` accepts a different field and
+  hands the round back instead of pushing it; every round carries its own
+  `tiebreakers`, `advance` count and `leg`, so one save file can span two
+  rulebooks correctly; and `advance()` may return the round it was given, having
+  added a second wave of fixtures to it — which is how the play-off's pathway
+  finals appear only once the semi-finals are done.
 
 **Consequence lines** ("Still in contention", "Eliminated — cannot finish in the
 top three") come from enumerating every remaining permutation of the team's own

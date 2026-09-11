@@ -103,24 +103,32 @@ export function potOf(code) { const i = POTS.findIndex(p => p.includes(code)); r
 
 // --- start: the draw --------------------------------------------------------
 
-export function start(c, rng) {
+// `opts.pots` lets another competition supply a different 48-team field in the
+// published pot shape -- Road to Glory substitutes the Asian qualifiers it
+// actually produced for the ones who qualified in real life.
+// `opts.push === false` returns the round instead of pushing it, so the finals
+// can be handed back as the next round of a longer campaign.
+export function start(c, rng, opts = {}) {
+  const pots = opts.pots || POTS;
   const drawn = drawGroups({
     groupNames: LETTERS,
-    pots: POTS,
+    pots,
     fixed: FIXED,
     confOf: code => team(code).conf,
     defaultConfMax: 1,
     confMax: { UEFA: 2 },
     confMin: { UEFA: 1 },
+    // The pathway separation applies to the four highest-ranked teams, all of
+    // whom sit in pot 1 and none of whom change in Road to Glory.
     separation: [
-      { codes: ['ESP', 'ARG', 'FRA', 'ENG'], by: 'quarter' },
-      { codes: ['ESP', 'ARG'], by: 'half' },
+      { codes: ['ESP', 'ARG', 'FRA', 'ENG'].filter(t => pots[0].includes(t)), by: 'quarter' },
+      { codes: ['ESP', 'ARG'].filter(t => pots[0].includes(t)), by: 'half' },
     ],
     zoneOf: (g, by) => (by === 'quarter' ? QUARTER[g] : HALF[QUARTER[g]]),
     slotPattern: Object.fromEntries(LETTERS.map(g => [g, ['A', 'D', 'G', 'J'].includes(g) ? [0, 2, 1, 3] : [0, 1, 2, 3]])),
   }, rng);
 
-  c.meta.pots = POTS;
+  c.meta.pots = pots;
   c.meta.drawSteps = drawn.steps;
   c.meta.groups = drawn.groups;
   c.meta.winners = {};
@@ -129,6 +137,8 @@ export function start(c, rng) {
   const round = {
     id: 'group', label: ROUND_LABEL.group, kind: 'groups', roundIndex: 0, tension: 0.15,
     groups: drawn.groups, fixtures: [], eliminated: [],
+    tiebreakers: meta.groupTiebreakers, advance: 2, totalRounds: meta.knockoutRounds,
+    leg: 'finals',
   };
   const SCHED = [[[0, 1], [2, 3]], [[0, 2], [3, 1]], [[3, 0], [1, 2]]];
   for (let md = 0; md < 3; md++) {
@@ -144,6 +154,7 @@ export function start(c, rng) {
       }
     }
   }
+  if (opts.push === false) return round;
   c.rounds.push(round);
   c.current = 0;
   return round;
@@ -185,7 +196,7 @@ export function matchThirds(groupsIn, rng) {
 // --- advance ----------------------------------------------------------------
 
 function tiesToRound(c, id, label, roundIndex, ties) {
-  const round = { id, label, kind: 'ties', roundIndex, ties: [], fixtures: [], eliminated: [] };
+  const round = { id, label, kind: 'ties', roundIndex, ties: [], fixtures: [], eliminated: [], leg: 'finals', totalRounds: meta.knockoutRounds };
   ties.forEach((t, i) => {
     const tie = { id: `m${t.m}`, matchNo: t.m, teams: [t.a, t.b], legs: 1, label, winner: null };
     round.ties.push(tie);
@@ -224,7 +235,7 @@ export function advance(c, rng) {
     const tables = {};
     for (const g of LETTERS) {
       tables[g] = rankTeams(round.groups[g], round.fixtures.filter(f => f.group === g),
-        meta.groupTiebreakers, makeRng(seedFor(c.seed, 'table', g)), meta.points);
+        meta.groupTiebreakers, makeRng(seedFor(c.seed, 'table', round.id, g)), meta.points);
     }
     c.meta.tables = tables;
 
@@ -297,3 +308,4 @@ export function consequence(c, fixture, code, round) {
   return won ? `World champions${how}.` : `Runners-up — beaten in the final${how}.`;
 }
 export const BRACKET = { R32, LINKS, QUARTER, ROUND_LABEL, LETTERS };
+export { POTS };

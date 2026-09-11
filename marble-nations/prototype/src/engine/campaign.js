@@ -43,7 +43,7 @@ export function roundById(c, id) { return c.rounds.find(r => r.id === id); }
 // --- fixtures ---------------------------------------------------------------
 
 export function makeFixture(c, round, { id, teams, label, group, tieId, leg, matchday, index }) {
-  const totalRounds = competitionOf(c).meta.knockoutRounds || 1;
+  const totalRounds = round.totalRounds || competitionOf(c).meta.knockoutRounds || 1;
   const kind = round.kind === 'groups' ? 'group' : 'ko';
   const pool = arenaPoolForStage(kind, round.roundIndex ?? 0, totalRounds);
   const seed = seedFor(c.seed, round.id, id);
@@ -123,8 +123,12 @@ export function roundIsComplete(c) {
 
 export function advance(c) {
   const comp = competitionOf(c);
-  const next = comp.advance(c, makeRng(seedFor(c.seed, 'advance', c.current)));
+  const current = c.rounds[c.current];
+  const next = comp.advance(c, makeRng(seedFor(c.seed, 'advance', c.current, current ? current.fixtures.length : 0)));
   if (!next) { c.finished = true; return null; }
+  // A competition may hand back the round it was given, having added a second
+  // wave of fixtures to it -- the play-off tournament's pathway finals do this.
+  if (next === current) return next;
   c.rounds.push(next);
   c.current = c.rounds.length - 1;
   return next;
@@ -138,14 +142,16 @@ export function advance(c) {
 // as a best third".
 
 export function groupScenario(c, groupName) {
-  const round = c.rounds.find(r => r.kind === 'groups' && r.groups && r.groups[groupName]);
+  // Search backwards: in a two-leg campaign the same group letter can appear in
+  // both legs, and the live one is always the later.
+  const round = [...c.rounds].reverse().find(r => r.kind === 'groups' && r.groups && r.groups[groupName]);
   if (!round) return null;
   const comp = competitionOf(c);
   const codes = round.groups[groupName];
   const played = round.fixtures.filter(f => f.group === groupName && f.result);
   const left = round.fixtures.filter(f => f.group === groupName && !f.result);
-  const chain = comp.meta.groupTiebreakers;
-  const rng = makeRng(seedFor(c.seed, 'scenario', groupName));
+  const chain = tiebreakersFor(c, round);
+  const rng = makeRng(seedFor(c.seed, 'scenario', round.id, groupName));
 
   const can2 = new Set(), can3 = new Set(), always2 = new Set(codes), always3 = new Set(codes);
   const combos = Math.pow(3, left.length);
@@ -215,12 +221,19 @@ export function consequenceFor(c, fixture, code) {
   return `Through to ${label}${suffix}.`;
 }
 
+// A round may carry its own tiebreaker chain. Road to Glory needs this: the
+// Asian rounds settle level teams on head-to-head first, the World Cup rounds
+// settle them on goal difference first, and both are correct in their own leg.
+export function tiebreakersFor(c, round) {
+  return (round && round.tiebreakers) || competitionOf(c).meta.groupTiebreakers;
+}
+
 export function groupTable(c, round, groupName) {
   const comp = competitionOf(c);
   const codes = round.groups[groupName];
   const ms = round.fixtures.filter(f => f.group === groupName);
-  const rng = makeRng(seedFor(c.seed, 'table', groupName));
-  return rankTeams(codes, ms, comp.meta.groupTiebreakers, rng, comp.meta.points);
+  const rng = makeRng(seedFor(c.seed, 'table', round.id, groupName));
+  return rankTeams(codes, ms, tiebreakersFor(c, round), rng, comp.meta.points);
 }
 
 export function allTablesFor(c, round) {

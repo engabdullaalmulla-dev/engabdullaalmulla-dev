@@ -28,6 +28,10 @@ settings at any time. Levels in use: `derived`, `partly-verified`,
 A competition that has not been researched does not appear at all. There is no
 half-finished competition presented as playable.
 
+A ruleset may also **compose** other rulesets rather than duplicate them — that
+is what Road to Glory does, and it is why tiebreaker chains live on the round
+rather than on the competition.
+
 ## 4.1 FIFA World Cup 2026 — finals (`wc2026`, ruleset 2026.1)
 
 **Format.** 48 teams, 12 groups of four, 104 matches. Top two in each group plus
@@ -116,6 +120,71 @@ second. The setup screen tells you which, per nation, before you start.
 | `out-of-scope` | The first two rounds also doubled as 2027 Asian Cup qualification. That consequence is shown as information; no Asian Cup campaign is generated. |
 | `partly-verified` | Fourth round modelled as two centralised single round-robin groups of three, which matches the published format. Which nation hosts is not modelled — and there is no home advantage regardless. |
 
+## 4.3 Road to Glory (`rtg2026`, ruleset 2026.1)
+
+The headline mode: Asian qualification, the inter-confederation play-off and the
+World Cup finals as **one continuous campaign**. 334 matches; roughly thirty of
+them yours to watch.
+
+```
+First round  →  Second  →  Third  →  Fourth  →  Fifth
+                              │         │         │
+              top two qualify ┘   winners ┘   winner → PLAY-OFF TOURNAMENT
+                                                            │
+                                      2 of 6 qualify ───────┘
+                                                            ↓
+                                      WORLD CUP FINALS (48 teams)
+```
+
+It **composes** the two verified rulesets rather than re-implementing either.
+Each round carries its own tiebreaker chain, so the Asian rounds settle level
+teams on head-to-head before goal difference and the finals rounds settle them
+the other way round — both correct, in the same save file.
+
+### The bridge: the FIFA Play-off Tournament
+
+Published structure, reproduced exactly: six teams, two pathways, two places.
+The two highest-ranked entrants went straight to their pathway finals; the other
+four played single-leg semi-finals.
+
+| | Semi-final | Final |
+|---|---|---|
+| **Pathway 1** | New Caledonia v Jamaica | DR Congo v winner |
+| **Pathway 2** | Bolivia v Suriname | **Asia's representative** v winner |
+
+Winning your pathway is qualification. Losing it is the end of the road, and the
+app says so in those words.
+
+### The field you play in is the field you produced
+
+This is the point of the mode. The finals are not the real 2026 field with your
+nation slotted in — the **eight Asian nations at the World Cup are the eight that
+came through your fifth round**, plus whoever won the play-off.
+
+| Source | Teams |
+|---|---|
+| Carried over from the published field | 38 |
+| Your eight direct Asian qualifiers | 8 |
+| The two play-off tournament winners | 2 |
+| **Total** | **48** |
+
+Your eight qualifiers take the eight pot slots the Asian teams occupied in the
+published pots — best AFC seed into the best available slot — and the two
+play-off winners take the two play-off slots. Pot sizes are unchanged. The test
+suite asserts, every run, that the field is 48 unique nations, that all eight of
+your qualifiers are in it, that **no nation reaches the finals on the strength of
+the real qualification**, and that Asia sends nine only when its play-off
+representative actually won.
+
+### Flags on this ruleset
+
+It inherits every flag from both legs, plus two of its own:
+
+| Level | What |
+|---|---|
+| `partly-verified` | The play-off tournament's published shape is kept exactly, and Asia's representative inherits the seeded slot in pathway two. In reality that seeding followed the FIFA ranking of the actual entrants, so a lower-ranked Asian qualifier would have played the semi-final instead. |
+| `derived` | The pot substitution rule above. Real pots follow the FIFA ranking, which a different set of qualifiers would change. |
+
 ## Sources
 
 **World Cup 2026**
@@ -124,6 +193,9 @@ second. The setup screen tells you which, per nation, before you start.
 - [FIFA — knockout stage match schedule and bracket](https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/knockout-stage-match-schedule-bracket)
 - [Wikipedia — 2026 FIFA World Cup draw](https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_draw)
 - [Wikipedia — 2026 FIFA World Cup knockout stage](https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_knockout_stage)
+
+**Play-off Tournament 2026**
+- [FIFA — Play-Off Tournament: teams, qualifying, dates, format](https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/play-off-tournament-teams-qualifying-dates-tickets-matches-format)
 
 **AFC qualification 2026**
 - [Wikipedia — 2026 FIFA World Cup qualification (AFC)](https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(AFC))

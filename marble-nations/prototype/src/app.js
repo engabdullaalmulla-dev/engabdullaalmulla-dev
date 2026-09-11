@@ -111,10 +111,13 @@ function topbar(title, sub, back) {
   );
 }
 
+const LEG_LABEL = { qualifying: 'QUALIFYING', playoff: 'PLAY-OFF', finals: 'WORLD CUP' };
+
 function journeyTop() {
   const c = S.campaign, r = currentRound(c);
   const done = r ? r.fixtures.filter(f => f.result).length : 0;
-  const sub = r ? `${r.label} · ${done}/${r.fixtures.length} played` : 'Campaign complete';
+  const leg = r && r.leg && LEG_LABEL[r.leg] ? LEG_LABEL[r.leg] + ' · ' : '';
+  const sub = r ? `${leg}${r.label} · ${done}/${r.fixtures.length} played` : 'Campaign complete';
   return h('div', { class: 'topbar' },
     h('h1', {}, `${compMeta().shortName}`, h('div', { class: 'sub' }, sub)),
     c.mode === 'arcade' ? h('span', { class: 'pill warn' }, `♥ ${c.lives - c.livesUsed}`) : null,
@@ -315,7 +318,7 @@ function drawScreen(root) {
   const pad = h('div', { class: 'pad' });
   root.appendChild(pad);
 
-  if (!c.meta.drawSteps) return drawScreenTies(pad);
+  if (!c.meta.drawSteps || (c.meta.leg && c.meta.leg !== 'finals')) return drawScreenTies(pad);
 
   const steps = c.meta.drawSteps;
   const letters = Object.keys(c.meta.groups);
@@ -395,6 +398,8 @@ function drawScreen(root) {
     clearTimeout(timer);
     while (idx < steps.length) apply(idx++);
     line.textContent = 'Draw complete. Twelve groups of four.';
+    c.meta.drawPending = false;
+    save();
     controls.innerHTML = '';
     controls.appendChild(h('button', { class: 'btn', onclick: () => { save(); go('journey'); } }, 'To the tournament'));
   }
@@ -432,8 +437,11 @@ function journeyScreen(root) {
   const alive = aliveFollowed(c);
 
   if (alive.length === 0 && c.followed.length) {
+    const missedFinals = r && r.leg === 'finals';
     pad.appendChild(h('div', { class: 'consequence bad' },
-      `Every nation you were following is out. ${c.followed.map(x => team(x).name).join(', ')} — eliminated.`));
+      missedFinals
+        ? `${c.followed.map(x => team(x).name).join(', ')} did not make the World Cup. The tournament goes ahead without them.`
+        : `Every nation you were following is out. ${c.followed.map(x => team(x).name).join(', ')} — eliminated.`));
     pad.appendChild(h('div', { class: 'row', style: 'gap:8px;margin-bottom:12px;flex-wrap:wrap' },
       h('button', { class: 'btn ghost sm', onclick: () => { toast('Keep watching — the tournament plays on'); } }, 'Keep watching'),
       h('button', { class: 'btn ghost sm', onclick: adoptNation }, 'Follow another nation'),
@@ -587,14 +595,11 @@ function tablesTab(pad, c, r) {
   }
 }
 
+// How many places in a group are qualifying places. Carried on the round, so a
+// campaign that spans two rulebooks gets it right in both legs.
 function advanceCount(c) {
   const r = currentRound(c);
-  if (c.competitionId === 'wc2026') return 2;
-  if (!r) return 2;
-  if (r.id === 'r2') return 2;
-  if (r.id === 'r3') return 2;
-  if (r.id === 'r4') return 1;
-  return 2;
+  return (r && r.advance) || 2;
 }
 
 function bracketTab(pad, c) {
@@ -975,14 +980,42 @@ function resultScreen(root) {
   }
   function next() {
     if (c.finished) return go('journey');
+    // The finals draw is a moment, not a loading step: if a new World Cup field
+    // has just been drawn, go and watch it.
+    if (c.meta.drawPending) return go('draw');
     if (S.live.roundClosed && !S.settings.premium && canShowAd()) return showAd(() => go('journey'));
     go('journey');
   }
 }
 
+// The last round a nation actually played in, for the end-of-campaign summary.
+function lastRoundFor(c, code) {
+  for (let i = c.rounds.length - 1; i >= 0; i--) {
+    const r = c.rounds[i];
+    if (r.fixtures.some(f => f.teams.includes(code) && f.result)) return r.label.toLowerCase();
+  }
+  return 'finals';
+}
+
 function roundSummary(pad, round) {
   const c = S.campaign;
   pad.appendChild(h('h3', {}, round.label + ' complete'));
+
+  // Road to Glory's hinge: qualifying is over, the finals field is set, and the
+  // only question that matters is whether your nation is in it.
+  const nextR0 = currentRound(c);
+  if (round.leg === 'playoff' && nextR0 && nextR0.leg === 'finals') {
+    const inField = Object.values(nextR0.groups || {}).flat();
+    for (const code of c.followed) {
+      const there = inField.includes(code);
+      pad.appendChild(h('div', { class: 'legcard' + (there ? '' : ' bad') },
+        h('div', { class: 'k' }, there ? 'QUALIFIED' : 'THE ROAD ENDS HERE'),
+        h('div', { class: 'n' }, team(code).name),
+        h('div', { class: 'r' }, there
+          ? 'Five rounds, two years and a play-off. They are at the World Cup.'
+          : 'They do not make the finals. The World Cup goes ahead without them — you can follow it, or follow somebody still in it.')));
+    }
+  }
   if (round.qualified && round.qualified.length) {
     pad.appendChild(h('div', { class: 'consequence' }, 'Qualified: ' + round.qualified.map(x => team(x).name).join(', ')));
   }
@@ -1031,7 +1064,46 @@ function showAd(done) {
 
 function finishedPanel(pad) {
   const c = S.campaign;
-  if (c.competitionId === 'wc2026') {
+  const isFinals = c.competitionId === 'wc2026' || c.meta.leg === 'finals';
+
+  // Road to Glory ends at the World Cup whether or not your nation got there,
+  // so it shows the champion first and then what happened to your road.
+  if (c.competitionId === 'rtg2026') {
+    const C = COMPETITIONS.rtg2026;
+    const inFinals = Object.values(c.meta.groups || {}).flat();
+    const yourWinner = c.followed.includes(c.champion);
+    pad.appendChild(h('div', { class: 'trophy' },
+      h('div', { class: 'cup' }, yourWinner ? '🏆' : '🎖'),
+      h('h2', {}, `${team(c.champion).name} are world champions`),
+      marbleEl(team(c.champion), 'lg'),
+      c.mode === 'arcade' ? h('span', { class: 'pill warn' }, 'Arcade run — assisted') : h('span', { class: 'pill ok' }, 'Authentic run')));
+    pad.appendChild(h('h3', {}, 'Your road'));
+    for (const code of c.followed) {
+      const madeIt = inFinals.includes(code);
+      const won = c.champion === code;
+      const text = won
+        ? 'From the Asian first round to the trophy. The whole road, in one campaign.'
+        : madeIt
+          ? `Qualified, and went out at the ${lastRoundFor(c, code)}.`
+          : C.outcomeText(c, code);
+      pad.appendChild(h('div', { class: 'legcard' + (won || madeIt ? '' : ' bad') },
+        h('div', { class: 'k' }, won ? 'CHAMPIONS' : madeIt ? 'REACHED THE FINALS' : 'DID NOT QUALIFY'),
+        h('div', { class: 'n' }, team(code).name),
+        h('div', { class: 'r' }, text)));
+    }
+    pad.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'kv' }, h('span', {}, 'Runner-up'), h('b', {}, team(c.meta.runnerUp).name)),
+      h('div', { class: 'kv' }, h('span', {}, 'Third'), h('b', {}, team(c.meta.third).name)),
+      h('div', { class: 'kv' }, h('span', {}, 'Asia at the finals'),
+        h('b', { class: 'tiny' }, inFinals.filter(t => team(t).conf === 'AFC').map(t => team(t).code).join(' '))),
+      h('div', { class: 'kv' }, h('span', {}, 'Matches played'),
+        h('b', {}, String(c.rounds.reduce((s, r) => s + r.fixtures.length, 0)))),
+      h('div', { class: 'kv' }, h('span', {}, 'Seed'), h('b', { class: 'mono' }, String(c.seed)))));
+    pad.appendChild(h('button', { class: 'btn', style: 'margin-top:12px', onclick: () => { store.clearCampaign(); S.campaign = null; go('home'); } }, 'Start another road'));
+    return;
+  }
+
+  if (isFinals) {
     const won = c.followed.includes(c.champion);
     pad.appendChild(h('div', { class: 'trophy' },
       h('div', { class: 'cup' }, won ? '🏆' : '🎖'),
