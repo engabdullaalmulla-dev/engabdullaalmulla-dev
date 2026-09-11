@@ -1,19 +1,19 @@
 {
   "artboards": [
     { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Tonight", "is_interactive": true },
-    { "file": "TeamSheet.dc.html", "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 · The line-up", "is_interactive": true },
-    { "file": "Resale.dc.html", "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 · Releasing a place", "is_interactive": true },
+    { "file": "TeamSheet.dc.html", "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 · The teams", "is_interactive": true },
+    { "file": "Resale.dc.html", "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 · Passing your shirt on", "is_interactive": true },
     { "file": "PostMatch.dc.html", "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 · Full time", "is_interactive": true },
-    { "file": "Passport.dc.html", "x": 0, "y": 964, "w": 390, "h": 844, "title": "5 · Member card", "is_interactive": true },
+    { "file": "Passport.dc.html", "x": 0, "y": 964, "w": 390, "h": 844, "title": "5 · Your player card", "is_interactive": true },
     { "file": "Season.dc.html", "x": 470, "y": 964, "w": 390, "h": 844, "title": "6 · Season", "is_interactive": true },
-    { "file": "HostMode.dc.html", "x": 940, "y": 964, "w": 390, "h": 844, "title": "7 · Hosting", "is_interactive": true },
+    { "file": "HostMode.dc.html", "x": 940, "y": 964, "w": 390, "h": 844, "title": "7 · Gaffer mode", "is_interactive": true },
     { "file": "System.dc.html", "x": 0, "y": 1928, "w": 1240, "h": 980, "title": "Design system" }
   ],
   "annotations": [
-    { "id": "brief", "x": 0, "y": -330, "w": 700, "text": "FEW THINGS, BEAUTIFULLY\n\nPushed further than the last pass. The serif is now the largest thing on every screen it appears on — 76px on the hero fixture, 88px on the refund — and it appears about four times, so those moments carry the whole impression.\n\nDark surfaces are lit from one corner rather than filled flat, every lifted card carries two shadows, and a brass hairline fades out instead of stopping. Every screen is live." },
-    { "id": "flow-note", "x": 1880, "y": 0, "w": 300, "text": "THE CORE LOOP\n\nOn screen 1, tap either of the games under \"Also tonight\" — it takes the hero slot and the whole card rebuilds around it.\n\nThen screen 3: \"I can't make it\" → \"Offer my place\". That interaction is the entire competitive argument against CeleBreak's forfeited credits, and it is now the most cinematic thing in the app on purpose." },
-    { "id": "retention-note", "x": 1410, "y": 964, "w": 300, "text": "WHY THESE THREE\n\nNeither CeleBreak nor Stranger Soccer has any of it. The member card makes your standing portable between cities, the season makes next Thursday matter, and hosting turns the organisers they compete with into supply.\n\nThe member card is the one screen built to be screenshotted." },
-    { "id": "system-note", "x": 1340, "y": 1928, "w": 320, "text": "WHAT MAKES IT EXPENSIVE\n\nNot ornament — scale and scarcity. One serif used four times a screen at a size nothing else comes near. One action per screen, 60px, pill. One dark surface, spent on exactly three moments.\n\nGilt only ever sits on dark. On bone it would read as costume jewellery." }
+    { "id": "brief", "x": 0, "y": -330, "w": 700, "text": "FOOTBALL, NOT A BANKING APP\n\nThe last two passes were elegant and dead. This one is built on the thing people actually feel on a Thursday night: pitch green, floodlight yellow, chunky shirt numbers, confetti when you win.\n\nEverything sits on a hard drop shadow so it feels like an object you press. The copy talks like a mate in the group chat. Every screen is live — go and press things." },
+    { "id": "flow-note", "x": 1880, "y": 0, "w": 300, "text": "WHAT TO TRY\n\nScreen 2 — the teams are drawn on an actual pitch. You are the orange 8.\n\nScreen 4 — confetti on full time, then vote man of the match.\n\nScreen 3 — \"I can't make it\" → \"Pass my shirt on\". A bouncing ball while we find someone, then your money comes back on a big yellow card. Still the whole argument against CeleBreak, just no longer solemn about it." },
+    { "id": "retention-note", "x": 1410, "y": 964, "w": 300, "text": "THE BITS THAT MAKE PEOPLE COME BACK\n\nThe player card is a Panini sticker — shirt number, goals, streak, trophies. Built to be screenshotted into a group chat, which is free marketing.\n\nThe season table hands out medals and remembers that you have beaten Marco four times out of six. Bragging rights are the product." },
+    { "id": "system-note", "x": 1340, "y": 1928, "w": 320, "text": "THE RULES\n\nYellow is the action, green is the brand, orange is you. Every pressable thing sits on a hard shadow and squashes when you press it.\n\nMotion is a reward, not decoration — it is spent on winning, scoring, and getting your money back. Nowhere else." }
   ],
   "launch": { "view": "canvas" }
 }

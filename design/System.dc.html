@@ -7,40 +7,43 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #1F4A3A; } a:hover { color: #16382C; }
+    a { color: #0B6E3F; } a:hover { color: #07512E; }
     * { box-sizing: border-box; }
-    .lift { box-shadow: 0 2px 4px rgba(26,29,26,.04), 0 24px 56px -24px rgba(26,29,26,.42); }
-    .lift-s { box-shadow: 0 1px 2px rgba(26,29,26,.04), 0 12px 30px -18px rgba(26,29,26,.32); }
+    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
+    .stripes { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 30px, transparent 30px 60px); }
   </style>
 </helmet>
 
-<div style="width: 1240px; height: 980px; background: #F4F2ED; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #16190F; padding: 42px; display: flex; flex-direction: column; gap: 28px; overflow: hidden;">
+<div style="width: 1240px; height: 980px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; padding: 40px; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
 
   <!-- head -->
   <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 44px;">
     <div style="display: flex; flex-direction: column; gap: 8px;">
-      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #A8894F;">Design system</div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 70px; line-height: .9; letter-spacing: -.032em;">Few things, beautifully</div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="background: #FFCE2E; color: #10201A; border-radius: 999px; padding: 6px 13px; font-size: 11.5px; font-weight: 800;">DESIGN SYSTEM</div>
+        <div style="background: #E3F7EC; color: #0B6E3F; border-radius: 999px; padding: 6px 13px; font-size: 11.5px; font-weight: 800;">MATCHDAY</div>
+      </div>
+      <div class="disp" style="font-size: 66px; line-height: .94;">Football, not a banking app</div>
     </div>
-    <div style="font-size: 15px; font-weight: 500; line-height: 1.65; color: #5A6057; max-width: 40ch;">The serif appears about four times a screen and each time it is the largest thing in view. Everything else is quiet, so those four moments carry the whole impression — and there is only ever one button to press.</div>
+    <div style="font-size: 15px; font-weight: 600; line-height: 1.6; color: #4C5A52; max-width: 40ch;">Pitch green, floodlight yellow, chunky shirt numbers and a bit of banter. Everything sits on a hard-edged drop shadow so it feels like a physical thing you can press — because the whole point is that Thursday night is the best part of the week.</div>
   </div>
 
-  <div style="height: 1px; background: linear-gradient(90deg, rgba(168,137,79,.55), rgba(168,137,79,.06));"></div>
+  <div style="height: 4px; border-radius: 999px; background: linear-gradient(90deg, #0F9E58, #FFCE2E, #FF5A3C);"></div>
 
   <!-- colour -->
-  <div style="display: flex; flex-direction: column; gap: 13px;">
-    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8C9189;">Colour</div>
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11.5px; font-weight: 800; letter-spacing: .14em; color: #6B7D74;">COLOUR</div>
     <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px;">
       <sc-for list="{{swatches}}" as="s" hint-placeholder-count="7">
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="height: 72px; border-radius: 16px; background: {{s.bg}}; border: 1px solid {{s.ring}};"></div>
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="height: 74px; border-radius: 18px; background: {{s.bg}}; border: 2.5px solid {{s.ring}}; box-shadow: 0 5px 0 {{s.shadow}};"></div>
           <div style="display: flex; flex-direction: column; gap: 2px;">
-            <div style="font-size: 13px; font-weight: 700; letter-spacing: -.012em;">{{s.name}}</div>
-            <div style="font-size: 11px; font-weight: 500; color: #A9AEA5; font-variant-numeric: tabular-nums;">{{s.hex}}</div>
-            <div style="font-size: 11.5px; font-weight: 500; color: #8C9189; line-height: 1.4;">{{s.role}}</div>
+            <div style="font-size: 13px; font-weight: 800;">{{s.name}}</div>
+            <div style="font-size: 11px; font-weight: 600; color: #A9B5AE;">{{s.hex}}</div>
+            <div style="font-size: 11.5px; font-weight: 600; color: #6B7D74; line-height: 1.4;">{{s.role}}</div>
           </div>
         </div>
       </sc-for>
@@ -48,87 +51,88 @@
   </div>
 
   <!-- type -->
-  <div style="display: flex; flex-direction: column; gap: 13px;">
-    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8C9189;">Type</div>
-    <div style="display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 20px;">
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11.5px; font-weight: 800; letter-spacing: .14em; color: #6B7D74;">TYPE &amp; VOICE</div>
+    <div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 18px;">
 
-      <div class="lift" style="border-radius: 24px; background: radial-gradient(140% 130% at 15% -20%, #2A3A31 0%, #191C18 58%, #14170F 100%); color: #F4F2ED; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
+      <div class="stripes" style="border-radius: 22px; background-color: #00A55C; color: #FFFFFF; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 7px 0 #07733F;">
         <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 12.5px; font-weight: 700;">Instrument Serif</div>
-          <div style="font-size: 11px; font-weight: 500; color: #8C968B;">Moments only</div>
+          <div style="font-size: 12.5px; font-weight: 800;">Bricolage Grotesque</div>
+          <div style="font-size: 11px; font-weight: 700; color: #BDEFD4;">Shout with it</div>
         </div>
-        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 66px; line-height: .84; letter-spacing: -.032em;">19:00<br>45.00</div>
-        <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #97A296;">Kick-off, the refund, the scoreline, the name on the card. Four uses a screen, always the biggest thing in view. Scarcity is what makes it read as expensive.</div>
+        <div class="disp" style="font-size: 62px; line-height: .88;">19:00 · 6–5</div>
+        <div style="font-size: 12.5px; font-weight: 600; line-height: 1.5; color: #BDEFD4;">Kick-off times, scorelines, names on the card. Big, tight and unapologetic — football numbers should look like they're printed on a shirt.</div>
       </div>
 
-      <div class="lift-s" style="border-radius: 24px; background: #FFFFFF; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="border-radius: 22px; background: #FFFFFF; border: 2.5px solid #F0EADA; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 5px 0 #EDE6D3;">
         <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 12.5px; font-weight: 700;">Manrope</div>
-          <div style="font-size: 11px; font-weight: 500; color: #A9AEA5;">Everything else</div>
+          <div style="font-size: 12.5px; font-weight: 800;">Plus Jakarta Sans</div>
+          <div style="font-size: 11px; font-weight: 700; color: #A9B5AE;">Everything else</div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-size: 19px; font-weight: 700; letter-spacing: -.014em;">Reserve your place</div>
-          <div style="font-size: 15.5px; font-weight: 600;">Al Quoz Sports Park</div>
-          <div style="font-size: 13px; font-weight: 500; color: #8C9189;">7-a-side · astro · floodlit</div>
-          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #A8894F;">Your next game</div>
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="font-size: 18px; font-weight: 800;">Grab the last shirt</div>
+          <div style="font-size: 15px; font-weight: 700;">Al Quoz Sports Park</div>
+          <div style="font-size: 13px; font-weight: 600; color: #6B7D74;">7-a-side · astro · floodlit</div>
         </div>
       </div>
 
-      <div class="lift-s" style="border-radius: 24px; background: #FFFFFF; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
-        <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 12.5px; font-weight: 700;">Voice</div>
-          <div style="font-size: 11px; font-weight: 500; color: #A9AEA5;">Plain, never salesy</div>
-        </div>
-        <div style="font-size: 16px; font-weight: 500; line-height: 1.6;">Release your place any time before kick-off. If someone takes it, your money goes back to your card.</div>
-        <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #8C9189;">Short sentences, no exclamation marks, no "oops". A policy stated calmly sounds like one you can trust.</div>
+      <div style="border-radius: 22px; background: #FFF6D6; border: 2.5px solid #F6E4A8; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 5px 0 #F0DC9A;">
+        <div style="font-size: 12.5px; font-weight: 800;">How it talks</div>
+        <div style="font-size: 16px; font-weight: 700; line-height: 1.5; color: #5A4A10;">"Rami snapped it up 🙌 — 45.00 back in your pocket."</div>
+        <div style="font-size: 12.5px; font-weight: 600; line-height: 1.5; color: #8A6A00;">Like a mate in the group chat, not a terms-and-conditions page. Warm, short, a little bit of banter — never salesy, never cutesy.</div>
       </div>
 
     </div>
   </div>
 
   <!-- components -->
-  <div style="display: flex; flex-direction: column; gap: 13px; flex-grow: 1;">
-    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8C9189;">Components</div>
-    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px;">
+  <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+    <div style="font-size: 11.5px; font-weight: 800; letter-spacing: .14em; color: #6B7D74;">COMPONENTS</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px;">
 
-      <div style="display: flex; flex-direction: column; gap: 11px;">
-        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">One action, 60px, pill</div>
-        <div class="lift" style="min-height: 56px; border-radius: 999px; background: #16190F; color: #F4F2ED; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Offer my place</div>
-        <div style="min-height: 56px; border-radius: 999px; background: #2E6B52; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">You're in</div>
-        <div style="min-height: 56px; border-radius: 999px; border: 1.5px solid #D3CEC2; color: #5A6057; display: flex; align-items: center; justify-content: center; font-size: 15.5px; font-weight: 600;">I can't make it</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">Buttons sit on a hard shadow</div>
+        <div class="disp" style="min-height: 54px; border-radius: 18px; background: #FFCE2E; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 5px 0 #D9A800;">Grab a shirt</div>
+        <div class="disp" style="min-height: 54px; border-radius: 18px; background: #0F9E58; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 5px 0 #0A7A43;">You're in!</div>
+        <div style="min-height: 54px; border-radius: 18px; background: #FFFFFF; border: 2.5px solid #E5DECB; color: #4C5A52; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; box-shadow: 0 4px 0 #E5DECB;">I can't make it</div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 11px;">
-        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">Segmented control &amp; chips</div>
-        <div style="display: flex; gap: 3px; background: #E7E4DA; border-radius: 999px; padding: 3px;">
-          <div style="flex-grow: 1; min-height: 46px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(26,29,26,.12); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600;">Who is playing</div>
-          <div style="flex-grow: 1; min-height: 46px; border-radius: 999px; color: #8C9189; display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600;">The two sides</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">Shirt numbers &amp; faces</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <sc-for list="{{shirts}}" as="s" hint-placeholder-count="4">
+            <div style="width: 46px; height: 46px; border-radius: 999px; background: {{s.bg}}; color: {{s.fg}}; border: 2.5px solid {{s.ring}}; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; box-shadow: 0 3px 0 {{s.shadow}};">{{s.num}}</div>
+          </sc-for>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 7px; flex-wrap: wrap;">
           <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
-            <div style="border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; border: 1px solid {{c.border}}; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 6px 11px;">{{c.label}}</div>
+            <div style="border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; font-size: 11px; font-weight: 800; padding: 6px 11px;">{{c.label}}</div>
           </sc-for>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 11px;">
-        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">Depth &amp; the brass rule</div>
-        <div class="lift-s" style="border-radius: 22px; background: #FFFFFF; padding: 18px; display: flex; flex-direction: column; gap: 15px; flex-grow: 1;">
-          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #5A6057;">Two shadows on every lifted surface — a tight one for the edge, a wide soft one for the ground it sits on.</div>
-          <div style="height: 1px; background: linear-gradient(90deg, rgba(168,137,79,.55), rgba(168,137,79,.05));"></div>
-          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #5A6057;">The brass hairline fades out rather than stopping. It appears only on dark surfaces, once each.</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">The pitch is a real surface</div>
+        <div style="position: relative; flex-grow: 1; min-height: 150px; border-radius: 18px; background-color: #0F9E58; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 22px, transparent 22px 44px); overflow: hidden; box-shadow: 0 5px 0 #0A7A43;">
+          <div style="position: absolute; left: 8px; right: 8px; top: 8px; bottom: 8px; border: 2px solid rgba(255,255,255,.34); border-radius: 8px;"></div>
+          <div style="position: absolute; left: 8px; right: 8px; top: 50%; height: 2px; background: rgba(255,255,255,.34);"></div>
+          <div style="position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border: 2px solid rgba(255,255,255,.34); border-radius: 999px;"></div>
+          <div style="position: absolute; left: 50%; top: 26%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 999px; background: #FFFFFF; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;">7</div>
+          <div style="position: absolute; left: 50%; top: 72%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 999px; background: #FFCE2E; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;">8</div>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 11px;">
-        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">Dark surface — three uses</div>
-        <div class="lift" style="border-radius: 22px; background: radial-gradient(140% 130% at 80% -20%, #2A3A31 0%, #191C18 58%, #14170F 100%); color: #F4F2ED; padding: 22px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
-          <div style="font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C6AE79;">Refunded in full</div>
-          <div style="display: flex; align-items: baseline; gap: 9px;">
-            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 54px; line-height: .84; letter-spacing: -.03em;">45.00</div>
-            <div style="font-size: 12px; font-weight: 700; letter-spacing: .1em; color: #C6AE79;">AED</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">Celebrate the good bits</div>
+        <div style="border-radius: 20px; background: #10201A; color: #FFFFFF; padding: 20px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; box-shadow: 0 5px 0 #000000;">
+          <div style="display: flex; gap: 6px;">
+            <div style="width: 7px; height: 13px; background: #FFCE2E; border-radius: 2px;"></div>
+            <div style="width: 7px; height: 13px; background: #FF5A3C; border-radius: 2px;"></div>
+            <div style="width: 7px; height: 13px; background: #3DA5FF; border-radius: 2px;"></div>
+            <div style="width: 7px; height: 13px; background: #BDEFD4; border-radius: 2px;"></div>
           </div>
-          <div style="font-size: 12px; font-weight: 500; line-height: 1.45; color: #97A296;">The hero fixture, the member card, the refund. A bloom from one corner gives it depth without a gradient you can name.</div>
+          <div class="disp" style="font-size: 30px; line-height: .96;">You won — and you bagged 2</div>
+          <div style="font-size: 12px; font-weight: 600; line-height: 1.5; color: #9FBCAE;">Confetti on full time, a bouncing ball while we find someone to take your shirt. Motion is the reward, so spend it on the moments that actually feel good.</div>
         </div>
       </div>
 
@@ -143,19 +147,25 @@ class Component extends DCLogic {
   renderVals() {
     return {
       swatches: [
-        { name: 'Bone', hex: '#F4F2ED', bg: '#F4F2ED', ring: '#E1DED5', role: 'The page. Warm, never pure white.' },
-        { name: 'Card', hex: '#FFFFFF', bg: '#FFFFFF', ring: '#E1DED5', role: 'Anything lifted off the page.' },
-        { name: 'Sunk', hex: '#E7E4DA', bg: '#E7E4DA', ring: '#E1DED5', role: 'Segmented tracks, quiet notes.' },
-        { name: 'Bloom', hex: '#191C18', bg: 'radial-gradient(140% 130% at 20% -20%, #2A3A31 0%, #191C18 58%, #14170F 100%)', ring: '#14170F', role: 'The dark surface, lit from one corner.' },
-        { name: 'Green', hex: '#2E6B52', bg: '#2E6B52', ring: '#2E6B52', role: 'Confirmed, refunded, even sides.' },
-        { name: 'Brass', hex: '#A8894F', bg: '#A8894F', ring: '#A8894F', role: 'Level, milestones, one hairline.' },
-        { name: 'Gilt', hex: '#D9C08A', bg: '#D9C08A', ring: '#D9C08A', role: 'Brass on dark only. Never on bone.' },
+        { name: 'Pitch', hex: '#00A55C', bg: '#00A55C', ring: '#00A55C', role: 'The brand. Hero cards and the pitch itself.' },
+        { name: 'Deep pitch', hex: '#0B6E3F', bg: '#0B6E3F', ring: '#0B6E3F', role: 'Shadows under green, and text on light.' },
+        { name: 'Floodlight', hex: '#FFCE2E', bg: '#FFCE2E', ring: '#FFCE2E', role: 'The main action. Grab a shirt, get paid.' },
+        { name: 'Kit orange', hex: '#FF5A3C', bg: '#FF5A3C', ring: '#FF5A3C', role: 'You, urgency, last shirt going.' },
+        { name: 'Night', hex: '#10201A', bg: '#10201A', ring: '#10201A', role: 'Type, and the clips panel.' },
+        { name: 'Paper', hex: '#FFFCF2', bg: '#FFFCF2', ring: '#F0EADA', role: 'The page. Warm, never cold white.' },
+        { name: 'Chalk', hex: '#F0EADA', bg: '#F0EADA', ring: '#E5DECB', role: 'Borders, tracks, resting chips.' },
+      ],
+      shirts: [
+        { num: '8', bg: '#FFCE2E', fg: '#10201A', ring: '#FFCE2E', shadow: '#D9A800' },
+        { num: '9', bg: '#FF5A3C', fg: '#FFFFFF', ring: '#FFFFFF', shadow: '#C43A20' },
+        { num: '1', bg: '#FFFFFF', fg: '#10201A', ring: '#F0EADA', shadow: '#E5DECB' },
+        { num: '+', bg: '#F0EADA', fg: '#6B7D74', ring: '#E5DECB', shadow: 'transparent' },
       ],
       chips: [
-        { label: 'Your level', bg: '#E2EDE6', fg: '#2E6B52', border: 'transparent' },
-        { label: 'Confirmed', bg: '#E2EDE6', fg: '#2E6B52', border: 'transparent' },
-        { label: 'A level up', bg: '#E7E4DA', fg: '#8C9189', border: 'transparent' },
-        { label: 'Level 5 is close', bg: 'transparent', fg: '#A8894F', border: 'rgba(168,137,79,.5)' },
+        { label: 'LAST SHIRT GOING!', bg: '#FFF3F0', fg: '#C43A20' },
+        { label: 'YOUR LEVEL', bg: '#E3F7EC', fg: '#0B6E3F' },
+        { label: 'SHIRT 8', bg: '#FFCE2E', fg: '#10201A' },
+        { label: 'FULL — WAITLIST', bg: '#F0EADA', fg: '#6B7D74' },
       ],
     };
   }

@@ -7,76 +7,82 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #1F4A3A; } a:hover { color: #16382C; }
+    a { color: #0B6E3F; } a:hover { color: #07512E; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .lift { box-shadow: 0 2px 4px rgba(26,29,26,.04), 0 24px 56px -24px rgba(26,29,26,.42); }
-    .lift-s { box-shadow: 0 1px 2px rgba(26,29,26,.04), 0 12px 30px -18px rgba(26,29,26,.32); }
-    .tap { cursor: pointer; transition: transform .55s cubic-bezier(.22,1,.36,1), background .35s ease, color .35s ease, box-shadow .35s ease; }
-    .tap:active { transform: scale(.99); }
-    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    @keyframes swell { from { opacity: 0; transform: translateY(16px) scale(.988); } to { opacity: 1; transform: none; } }
+    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
+    .pop { cursor: pointer; transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease, color .25s ease; }
+    .pop:active { transform: scale(.97); }
+    .stripes { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 30px, transparent 30px 60px); }
+    @keyframes bounceIn { 0% { opacity: 0; transform: translateY(18px) scale(.95); } 60% { transform: translateY(-3px) scale(1.012); } 100% { opacity: 1; transform: none; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #F4F2ED; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #16190F; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- header -->
-  <div style="padding: 30px 22px 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; animation: rise .6s cubic-bezier(.22,1,.36,1) both;">
-    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
-      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #A8894F;">Autumn · week 6 of 8</div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 44px; line-height: .96; letter-spacing: -.026em;">Division<br>three</div>
+  <div style="padding: 24px 20px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+    <div style="display: flex; flex-direction: column; gap: 1px;">
+      <div style="font-size: 12px; font-weight: 700; color: #6B7D74;">Autumn · week 6 of 8</div>
+      <div class="disp" style="font-size: 36px; line-height: 1;">Division 3</div>
     </div>
-    <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0;">
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 62px; line-height: .84; letter-spacing: -.03em; color: #2E6B52;">3<span style="font-size: 26px;">rd</span></div>
-      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #8C9189;">of eight</div>
+    <div style="display: flex; flex-direction: column; align-items: center; background: #FFCE2E; border-radius: 18px; padding: 8px 13px; box-shadow: 0 5px 0 #D9A800;">
+      <div class="disp" style="font-size: 30px; line-height: 1;">3rd</div>
+      <div style="font-size: 9.5px; font-weight: 800; color: #8A6A00;">OF 8</div>
     </div>
   </div>
 
-  <div style="padding: 0 22px 18px;">
-    <div style="font-size: 15px; font-weight: 500; line-height: 1.6; color: #5A6057;">Top two move up, bottom two move down. Two games left — you are <strong style="font-weight: 700; color: #2E6B52;">two points</strong> from promotion.</div>
+  <!-- push bar -->
+  <div style="padding: 0 20px 14px;">
+    <div class="stripes" style="border-radius: 20px; background-color: #00A55C; color: #FFFFFF; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 6px 0 #07733F; animation: bounceIn .6s cubic-bezier(.34,1.56,.64,1) both;">
+      <div style="font-size: 26px; line-height: 1;">🏆</div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+        <div class="disp" style="font-size: 20px;">Two points off going up</div>
+        <div style="font-size: 12.5px; font-weight: 700; color: #BDEFD4;">Win both and you're promoted. Top two go up.</div>
+      </div>
+    </div>
   </div>
 
   <!-- tabs -->
-  <div style="padding: 0 22px 16px;">
-    <div style="display: flex; gap: 3px; background: #E7E4DA; border-radius: 999px; padding: 3px;">
+  <div style="padding: 0 20px 14px;">
+    <div style="display: flex; gap: 4px; background: #F0EADA; border-radius: 999px; padding: 4px;">
       <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
-        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 46px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
-          <span style="font-size: 13.5px; font-weight: 600;">{{t.label}}</span>
+        <div class="pop" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 13.5px; font-weight: 800;">{{t.label}}</span>
         </div>
       </sc-for>
     </div>
   </div>
 
-  <div style="padding: 0 22px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+  <div style="padding: 0 20px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
 
     <!-- TABLE -->
     <sc-if value="{{isTable}}" hint-placeholder-val="{{ true }}">
-      <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; flex-direction: column; gap: 7px;">
         <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
-          <div style="display: flex; align-items: center; gap: 13px; padding: 12px 2px; border-bottom: 1px solid #E4E1D8; animation: rise .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{r.delay}};">
-            <div style="width: 3px; height: 30px; border-radius: 999px; background: {{r.zone}}; flex-shrink: 0;"></div>
-            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 21px; color: {{r.posColor}}; min-width: 18px;">{{r.pos}}</div>
-            <div style="width: 36px; height: 36px; border-radius: 999px; background: {{r.chipBg}}; color: {{r.chipFg}}; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0;">{{r.initials}}</div>
+          <div style="display: flex; align-items: center; gap: 11px; background: {{r.bg}}; border: 2.5px solid {{r.border}}; border-radius: 18px; padding: 10px 13px; box-shadow: 0 3px 0 {{r.shadow}}; animation: slideUp .42s cubic-bezier(.22,1,.36,1) both; animation-delay: {{r.delay}};">
+            <div class="disp" style="font-size: 17px; color: {{r.posColor}}; min-width: 20px;">{{r.pos}}</div>
+            <div style="width: 36px; height: 36px; border-radius: 999px; background: {{r.chipBg}}; color: {{r.chipFg}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0;">{{r.initials}}</div>
             <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 15px; font-weight: {{r.weight}}; letter-spacing: -.014em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.name}}</div>
-              <div style="font-size: 11.5px; font-weight: 500; color: #A9AEA5;">{{r.played}}</div>
+              <div style="font-size: 14.5px; font-weight: 800; letter-spacing: -.01em; color: {{r.nameColor}}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.name}}</div>
+              <div style="font-size: 11.5px; font-weight: 600; color: {{r.metaColor}};">{{r.played}}</div>
             </div>
-            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 27px; min-width: 30px; text-align: right; letter-spacing: -.018em;">{{r.pts}}</div>
+            <div style="font-size: 15px; line-height: 1;">{{r.mark}}</div>
+            <div class="disp" style="font-size: 22px; min-width: 28px; text-align: right; color: {{r.ptsColor}};">{{r.pts}}</div>
           </div>
         </sc-for>
-
-        <div style="display: flex; gap: 20px; padding: 16px 2px 8px;">
-          <div style="display: flex; align-items: center; gap: 9px;">
-            <div style="width: 3px; height: 14px; border-radius: 999px; background: #2E6B52;"></div>
-            <div style="font-size: 12px; font-weight: 500; color: #8C9189;">Moving up</div>
+        <div style="display: flex; gap: 16px; padding: 10px 4px 6px;">
+          <div style="display: flex; align-items: center; gap: 7px;">
+            <div style="width: 12px; height: 12px; border-radius: 5px; background: #0F9E58;"></div>
+            <div style="font-size: 12px; font-weight: 700; color: #6B7D74;">Going up</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 9px;">
-            <div style="width: 3px; height: 14px; border-radius: 999px; background: #D5C6C1;"></div>
-            <div style="font-size: 12px; font-weight: 500; color: #8C9189;">Moving down</div>
+          <div style="display: flex; align-items: center; gap: 7px;">
+            <div style="width: 12px; height: 12px; border-radius: 5px; background: #FFB4A3;"></div>
+            <div style="font-size: 12px; font-weight: 700; color: #6B7D74;">Going down</div>
           </div>
         </div>
       </div>
@@ -84,36 +90,24 @@
 
     <!-- FIXTURES -->
     <sc-if value="{{isFixtures}}" hint-placeholder-val="{{ true }}">
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
         <sc-for list="{{fixtures}}" as="f" hint-placeholder-count="4">
-          <div class="lift-s" style="border-radius: 22px; background: #FFFFFF; padding: 18px; display: flex; align-items: center; gap: 17px; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{f.delay}};">
-            <div style="display: flex; flex-direction: column; align-items: center; min-width: 42px;">
-              <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 32px; line-height: .94; letter-spacing: -.02em; color: {{f.dayColor}};">{{f.day}}</div>
-              <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #8C9189;">{{f.month}}</div>
+          <div style="background: #FFFFFF; border: 2.5px solid {{f.border}}; border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 0 {{f.shadow}}; animation: slideUp .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{f.delay}};">
+            <div class="disp" style="font-size: 22px; background: {{f.dayBg}}; color: {{f.dayFg}}; border-radius: 14px; padding: 9px 11px; min-width: 60px; text-align: center; line-height: 1.05;">{{f.day}}<div style="font-size: 10px; font-weight: 800;">{{f.month}}</div></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+              <div style="font-size: 14.5px; font-weight: 800; letter-spacing: -.01em;">{{f.venue}}</div>
+              <div style="font-size: 12px; font-weight: 600; color: #6B7D74;">{{f.meta}}</div>
             </div>
-            <div style="width: 1px; align-self: stretch; background: #EBE8DF;"></div>
-            <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 15px; font-weight: 700; letter-spacing: -.014em;">{{f.venue}}</div>
-              <div style="font-size: 12.5px; font-weight: 500; color: #8C9189;">{{f.meta}}</div>
-            </div>
-            <div style="border-radius: 999px; background: {{f.tagBg}}; color: {{f.tagColor}}; font-size: 11px; font-weight: 700; padding: 6px 11px; white-space: nowrap;">{{f.tag}}</div>
+            <div style="background: {{f.tagBg}}; color: {{f.tagFg}}; border-radius: 999px; padding: 6px 10px; font-size: 10.5px; font-weight: 800; white-space: nowrap;">{{f.tag}}</div>
           </div>
         </sc-for>
-        <div style="font-size: 13.5px; font-weight: 500; line-height: 1.55; color: #8C9189; padding: 4px 2px;">Season games are ordinary games. You don't need a team — you need to turn up.</div>
+        <div style="border-radius: 18px; background: #FFF6D6; border: 2px solid #F6E4A8; padding: 14px 16px; display: flex; align-items: center; gap: 11px;">
+          <div style="font-size: 20px; line-height: 1;">😤</div>
+          <div style="font-size: 13px; font-weight: 700; color: #5A4A10; line-height: 1.4;">Marco's top of the table. You've beaten him 4 times out of 6.</div>
+        </div>
       </div>
     </sc-if>
 
-  </div>
-
-  <!-- footer -->
-  <div style="padding: 16px 22px 24px;">
-    <div class="lift" style="border-radius: 24px; background: radial-gradient(140% 130% at 85% -20%, #2A3A31 0%, #191C18 60%, #14170F 100%); color: #F4F2ED; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 9.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C6AE79;">To go up</div>
-        <div style="font-size: 15px; font-weight: 600;">Win both remaining games</div>
-      </div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 46px; line-height: .88; letter-spacing: -.026em; color: #D9C08A;">+2</div>
-    </div>
   </div>
 
 </div>
@@ -138,43 +132,57 @@ class Component extends DCLogic {
       return {
         label: t.label,
         bg: on ? '#FFFFFF' : 'transparent',
-        fg: on ? '#16190F' : '#8C9189',
-        shadow: on ? '0 1px 3px rgba(26,29,26,.12)' : 'none',
+        fg: on ? '#10201A' : '#6B7D74',
+        shadow: on ? '0 2px 0 #E0D8C2' : 'none',
         pick: () => this.setState({ tab: t.id }),
       };
     });
 
     const rowDefs = [
-      { pos: 1, initials: 'MA', name: 'Marco A.', played: 6, pts: 16 },
-      { pos: 2, initials: 'TM', name: 'Tariq M.', played: 6, pts: 14 },
-      { pos: 3, initials: 'AA', name: 'You', played: 6, pts: 12, me: true },
-      { pos: 4, initials: 'RK', name: 'Rami K.', played: 6, pts: 11 },
-      { pos: 5, initials: 'SH', name: 'Sami H.', played: 5, pts: 8 },
-      { pos: 6, initials: 'PN', name: 'Paolo N.', played: 6, pts: 7 },
-      { pos: 7, initials: 'JT', name: 'Jonas T.', played: 6, pts: 5 },
-      { pos: 8, initials: 'KO', name: 'Kwame O.', played: 5, pts: 4 },
+      { pos: 1, initials: 'MA', name: 'Marco A.', played: 6, pts: 16, mark: '🥇' },
+      { pos: 2, initials: 'TM', name: 'Tariq M.', played: 6, pts: 14, mark: '🥈' },
+      { pos: 3, initials: 'AA', name: 'You', played: 6, pts: 12, mark: '', me: true },
+      { pos: 4, initials: 'RK', name: 'Rami K.', played: 6, pts: 11, mark: '' },
+      { pos: 5, initials: 'SH', name: 'Sami H.', played: 5, pts: 8, mark: '' },
+      { pos: 6, initials: 'PN', name: 'Paolo N.', played: 6, pts: 7, mark: '' },
+      { pos: 7, initials: 'JT', name: 'Jonas T.', played: 6, pts: 5, mark: '' },
+      { pos: 8, initials: 'KO', name: 'Kwame O.', played: 5, pts: 4, mark: '' },
     ];
 
     const total = rowDefs.length;
-    const rows = rowDefs.map((r, i) => ({
-      pos: r.pos,
-      initials: r.initials,
-      name: r.name,
-      played: r.played + ' played',
-      pts: r.pts,
-      zone: r.pos <= 2 ? '#2E6B52' : (r.pos > total - 2 ? '#D5C6C1' : 'transparent'),
-      posColor: r.me ? '#2E6B52' : '#B2B7AE',
-      chipBg: r.me ? '#2E6B52' : '#EAE7DE',
-      chipFg: r.me ? '#FFFFFF' : '#16190F',
-      weight: r.me ? '800' : '600',
-      delay: (i * 0.035) + 's',
-    }));
+    const rows = rowDefs.map((r, i) => {
+      const up = r.pos <= 2;
+      const down = r.pos > total - 2;
+      let border = '#F0EADA';
+      let shadow = '#EDE6D3';
+      if (r.me) { border = '#FFCE2E'; shadow = '#D9A800'; }
+      else if (up) { border = '#B4E8CD'; shadow = '#D5F2E3'; }
+      else if (down) { border = '#FFD9D0'; shadow = '#FFE9E3'; }
+      return {
+        pos: r.pos,
+        initials: r.initials,
+        name: r.name,
+        played: r.played + ' played',
+        pts: r.pts,
+        mark: r.mark,
+        bg: r.me ? '#FFF9E6' : '#FFFFFF',
+        border: border,
+        shadow: shadow,
+        posColor: up ? '#0F9E58' : (down ? '#E0705A' : '#A9B5AE'),
+        chipBg: r.me ? '#FF5A3C' : '#F0EADA',
+        chipFg: r.me ? '#FFFFFF' : '#10201A',
+        nameColor: '#10201A',
+        metaColor: '#6B7D74',
+        ptsColor: r.me ? '#C43A20' : '#10201A',
+        delay: (i * 0.04) + 's',
+      };
+    });
 
     const fixtureDefs = [
-      { day: '12', month: 'Sep', venue: 'Al Quoz Sports Park', meta: 'Friday 19:00 · 7-a-side', tag: 'Counts', live: true },
-      { day: '17', month: 'Sep', venue: 'The Sevens', meta: 'Wednesday 20:30 · 5-a-side', tag: 'Counts', live: true },
-      { day: '19', month: 'Sep', venue: 'Insportz Indoor', meta: 'Friday 21:00 · 7-a-side', tag: 'Friendly', live: false },
-      { day: '24', month: 'Sep', venue: 'Zabeel Park', meta: 'Wednesday 06:45 · 11-a-side', tag: 'Friendly', live: false },
+      { day: '12', month: 'SEP', venue: 'Al Quoz Sports Park', meta: 'Friday 19:00 · 7-a-side', tag: 'COUNTS', live: true },
+      { day: '17', month: 'SEP', venue: 'The Sevens', meta: 'Wednesday 20:30 · 5-a-side', tag: 'COUNTS', live: true },
+      { day: '19', month: 'SEP', venue: 'Insportz Indoor', meta: 'Friday 21:00 · 7-a-side', tag: 'FRIENDLY', live: false },
+      { day: '24', month: 'SEP', venue: 'Zabeel Park', meta: 'Wednesday 06:45 · 11-a-side', tag: 'FRIENDLY', live: false },
     ];
     const fixtures = fixtureDefs.map((f, i) => ({
       day: f.day,
@@ -182,9 +190,12 @@ class Component extends DCLogic {
       venue: f.venue,
       meta: f.meta,
       tag: f.tag,
-      dayColor: f.live ? '#2E6B52' : '#8C9189',
-      tagBg: f.live ? '#E2EDE6' : '#EAE7DE',
-      tagColor: f.live ? '#2E6B52' : '#8C9189',
+      border: f.live ? '#B4E8CD' : '#F0EADA',
+      shadow: f.live ? '#D5F2E3' : '#EDE6D3',
+      dayBg: f.live ? '#0F9E58' : '#F0EADA',
+      dayFg: f.live ? '#FFFFFF' : '#6B7D74',
+      tagBg: f.live ? '#E3F7EC' : '#F0EADA',
+      tagFg: f.live ? '#0B6E3F' : '#6B7D74',
       delay: (i * 0.06) + 's',
     }));
 
