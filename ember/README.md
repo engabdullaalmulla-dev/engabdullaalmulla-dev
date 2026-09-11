@@ -49,7 +49,7 @@ EXPO_PUBLIC_EMBER_SERVER=https://your-server npm run bundle:web
 ```bash
 npm test              # the rules, checked from plain node
 npm run typecheck
-npm run icons         # redraws every app icon from scripts/generate-icons.js
+npm run art           # redraws the icons, the felt, and every sound effect
 cd server && npm test # accounts, rooms, and the redaction, end to end
 ```
 
@@ -116,6 +116,29 @@ had actually been shown. Lose signal and your seat is covered the same way until
 you come back to it — the app reconnects on its own, with the seat marked *away*
 in the meantime.
 
+## How it looks, and why
+
+EMBER is a card table, not a dashboard: baize with a visible weave, a light hung
+over the middle of it, cream cards with the pip layouts a real deck uses — a
+seven is not a six with one more in the middle — corner indices that read the
+right way up from either end, and gold where a good deck has gilding. A card
+only carries a point value where the card itself does not already say it: a
+nine is worth nine, but a red King is worth nothing and a Joker fifteen.
+
+Cards move. They are dealt out one at a time, fly from the stock into your
+hand, are thrown onto the pile face up, cross the table on a blind swap, and
+leave in a flash of ember when you burn one. `src/ui/motion` measures where
+every pile and slot is, then flies real cards between them; it works from the
+redacted view alone, which is why a card going into a rival's pile flies to
+their seat rather than to the exact slot — which slot it went into is not
+yours to know.
+
+**None of the art is a binary blob.** The felt, the light over it, the lattice
+on the back of a card, the app icons and all eight sound effects are drawn and
+synthesised by the scripts in `scripts/`. Changing the colour of the baize or
+how a burn crackles is a one-line edit and `npm run art`. It also means the
+whole game packs into a single HTML file with nothing to fetch.
+
 ## How it is put together
 
 ```
@@ -132,13 +155,15 @@ src/
   net/            the API client and the socket
   store/          where the sign-in token is kept
   ui/             screens, components, theme
+    motion/         anchors, flying cards, the burst when one burns
+    textures.ts     the felt and the card back, generated
 server/
   src/            accounts, stats, rooms, the hub, the HTTP and socket surface
   Dockerfile      builds from ember/, because the rules are shared
   fly.toml
 tests/          the rules, exercised from node
 server/tests/   the server, exercised from node
-scripts/        draws the app icons
+scripts/        draws the icons and the felt, and synthesises the sounds
 ```
 
 ### Hidden cards

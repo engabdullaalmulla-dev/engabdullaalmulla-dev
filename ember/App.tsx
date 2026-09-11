@@ -16,6 +16,7 @@ import { ProfileScreen } from './src/ui/screens/ProfileScreen';
 import { RoomScreen } from './src/ui/screens/RoomScreen';
 import { RoundOverlay } from './src/ui/screens/RoundOverlay';
 import { RulesScreen } from './src/ui/screens/RulesScreen';
+import { FeltTable } from './src/ui/components/FeltTable';
 import { colors } from './src/ui/theme';
 import { useEmber } from './src/ui/useEmber';
 
@@ -192,14 +193,14 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.root}>
+      <FeltTable>
         <StatusBar style="light" />
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
           {/* A card table is a phone-shaped thing: on a wide screen it sits in
               the middle rather than stretching across the whole window. */}
           <View style={styles.column}>{body()}</View>
         </SafeAreaView>
-      </View>
+      </FeltTable>
     </SafeAreaProvider>
   );
 }
@@ -246,7 +247,7 @@ function OfflineTable({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.feltDeep },
   safe: { flex: 1 },
   column: { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center' },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },

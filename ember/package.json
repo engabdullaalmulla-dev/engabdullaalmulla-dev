@@ -6,6 +6,7 @@
     "@expo/metro-runtime": "~57.0.15",
     "escape-string-regexp": "^4.0.0",
     "expo": "~57.0.21",
+    "expo-audio": "~57.0.4",
     "expo-haptics": "^57.0.2",
     "expo-secure-store": "~57.0.3",
     "expo-status-bar": "~57.0.1",
@@ -28,7 +29,10 @@
     "test": "tsc -p tsconfig.test.json && node .test-build/tests/engine.test.js",
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/generate-icons.js",
-    "bundle:web": "node scripts/bundle-web.js"
+    "bundle:web": "node scripts/bundle-web.js",
+    "textures": "node scripts/generate-textures.js",
+    "sounds": "node scripts/generate-sounds.js",
+    "art": "npm run icons && npm run textures && npm run sounds"
   },
   "private": true
 }

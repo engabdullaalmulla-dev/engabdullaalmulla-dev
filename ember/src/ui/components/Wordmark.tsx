@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import { Flame } from './Flame';
 
 export function Wordmark({ size = 44 }: { size?: number }) {
@@ -18,5 +18,5 @@ export function Wordmark({ size = 44 }: { size?: number }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
-  text: { color: colors.text, fontWeight: '800' },
+  text: { fontFamily: fonts.display, color: colors.text, fontWeight: '700' },
 });

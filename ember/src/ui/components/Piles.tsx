@@ -2,8 +2,10 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Card } from '../../../shared/types';
-import { colors, radius, space, type as typography } from '../theme';
+import { AnchoredCard } from '../motion/AnchoredCard';
+import { anchorKeys } from '../motion/anchors';
 import { tap } from '../haptics';
+import { colors, space, type as typography } from '../theme';
 import { PlayingCard } from './PlayingCard';
 
 interface Props {
@@ -12,12 +14,12 @@ interface Props {
   width: number;
   onDrawStock?: () => void;
   onDrawDiscard?: () => void;
-  /** Draws attention to whichever pile can be tapped. */
-  live?: 'none' | 'both';
+  /** Lights both piles when it is your move. */
+  live?: boolean;
 }
 
-export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscard, live = 'none' }: Props) {
-  const enabled = live === 'both';
+export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscard, live }: Props) {
+  const height = width * 1.45;
 
   return (
     <View style={styles.row}>
@@ -25,7 +27,7 @@ export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscar
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Stock, ${stockCount} cards left`}
-          disabled={!enabled || !onDrawStock}
+          disabled={!live || !onDrawStock}
           onPress={() => {
             tap();
             onDrawStock?.();
@@ -33,25 +35,26 @@ export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscar
           style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}
         >
           <View>
-            {stockCount > 1 ? (
-              <View style={[styles.shadowCard, { width, height: width * 1.42, borderRadius: width * 0.14 }]} />
-            ) : null}
-            <PlayingCard
+            {/* The depth of the deck, so the stock reads as a stack. */}
+            {stockCount > 2 ? <View style={[styles.under, { width, height, top: -5, left: 5 }]} /> : null}
+            {stockCount > 1 ? <View style={[styles.under, { width, height, top: -2.5, left: 2.5 }]} /> : null}
+            <AnchoredCard
+              anchorKey={anchorKeys.stock}
               card={null}
               faceUp={false}
               width={width}
-              highlight={enabled ? 'target' : 'none'}
+              highlight={live ? 'target' : 'none'}
             />
           </View>
         </Pressable>
-        <Text style={styles.caption}>STOCK · {stockCount}</Text>
+        <Text style={styles.caption}>{stockCount}</Text>
       </View>
 
       <View style={styles.column}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Discard pile"
-          disabled={!enabled || !onDrawDiscard || !discardTop}
+          disabled={!live || !onDrawDiscard || !discardTop}
           onPress={() => {
             tap();
             onDrawDiscard?.();
@@ -59,38 +62,43 @@ export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscar
           style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}
         >
           {discardTop ? (
-            <PlayingCard
+            <AnchoredCard
+              anchorKey={anchorKeys.discard}
               card={discardTop}
               faceUp
               width={width}
-              highlight={enabled ? 'target' : 'none'}
+              highlight={live ? 'target' : 'none'}
             />
           ) : (
-            <View style={[styles.empty, { width, height: width * 1.42, borderRadius: width * 0.14 }]} />
+            <EmptyPile width={width} height={height} />
           )}
         </Pressable>
-        <Text style={styles.caption}>DISCARD</Text>
+        <Text style={styles.caption}>PILE</Text>
       </View>
     </View>
   );
 }
 
+function EmptyPile({ width, height }: { width: number; height: number }) {
+  return <View style={[styles.empty, { width, height, borderRadius: width * 0.075 }]} />;
+}
+
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: space(6), alignItems: 'flex-start' },
-  column: { alignItems: 'center', gap: space(2) },
-  caption: { ...typography.label, color: colors.textFaint, fontSize: 10 },
-  shadowCard: {
+  row: { flexDirection: 'row', gap: space(5), alignItems: 'flex-start' },
+  column: { alignItems: 'center', gap: space(1.5) },
+  caption: { ...typography.label, fontSize: 9, color: colors.goldFaint },
+  under: {
     position: 'absolute',
-    top: -4,
-    left: 4,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.backInk,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: colors.creamEdge,
+    opacity: 0.55,
   },
   empty: {
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.hairline,
+    opacity: 0.6,
   },
 });

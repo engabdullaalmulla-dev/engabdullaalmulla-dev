@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   back: { ...typography.label, fontSize: 10, color: colors.textFaint },
 
   codeCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.panel,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: space(2),
-    backgroundColor: colors.surface,
+    backgroundColor: colors.panel,
     borderRadius: radius.md,
     paddingVertical: space(3),
     paddingHorizontal: space(3.5),
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: '800',
     letterSpacing: 0.8,
-    color: colors.bg,
+    color: colors.feltDeep,
     backgroundColor: colors.textMuted,
     paddingHorizontal: 5,
     paddingVertical: 2,

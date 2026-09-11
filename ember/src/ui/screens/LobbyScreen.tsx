@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   error: { ...typography.small, color: colors.bad, lineHeight: 18 },
 
   block: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.panel,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   joinRow: { flexDirection: 'row', gap: space(2) },
   codeInput: {
     flex: 1,
-    backgroundColor: colors.bgDeep,
+    backgroundColor: colors.feltEdge,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.line,

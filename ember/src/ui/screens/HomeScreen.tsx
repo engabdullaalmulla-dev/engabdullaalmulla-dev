@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   blurb: { ...typography.body, color: colors.textMuted, lineHeight: 22 },
 
   panel: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.panel,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   segmentLabel: { ...typography.label, fontSize: 9, color: colors.textFaint },
   segment: {
     flexDirection: 'row',
-    backgroundColor: colors.bgDeep,
+    backgroundColor: colors.feltEdge,
     borderRadius: radius.pill,
     padding: 3,
     gap: 3,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  segmentItemActive: { backgroundColor: colors.surfaceRaised },
+  segmentItemActive: { backgroundColor: colors.panelRaised },
   segmentText: { ...typography.small, fontSize: 12, color: colors.textFaint },
   segmentTextActive: { color: colors.text },
 

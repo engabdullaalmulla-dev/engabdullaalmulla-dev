@@ -106,12 +106,12 @@ export function RoundOverlay({
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(8,6,5,0.82)',
+    backgroundColor: '#05100C8C',
     justifyContent: 'flex-end',
     padding: space(4),
   },
   sheet: {
-    backgroundColor: colors.surface,
+    backgroundColor: '#0B2019F7',
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     gap: space(2.5),
     ...shadow.card,
   },
-  eyebrow: { ...typography.label, fontSize: 10, color: colors.ember },
+  eyebrow: { ...typography.label, fontSize: 10, color: colors.gold },
   headline: { ...typography.heading, fontSize: 19, color: colors.text, lineHeight: 25 },
   table: { gap: space(1.5) },
   rowHead: { flexDirection: 'row', paddingBottom: space(1), borderBottomWidth: 1, borderBottomColor: colors.line },

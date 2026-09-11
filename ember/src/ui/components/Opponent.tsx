@@ -2,8 +2,10 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { PlayerView } from '../../../shared/view';
+import { AnchoredCard } from '../motion/AnchoredCard';
+import { anchorKeys, useAnchor } from '../motion/anchors';
 import { colors, radius, space, type as typography } from '../theme';
-import { PlayingCard, type CardHighlight } from './PlayingCard';
+import { type CardHighlight } from './PlayingCard';
 
 interface Props {
   player: PlayerView;
@@ -12,22 +14,23 @@ interface Props {
   /** Slots you are currently allowed to tap, for a power. */
   targetable?: number[];
   onPressSlot?: (slot: number) => void;
-  /** Sized by the table so a pile never wraps onto a second line. */
   cardWidth: number;
 }
 
 export function Opponent({ player, active, knocked, targetable = [], onPressSlot, cardWidth }: Props) {
+  const seat = useAnchor(anchorKeys.seat(player.id));
+
   return (
-    <View style={[styles.wrap, active && styles.active]}>
+    <View {...seat} style={[styles.wrap, active && styles.active]}>
       <View style={styles.header}>
         <Text
-          style={[styles.name, active && { color: colors.ember }, !player.connected && styles.away]}
+          style={[styles.name, active && styles.nameActive, !player.connected && styles.away]}
           numberOfLines={1}
         >
           {player.name}
         </Text>
         {!player.connected ? <Text style={styles.tag}>AWAY</Text> : null}
-        {knocked ? <Text style={[styles.tag, styles.knock]}>KNOCKED</Text> : null}
+        {knocked ? <Text style={[styles.tag, styles.knock]}>KNOCK</Text> : null}
         <Text style={styles.score}>{player.matchScore}</Text>
       </View>
 
@@ -35,8 +38,9 @@ export function Opponent({ player, active, knocked, targetable = [], onPressSlot
         {player.slots.map((slot, index) => {
           const highlight: CardHighlight = targetable.includes(index) ? 'target' : 'none';
           return (
-            <PlayingCard
+            <AnchoredCard
               key={`${player.id}-${index}`}
+              anchorKey={anchorKeys.slot(player.id, index)}
               card={slot.kind === 'face' ? slot.card : null}
               faceUp={slot.kind === 'face'}
               burned={slot.kind === 'burned'}
@@ -54,29 +58,38 @@ export function Opponent({ player, active, knocked, targetable = [], onPressSlot
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,
-    padding: space(2.5),
+    paddingVertical: space(2),
+    paddingHorizontal: space(2.5),
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: 'transparent',
-    backgroundColor: colors.surface,
-    gap: space(2),
+    gap: space(1.5),
   },
-  active: { borderColor: colors.ember, backgroundColor: colors.surfaceRaised },
+  active: {
+    borderColor: colors.gold,
+    backgroundColor: '#0E241C66',
+  },
   header: { flexDirection: 'row', alignItems: 'center', gap: space(1.5) },
-  name: { ...typography.small, color: colors.text, flexShrink: 1 },
+  name: { ...typography.small, fontSize: 11, color: colors.textMuted, flexShrink: 1 },
+  nameActive: { color: colors.goldSoft },
   away: { color: colors.textFaint },
-  score: { ...typography.small, color: colors.textFaint, marginLeft: 'auto' },
+  score: {
+    ...typography.numeral,
+    fontSize: 13,
+    color: colors.text,
+    marginLeft: 'auto',
+  },
   tag: {
     fontSize: 8,
     fontWeight: '800',
-    letterSpacing: 0.8,
-    color: colors.bg,
+    letterSpacing: 0.6,
+    color: colors.feltEdge,
     backgroundColor: colors.textFaint,
     paddingHorizontal: 4,
     paddingVertical: 1,
-    borderRadius: 4,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   knock: { backgroundColor: colors.gold },
-  cards: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  cards: { flexDirection: 'row', gap: 4 },
 });

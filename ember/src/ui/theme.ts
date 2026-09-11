@@ -1,36 +1,79 @@
-/** EMBER's look: warm charcoal table, cream cards, a fire that never quite goes out. */
+import { Platform } from 'react-native';
+
+/**
+ * EMBER's look: a card table. Baize under everything, a light hung over the
+ * middle of it, cream cards with real corners, and gold where a good deck has
+ * gilding. One bold accent — the ember the game is named for — spent only on
+ * the thing you are meant to do next.
+ */
 
 export const colors = {
-  bg: '#14100E',
-  bgDeep: '#0C0908',
-  surface: '#1E1815',
-  surfaceRaised: '#2A211C',
-  line: '#3A2E27',
+  /** The felt, from the lit centre out to the shadowed edge. */
+  feltLit: '#24513F',
+  felt: '#1B3A2F',
+  feltDeep: '#122A22',
+  feltEdge: '#0C1B16',
 
-  ember: '#FF6B35',
-  emberSoft: '#F4845F',
-  gold: '#FFB627',
+  /** Panels away from the table: darker baize with a leather cast. */
+  panel: '#102A22E0',
+  panelRaised: '#17392EF2',
+  line: '#2C5647',
+  hairline: '#3C6A58',
 
-  cream: '#F7F1E8',
-  cardEdge: '#E4D9C8',
-  ink: '#191310',
-  inkSoft: '#6B5B50',
+  /** Gilding. Structure, labels, the rim of things. */
+  gold: '#C9A227',
+  goldSoft: '#E0C874',
+  goldFaint: '#6E5E2E',
 
-  suitRed: '#C8443C',
-  suitBlack: '#221B17',
+  /** The ember: what you are meant to do next, and what is on fire. */
+  ember: '#E8622F',
+  emberSoft: '#F3915F',
+  emberDeep: '#A8350F',
 
-  text: '#F2E9E1',
-  textMuted: '#9B8A7E',
-  textFaint: '#6A5A50',
+  /** Cards. */
+  cream: '#FBF7EF',
+  creamEdge: '#E6DCC9',
+  creamShade: '#EFE7D8',
+  ink: '#17120F',
+  inkSoft: '#7A6A5C',
+  suitRed: '#B3332C',
+  suitBlack: '#1C1714',
+  backInk: '#581A16',
 
-  good: '#6FBF8B',
-  bad: '#E0574A',
+  /** Type on the felt. Neutrals carry the green of the ground. */
+  text: '#F1EADC',
+  textMuted: '#A8BCAF',
+  textFaint: '#6F887B',
+
+  good: '#7BC49A',
+  bad: '#E2564A',
+} as const;
+
+/**
+ * A serif for anything that belongs to the deck — the wordmark, card ranks,
+ * headings — and the platform's own interface face for everything else. Both
+ * are already on the device, so nothing is ever waiting on a font to load and
+ * nothing falls back silently.
+ */
+export const fonts = {
+  display: Platform.select({
+    ios: 'Palatino',
+    android: 'serif',
+    default: 'Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif',
+  }),
+  sans: Platform.select({
+    ios: undefined,
+    android: undefined,
+    default:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  }),
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 14,
-  lg: 22,
+  sm: 6,
+  md: 12,
+  lg: 20,
+  card: 0.075, // as a fraction of card width, so corners scale with the card
   pill: 999,
 } as const;
 
@@ -38,42 +81,60 @@ export const space = (n: number) => n * 4;
 
 export const type = {
   title: {
-    fontSize: 44,
-    fontWeight: '800' as const,
-    letterSpacing: 6,
+    fontFamily: fonts.display,
+    fontSize: 42,
+    fontWeight: '700' as const,
+    letterSpacing: 4,
   },
   heading: {
-    fontSize: 22,
+    fontFamily: fonts.display,
+    fontSize: 21,
     fontWeight: '700' as const,
-    letterSpacing: 0.5,
   },
   body: {
+    fontFamily: fonts.sans,
     fontSize: 15,
     fontWeight: '500' as const,
   },
   label: {
-    fontSize: 12,
-    fontWeight: '700' as const,
-    letterSpacing: 1.4,
+    fontFamily: fonts.sans,
+    fontSize: 11,
+    fontWeight: '800' as const,
+    letterSpacing: 1.6,
   },
   small: {
+    fontFamily: fonts.sans,
     fontSize: 12,
     fontWeight: '600' as const,
+  },
+  numeral: {
+    fontFamily: fonts.display,
+    fontWeight: '700' as const,
   },
 } as const;
 
 export const shadow = {
+  /** A card lying on the felt. */
   card: {
-    shadowColor: '#000',
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
+    shadowColor: '#03110C',
+    shadowOpacity: 0.55,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  lift: {
+  /** A card in the air, on its way somewhere. */
+  flying: {
+    shadowColor: '#03110C',
+    shadowOpacity: 0.65,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 18,
+  },
+  /** Something waiting to be tapped. */
+  lit: {
     shadowColor: colors.ember,
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
+    shadowOpacity: 0.65,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
     elevation: 10,
   },

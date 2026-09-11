@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   field: { gap: space(1.5) },
   fieldLabel: { ...typography.label, fontSize: 9, color: colors.textFaint },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.panel,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.line,

@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   stat: {
     flexGrow: 1,
     minWidth: 96,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.panel,
     borderRadius: radius.md,
     padding: space(3.5),
     gap: 2,
@@ -138,13 +138,13 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 24, fontWeight: '800', color: colors.text },
   statLabel: { ...typography.label, fontSize: 8, color: colors.textFaint },
 
-  lines: { backgroundColor: colors.surface, borderRadius: radius.md, paddingHorizontal: space(3.5) },
+  lines: { backgroundColor: colors.panel, borderRadius: radius.md, paddingHorizontal: space(3.5) },
   line: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: space(3),
     borderBottomWidth: 1,
-    borderBottomColor: colors.bgDeep,
+    borderBottomColor: colors.feltEdge,
   },
   lineLabel: { ...typography.body, color: colors.textMuted },
   lineValue: { ...typography.body, color: colors.text, fontWeight: '700' },
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     gap: space(3),
     paddingVertical: space(2.5),
     borderBottomWidth: 1,
-    borderBottomColor: colors.bgDeep,
+    borderBottomColor: colors.feltEdge,
   },
   rank: { ...typography.small, color: colors.textFaint, width: 18 },
   boardName: { ...typography.body, color: colors.textMuted, flex: 1 },

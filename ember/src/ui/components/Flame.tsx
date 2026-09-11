@@ -30,7 +30,7 @@ export function Flame({ size = 26, dim = false }: { size?: number; dim?: boolean
           width: size * 0.38,
           height: size * 0.38,
           borderRadius: size * 0.19,
-          backgroundColor: dim ? colors.surfaceRaised : colors.gold,
+          backgroundColor: dim ? colors.panelRaised : colors.gold,
           opacity: 0.9,
         }}
       />
