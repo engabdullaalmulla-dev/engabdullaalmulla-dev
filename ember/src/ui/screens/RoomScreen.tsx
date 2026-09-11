@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   codeLabel: { ...typography.label, fontSize: 9, color: colors.textFaint },
   // A room code is read out and typed in character by character, so it keeps
   // its own direction whatever language the app is in.
-  code: { fontSize: 40, fontWeight: '800', color: colors.text, letterSpacing: 8, direction: 'ltr' },
+  code: { fontSize: 40, fontWeight: '800', color: colors.text, letterSpacing: 8, writingDirection: 'ltr' },
   codeHint: { ...typography.small, fontSize: 11, color: colors.textFaint, textAlign: 'center' },
 
   error: { ...typography.small, color: colors.bad },

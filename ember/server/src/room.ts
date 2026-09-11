@@ -413,8 +413,10 @@ export class Room {
 
   private countForStats(state: GameState, userId: string, action: GameAction): void {
     if (action.type !== 'BURN' || !state.burn) return;
-    const player = playerById(state, action.playerId);
-    const card = player?.slots[action.slot];
+    // The card being reached for may be somebody else's; the record belongs
+    // to whoever reached.
+    const owner = playerById(state, action.ownerId);
+    const card = owner?.slots[action.slot];
     if (!card) return;
     const delta = (this.roundDeltas[userId] ??= {});
     if (card.rank === state.burn.rank) delta.burns = (delta.burns ?? 0) + 1;

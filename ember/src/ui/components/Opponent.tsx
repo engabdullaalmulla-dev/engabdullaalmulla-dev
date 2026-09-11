@@ -18,6 +18,8 @@ interface Props {
   onPressSlot?: (slot: number) => void;
   /** True while a copy of that card is still in the air. */
   inFlight?: (slot: number) => boolean;
+  /** Lights their cards as burnable rather than as a target to pick. */
+  burning?: boolean;
   cardWidth: number;
 }
 
@@ -28,6 +30,7 @@ export function Opponent({
   targetable = [],
   onPressSlot,
   inFlight,
+  burning,
   cardWidth,
 }: Props) {
   const { t, n } = useLanguage();
@@ -49,7 +52,11 @@ export function Opponent({
 
       <View style={styles.cards}>
         {player.slots.map((slot, index) => {
-          const highlight: CardHighlight = targetable.includes(index) ? 'target' : 'none';
+          const highlight: CardHighlight = targetable.includes(index)
+            ? burning
+              ? 'burn'
+              : 'target'
+            : 'none';
           return (
             <AnchoredCard
               key={`${player.id}-${index}`}

@@ -20,10 +20,10 @@ export interface ScheduledMove {
 
 export class Autoplay {
   /** One burn decision per window, so a bot cannot re-roll its nerve. */
-  private plan: { window: number; moves: Array<{ playerId: string; slot: number; at: number }> } = {
-    window: -1,
-    moves: [],
-  };
+  private plan: {
+    window: number;
+    moves: Array<{ playerId: string; ownerId: string; slot: number; at: number }>;
+  } = { window: -1, moves: [] };
 
   constructor(private readonly random: () => number = Math.random) {}
 
@@ -65,7 +65,7 @@ export class Autoplay {
       const moves: ScheduledMove[] = [];
 
       if (this.plan.window !== state.burn.closesAt) {
-        const planned: Array<{ playerId: string; slot: number; at: number }> = [];
+        const planned: Array<{ playerId: string; ownerId: string; slot: number; at: number }> = [];
         for (const player of state.players) {
           if (isTheirs(player.id)) continue; // people spot their own burns
           const move = decideBurn(state, player.id, memories[player.id] ?? {}, this.random);
@@ -73,6 +73,7 @@ export class Autoplay {
             const quickness = player.difficulty === 'sharp' ? 700 : 1200;
             planned.push({
               playerId: player.id,
+              ownerId: move.ownerId,
               slot: move.slot,
               at: now + 380 + this.random() * quickness,
             });
@@ -84,7 +85,12 @@ export class Autoplay {
       for (const move of this.plan.moves) {
         if (state.burn.attempted.includes(move.playerId)) continue;
         moves.push({
-          action: { type: 'BURN', playerId: move.playerId, slot: move.slot },
+          action: {
+            type: 'BURN',
+            playerId: move.playerId,
+            ownerId: move.ownerId,
+            slot: move.slot,
+          },
           delayMs: move.at - now,
         });
       }

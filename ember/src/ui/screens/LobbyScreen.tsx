@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     textAlign: 'center',
     minHeight: 48,
-    direction: 'ltr',
+    writingDirection: 'ltr',
   },
   joinButton: { minWidth: 96 },
 

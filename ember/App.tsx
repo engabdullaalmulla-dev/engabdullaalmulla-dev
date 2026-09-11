@@ -19,6 +19,7 @@ import { RoomScreen } from './src/ui/screens/RoomScreen';
 import { RoundOverlay } from './src/ui/screens/RoundOverlay';
 import { RulesScreen } from './src/ui/screens/RulesScreen';
 import { FeltTable } from './src/ui/components/FeltTable';
+import { asDir, directionStyle } from './src/ui/ltr';
 import { setSoundEnabled } from './src/ui/sound';
 import { colors } from './src/ui/theme';
 import { useEmber } from './src/ui/useEmber';
@@ -232,7 +233,10 @@ export default function App() {
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
           {/* A card table is a phone-shaped thing: on a wide screen it sits in
               the middle rather than stretching across the whole window. */}
-          <View style={[styles.column, { direction: locale === 'ar' ? 'rtl' : 'ltr' }]}>
+          <View
+            {...asDir(locale === 'ar')}
+            style={[styles.column, directionStyle(locale === 'ar' ? 'rtl' : 'ltr')]}
+          >
             {body()}
           </View>
         </SafeAreaView>

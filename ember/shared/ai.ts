@@ -330,7 +330,7 @@ function decidePower(
   }
 }
 
-/** Whether this bot spots a burn, and on which of its cards. */
+/** Whether this bot spots a burn, and whose card it reaches for. */
 export function decideBurn(
   state: GameState,
   botId: string,
@@ -341,15 +341,40 @@ export function decideBurn(
   if (state.burn.attempted.includes(botId)) return null;
   const bot = playerById(state, botId);
   if (!bot) return null;
-
   const traits = traitsFor(bot.difficulty);
-  for (let slot = 0; slot < bot.slots.length; slot++) {
-    const card = bot.slots[slot];
-    const seen = memory[key(botId, slot)];
-    if (!card || !seen || seen.rank !== state.burn.rank) continue;
+
+  /** Somewhere this bot remembers a card of the rank on the pile. */
+  const match = (player: Player): number | null => {
+    for (let slot = 0; slot < player.slots.length; slot++) {
+      const card = player.slots[slot];
+      const seen = memory[key(player.id, slot)];
+      if (card && seen && seen.rank === state.burn!.rank) return slot;
+    }
+    return null;
+  };
+
+  // Your own is always worth burning: the card leaves the table and nothing
+  // takes its place, so the pile simply gets smaller.
+  const own = match(bot);
+  if (own != null) {
     if (random() > traits.burnNerve) return null;
-    return { type: 'BURN', playerId: botId, slot };
+    return { type: 'BURN', playerId: botId, ownerId: botId, slot: own };
   }
+
+  // A rival's card is replaced from the stock rather than removed, so burning
+  // their Joker would be doing them a favour. Only a cheap card of theirs is
+  // worth taking away — what they get back averages UNKNOWN_VALUE, and they
+  // will not know what it is.
+  for (const rival of state.players) {
+    if (rival.id === botId) continue;
+    const slot = match(rival);
+    if (slot == null) continue;
+    const seen = memory[key(rival.id, slot)];
+    if (!seen || seen.value >= UNKNOWN_VALUE - 1) continue;
+    if (random() > traits.burnNerve) return null;
+    return { type: 'BURN', playerId: botId, ownerId: rival.id, slot };
+  }
+
   return null;
 }
 

@@ -602,29 +602,63 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
     case 'BURN': {
       if (state.phase !== 'BURN_WINDOW' || !state.burn) return previous;
       if (state.burn.attempted.includes(action.playerId)) return previous;
-      const player = playerById(state, action.playerId);
-      if (!player) return previous;
-      const card = player.slots[action.slot];
+      const burner = playerById(state, action.playerId);
+      const owner = playerById(state, action.ownerId);
+      if (!burner || !owner) return previous;
+      const card = owner.slots[action.slot];
       if (!card) return previous;
 
+      // One go each per window, whosever card you reach for.
       state.burn.attempted.push(action.playerId);
+      const mine = burner.id === owner.id;
 
       if (card.rank === state.burn.rank) {
-        player.slots[action.slot] = null;
         state.discard.push(card);
-        log(state, 'good', 'burned', { name: player.name, actorId: player.id, card: ref(card) });
-        if (checkAshOut(state, player.id)) return state;
+
+        if (mine) {
+          // Your own card leaves the table for good: one card lighter.
+          owner.slots[action.slot] = null;
+          log(state, 'good', 'burned', {
+            name: burner.name,
+            actorId: burner.id,
+            card: ref(card),
+          });
+          if (checkAshOut(state, owner.id)) return state;
+          return state;
+        }
+
+        // Somebody else's card is replaced from the stock, face down. They
+        // keep the same number of cards and lose the one thing that mattered
+        // about that slot — knowing what was in it.
+        const replacement = drawCard(state);
+        owner.slots[action.slot] = replacement ?? null;
+        log(state, 'hot', 'burned_theirs', {
+          name: burner.name,
+          actorId: burner.id,
+          other: owner.name,
+          otherId: owner.id,
+          card: ref(card),
+        });
         return state;
       }
 
-      log(state, 'bad', 'misfire', { name: player.name, actorId: player.id, card: ref(card) });
+      // A wrong guess turns the card over for the whole table to see — the
+      // information is the price of grabbing at it — and costs the person who
+      // grabbed, never the person whose card it was.
+      log(state, 'bad', mine ? 'misfire' : 'misfire_theirs', {
+        name: burner.name,
+        actorId: burner.id,
+        other: mine ? undefined : owner.name,
+        otherId: mine ? undefined : owner.id,
+        card: ref(card),
+      });
       setReveal(state, {
         viewerId: '*',
         reason: 'failed_burn',
-        targets: [{ playerId: action.playerId, slot: action.slot }],
+        targets: [{ playerId: action.ownerId, slot: action.slot }],
       });
       const penalty = drawCard(state);
-      if (penalty) player.slots.push(penalty);
+      if (penalty) burner.slots.push(penalty);
       return state;
     }
 

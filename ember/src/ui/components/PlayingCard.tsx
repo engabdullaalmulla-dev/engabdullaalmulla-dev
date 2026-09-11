@@ -14,7 +14,7 @@ import {
 import { isRed, SUIT_SYMBOL } from '../../../shared/cards';
 import type { Card, Rank } from '../../../shared/types';
 import { useLanguage } from '../../i18n';
-import { LTR } from '../ltr';
+import { directionStyle, LTR } from '../ltr';
 import { colors, fonts, shadow } from '../theme';
 import { CARD_BACK } from '../textures';
 import { Flame } from './Flame';
@@ -140,7 +140,7 @@ export function PlayingCard({
   const ring = highlight === 'burn' ? colors.ember : highlight === 'chosen' ? colors.goldSoft : colors.gold;
 
   const body = (
-    <View {...LTR} style={{ width, height, opacity: inFlight ? 0 : 1, direction: 'ltr' }}>
+    <View {...LTR} style={[{ width, height, opacity: inFlight ? 0 : 1 }, directionStyle('ltr')]}>
       <Animated.View
         style={[
           styles.face,

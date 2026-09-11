@@ -167,13 +167,18 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
   }, [view, you, yourTurn, reveal, showdown, youId]);
 
   const rivalsTargetable = useMemo(() => {
+    // Anyone's card can be burned, not just your own — which is the whole
+    // reason for remembering what a rival is holding.
+    if (view.phase === 'BURN_WINDOW') {
+      return !view.burn?.attempted.includes(youId) && !reveal;
+    }
     if (!yourTurn || reveal || view.phase !== 'POWER' || !view.power) return false;
     const { kind, picked } = view.power;
     if (kind === 'SPY' || kind === 'EMBER') return true;
     if (kind === 'SWAP' && picked.length === 1) return true;
     if (kind === 'LOOK_SWAP' && picked.length === 0) return true;
     return false;
-  }, [view, yourTurn, reveal]);
+  }, [view, yourTurn, reveal, youId]);
 
   /* ---------------------------------------------------------------- */
   /* acting                                                            */
@@ -186,7 +191,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
       return;
     }
     if (view.phase === 'BURN_WINDOW') {
-      dispatch({ type: 'BURN', playerId: youId, slot });
+      dispatch({ type: 'BURN', playerId: youId, ownerId: youId, slot });
       return;
     }
     if (view.phase === 'HOLDING') {
@@ -202,6 +207,10 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
   };
 
   const pressRivalCard = (playerId: string, slot: number) => {
+    if (view.phase === 'BURN_WINDOW') {
+      dispatch({ type: 'BURN', playerId: youId, ownerId: playerId, slot });
+      return;
+    }
     if (view.phase === 'POWER') {
       tap();
       dispatch({ type: 'POWER_TARGET', playerId, slot });
@@ -261,6 +270,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
               knocked={view.knockerId === player.id}
               cardWidth={rivalCardWidth}
               targetable={rivalsTargetable ? liveSlots(player) : []}
+              burning={view.phase === 'BURN_WINDOW'}
               inFlight={(index) => flights.isFlyingTo(anchorKeys.slot(player.id, index))}
               onPressSlot={(slot) => pressRivalCard(player.id, slot)}
             />

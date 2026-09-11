@@ -120,7 +120,9 @@ export type LogKey =
   | 'looked'
   | 'ember'
   | 'burned'
+  | 'burned_theirs'
   | 'misfire'
+  | 'misfire_theirs'
   | 'ash_out';
 
 /**
@@ -196,6 +198,7 @@ export type GameAction =
   | { type: 'THROW'; usePower: boolean }
   | { type: 'POWER_TARGET'; playerId: string; slot: number }
   | { type: 'POWER_DECLINE' }
-  | { type: 'BURN'; playerId: string; slot: number }
+  /** `playerId` is whoever is burning; `ownerId` is whose pile the card is in. */
+  | { type: 'BURN'; playerId: string; ownerId: string; slot: number }
   | { type: 'CLOSE_BURN'; now: number }
   | { type: 'NEXT_ROUND' };

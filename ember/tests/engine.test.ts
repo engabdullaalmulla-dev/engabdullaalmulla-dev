@@ -123,21 +123,93 @@ const matching = buildDeck().find(
 let burning = stack(placed, currentPlayer(placed).id === HUMAN_ID ? 'bot1' : HUMAN_ID, 2, matching!.id);
 const burner = currentPlayer(placed).id === HUMAN_ID ? 'bot1' : HUMAN_ID;
 const beforeBurn = cardsLeft(playerById(burning, burner)!);
-burning = reduce(burning, { type: 'BURN', playerId: burner, slot: 2 });
+burning = reduce(burning, { type: 'BURN', playerId: burner, ownerId: burner, slot: 2 });
 equal('a good burn removes the card', cardsLeft(playerById(burning, burner)!), beforeBurn - 1);
 equal('a burned card goes on the pile', topDiscard(burning)?.id, matching!.id);
-equal('one burn attempt per window', reduce(burning, { type: 'BURN', playerId: burner, slot: 0 }).logSeq, burning.logSeq);
+equal('one burn attempt per window', reduce(burning, { type: 'BURN', playerId: burner, ownerId: burner, slot: 0 }).logSeq, burning.logSeq);
+
+/* burning somebody else's card ------------------------------------- */
+
+// Knowing what a rival holds is worth something: their card goes, and what
+// replaces it comes off the stock, so they are left holding something nobody
+// at the table can name.
+const victim = placed.players.find((p) => p.id !== burner)!.id;
+const theirMatch = buildDeck().find(
+  (c) =>
+    c.rank === burnTop?.rank &&
+    c.id !== burnTop?.id &&
+    c.id !== matching!.id &&
+    !placed.players.some((p) => p.slots.some((slot) => slot?.id === c.id)),
+)!;
+let raid = stack(placed, victim, 1, theirMatch.id);
+const theirCountBefore = cardsLeft(playerById(raid, victim)!);
+const myCountBefore = cardsLeft(playerById(raid, burner)!);
+raid = reduce(raid, { type: 'BURN', playerId: burner, ownerId: victim, slot: 1 });
+
+equal('their card is taken', playerById(raid, victim)!.slots[1]?.id !== theirMatch.id, true);
+equal('but the slot is not left empty', playerById(raid, victim)!.slots[1] != null, true);
+equal('so their pile is the same size', cardsLeft(playerById(raid, victim)!), theirCountBefore);
+equal('and yours is too', cardsLeft(playerById(raid, burner)!), myCountBefore);
+equal('the burned card lands on the pile', topDiscard(raid)?.id, theirMatch.id);
+equal('what replaces it comes off the stock', raid.stock.length, placed.stock.length - 1);
+equal('nobody is shown the new card', raid.reveals.length, 0);
+equal('no card goes missing in a raid', countCards(raid), 108);
+
+// Reaching for a rival's card and getting it wrong costs the person reaching.
+const theirWrong = buildDeck().find((c) => c.rank !== burnTop?.rank && c.rank !== 'JOKER')!;
+let raidMiss = stack(placed, victim, 2, theirWrong.id);
+const missMine = cardsLeft(playerById(raidMiss, burner)!);
+const missTheirs = cardsLeft(playerById(raidMiss, victim)!);
+raidMiss = reduce(raidMiss, { type: 'BURN', playerId: burner, ownerId: victim, slot: 2 });
+equal('a wrong grab costs the grabber', cardsLeft(playerById(raidMiss, burner)!), missMine + 1);
+equal('and costs its owner nothing', cardsLeft(playerById(raidMiss, victim)!), missTheirs);
+equal('their card is turned over for everyone', publicReveal(raidMiss)?.targets[0].playerId, victim);
 
 // A misfire hands you a penalty card instead.
 const wrongRank = buildDeck().find((c) => c.rank !== burnTop?.rank && c.rank !== 'JOKER')!;
 let misfire = stack(placed, burner, 3, wrongRank.id);
 const beforeMisfire = cardsLeft(playerById(misfire, burner)!);
-misfire = reduce(misfire, { type: 'BURN', playerId: burner, slot: 3 });
+misfire = reduce(misfire, { type: 'BURN', playerId: burner, ownerId: burner, slot: 3 });
 equal('a misfire costs you a card', cardsLeft(playerById(misfire, burner)!), beforeMisfire + 1);
 equal('a misfire is shown to everyone', publicReveal(misfire)?.viewerId, '*');
 equal('the window will not close mid-misfire', reduce(misfire, { type: 'CLOSE_BURN', now: 0 }).phase, 'BURN_WINDOW');
 const cleared = reduce(misfire, { type: 'ACK_REVEAL', playerId: '*' });
 equal('the window reopens after the misfire is seen', cleared.phase, 'BURN_WINDOW');
+
+/* bots know whose card is worth burning ---------------------------- */
+
+// Replacing a rival's card costs them nothing if what they had was expensive,
+// so a bot that burns a rival's Joker is doing them a favour.
+const raider = 'bot1';
+const mark = HUMAN_ID;
+
+let joker = stack(placed, mark, 0, 'JOKERX-1');
+joker.burn = { rank: 'JOKER', closesAt: 1, attempted: [] };
+const knowsJoker: BotMemory = { [`${mark}:0`]: { cardId: 'JOKERX-1', rank: 'JOKER', value: 15 } };
+equal("a bot leaves a rival's Joker alone", decideBurn(joker, raider, knowsJoker, () => 0), null);
+
+let ace = stack(placed, mark, 1, 'AH-1');
+ace.burn = { rank: 'A', closesAt: 1, attempted: [] };
+const knowsAce: BotMemory = { [`${mark}:1`]: { cardId: 'AH-1', rank: 'A', value: 1 } };
+const raidMove = decideBurn(ace, raider, knowsAce, () => 0);
+check(
+  "but takes a rival's cheap card",
+  raidMove?.type === 'BURN' && raidMove.ownerId === mark && raidMove.slot === 1,
+  JSON.stringify(raidMove),
+);
+
+// Its own matching card comes first either way: that one actually leaves.
+let both = stack(ace, raider, 2, 'AS-1');
+const knowsBoth: BotMemory = {
+  ...knowsAce,
+  [`${raider}:2`]: { cardId: 'AS-1', rank: 'A', value: 1 },
+};
+const ownMove = decideBurn(both, raider, knowsBoth, () => 0);
+check(
+  'and its own card comes first',
+  ownMove?.type === 'BURN' && ownMove.ownerId === raider,
+  JSON.stringify(ownMove),
+);
 
 /* the burn window's clock ------------------------------------------ */
 equal('the window is open before it expires', burnExpired(placed, 0), false);
@@ -269,7 +341,7 @@ let ash: GameState = JSON.parse(JSON.stringify(placed));
 const ashPlayer = playerById(ash, burner)!;
 const ashTop = topDiscard(ash)!;
 ashPlayer.slots = [buildDeck().find((c) => c.rank === ashTop.rank && c.id !== ashTop.id)!];
-ash = reduce(ash, { type: 'BURN', playerId: burner, slot: 0 });
+ash = reduce(ash, { type: 'BURN', playerId: burner, ownerId: burner, slot: 0 });
 equal('emptying your pile ends the round', ash.phase === 'ROUND_OVER' || ash.phase === 'MATCH_OVER', true);
 equal('an ash out wins the round', ash.result?.ashOutId, burner);
 equal('an ash out scores nothing', ash.result?.scored[burner], 0);

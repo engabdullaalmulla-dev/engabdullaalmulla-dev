@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   // "2 – 10" and "J · Q" are card notation, not prose: they read the same way
   // round in either language.
-  chipText: { ...typography.small, color: colors.text, direction: 'ltr' },
+  chipText: { ...typography.small, color: colors.text, writingDirection: 'ltr' },
   chipSpoken: { ...typography.small, fontSize: 10, color: colors.goldFaint, marginTop: 1 },
   points: { ...typography.body, color: colors.text, fontWeight: '800', minWidth: 86 },
   note: { ...typography.small, fontSize: 11, color: colors.textFaint, flexShrink: 1, lineHeight: 16 },

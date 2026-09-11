@@ -183,6 +183,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.line,
     textAlign: 'center',
-    direction: 'ltr',
+    writingDirection: 'ltr',
   },
 });

@@ -1,11 +1,27 @@
+import { Platform } from 'react-native';
+import type { ViewStyle } from 'react-native';
+
 /**
- * Keeping Latin script the right way round inside an Arabic screen.
+ * Pinning which way round something is laid out.
  *
- * A few things are not prose and must not mirror: the wordmark, a room code
- * read out character by character, card notation like "2 – 10", the faces of
- * the cards themselves. React Native honours `direction` in a style, but
- * react-native-web drops it from generated stylesheet classes, so the web also
- * needs the `dir` attribute. Spread this alongside a style that sets
- * `direction: 'ltr'` and both platforms are covered.
+ * Two platforms, two mechanisms. React Native reads `direction` from a style
+ * (and `writingDirection` on text, which is a different property). The web
+ * reads the `dir` attribute and rejects `direction` as a style outright — so
+ * the style half is left off there rather than warning on every render.
+ *
+ * Most of the app follows the language. A few things must not: the wordmark,
+ * the faces of the cards, a room code read out character by character, card
+ * notation like "2 – 10" that bidi would otherwise be free to reorder.
  */
-export const LTR = { dir: 'ltr' } as unknown as { dir?: 'ltr' };
+
+type DirProp = { dir?: 'ltr' | 'rtl' };
+
+export const LTR = { dir: 'ltr' } as unknown as DirProp;
+export const RTL = { dir: 'rtl' } as unknown as DirProp;
+
+export const asDir = (rtl: boolean): DirProp => (rtl ? RTL : LTR);
+
+/** The style half of the same thing. Null on the web, where `dir` does it. */
+export function directionStyle(dir: 'ltr' | 'rtl'): ViewStyle | null {
+  return Platform.OS === 'web' ? null : { direction: dir };
+}

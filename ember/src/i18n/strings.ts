@@ -462,8 +462,10 @@ export const en: Strings = {
     ],
     burning: 'Burning',
     burningBody: [
-      'The moment a card lands face up, anyone may burn a card of the same rank straight out of their own pile — fewer cards, fewer points, and nobody gets to replace it.',
-      'Get it wrong and you take a penalty card, face down, on top of what you already had. Be sure before you tap.',
+      'The moment a card lands face up, anyone may burn a card of the same rank — out of their own pile, or out of somebody else\'s.',
+      'Your own card leaves the table for good: one card fewer, and nothing takes its place.',
+      "A rival's card is replaced from the stock instead, face down. They keep the same number of cards, but they lose the one they knew — and nobody at the table knows what they are holding now. That is what remembering a rival's card is worth.",
+      'Get it wrong and you take the penalty card, whosever card you reached for, and it is turned over for the whole table to see. Be sure before you tap.',
     ],
     knocking: 'Knocking',
     knockingBody: [
@@ -520,8 +522,16 @@ export const en: Strings = {
         return `${who} forced a card on ${them}. Ember!`;
       case 'burned':
         return `${who} burned ${which}. One card lighter.`;
+      case 'burned_theirs':
+        return toYou
+          ? `${who} burned ${which} out of your pile.`
+          : `${who} burned ${which} out of ${entry.other ?? ''}'s pile.`;
       case 'misfire':
         return `${who} misfired on ${which} — penalty card.`;
+      case 'misfire_theirs':
+        return toYou
+          ? `${who} grabbed at ${which} in your pile — penalty card.`
+          : `${who} grabbed at ${which} in ${entry.other ?? ''}'s pile — penalty card.`;
       case 'ash_out':
         return `${who} burned away every card. Ash out!`;
       default:
@@ -851,8 +861,10 @@ export const ar: Strings = {
     ],
     burning: 'الحرق',
     burningBody: [
-      'ما إن تسقط ورقة مكشوفة حتى يجوز لأي لاعب أن يحرق ورقة من الرتبة نفسها من أوراقه — أوراق أقل، ونقاط أقل، ولا بديل عنها.',
-      'وإن أخطأت أخذت ورقة عقوبة مقلوبة فوق ما عندك. تأكّد قبل أن تضغط.',
+      'ما إن تسقط ورقة مكشوفة حتى يجوز لأي لاعب أن يحرق ورقة من الرتبة نفسها — من أوراقه هو، أو من أوراق غيره.',
+      'ورقتك أنت تخرج من اللعب نهائيًا: ورقة أقل، ولا شيء يحل مكانها.',
+      'أما ورقة خصمك فتُستبدل بورقة من الكومة مقلوبة. يبقى عدد أوراقه كما هو، لكنه يفقد الورقة التي كان يعرفها، ولا أحد على الطاولة يعرف ما صار في يده. هذا ما تساويه معرفتك بورقة خصمك.',
+      'وإن أخطأت أخذت أنت ورقة العقوبة، أيًّا كان صاحب الورقة، وتُكشف الورقة للطاولة كلها. تأكّد قبل أن تضغط.',
     ],
     knocking: 'الطرق',
     knockingBody: [
@@ -883,6 +895,8 @@ export const ar: Strings = {
     const onThem = toYou ? 'عليك' : `على ${entry.other ?? ''}`;
     const withThem = toYou ? 'معك' : `مع ${entry.other ?? ''}`;
     const fromThem = toYou ? 'منك' : `من ${entry.other ?? ''}`;
+    const theirCards = toYou ? 'أوراقك' : `أوراق ${entry.other ?? ''}`;
+    const atThem = toYou ? 'عندك' : `عند ${entry.other ?? ''}`;
     const which = entry.card ? card(entry.card) : '';
     const count = arabicDigits(entry.count ?? 0);
 
@@ -919,8 +933,12 @@ export const ar: Strings = {
         return `${subject}${said({ you: 'فرضتَ', he: 'فرض', she: 'فرضت' })} ورقة ${onThem}. جمرة!`;
       case 'burned':
         return `${subject}${said({ you: 'أحرقتَ', he: 'أحرق', she: 'أحرقت' })} ${which}. ورقة أقل.`;
+      case 'burned_theirs':
+        return `${subject}${said({ you: 'أحرقتَ', he: 'أحرق', she: 'أحرقت' })} ${which} من ${theirCards}.`;
       case 'misfire':
         return `${subject}${said({ you: 'أخطأتَ', he: 'أخطأ', she: 'أخطأت' })} في ${which} — ورقة عقوبة.`;
+      case 'misfire_theirs':
+        return `${subject}${said({ you: 'أخطأتَ', he: 'أخطأ', she: 'أخطأت' })} في ${which} ${atThem} — ورقة عقوبة.`;
       case 'ash_out':
         return `${subject}${said({ you: 'أحرقتَ أوراقك', he: 'أحرق أوراقه', she: 'أحرقت أوراقها' })} كلها. لم يبق شيء!`;
       default:
