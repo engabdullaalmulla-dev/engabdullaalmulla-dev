@@ -1,9 +1,0 @@
-node_modules/
-.env
-.env.local
-dist/
-.next/
-*.log
-
-# Real player data never goes in git. Fixtures are made up.
-/data/
