@@ -3,14 +3,18 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { directionStyle, LTR } from '../ltr';
 import { colors, fonts } from '../theme';
-import { Flame } from './Flame';
+import { Emblem } from './Emblem';
 
+/**
+ * EMBER, with the mark standing in for the second E. The word and the symbol
+ * are the same object, so the logo works with the letters or without them.
+ */
 export function Wordmark({ size = 44 }: { size?: number }) {
   return (
     <View {...LTR} style={[styles.row, directionStyle('ltr')]}>
       <Text style={[styles.text, { fontSize: size, letterSpacing: size * 0.13 }]}>EMB</Text>
-      <Flame size={size * 0.72} />
-      <Text style={[styles.text, { fontSize: size, letterSpacing: size * 0.13, marginLeft: size * 0.16 }]}>
+      <Emblem size={size * 0.86} />
+      <Text style={[styles.text, { fontSize: size, letterSpacing: size * 0.13, marginLeft: size * 0.12 }]}>
         R
       </Text>
     </View>
@@ -18,7 +22,7 @@ export function Wordmark({ size = 44 }: { size?: number }) {
 }
 
 const styles = StyleSheet.create({
-  // The mark is three pieces in a row — EMB, the flame, R — so right-to-left
+  // The mark is three pieces in a row — EMB, the emblem, R — so right-to-left
   // would lay it out backwards. A name in Latin script does not mirror, any
   // more than the cards do.
   row: {

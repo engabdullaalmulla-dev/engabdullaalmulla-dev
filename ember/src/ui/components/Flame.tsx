@@ -1,39 +1,34 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Image } from 'react-native';
 
+import { FLAME_GLYPH } from '../marks';
 import { colors } from '../theme';
 
 /**
- * The mark that stands in for the second E in EMBER: a teardrop of fire, built
- * out of two rotated rounded squares so it needs no image asset.
+ * Fire, wherever the game needs a little of it: the medallion on a card back,
+ * the head of the burn meter, the room screen.
+ *
+ * It is a drawn outline rather than a couple of rounded boxes, because a
+ * rounded box tapering to a point is a drop of water however it is coloured.
  */
-export function Flame({ size = 26, dim = false }: { size?: number; dim?: boolean }) {
-  const corner = size * 0.5;
+export function Flame({
+  size = 26,
+  dim = false,
+  tint,
+}: {
+  size?: number;
+  dim?: boolean;
+  /** Overrides the colour entirely — used for the marks beside names. */
+  tint?: string;
+}) {
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <View
-        style={{
-          width: size * 0.86,
-          height: size * 0.86,
-          backgroundColor: dim ? colors.line : colors.coral,
-          transform: [{ rotate: '45deg' }],
-          borderTopLeftRadius: size * 0.1,
-          borderTopRightRadius: corner,
-          borderBottomLeftRadius: corner,
-          borderBottomRightRadius: corner,
-        }}
-      />
-      <View
-        style={{
-          position: 'absolute',
-          bottom: size * 0.14,
-          width: size * 0.38,
-          height: size * 0.38,
-          borderRadius: size * 0.19,
-          backgroundColor: dim ? colors.surfaceRaised : colors.coral,
-          opacity: 0.9,
-        }}
-      />
-    </View>
+    <Image
+      source={{ uri: FLAME_GLYPH }}
+      // The silhouette is white, so every use is a tint away from any colour.
+      tintColor={tint ?? (dim ? colors.hairline : colors.coral)}
+      style={{ width: size, height: size }}
+      resizeMode="contain"
+      accessible={false}
+    />
   );
 }

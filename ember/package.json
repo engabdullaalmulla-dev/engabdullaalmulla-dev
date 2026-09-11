@@ -32,7 +32,8 @@
     "bundle:web": "node scripts/bundle-web.js",
     "textures": "node scripts/generate-textures.js",
     "sounds": "node scripts/generate-sounds.js",
-    "art": "npm run icons && npm run textures && npm run sounds"
+    "marks": "node scripts/generate-marks.js",
+    "art": "npm run marks && npm run icons && npm run textures && npm run sounds"
   },
   "private": true
 }

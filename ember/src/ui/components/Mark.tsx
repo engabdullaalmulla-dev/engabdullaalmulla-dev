@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import { parseAvatar, type Avatar, type AvatarColour } from '../../../shared/progress';
 import { colors, radius } from '../theme';
+import { Flame } from './Flame';
 
 /**
  * The mark beside a name.
@@ -60,7 +61,8 @@ export function Mark({
       ]}
     >
       {mark.shape === 'flame' ? (
-        <Flame size={Math.round(size * 0.46)} tint={tint} />
+        // The same fire the rest of the game uses, at the size of a suit.
+        <Flame size={Math.round(size * 0.58)} tint={tint} />
       ) : (
         <Text
           allowFontScaling={false}
@@ -70,27 +72,6 @@ export function Mark({
         </Text>
       )}
     </View>
-  );
-}
-
-/**
- * No font has a flame that sits properly beside the card suits, so this one
- * is drawn: a square with one sharp corner, turned to point upwards.
- */
-function Flame({ size, tint }: { size: number; tint: string }) {
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: tint,
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: size / 2,
-        borderBottomRightRadius: size / 2,
-        borderBottomLeftRadius: size / 2,
-        transform: [{ rotate: '45deg' }],
-      }}
-    />
   );
 }
 

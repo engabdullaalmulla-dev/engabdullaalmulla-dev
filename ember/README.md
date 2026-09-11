@@ -224,6 +224,25 @@ Two details worth knowing about how it is built:
   A player online could be anyone, so an unfamiliar name takes the masculine,
   which is the ordinary fallback.
 
+## The mark
+
+A playing card with the fire knocked out of the middle of it. One shape that
+says card game and says fire, and it still reads at 32px — which the flame on
+its own did not, because a circle with a taper on top is a drop of water
+however you colour it. The flame is a real outline, drawn by hand and smoothed
+through a spline: a bowl at the bottom, a waist, a tip that hooks over, and a
+second tongue licking up beside it.
+
+In the wordmark the card stands in for the second E, so the logo works with the
+letters or without them. The fire inside it is a hole rather than a fill, so
+the mark takes its background from whatever it is set on — paper on the home
+screen, cream in the app icon — and one white silhouette tinted at the point of
+use covers every place it appears.
+
+`npm run marks` redraws it into `src/ui/marks.ts`; `npm run icons` redraws the
+app icons from the same outlines in `scripts/shapes.js`. The favicon drops the
+card and keeps only the fire, which is the part that survives being 16px.
+
 ## How it looks, and why
 
 EMBER is a card table, not a dashboard: baize with a visible weave, a light hung
