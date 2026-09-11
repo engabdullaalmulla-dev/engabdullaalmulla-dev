@@ -832,6 +832,19 @@ const AR_SUIT: Record<Suit, string> = {
   C: 'شيريا',
 };
 
+/**
+ * Emirati, not "Gulf".
+ *
+ * This is written the way it is spoken in the UAE rather than in the pan-Gulf
+ * register a translator reaches for: وايد for "very", مب for "not", عيل for
+ * "so then", منو for "who", شقد for "how much", ربع for the friends you would
+ * actually call. Where a ج turns into a ي in speech — يديد, الياية — it is
+ * written the way it sounds.
+ *
+ * The verbs still agree with whoever is doing the thing, because Arabic
+ * insists on it, and «نورة طقّت» against «راشد طقّ» is the difference between
+ * a table and a translation.
+ */
 export const ar: Strings = {
   code: 'ar',
   rtl: true,
@@ -842,172 +855,174 @@ export const ar: Strings = {
   common: {
     back: 'رجوع',
     backArrow: '→',
-    gotIt: 'حفظتها',
-    doneLooking: 'انتهيت',
-    cancel: 'إلغاء',
-    leave: 'خروج',
-    leaveTable: 'مغادرة الطاولة',
+    gotIt: 'حفظتهن',
+    doneLooking: 'خلصت',
+    cancel: 'خلاص',
+    leave: 'أطلع',
+    leaveTable: 'أطلع من الطاولة',
     you: 'أنت',
     points: 'نقطة',
     round: (n) => `الجولة ${n}`,
-    toScore: (n) => `حتى ${n}`,
+    toScore: (n) => `لين ${n}`,
     seconds: (n) => `${n} ث`,
   },
 
   home: {
-    tagline: 'احفظ. احرق. اطرق.',
+    tagline: 'احفظ. احرق. طق.',
     blurb:
-      'أربع أوراق مقلوبة، رأيت اثنتين منها مرة واحدة. اجعل مجموعك الأقل على الطاولة، وأعلنها قبل أن يسبقك أحد.',
-    playOnline: 'العب على الإنترنت',
-    onlineSignedIn: (name) => `مسجّل باسم ${name}. مباراة سريعة، أو طاولة خاصة مع أصدقائك.`,
-    onlineBlurb: 'مباراة سريعة مع لاعبين حقيقيين، أو طاولة خاصة لأصدقائك وحدهم.',
-    offlineOnly: 'هذه النسخة تلعب ضد الروبوتات فقط. الطاولات على الإنترنت تحتاج خادم EMBER — راجع ملف README.',
+      'أربع أوراق مقلوبة، وشفت ثنتين منهن بس مرة وحدة. خل مجموعك أقل واحد على الطاولة، وطق قبل لا أحد يسبقك.',
+    playOnline: 'العب أونلاين',
+    onlineSignedIn: (name) => `داخل باسم ${name}. مباراة سريعة، ولا طاولة خاصة وية ربعك.`,
+    onlineBlurb: 'مباراة سريعة وية ناس حقيقيين، ولا طاولة خاصة لربعك بس.',
+    offlineOnly:
+      'هالنسخة تلعب ضد الروبوتات بس. الطاولات الأونلاين تبي سيرفر EMBER — شوف ملف README.',
     againstBots: 'ضد الروبوتات',
     table: 'الطاولة',
     players: (n) => `${n} لاعبين`,
     opponents: 'الخصوم',
     assist: 'وضع المساعدة',
-    assistHint: 'يضع علامة على الأوراق التي سبق أن رأيتها.',
+    assistHint: 'يحط علامة على الأوراق اللي سبق وشفتها.',
     sound: 'الصوت',
-    soundHint: 'طقطقة الورق، وفرقعة الحرق، وصوت الطرق.',
-    deal: 'وزّع الأوراق',
-    howToPlay: 'كيف تلعب',
+    soundHint: 'طقطقة الورق، وفرقعة الحرق، وصوت الطقة.',
+    deal: 'وزّع الورق',
+    howToPlay: 'شلون تلعب',
     language: 'English',
   },
 
-  difficulty: { easy: 'كثير النسيان', normal: 'متمكّن', sharp: 'لا يرحم' },
+  difficulty: { easy: 'وايد ينسى', normal: 'متمكّن', sharp: 'ما يرحم' },
 
   powers: {
-    PEEK: { name: 'نظرة', hint: 'انظر إلى واحدة من أوراقك.' },
-    SPY: { name: 'تجسس', hint: 'انظر إلى واحدة من أوراق خصمك.' },
-    SWAP: { name: 'تبديل', hint: 'بدّل ورقة من عندك بأخرى من عنده، دون أن يرى أحد شيئًا.' },
-    LOOK_SWAP: { name: 'انظر وبدّل', hint: 'انظر إلى ورقة خصمك، ثم خذها إن أعجبتك.' },
-    EMBER: { name: 'جمرة', hint: 'أجبر خصمًا على سحب ورقة من الكومة.' },
+    PEEK: { name: 'نظرة', hint: 'شوف وحدة من أوراقك.' },
+    SPY: { name: 'تجسس', hint: 'شوف وحدة من أوراق خصمك.' },
+    SWAP: { name: 'تبديل', hint: 'بدّل ورقة من عندك بوحدة من عنده، وما أحد يشوف شي.' },
+    LOOK_SWAP: { name: 'شوف وبدّل', hint: 'شوف ورقة خصمك، وإذا عيبتك خذها.' },
+    EMBER: { name: 'جمرة', hint: 'خل خصمك يسحب ورقة من الكومة غصب.' },
   },
 
   table: {
-    lookAtTwo: 'انظر إلى ورقتين من عندك',
-    oneMoreLook: 'نظرة أخيرة',
-    rememberThem: 'احفظهما جيدًا',
-    waitingForTable: 'في انتظار بقية الطاولة',
-    everyoneSaw: 'رآها الجميع',
+    lookAtTwo: 'شوف ثنتين من عندك',
+    oneMoreLook: 'باقي وحدة',
+    rememberThem: 'احفظهن زين',
+    waitingForTable: 'ننتظر باقي الطاولة',
+    everyoneSaw: 'الكل شافها',
     burnRank: (rank) => `تحرق ${rank}؟`,
     burnPlain: 'تحرق؟',
-    burnHint: 'من أوراقك أو أوراقه — والورقة الخطأ تكلّفك ورقة',
+    burnHint: 'من أوراقك ولا من أوراقه — والغلط يكلّفك ورقة',
     yourMove: 'دورك',
-    lastTurn: 'الدور الأخير',
+    lastTurn: 'آخر دور',
     thinking: (name) => `${name}…`,
     usingPower: (name, power) => `${name} — ${power}`,
     drew: (card) => `سحبت ${card}`,
-    swapItIn: 'ضعها مكان ورقة',
-    giveAwayWhich: 'أي ورقة تعطي؟',
-    andTakeWhich: 'وأي ورقة تأخذ؟',
-    lookAtWhose: 'ورقة من تريد أن ترى؟',
-    takeIt: 'تأخذها؟',
-    whoTakesCard: 'من يسحب ورقة؟',
-    lookAtOneOfYours: 'انظر إلى واحدة من عندك',
-    lookAtOneOfTheirs: 'انظر إلى واحدة من عنده',
-    cardsOnTable: 'اكشفوا الأوراق',
-    youWillNotSeeAgain: 'لن تراهما مرة أخرى',
+    swapItIn: 'حطها مكان ورقة',
+    giveAwayWhich: 'أي ورقة بتعطي؟',
+    andTakeWhich: 'وأي وحدة بتاخذ؟',
+    lookAtWhose: 'ورقة منو تبي تشوف؟',
+    takeIt: 'تاخذها؟',
+    whoTakesCard: 'منو يسحب ورقة؟',
+    lookAtOneOfYours: 'شوف وحدة من عندك',
+    lookAtOneOfTheirs: 'شوف وحدة من عنده',
+    cardsOnTable: 'اكشفوا الورق',
+    youWillNotSeeAgain: 'ما بتشوفهن مرة ثانية',
     inHand: 'في يدك',
     remember: 'احفظها',
     pile: 'المرمى',
-    knock: 'اطرق',
-    alreadyKnocked: 'طُرقت بالفعل',
-    knocked: 'طَرَق',
+    knock: 'طق',
+    alreadyKnocked: 'أحد طق قبلك',
+    knocked: 'طق',
     throwIt: 'ارمها',
-    justThrow: 'ارمها',
-    leaveIt: 'اتركها',
-    burnWindow: 'مهلة الحرق',
-    away: 'غائب',
+    justThrow: 'ارمها بس',
+    leaveIt: 'خلّها',
+    burnWindow: 'وقت الحرق',
+    away: 'غايب',
     faceDownCard: 'ورقة مقلوبة',
-    emptySpace: 'مكان فارغ، احترقت الورقة',
+    emptySpace: 'مكان فاضي، الورقة انحرقت',
     cardWorth: (rank, suit, points) => `${rank} ${suit}، ${points} نقطة`,
-    stockCount: (n) => `الكومة، بقيت ${n} ورقة`,
+    stockCount: (n) => `الكومة، باقي ${n} ورقة`,
     discardPile: 'كومة المرمى',
-    leaveGame: 'مغادرة اللعبة',
+    leaveGame: 'أطلع من اللعبة',
   },
 
   overlay: {
-    matchOver: 'انتهت المباراة',
+    matchOver: 'خلصت المباراة',
     roundNumber: (n) => `الجولة ${n}`,
     youWin: 'فزت بالمباراة.',
     someoneWins: (name) => `${name} فاز بالمباراة.`,
-    ashedOut: (name) => `${name} أحرق أوراقه كلها.`,
-    knockStuck: (name) => `${name} طَرَق ونجح.`,
-    knockPaid: (name) => `${name} طَرَق ودفع الثمن.`,
-    takesRound: (name) => `${name} يكسب الجولة.`,
+    ashedOut: (name) => `${name} حرق أوراقه كلها.`,
+    knockStuck: (name) => `${name} طق ونجح.`,
+    knockPaid: (name) => `${name} طق ودفع الثمن.`,
+    takesRound: (name) => `${name} ياخذ الجولة.`,
     player: 'اللاعب',
-    pilePoints: 'الأوراق',
+    pilePoints: 'الورق',
     roundPoints: 'الجولة',
     total: 'المجموع',
-    knockedTag: 'طَرَق',
-    lowestWins: 'الأقل مجموعًا يفوز.',
-    firstTo: (n) => `أول من يبلغ ${n} ينهي المباراة — والأقل نقاطًا يفوز بها.`,
-    nextRound: 'الجولة التالية',
-    nextRoundIn: (n) => `الجولة التالية بعد ${n} ثوانٍ.`,
-    playAgain: 'العب مرة أخرى',
+    knockedTag: 'طق',
+    lowestWins: 'اللي مجموعه أقل يفوز.',
+    firstTo: (n) => `أول واحد يوصل ${n} ينهي المباراة — واللي نقاطه أقل يفوز فيها.`,
+    nextRound: 'الجولة الياية',
+    nextRoundIn: (n) => `الجولة الياية بعد ${n} ثواني.`,
+    playAgain: 'العب مرة ثانية',
     home: 'الرئيسية',
   },
 
   auth: {
-    signInTitle: 'سجّل الدخول للعب على الإنترنت.',
-    registerTitle: 'اختر اسمًا وكلمة مرور.',
+    signInTitle: 'سجّل دخولك عشان تلعب أونلاين.',
+    registerTitle: 'اختر لك اسم وكلمة سر.',
     name: 'الاسم',
-    password: 'كلمة المرور',
+    password: 'كلمة السر',
     namePlaceholder: 'عبدالله',
-    passwordPlaceholder: '٨ أحرف على الأقل',
-    signIn: 'تسجيل الدخول',
-    createAccount: 'إنشاء حساب',
+    passwordPlaceholder: '8 أحرف على الأقل',
+    signIn: 'دخول',
+    createAccount: 'سوّي حساب',
     oneMoment: 'لحظة…',
-    switchToRegister: 'ليس لديك حساب؟ أنشئ واحدًا.',
-    switchToSignIn: 'لديك حساب؟ سجّل الدخول.',
+    switchToRegister: 'ما عندك حساب؟ سوّ لك واحد.',
+    switchToSignIn: 'عندك حساب؟ ادخل.',
     privacy:
-      'تحتفظ EMBER باسمك وكلمة مرورك فقط — بلا بريد إلكتروني، ولا جهات اتصال، ولا تتبّع. ولا توجد طريقة لاستعادة كلمة مرور منسية، فاختر واحدة تتذكرها.',
+      'EMBER ما تبي منك غير اسم وكلمة سر — لا إيميل، ولا جهات اتصال، ولا تتبّع. وما في طريقة ترجّع كلمة سر نسيتها، عيل اختر وحدة تحفظها.',
   },
 
   lobby: {
     status: {
-      idle: 'غير متصل',
-      connecting: 'جارٍ الاتصال…',
+      idle: 'مب متصل',
+      connecting: 'يتصل…',
       online: 'متصل',
-      reconnecting: 'إعادة الاتصال…',
-      failed: 'تعذّر الوصول إلى الخادم',
+      reconnecting: 'يحاول يتصل…',
+      failed: 'ما قدر يوصل للسيرفر',
     },
     playingAs: (name) => `تلعب باسم ${name}.`,
-    online: 'على الإنترنت.',
-    playAnyone: 'العب مع أي أحد',
-    playAnyoneBlurb: 'انضم إلى أول طاولة تحتاج لاعبين. وإن لم يحضر أحد، تملأ الروبوتات المقاعد الفارغة.',
+    online: 'أونلاين.',
+    playAnyone: 'العب وية أي أحد',
+    playAnyoneBlurb:
+      'ادخل أول طاولة ناقصها لاعبين. وإذا ما حضر أحد، الروبوتات تملي المقاعد الفاضية.',
     quickMatch: 'مباراة سريعة',
-    playFriends: 'العب مع أصدقائك',
-    playFriendsBlurb: 'افتح طاولة خاصة وشارك الرمز. لا يجلس عليها أحد لا يملكه.',
+    playFriends: 'العب وية ربعك',
+    playFriendsBlurb: 'افتح طاولة خاصة وعطهم الرمز. ما يقعد فيها أحد ما عنده الرمز.',
     createPrivate: 'افتح طاولة خاصة',
     code: 'الرمز',
-    join: 'انضم',
+    join: 'ادخل',
     roomCode: 'رمز الطاولة',
     yourRecord: 'سجلّك',
-    signOut: 'تسجيل الخروج',
-    lookingForPlayers: 'نبحث عن لاعبين…',
-    firstAtTable: 'أنت أول من جلس على الطاولة.',
-    waitingCount: (n) => `${n} في الانتظار.`,
-    botsWillFill: 'إن لم يحضر أحد آخر، ستملأ الروبوتات المقاعد الفارغة.',
+    signOut: 'طلّعني',
+    lookingForPlayers: 'ندوّر لاعبين…',
+    firstAtTable: 'أنت أول واحد قعد على الطاولة.',
+    waitingCount: (n) => `${n} ينتظرون.`,
+    botsWillFill: 'إذا ما حضر أحد ثاني، الروبوتات بتملي المقاعد الفاضية.',
   },
 
   room: {
     roomCode: 'رمز الطاولة',
-    tapToSend: 'اضغط لإرساله إلى أحدهم.',
+    tapToSend: 'دوس عليه وأرسله لأحد.',
     publicTable: 'طاولة عامة',
-    publicBlurb: 'يستطيع أي باحث عن مباراة أن يجلس هنا.',
+    publicBlurb: 'أي أحد يدوّر مباراة يقدر يقعد هني.',
     atTable: (seated, max) => `على الطاولة · ${seated}/${max}`,
     host: 'المضيف',
-    away: 'غائب',
-    emptySeat: 'مقعد فارغ',
-    addBot: 'أضف روبوتًا',
+    away: 'غايب',
+    emptySeat: 'مقعد فاضي',
+    addBot: 'ضيف روبوت',
     deal: 'وزّع',
-    needThree: 'نحتاج ثلاثة لاعبين',
-    waitingForHost: 'في انتظار المضيف ليوزّع…',
-    remove: (name) => `أزل ${name}`,
-    invite: (code) => `اجلس على طاولتي في EMBER. رمز الطاولة: ${code}`,
+    needThree: 'نبي ثلاثة لاعبين',
+    waitingForHost: 'ننتظر المضيف يوزّع…',
+    remove: (name) => `شيل ${name}`,
+    invite: (code) => `اقعد على طاولتي في EMBER. رمز الطاولة: ${code}`,
     youSuffix: ' (أنت)',
   },
 
@@ -1020,45 +1035,45 @@ export const ar: Strings = {
     kind: 'بطيبة',
     cheeky: 'بمزح',
     muted: 'التفاعلات مقفلة.',
-    mute: 'أقفلها',
-    unmute: 'افتحها',
+    mute: 'قفّلها',
+    unmute: 'فتّحها',
     aimHint: 'اختر مقعد فوق عشان ترميها على أحد.',
-    tooFast: 'عطِ الطاولة لحظة.',
+    tooFast: 'عط الطاولة شوي.',
     phrase: {
-      hello: 'هلا والله!',
-      nice: 'يا سلام عليك',
-      wellPlayed: 'لعب صح',
-      goodGame: 'لعبة حلوة',
-      lucky: 'حظك حلو',
-      close: 'قرّبت',
-      oops: 'أوبس',
-      thanks: 'مشكور والله',
-      yourTurn: 'متى بتلعب؟',
-      sleeping: 'نمت ولا شفيك؟',
-      teaTime: 'بسوّي شاي لين تخلّص',
-      memory: 'أنا حافظ كل شي',
-      forgot: 'نسيت أوراقي أنا',
-      didntSee: 'ما شفت شي',
-      notThatLucky: 'ما أحد حظه جذي',
-      watchThis: 'شوف هالحركة',
+      hello: 'مرحبا الساع!',
+      nice: 'عفية عليك',
+      wellPlayed: 'لعب مضبوط',
+      goodGame: 'لعبة وايد حلوة',
+      lucky: 'حظك زين',
+      close: 'قرّبت وايد',
+      oops: 'يا ساتر',
+      thanks: 'يزاك الله خير',
+      yourTurn: 'عيل متى بتلعب؟',
+      sleeping: 'نمت ولا شو؟',
+      teaTime: 'بسوّي چاي لين تخلّص',
+      memory: 'ذاكرتي وايد زينة',
+      forgot: 'أنا ناسي ورقي',
+      didntSee: 'ما شفت شي والله',
+      notThatLucky: 'ما أحد حظه چذي',
+      watchThis: 'شوف هالسالفة',
     },
   },
 
   rank: {
     title: 'الترتيب',
-    season: 'هذا الموسم',
+    season: 'هالموسم',
     allTime: 'كل الأوقات',
-    seasonEnds: (days) => `الموسم ينتهي بعد ${days} يوم.`,
-    seasonEndsToday: 'الموسم ينتهي اليوم.',
+    seasonEnds: (days) => `الموسم يخلص بعد ${days} يوم.`,
+    seasonEndsToday: 'الموسم يخلص اليوم.',
     points: (points) => `${points} نقطة`,
     toNext: (points, tier) => `${points} نقطة وتوصل ${tier}`,
-    atTheTop: 'أعلى السلم.',
+    atTheTop: 'أعلى السلّم.',
     unranked: 'بدون ترتيب',
-    unrankedHint: 'خلّص مباراة ضد لاعبين حقيقيين عشان تدخل اللوحة.',
+    unrankedHint: 'خلّص مباراة ضد ناس حقيقيين عشان تدخل اللوحة.',
     place: (place) => `#${place}`,
     you: 'أنت',
-    empty: 'ما أحد سجّل هذا الموسم. كن أول واحد.',
-    emptyAllTime: 'ما أحد خلّص مباريات كافية بعد.',
+    empty: 'ما أحد سجّل هالموسم. كن أول واحد.',
+    emptyAllTime: 'ما أحد خلّص مباريات كافية لين الحين.',
     columnPlayer: 'اللاعب',
     columnPoints: 'النقاط',
     columnWinRate: 'نسبة الفوز',
@@ -1073,7 +1088,7 @@ export const ar: Strings = {
     tierBlurb: {
       ash: 'الكل يبدأ بارد.',
       spark: 'شبّت.',
-      ember: 'تحترق بثبات.',
+      ember: 'تحترق على مهلها.',
       blaze: 'صعب أحد يقعد قبالك.',
       inferno: 'الطاولة تفضى لين تقعد.',
     },
@@ -1085,29 +1100,29 @@ export const ar: Strings = {
     winRate: 'نسبة الفوز',
     rounds: 'الجولات',
     roundsWon: 'جولات رابحة',
-    bestPile: 'أفضل مجموع',
-    knocks: 'الطرقات',
+    bestPile: 'أحسن مجموع',
+    knocks: 'الطقات',
     knocksValue: (stuck, total, rate) => `${stuck} من ${total} نجحت${rate ? ` · ${rate}٪` : ''}`,
-    cardsBurned: 'أوراق محروقة',
-    misfires: 'محاولات خاطئة',
+    cardsBurned: 'ورق محروق',
+    misfires: 'غلطات حرق',
     ashOuts: 'حرق كامل',
-    pointsTaken: 'النقاط المحصّلة',
+    pointsTaken: 'النقاط اللي عليك',
     leaderboard: 'لوحة الصدارة',
     yourMark: 'علامتك',
-    markHint: 'اللي يشوفه الكل جنب اسمك.',
+    markHint: 'اللي يشوفه الكل يم اسمك.',
     badges: 'الأوسمة',
     badgesEarned: (earned, total) => `${earned} من ${total}`,
-    locked: 'لسه',
+    locked: 'لين الحين لا',
     seeRankings: 'شوف الترتيب',
     title: {
-      newcomer: 'جديد',
+      newcomer: 'يديد',
       arsonist: 'الحرّاق',
-      coldHands: 'يد باردة',
+      coldHands: 'يده باردة',
       lightFingers: 'خفيف اليد',
       tableRunner: 'سيد الطاولة',
       sparkThrower: 'رامي الشرر',
       vanisher: 'المختفي',
-      steadyHand: 'يد ثابتة',
+      steadyHand: 'يده ثابتة',
     },
     badge: {
       firstMatch: 'قعدت',
@@ -1115,23 +1130,23 @@ export const ar: Strings = {
       fiveWins: 'خمس مرات',
       arsonist: 'حرّاق',
       pyromaniac: 'مهووس حريق',
-      coldKnocks: 'طرقة باردة',
+      coldKnocks: 'طقة باردة',
       ashOut: 'صار رماد',
-      emptyHanded: 'إيدك فاضية',
+      emptyHanded: 'يدك فاضية',
       century: 'مية جولة',
       lightFingers: 'خفيف اليد',
     },
     badgeHint: {
       firstMatch: 'خلّص مباراة.',
-      regular: 'خلّص ٢٥ مباراة.',
+      regular: 'خلّص 25 مباراة.',
       fiveWins: 'افز بخمس مباريات.',
-      arsonist: 'احرق ١٠ أوراق.',
-      pyromaniac: 'احرق ١٠٠ ورقة.',
-      coldKnocks: 'اطرق وتثبت طرقتك ١٠ مرات.',
+      arsonist: 'احرق 10 أوراق.',
+      pyromaniac: 'احرق 100 ورقة.',
+      coldKnocks: 'طق وتثبت طقتك 10 مرات.',
       ashOut: 'احرق آخر ورقة عندك.',
       emptyHanded: 'وصّل جولة للكشف وما عندك ولا ورقة.',
-      century: 'العب ١٠٠ جولة.',
-      lightFingers: 'خلّص جولة بـ ٣ نقاط أو أقل.',
+      century: 'العب 100 جولة.',
+      lightFingers: 'خلّص جولة بـ 3 نقاط ولا أقل.',
     },
     shape: {
       spade: 'بستوني',
@@ -1149,47 +1164,47 @@ export const ar: Strings = {
       plum: 'برقوقي',
       teal: 'فيروزي',
     },
-    noRecord: 'لا سجلّ بعد. العب مباراة على الإنترنت.',
-    noLeaders: 'لم يُكمل أحد ما يكفي من المباريات بعد.',
+    noRecord: 'ما في سجل لين الحين. العب مباراة أونلاين.',
+    noLeaders: 'ما أحد خلّص مباريات كافية لين الحين.',
     none: '—',
   },
 
   rules: {
-    title: 'كيف تلعب',
+    title: 'شلون تلعب',
     thePoint: 'الفكرة',
     pointBody: [
-      'مجموعتان من الورق، ١٠٨ أوراق. يأخذ كل لاعب أربعًا مقلوبة. الأوراق أمامك تساوي نقاطًا، والنقاط سيئة — تريد أقل مجموع على الطاولة.',
-      'قبل أن تبدأ اللعب تنظر إلى ورقتين من أوراقك. هذه آخر نظرة صادقة تحصل عليها، وكل ما بعدها ذاكرة.',
+      'شدّتين ورق، 108 ورقة. كل واحد ياخذ أربع مقلوبات. الورق اللي قدامك يسوى نقاط، والنقاط مب زينة — تبي أقل مجموع على الطاولة.',
+      'قبل ما تبدأ اللعب تشوف ثنتين من أوراقك. هذي آخر نظرة صادقة تحصّلها، وكل اللي بعدها ذاكرة.',
     ],
     yourTurn: 'دورك',
     turnSteps: [
-      'اسحب من أعلى الكومة، أو خذ الورقة المكشوفة من المرمى. الورقة التي تأخذها من المرمى يجب أن تدخل أوراقك — لا تراجع.',
-      'بدّلها بورقة من أوراقك (فتذهب القديمة مكشوفة إلى المرمى)، أو ارمِ الورقة التي سحبتها.',
-      'إن رميت ٧ أو أعلى جاز لك استعمال قوتها بدل الاحتفاظ بها. هذه هي المقايضة: نقاط الآن، أو معلومة الآن.',
+      'اسحب من فوق الكومة، ولا خذ الورقة المكشوفة من المرمى. اللي تاخذه من المرمى لازم يدخل أوراقك — ما في تراجع.',
+      'بدّلها بورقة من عندك (والقديمة تروح مكشوفة على المرمى)، ولا ارمِ الورقة اللي سحبتها.',
+      'وإذا رميت 7 ولا أعلى، تقدر تستخدم قوتها بدال ما تحتفظ فيها. هذي هي المقايضة: نقاط الحين، ولا معلومة الحين.',
     ],
     burning: 'الحرق',
     burningBody: [
-      'ما إن تسقط ورقة مكشوفة حتى يجوز لأي لاعب أن يحرق ورقة من الرتبة نفسها — من أوراقه هو، أو من أوراق غيره.',
-      'ورقتك أنت تخرج من اللعب نهائيًا: ورقة أقل، ولا شيء يحل مكانها.',
-      'أما ورقة خصمك فتُستبدل بورقة من الكومة مقلوبة. يبقى عدد أوراقه كما هو، لكنه يفقد الورقة التي كان يعرفها، ولا أحد على الطاولة يعرف ما صار في يده. هذا ما تساويه معرفتك بورقة خصمك.',
-      'وإن أخطأت أخذت أنت ورقة العقوبة، أيًّا كان صاحب الورقة، وتُكشف الورقة للطاولة كلها. تأكّد قبل أن تضغط.',
+      'أول ما تنزل ورقة مكشوفة، أي واحد يقدر يحرق ورقة من نفس الرتبة — من أوراقه هو، ولا من أوراق غيره.',
+      'ورقتك أنت تطلع من اللعب نهائي: ورقة أقل، وما في شي يحل مكانها.',
+      'أما ورقة خصمك فتتبدّل بورقة من الكومة مقلوبة. عدد أوراقه ما يتغيّر، بس يخسر الورقة اللي كان يعرفها، وما أحد على الطاولة يدري شو صار في يده. هذا اللي تسواه معرفتك بورقة خصمك.',
+      'وإذا غلطت، تاخذ أنت ورقة العقوبة، مهما كان صاحب الورقة، وتنكشف الورقة للطاولة كلها. تأكّد قبل لا تدوس.',
     ],
-    knocking: 'الطرق',
+    knocking: 'الطق',
     knockingBody: [
-      'حين ترى أن أوراقك هي الأقل، اطرق في بداية دورك. يأخذ كل واحد دورًا أخيرًا، ثم تُكشف كل الأوراق.',
-      'إن كنت الأقل على الطاولة فالطرق لا يكلفك شيئًا. وإن سبقك أحد، أو حتى تعادل معك، كلّفك مجموعك زائد عشرة.',
+      'لين تشوف أوراقك هي الأقل، طق في بداية دورك. كل واحد ياخذ دور أخير، وبعدين ينكشف الورق كله.',
+      'إذا كنت الأقل على الطاولة، الطقة ما تكلّفك شي. وإذا سبقك أحد، ولا حتى تعادل وياك، كلّفك مجموعك زايد عشرة.',
     ],
-    values: 'كم تساوي الأوراق',
+    values: 'شقد تسوى الأوراق',
     valueNotes: {
-      bestCard: 'أفضل ورقة في المجموعة',
+      bestCard: 'أحسن ورقة في الشدّة',
       getRidOfIt: 'تخلّص منها',
       faceValue: 'حسب رقمها',
     },
     powersTitle: 'القوى',
-    redKingNote: 'الشايب الأحمر لا يساوي شيئًا أصلًا، فلا قوة له تُنفق — احتفظ به.',
+    redKingNote: 'الشايب الأحمر ما يسوى شي أصلاً، عيل ما له قوة تنصرف — خلّه عندك.',
     ending: 'النهاية',
     endingBody:
-      'تتراكم نقاط الجولات. وما إن يبلغ أحدهم ١٠٠ حتى تنتهي المباراة، ويفوز صاحب أقل النقاط. وإن أحرقت أوراقك كلها انتهت الجولة في الحال ولم تسجّل عليك نقطة.',
+      'نقاط الجولات تتجمّع. وأول ما يوصل أحد 100 تخلص المباراة، ويفوز اللي نقاطه أقل. وإذا حرقت أوراقك كلها، تخلص الجولة على طول وما تتسجّل عليك ولا نقطة.',
   },
 
   /**
@@ -1201,7 +1216,7 @@ export const ar: Strings = {
     const said = (forms: { you: string; he: string; she: string }) => person(you, who, forms);
     const subject = you ? '' : `${who} `;
     const onThem = toYou ? 'عليك' : `على ${entry.other ?? ''}`;
-    const withThem = toYou ? 'معك' : `مع ${entry.other ?? ''}`;
+    const withThem = toYou ? 'وياك' : `وية ${entry.other ?? ''}`;
     const fromThem = toYou ? 'منك' : `من ${entry.other ?? ''}`;
     const theirCards = toYou ? 'أوراقك' : `أوراق ${entry.other ?? ''}`;
     const atThem = toYou ? 'عندك' : `عند ${entry.other ?? ''}`;
@@ -1210,72 +1225,73 @@ export const ar: Strings = {
 
     switch (entry.key) {
       case 'round_dealt':
-        return `الجولة ${count}. احفظ ورقتين من أوراقك.`;
+        return `الجولة ${count}. احفظ ثنتين من أوراقك.`;
       case 'round_begins':
-        return `بدأت الجولة ${count}.`;
+        return `بدت الجولة ${count}.`;
       case 'reshuffled':
-        return 'نفدت الكومة — أُعيد خلط المرمى فيها.';
+        return 'خلصت الكومة — رجّعنا المرمى وخلطناه.';
       case 'knocked':
-        return `${subject}${said({ you: 'طرقتَ', he: 'طَرَق', she: 'طَرَقت' })}! دور أخير لكل واحد.`;
+        return `${subject}${said({ you: 'طقيت', he: 'طقّ', she: 'طقّت' })}! دور أخير لكل واحد.`;
       case 'knock_stuck':
-        return `${subject}${said({ you: 'طرقتَ ونجوتَ', he: 'طَرَق ونجا', she: 'طَرَقت ونجت' })} بها — بلا نقاط.`;
+        return `${subject}${said({ you: 'طقيت ونجيت', he: 'طقّ ونجا', she: 'طقّت ونجت' })} — بلا نقاط.`;
       case 'knock_missed':
-        return `${subject}${said({ you: 'طرقتَ وأخطأتَ', he: 'طَرَق وأخطأ', she: 'طَرَقت وأخطأت' })}. زائد ${count}.`;
+        return `${subject}${said({ you: 'طقيت وغلطت', he: 'طقّ وغلط', she: 'طقّت وغلطت' })}. زايد ${count}.`;
       case 'took_discard':
-        return `${subject}${said({ you: 'أخذتَ', he: 'أخذ', she: 'أخذت' })} ${which} من المرمى.`;
+        return `${subject}${said({ you: 'خذيت', he: 'خذ', she: 'خذت' })} ${which} من المرمى.`;
       case 'swapped_threw':
-        return `${subject}${said({ you: 'بدّلتَ', he: 'بدّل', she: 'بدّلت' })} ورقة و${said({ you: 'رميتَ', he: 'رمى', she: 'رمت' })} ${which}.`;
+        return `${subject}${said({ you: 'بدّلت', he: 'بدّل', she: 'بدّلت' })} ورقة و${said({ you: 'رميت', he: 'رمى', she: 'رمت' })} ${which}.`;
       case 'threw':
-        return `${subject}${said({ you: 'رميتَ', he: 'رمى', she: 'رمت' })} ${which}.`;
+        return `${subject}${said({ you: 'رميت', he: 'رمى', she: 'رمت' })} ${which}.`;
       case 'threw_power':
-        return `${subject}${said({ you: 'رميتَ', he: 'رمى', she: 'رمت' })} ${which} — ${entry.power ? power(entry.power) : ''}.`;
+        return `${subject}${said({ you: 'رميت', he: 'رمى', she: 'رمت' })} ${which} — ${entry.power ? power(entry.power) : ''}.`;
       case 'blind_swap':
-        return `${subject}${said({ you: 'بدّلتَ', he: 'بدّل', she: 'بدّلت' })} ورقة ${withThem} دون أن يرى أحد شيئًا.`;
+        return `${subject}${said({ you: 'بدّلت', he: 'بدّل', she: 'بدّلت' })} ورقة ${withThem} وما أحد شاف شي.`;
       case 'look_swap_took':
-        return `${subject}${said({ you: 'نظرتَ فأعجبتك، فأخذتها', he: 'نظر فأعجبته، فأخذها', she: 'نظرت فأعجبتها، فأخذتها' })} ${fromThem}.`;
+        return `${subject}${said({ you: 'شفتها وعيبتك وخذيتها', he: 'شافها وعيبته وخذها', she: 'شافتها وعيبتها وخذتها' })} ${fromThem}.`;
       case 'look_swap_left':
-        return `${subject}${said({ you: 'نظرتَ وتركتها', he: 'نظر وتركها', she: 'نظرت وتركتها' })} مكانها.`;
+        return `${subject}${said({ you: 'شفتها وخليتها', he: 'شافها وخلاها', she: 'شافتها وخلتها' })} مكانها.`;
       case 'looked':
-        return `${subject}${said({ you: 'نظرتَ', he: 'نظر', she: 'نظرت' })} إلى ورقة.`;
+        return `${subject}${said({ you: 'شفت', he: 'شاف', she: 'شافت' })} ورقة.`;
       case 'ember':
-        return `${subject}${said({ you: 'فرضتَ', he: 'فرض', she: 'فرضت' })} ورقة ${onThem}. جمرة!`;
+        return `${subject}${said({ you: 'فرضت', he: 'فرض', she: 'فرضت' })} ورقة ${onThem}. جمرة!`;
       case 'burned':
-        return `${subject}${said({ you: 'أحرقتَ', he: 'أحرق', she: 'أحرقت' })} ${which}. ورقة أقل.`;
+        return `${subject}${said({ you: 'حرقت', he: 'حرق', she: 'حرقت' })} ${which}. ورقة أقل.`;
       case 'burned_theirs':
-        return `${subject}${said({ you: 'أحرقتَ', he: 'أحرق', she: 'أحرقت' })} ${which} من ${theirCards}.`;
+        return `${subject}${said({ you: 'حرقت', he: 'حرق', she: 'حرقت' })} ${which} من ${theirCards}.`;
       case 'misfire':
-        return `${subject}${said({ you: 'أخطأتَ', he: 'أخطأ', she: 'أخطأت' })} في ${which} — ورقة عقوبة.`;
+        return `${subject}${said({ you: 'غلطت', he: 'غلط', she: 'غلطت' })} في ${which} — ورقة عقوبة.`;
       case 'misfire_theirs':
-        return `${subject}${said({ you: 'أخطأتَ', he: 'أخطأ', she: 'أخطأت' })} في ${which} ${atThem} — ورقة عقوبة.`;
+        return `${subject}${said({ you: 'غلطت', he: 'غلط', she: 'غلطت' })} في ${which} ${atThem} — ورقة عقوبة.`;
       case 'ash_out':
-        return `${subject}${said({ you: 'أحرقتَ أوراقك', he: 'أحرق أوراقه', she: 'أحرقت أوراقها' })} كلها. لم يبق شيء!`;
+        return `${subject}${said({ you: 'حرقت أوراقك', he: 'حرق أوراقه', she: 'حرقت أوراقها' })} كلها. ما بقى شي!`;
       default:
         return '';
     }
   },
 
   errors: {
-    offline: 'تعذّر الوصول إلى الخادم. تحقّق من اتصالك.',
-    bad_name: 'الاسم من ٣ إلى ١٦ حرفًا: حروف وأرقام ومسافات و . _ -',
-    weak_password: 'كلمة المرور ٨ أحرف على الأقل.',
-    long_password: 'كلمة المرور طويلة أكثر من اللازم.',
-    name_taken: 'هذا الاسم مستخدم بالفعل.',
-    bad_credentials: 'الاسم أو كلمة المرور غير صحيحة.',
-    rate_limited: 'محاولات كثيرة. انتظر قليلًا.',
-    too_large: 'الطلب كبير أكثر من اللازم.',
-    bad_json: 'أرسل التطبيق شيئًا لم تفهمه الطاولة.',
-    bad_message: 'أرسل التطبيق شيئًا لم تفهمه الطاولة.',
-    unauthorised: 'عليك تسجيل الدخول من جديد.',
-    version_mismatch: 'هذه النسخة قديمة. حدّثها لتكمل اللعب على الإنترنت.',
-    no_such_room: 'لا توجد طاولة بهذا الرمز.',
-    room_full: 'الطاولة ممتلئة.',
-    room_in_play: 'بدأت هذه المباراة بالفعل.',
-    not_host: 'المضيف وحده يستطيع ذلك.',
-    not_in_room: 'لست على طاولة.',
-    need_players: 'تحتاج ثلاثة لاعبين على الأقل.',
-    not_your_move: 'ليس دورك.',
-    server_error: 'حدث خطأ عندنا.',
-    session_expired: 'انتهت جلستك. سجّل الدخول من جديد.',
+    offline: 'ما قدرنا نوصل للسيرفر. شيّك على النت.',
+    bad_name: 'الاسم من 3 لين 16 حرف: حروف وأرقام ومسافات و . _ -',
+    weak_password: 'كلمة السر 8 أحرف على الأقل.',
+    long_password: 'كلمة السر طويلة وايد.',
+    name_taken: 'هالاسم محجوز.',
+    bad_credentials: 'الاسم ولا كلمة السر غلط.',
+    rate_limited: 'محاولات وايد. انتظر شوي.',
+    too_large: 'الطلب كبير وايد.',
+    bad_json: 'التطبيق أرسل شي ما فهمته الطاولة.',
+    bad_message: 'التطبيق أرسل شي ما فهمته الطاولة.',
+    unauthorised: 'لازم تسجّل دخولك من يديد.',
+    version_mismatch: 'هالنسخة قديمة. حدّثها عشان تكمّل أونلاين.',
+    no_such_room: 'ما في طاولة بهالرمز.',
+    room_full: 'الطاولة مليانة.',
+    room_in_play: 'هالمباراة بدت من قبل.',
+    not_host: 'المضيف بس يقدر يسوي جي.',
+    not_in_room: 'أنت مب على طاولة.',
+    need_players: 'تبي ثلاثة لاعبين على الأقل.',
+    not_your_move: 'مب دورك.',
+    too_chatty: 'عط الطاولة شوي.',
+    server_error: 'صار خطأ عندنا.',
+    session_expired: 'خلصت جلستك. سجّل دخولك من يديد.',
   },
 
   cards: {
@@ -1291,10 +1307,10 @@ export const ar: Strings = {
     },
     spoken: (rank) => {
       if (rank === 'JOKER') return 'جوكر';
-      if (rank === 'A') return 'آسًا';
-      if (rank === 'J') return 'ولدًا';
-      if (rank === 'Q') return 'بنتًا';
-      if (rank === 'K') return 'شايبًا';
+      if (rank === 'A') return 'آس';
+      if (rank === 'J') return 'ولد';
+      if (rank === 'Q') return 'بنت';
+      if (rank === 'K') return 'شايب';
       return AR_RANK[rank];
     },
   },

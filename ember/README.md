@@ -172,12 +172,25 @@ stick and you have *Cold Hands*.
 And ten **badges**, each a count against a target, so a locked one still shows
 how close it is.
 
-## Arabic
+## Arabic — Emirati, not "Gulf"
 
 The whole app is in Arabic as well as English — the table, the rules, sign-in,
 the lobby, the scoring sheet, and every error the server can send. It opens in
 whichever language the device is set to, and the toggle on the home screen
 overrides that and is remembered.
+
+The dialect is **Emirati**, written the way it is spoken in the UAE rather than
+in the pan-Gulf register a translator reaches for. That means وايد for "very",
+مب for "not", عيل for "so then", منو for "who", شقد for "how much", ربع for the
+friends you would actually call, لين for "until", وية for "with", and هني for
+"here". Where a ج turns into a ي in speech it is written the way it sounds —
+يديد, الجولة الياية — and where a ك turns into a چ, that too: چاي, چذي.
+
+The words on the buttons follow: knocking is **طق** rather than the dictionary's
+اطرق, the tagline is «احفظ. احرق. طق.», and "how to play" is «شلون تلعب». The
+rules screen asks «شقد تسوى الأوراق» and the sign-in screen says «سوّ لك واحد»
+rather than «أنشئ حسابًا». Nothing in the Arabic is a translation of the English
+sentence next to it; both were written for the thing they describe.
 
 Arabic lays the app out right to left, which is a layout change rather than a
 mirror image: rows, alignment and the back arrow all turn round, while the
@@ -186,14 +199,17 @@ language. Numbers are written in Western digits in both languages: they are read
 against the cards themselves — a 7 on the table, a score beside a name — and the
 cards are printed 7.
 
-The card names are the ones used at a table in the Gulf rather than the ones
+The card names are the ones used at a table in the Emirates rather than the ones
 in a dictionary: a King is **الشايب**, a Queen is **البنت**, a Jack is
 **الولد**, and the suits are بستوني ♠، كبة ♥، ديناري ♦، شيريا ♣. Baloot's own
-jargon (سبيت، هاص، ديمن، كلفس) is more deeply Khaleeji still, but it is
-game-specific in a way a casual player may not use. The faces of the cards keep
-the Latin A K Q J, which is how decks sold in the region are printed and what
-Gulf card apps show; the rules screen puts the spoken name under each one so
-the two connect.
+jargon (سبيت، هاص، ديمن، كلفس) is Najdi rather than Emirati, and game-specific
+besides, so it is left alone. The faces of the cards keep the Latin A K Q J,
+which is how decks sold here are printed; the rules screen puts the spoken name
+under each one so the two connect.
+
+The things players say to each other are Emirati first and translated second:
+«مرحبا الساع»، «عفية عليك»، «يزاك الله خير» on the kind side, and «عيل متى
+بتلعب؟»، «نمت ولا شو؟»، «بسوّي چاي لين تخلّص»، «ما أحد حظه چذي» on the other.
 
 Two details worth knowing about how it is built:
 
