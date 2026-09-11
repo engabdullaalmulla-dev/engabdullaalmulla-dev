@@ -40,11 +40,33 @@ This is why we can undercut on price *and* out-differentiate at the same time. I
 Both incumbents let you pick your own tier and never check it. Ours moves with real results and peer votes, corrects fast, and everything downstream reads from it. **The only asset here that compounds — it takes as many games to build as you have played, and cannot be bought.** The purest technology advantage on the list.
 `Marginal cost: compute` · `Gap G05` · `Copy time: years`
 
-### 2. Cancel any time and the money comes back — in cash
-> *"No cut-off. If someone takes your place, it's back on your card."*
+### 2. The only cost of pulling out is telling us
+> *"Cancel and the money comes back. Leave it late and it costs you standing, not cash."*
 
-Technically a small real-time marketplace: release a place, offer it down a ranked waitlist, settle both ways. Easy to build. Nobody has, because on a rented-pitch cost base **keeping your money is where their margin comes from.** The tech is the enabler; the venue contract is the moat.
-`Marginal cost: float` · `Gaps G02 G03 G08` · `Copy time: needs a new cost base`
+**This must not be made conditional on a waitlist.** "You get your money back if someone replaces you" is not a promise, it is a lottery — and it fails hardest on quiet slots, half-empty games and launch week, which is exactly when the differentiation is worth most.
+
+It doesn't need to be conditional, because **a refunded seat costs about AED 24, not AED 45.** Under revenue share the venue's share reverses with the booking, the host is paid on attendance so that fee never goes out, and the only cash actually lost is the processor's fee (~AED 2.30, non-refundable). The rest is the AED 21.95 of contribution you would have earned. That is affordable to absorb unconditionally.
+
+| | Unresold refunds | Cost per game | % of contribution |
+|---|---|---|---|
+| Mature, waitlist exists | ~0.6 seats | ~AED 14 | 5% |
+| Launch, no waitlist at all | ~2.4 seats | ~AED 58 | 22% |
+
+The worst case is survivable and, in absolute terms at launch, about AED 760 a week across 20 games. **The cost falls as waitlists appear — the guarantee is cheapest exactly where it is most needed.**
+
+**The three tiers:**
+
+1. **More than 24h before kick-off** — cash back, automatic, no waitlist required, no reliability cost. Advertise with no asterisk.
+2. **Inside 24h** — we offer the place on. It goes: cash back, clean. It doesn't: **still cash back**, but it counts against reliability.
+3. **No-show, never told us** — no refund. The only case where money is kept, and defensible to everyone, because they took a place and denied it to someone else.
+
+The risk this creates is behavioural, not financial — speculative booking and casual cancelling. That is handled by standing, per principle 4, never by keeping money.
+
+**Two cheap ways to manufacture a waitlist:** make it *cross-game* ("notify me for any Tier-4 game on a Thursday evening") so scattered city-wide demand pools instead of sitting in separate queues; and **spend earned free-game credits on released seats first**, redeeming a liability you already owe into a filled shirt and even sides.
+
+**Negotiate against this:** if a venue insists on a *minimum guarantee per slot* rather than a share of collected revenue, the arithmetic above breaks — refunded seats would still cost you the floor. Share-of-collected with the lowest possible floor is worth more than the headline percentage.
+
+`Marginal cost: ~AED 24 per unresold refund` · `Gaps G02 G03 G08` · `Copy time: needs a new cost base`
 
 ### 3. Your organiser keeps their game — and stops chasing money
 > *"Bring your WhatsApp group. Keep your players. Play for free."*
@@ -108,7 +130,7 @@ One tap on **Take a shirt** fans out to six systems — rating engine, team bala
 
 | Line | Audience |
 |---|---|
-| "Cancel any time. If someone takes your place, the money goes back to your card — not a wallet." | A player burned by CeleBreak. The sharpest thing you can say, because they can't say it back. |
+| "The only cost of pulling out is telling us. Cancel and the money goes back to your card — not a wallet." | A player burned by CeleBreak. The sharpest thing you can say, because they can't say it back. |
 | "You'll be in the right game on your first night, and we'll be right by your third." | A newcomer. Answers the fear that actually stops people booking. |
 | "Bring your group. Keep your players. Play for free and stop chasing people for money." | An organiser. The highest-leverage conversation in the business. |
 | "We'll fill your Tuesday afternoons. You keep a share, we carry the risk." | A venue. Lead with their dead hours, never with your app. |

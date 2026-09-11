@@ -124,9 +124,12 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 |---|---|---|---|---|---|
 | B1 | Card payment + wallet top-up | — | P0 | R1 | FR |
 | B2 | **Cash-refundable wallet** — never credit-locked | G03 | P0 | R1 | RPT |
-| B3 | **Spot auto-lists to waitlist on cancel** | G02 G08 | P0 | R1 | FR RPT |
-| B4 | **Full cash refund when the spot is resold** | G02 G03 | P0 | R1 | RPT |
-| B5 | Credit fallback when it doesn't resell | G02 | P0 | R1 | RPT |
+| B3 | **Unconditional cash refund when cancelled >24h out** | G02 G03 | P0 | R1 | RPT |
+| B4 | **Spot auto-lists to waitlist on cancel; cash refund either way** | G02 G08 | P0 | R1 | FR RPT |
+| B5 | Late release (<24h) refunds cash but costs reliability | G02 G07 | P0 | R1 | NS |
+| B5a | No-show without cancelling — the only case that forfeits | G07 | P0 | R1 | NS |
+| B5b | Cross-game waitlist — "any Tier-4 game, Thursday evening" | G08 | P1 | R2 | FR |
+| B5c | Spend earned free-game credits on released seats first | G08 | P2 | R3 | FR |
 | B6 | Transparent pricing — no fee at checkout that wasn't on the card | G01 | P0 | R1 | RPT |
 | B7 | Receipts and payment history | — | P1 | R1 | — |
 | B8 | Membership tiers — games/month, off-peak, priority | G01 | P1 | R3 | FREQ |
@@ -266,7 +269,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | O4 | Arabic localisation | — | P1 | R4 | CAC |
 | O5 | Notifications — reminders, waitlist hits, clips, team sheets | G07 | P0 | R1 | NS |
 
-**Count:** 97 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 101 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 

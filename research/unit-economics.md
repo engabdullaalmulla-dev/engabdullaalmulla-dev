@@ -62,6 +62,31 @@ Revenue share converts a fixed-cost business with a 69% break-even into a variab
 
 ---
 
+## 2b. What a refund actually costs
+
+The refund guarantee is only credible if it is unconditional, and it can be — because a refunded seat does **not** cost AED 45.
+
+| Line | Effect on a reversed booking |
+|---|---|
+| Place price | −45 revenue |
+| Venue share (35%) | +15.75 — reverses with the booking |
+| Host fee (AED 5/head) | +5 — paid on attendance, never goes out |
+| Payment processing | **−2.31 real cash, not returned by the processor** |
+| **Net economic cost** | **≈ AED 24** — the AED 21.95 of contribution foregone, plus the fee |
+
+| Scenario | Unresold refunds/game | Cost/game | % of contribution |
+|---|---:|---:|---:|
+| Mature — waitlist exists | ~0.6 seats | ~AED 14 | 5% |
+| Launch — no waitlist at all | ~2.4 seats | ~AED 58 | 22% |
+
+Worst case is survivable, and in absolute terms at launch it is roughly AED 760 a week across 20 games. **The cost falls as waitlists appear, so the guarantee is cheapest exactly where it is most needed.**
+
+The residual risk is behavioural, not financial — speculative booking and casual cancelling — and is handled by the reliability score, never by keeping money.
+
+**Contract risk:** this holds only if the venue takes a share of *collected* revenue. A minimum guarantee per slot breaks it, because refunded seats would still cost the floor. Negotiate share-of-collected with the lowest possible floor; that clause matters more than the percentage.
+
+---
+
 ## 3. Does it scale?
 
 At 48% contribution margin and AED 45 a place, reaching **AED 10M of revenue from games alone** requires roughly:
