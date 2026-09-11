@@ -4,7 +4,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Difficulty } from './shared/types';
-import { api, type AuthResponse } from './src/net/api';
+import { api, ONLINE_ENABLED, type AuthResponse } from './src/net/api';
 import { useOnline } from './src/net/useOnline';
 import { clearSession, loadSession, saveSession, type StoredSession } from './src/store/session';
 import { AuthScreen } from './src/ui/screens/AuthScreen';
@@ -184,6 +184,7 @@ export default function App() {
             onPlayOnline={goOnline}
             onRules={() => setScreen('rules')}
             signedInAs={session?.user.name ?? null}
+            onlineEnabled={ONLINE_ENABLED}
           />
         );
     }
@@ -194,7 +195,9 @@ export default function App() {
       <View style={styles.root}>
         <StatusBar style="light" />
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-          {body()}
+          {/* A card table is a phone-shaped thing: on a wide screen it sits in
+              the middle rather than stretching across the whole window. */}
+          <View style={styles.column}>{body()}</View>
         </SafeAreaView>
       </View>
     </SafeAreaProvider>
@@ -245,5 +248,6 @@ function OfflineTable({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   safe: { flex: 1 },
+  column: { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center' },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });

@@ -33,6 +33,19 @@ cd server && npm install && npm run dev     # http://localhost:8787
 EXPO_PUBLIC_EMBER_SERVER=http://localhost:8787 npm start
 ```
 
+To hand someone a link rather than an app, pack the whole thing into one file:
+
+```bash
+npm run bundle:web    # dist/ember.html — 600 KB, loads nothing from the network
+```
+
+That build plays the bots only and says so on its home screen. Point it at a
+server to keep online play:
+
+```bash
+EXPO_PUBLIC_EMBER_SERVER=https://your-server npm run bundle:web
+```
+
 ```bash
 npm test              # the rules, checked from plain node
 npm run typecheck

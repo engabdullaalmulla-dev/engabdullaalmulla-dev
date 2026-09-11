@@ -5,12 +5,21 @@
 
 import type { LeaderboardRow, PublicUser, UserStats } from '../../shared/protocol';
 
+const configured = process.env.EXPO_PUBLIC_EMBER_SERVER;
+
+/**
+ * Whether this build has a server to talk to at all. Building with
+ * EXPO_PUBLIC_EMBER_SERVER=none produces a bots-only app, which is what gets
+ * published anywhere the app cannot reach a server.
+ */
+export const ONLINE_ENABLED = configured !== 'none';
+
 /**
  * Where the server lives. Set EXPO_PUBLIC_EMBER_SERVER when you build, or
  * leave it for a server running on the same machine during development.
  */
 export const SERVER_URL = (
-  process.env.EXPO_PUBLIC_EMBER_SERVER ?? 'http://localhost:8787'
+  configured && configured !== 'none' ? configured : 'http://localhost:8787'
 ).replace(/\/$/, '');
 
 export function socketUrl(): string {

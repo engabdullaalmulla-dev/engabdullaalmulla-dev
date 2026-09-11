@@ -22,6 +22,8 @@ interface Props {
   onRules: () => void;
   /** Shown when there is already a signed-in account on this device. */
   signedInAs?: string | null;
+  /** False in a build with no server behind it. */
+  onlineEnabled?: boolean;
 }
 
 export function HomeScreen({
@@ -31,6 +33,7 @@ export function HomeScreen({
   onPlayOnline,
   onRules,
   signedInAs,
+  onlineEnabled = true,
 }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.screen} showsVerticalScrollIndicator={false}>
@@ -44,12 +47,21 @@ export function HomeScreen({
       </View>
 
       <View style={styles.actions}>
-        <Button label="PLAY ONLINE" onPress={onPlayOnline} />
-        <Text style={styles.online}>
-          {signedInAs
-            ? `Signed in as ${signedInAs}. Quick match, or a private table with friends.`
-            : 'Quick match against people, or a private table just for your friends.'}
-        </Text>
+        {onlineEnabled ? (
+          <>
+            <Button label="PLAY ONLINE" onPress={onPlayOnline} />
+            <Text style={styles.online}>
+              {signedInAs
+                ? `Signed in as ${signedInAs}. Quick match, or a private table with friends.`
+                : 'Quick match against people, or a private table just for your friends.'}
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.online}>
+            This build plays the bots only. Online tables need the EMBER server —
+            see the README.
+          </Text>
+        )}
       </View>
 
       <View style={styles.panel}>

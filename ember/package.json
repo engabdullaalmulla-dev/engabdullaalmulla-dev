@@ -27,7 +27,8 @@
     "web": "expo start --web",
     "test": "tsc -p tsconfig.test.json && node .test-build/tests/engine.test.js",
     "typecheck": "tsc --noEmit",
-    "icons": "node scripts/generate-icons.js"
+    "icons": "node scripts/generate-icons.js",
+    "bundle:web": "node scripts/bundle-web.js"
   },
   "private": true
 }
