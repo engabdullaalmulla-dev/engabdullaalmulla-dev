@@ -174,6 +174,10 @@ round** — the qualifying journey does not lock lower-seeded nations out.
 | **All 495 possible combinations of qualifying third-place groups can be assigned to valid slots** | pass, 495/495 |
 | A save file reloaded mid-campaign finishes identically | pass |
 | AFC: exactly 8 direct qualifiers, play-off representative distinct and not counted as qualified | pass |
+| Road to Glory: 334 matches across 12 rounds, ending with a champion | pass |
+| Road to Glory: legs run qualifying → play-off → finals, each under its own tiebreakers | pass |
+| Road to Glory: finals field is 48 unique nations built from **your** qualifiers — no nation reaches the finals on the strength of the real qualification | pass |
+| Road to Glory: Asia sends nine to the finals only when its play-off representative actually won | pass |
 
 The 495 check is the same 495 combinations FIFA publishes in Annex C, and it is
 the test that proves the constraint solver can never paint itself into a corner

@@ -10,8 +10,10 @@ Working title. Naming options are in [docs/01-concept.md](docs/01-concept.md).
 **Playable prototype (hosted):** <https://claude.ai/code/artifact/4a7d93a1-95d2-4466-a0f0-4a83d246b2a0>
 
 **Playable prototype (local):** `prototype/` — open `prototype/index.html` from any static
-server. Two complete, verified competitions (World Cup 2026 finals, and the full
-five-round Asian qualification journey), **twenty-five distinct arenas**, penalty
+server. Three complete, verified competitions — **Road to Glory** (Asian qualification,
+the inter-confederation play-off and the World Cup finals as one 334-match
+campaign), the World Cup finals on their own, and Asian qualification on its
+own — **twenty-five distinct arenas**, penalty
 shoot-outs, save/resume, an authentic mode and an arcade mode. Every nation is a
 **flag marble** identified by its FIFA trigramme. Real marble physics, not
 pre-recorded animation: every scoreline is counted from marbles crossing a goal

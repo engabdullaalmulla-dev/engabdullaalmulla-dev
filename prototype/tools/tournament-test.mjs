@@ -162,5 +162,64 @@ console.log('\nAFC qualification 2026 — full campaigns');
   check('nations that entered in round one can still qualify', lowSeed >= 0);
 }
 
+// --- 5. Road to Glory -------------------------------------------------------
+console.log('\nRoad to Glory — qualifying, play-off and finals as one campaign');
+{
+  const M = Math.max(3, Math.round(N / 8));
+  const REAL_AFC = ['JPN', 'IRN', 'KOR', 'AUS', 'UZB', 'QAT', 'KSA', 'JOR', 'IRQ'];
+  let shapeOk = true, fieldOk = true, legsOk = true, playoffOk = true, outcomeOk = true;
+  let repWon = 0, matches = 0;
+  const legOrder = [];
+
+  for (let i = 0; i < M; i++) {
+    const c = createCampaign({ competitionId: 'rtg2026', seed: 31337 + i * 104729, followed: ['UAE', 'NEP'] });
+    playAll(c);
+    matches = c.rounds.reduce((s, r) => s + r.fixtures.length, 0);
+    if (matches !== 334) shapeOk = false;
+    if (c.rounds.length !== 12) shapeOk = false;
+    if (!c.champion) shapeOk = false;
+
+    const legs = c.rounds.map(r => r.leg);
+    if (legOrder.length === 0) legOrder.push(...legs);
+    const expect = ['qualifying', 'qualifying', 'qualifying', 'qualifying', 'qualifying',
+      'playoff', 'finals', 'finals', 'finals', 'finals', 'finals', 'finals'];
+    if (legs.join() !== expect.join()) legsOk = false;
+
+    // Each leg must be ranked under its own rulebook.
+    const q = c.rounds.find(r => r.id === 'r2'), f = c.rounds.find(r => r.id === 'group');
+    if (!q.tiebreakers[0].startsWith('h2h:')) legsOk = false;
+    if (f.tiebreakers[0] !== 'pts' || f.tiebreakers[1] !== 'gd') legsOk = false;
+
+    const po = c.rounds.find(r => r.id === 'icpo');
+    if (!po || po.fixtures.length !== 4 || po.ties.length !== 4) playoffOk = false;
+    if (!c.meta.playoffWinners || c.meta.playoffWinners.length !== 2) playoffOk = false;
+    if (new Set(c.meta.playoffWinners).size !== 2) playoffOk = false;
+
+    const field = Object.values(c.meta.groups).flat();
+    if (field.length !== 48 || new Set(field).size !== 48) fieldOk = false;
+    const direct = c.meta.qualified.slice(0, 8);
+    if (!direct.every(t => field.includes(t))) fieldOk = false;
+    // No nation may reach the finals on the strength of the REAL qualification.
+    const strays = field.filter(t => team(t).conf === 'AFC' && !c.meta.qualified.includes(t));
+    if (strays.length) fieldOk = false;
+    const afcCount = field.filter(t => team(t).conf === 'AFC').length;
+    const rep = c.meta.playoffRep;
+    const won = c.meta.playoffWinners.includes(rep);
+    if (won) repWon++;
+    if (afcCount !== (won ? 9 : 8)) fieldOk = false;
+    if (won && c.meta.outcome[rep] !== 'qualified') outcomeOk = false;
+    if (!won && c.meta.outcome[rep] !== 'out') outcomeOk = false;
+    // Every followed nation ends with a stated outcome, however early it went out.
+    for (const code of c.followed) if (!c.meta.outcome[code]) outcomeOk = false;
+  }
+
+  check('334 matches across 12 rounds, ending with a champion', shapeOk, `${matches} matches`);
+  check('legs run qualifying -> play-off -> finals, each under its own tiebreakers', legsOk, legOrder.join(' '));
+  check('play-off tournament is two pathways of two matches with two winners', playoffOk);
+  check('finals field is 48 unique nations built from YOUR qualifiers, not the real ones', fieldOk,
+    `Asia sends 9 when its play-off representative wins (${repWon}/${M} runs), 8 when it does not`);
+  check('every nation the play-off decided, and every followed nation, ends with a stated outcome', outcomeOk);
+}
+
 console.log(failures === 0 ? '\nAll checks passed.\n' : `\n${failures} check(s) failed.\n`);
 process.exit(failures ? 1 : 0);

@@ -13,6 +13,9 @@ qualification journey on top of it:
   named;
 - a functioning knockout bracket including the eight best third-placed teams,
   extra time and penalty shoot-outs;
+- **Road to Glory**: Asian qualification, the inter-confederation play-off and
+  the World Cup finals as one continuous 334-match campaign, with the finals
+  field built from the qualifiers the campaign actually produced;
 - twenty-five genuinely different arenas plus the penalty challenge, each with
   its own mechanic, palette and arena card, and each auto-calibrated to its
   target scoring rate;
@@ -29,8 +32,9 @@ qualification journey on top of it:
 
 ## Version 1.0 — what ships
 
-**Competitions:** World Cup 2026 finals, and World Cup 2026 qualification (AFC),
-both at ruleset 2026.x with sources upgraded to governing-body regulations.
+**Competitions:** Road to Glory (the full Asian road to the finals), the World
+Cup 2026 finals on their own, and Asian qualification on its own — all at ruleset
+2026.x with sources upgraded to governing-body regulations.
 
 **Modes:** Authentic and Arcade.
 
@@ -60,8 +64,8 @@ multiplayer.
 
 CAF, CONMEBOL, CONCACAF, OFC and UEFA qualification for the 2026 cycle, each as
 its own verified edition ruleset with its own tiebreakers, its own round
-structure and its own flags. The inter-confederation play-off tournament, which
-finally lets an AFC campaign that reached it play it out.
+structure and its own flags — and a Road to Glory for each of them, since the
+composition pattern is already built and the play-off tournament already works.
 
 These are independent modules; they do not share a "qualifying" template, because
 they are not the same competition. Until one is verified and complete it does not

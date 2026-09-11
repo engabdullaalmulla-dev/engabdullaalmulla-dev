@@ -37,10 +37,24 @@ The subtitle does the search work; the name does the brand work. Keep "Marble
 Nations" as the working title until a trademark search on Glassball is done in
 the target markets.
 
+## Road to Glory
+
+The headline mode, and the one the whole engine was built to reach: **start in
+the Asian first round and, if you are good enough, finish at the World Cup**.
+
+Five qualifying rounds over two years. The fifth-round winner does not qualify —
+it wins the right to play the inter-confederation play-off, and losing that is
+the end of the road. Get through, and you walk into a World Cup draw where the
+eight Asian nations in the field are the eight *your* qualifying produced, not
+the ones who qualified in real life.
+
+334 matches, around thirty of them yours to watch. It is the longest thing in the
+game and the only one where the trophy means you came from the very bottom.
+
 ## Core loop
 
 ```
-Choose competition and edition
+Choose competition and edition   (Road to Glory / World Cup / Asian Qualification)
    ↓
 Choose the nations you follow  (one, or up to six)
    ↓

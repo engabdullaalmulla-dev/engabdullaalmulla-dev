@@ -61,8 +61,8 @@ export const meta = {
   flags: [
     { id: 'seed-order', level: 'approximate',
       text: 'The 1–46 seeding order is an approximation of the FIFA ranking that was used for the real draws. It decides which 20 nations start in the first round and how the pots are filled. This is the one part of this ruleset not confirmed against a primary source, and it is the first thing to replace before release.' },
-    { id: 'playoff-scope', level: 'out-of-scope',
-      text: 'The inter-confederation play-off tournament itself is not simulated: its other five entrants come from outside the AFC and are edition-specific. A campaign that reaches it ends with "Reached the inter-confederation play-off", which is explicitly NOT qualification.' },
+    { id: 'playoff-scope', level: 'by-design',
+      text: 'AFC qualification ends at the fifth round, and so does this competition. The inter-confederation play-off is a separate FIFA tournament, not an AFC one: a campaign that reaches it ends with "Reached the inter-confederation play-off", which is explicitly NOT qualification. Play Road to Glory to contest that play-off and go on to the finals.' },
     { id: 'asian-cup', level: 'out-of-scope',
       text: 'The first two rounds also doubled as 2027 Asian Cup qualification in real life. That consequence is shown as information on the results screen but no Asian Cup campaign is generated.' },
     { id: 'r4-venue', level: 'partly-verified',
@@ -108,7 +108,11 @@ function homeAndAway(teams) {
 }
 
 function groupRound(c, id, label, roundIndex, groups, legs) {
-  const round = { id, label, kind: 'groups', roundIndex, groups, legs, fixtures: [], eliminated: [] };
+  const round = {
+    id, label, kind: 'groups', roundIndex, groups, legs, fixtures: [], eliminated: [],
+    tiebreakers: meta.groupTiebreakers, advance: id === 'r4' ? 1 : 2,
+    totalRounds: meta.knockoutRounds, leg: 'qualifying',
+  };
   for (const g of Object.keys(groups)) {
     const days = legs === 2 ? homeAndAway(groups[g]) : roundRobin(groups[g]);
     days.forEach((day, md) => {
@@ -126,7 +130,7 @@ function groupRound(c, id, label, roundIndex, groups, legs) {
 }
 
 function tieRound(c, id, label, roundIndex, pairs, legs) {
-  const round = { id, label, kind: 'ties', roundIndex, ties: [], fixtures: [], eliminated: [] };
+  const round = { id, label, kind: 'ties', roundIndex, ties: [], fixtures: [], eliminated: [], leg: 'qualifying', totalRounds: meta.knockoutRounds };
   pairs.forEach(([a, b], i) => {
     const tie = { id: `${id}-${i}`, teams: [a, b], legs, label, winner: null };
     round.ties.push(tie);
@@ -205,11 +209,19 @@ function tablesFor(c, round) {
   return out;
 }
 
+// Mark everyone knocked out of a round, so a followed nation always has a
+// plain-language outcome no matter how early it went out.
+function markOut(c, codes) {
+  for (const code of codes) if (!c.meta.outcome[code]) c.meta.outcome[code] = 'out';
+}
+
 export function advance(c, rng) {
   const round = c.rounds[c.current];
+  markOut(c, round.eliminated || []);
 
   if (round.id === 'r1') {
     closeTies(c, round);
+    markOut(c, round.eliminated);
     const winners = round.ties.map(t => t.winner);
     c.meta.r1Winners = winners;
     const field = SEEDS.slice(0, 26).concat(winners);
@@ -229,6 +241,7 @@ export function advance(c, rng) {
       out.push(tables[g][2].code, tables[g][3].code);
     }
     round.eliminated = out;
+    markOut(c, out);
     const { groups } = drawPotsSimple(potsFrom(through, 6), R3_GROUPS, rng);
     c.meta.r3Groups = groups;
     const r = groupRound(c, 'r3', LABEL.r3, 2, groups, 2);
