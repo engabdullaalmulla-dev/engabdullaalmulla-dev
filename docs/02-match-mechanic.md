@@ -20,8 +20,8 @@ tactical camera. **No gravity.** Two marbles, one per nation. Team A attacks the
 top goal, team B the bottom. Each marble carries a constant *forward drive*
 toward the end it is attacking — that is what turns a random walk into a contest
 with intent, and it is why the two marbles meet in midfield instead of drifting.
-Obstacles, hazards and moving parts sit between each marble and the goal it
-wants. Each goal mouth is guarded by a **keeper**: a bright bar that slides
+Obstacles, hazards, force fields and moving parts sit between each marble and
+the goal it wants. Each goal mouth is guarded by a **keeper**: a bright bar that slides
 across the mouth on a fixed cycle.
 
 Why overhead and gravity-free: gravity has a direction, and a portrait pitch has
@@ -65,17 +65,19 @@ chance, and it put the outcome somewhere the viewer is already looking.
 
 | Period | Sim seconds | Shown as |
 |---|---|---|
-| First half | 32 + 1.0–4.2 stoppage | 1'–45'+ |
-| Second half | 32 + 1.6–5.6 stoppage | 45'–90'+ |
-| Extra time, two periods | 11 each + stoppage | 90'–120' |
+| First half | 19 + 0.6–2.2 stoppage | 1'–45'+ |
+| Second half | 19 + 0.9–3.1 stoppage | 45'–90'+ |
+| Extra time, two periods | 6.5 each + stoppage | 90'–120' |
 | Penalty challenge | until decided | PENS |
 
 Stoppage time is drawn per match from the match seed, so a late winner in the
 93rd minute is a real thing that can happen to you.
 
-**Measured watch time: 75–77 seconds mean at 1×, 87s worst case** across all six
-arenas — inside the 45–90 second target. Fast-forward (2×, 4×) and skip run the
-same function more times per frame; they cannot produce a different result.
+**Measured watch time: 45–48 seconds mean at 1×, 56s worst case** across all nine
+arenas — inside the 45–60 second target, and most matches are nearer 46s. Extra
+time and a shoot-out extend a knockout tie, which is the point of them.
+Fast-forward (2×, 4×) and skip run the same function more times per frame; they
+cannot produce a different result.
 
 ## Restart to the conceding side
 
@@ -115,13 +117,17 @@ in it is allowed to be ambiguous.
 
 ## Scoreline distribution
 
-Pooled over 2,400 matches across all six arenas:
+Pooled across all nine arenas:
 
 ```
 1-0  17.6%   2-1  17.2%   1-1  13.6%   2-0  10.8%
 3-1   7.7%   0-0   7.0%   2-2   5.7%   3-0   5.4%
 ```
 
-Mean 2.0–2.9 goals per match depending on arena; real World Cup football runs
+Mean 1.9–2.9 goals per match depending on arena; real World Cup football runs
 around 2.7. The shape is right: 1-0 and 2-1 dominate, 0-0 is uncommon but
 possible, and a 7-1 exists somewhere in the tail where it belongs.
+
+Halving the match length did not halve the scoring: the forward drive on each
+marble was raised to compensate, which is a knob on the *environment* and applies
+to both sides identically.

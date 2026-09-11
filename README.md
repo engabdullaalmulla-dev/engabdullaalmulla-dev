@@ -11,10 +11,11 @@ Working title. Naming options are in [docs/01-concept.md](docs/01-concept.md).
 
 **Playable prototype (local):** `prototype/` — open `prototype/index.html` from any static
 server. Two complete, verified competitions (World Cup 2026 finals, and the full
-five-round Asian qualification journey), six distinct arenas, penalty shoot-outs,
-save/resume, an authentic mode and an arcade mode. Real marble physics, not
+five-round Asian qualification journey), **nine distinct arenas**, penalty
+shoot-outs, save/resume, an authentic mode and an arcade mode. Every nation is a
+**flag marble** identified by its FIFA trigramme. Real marble physics, not
 pre-recorded animation: every scoreline is counted from marbles crossing a goal
-line.
+line, and a match takes **45–55 seconds** to watch.
 
 ---
 
@@ -52,9 +53,13 @@ node tools/validate.mjs 400         # simulation: determinism, balance, scorelin
 node tools/tournament-test.mjs 40   # tournament: draw constraints, brackets, campaigns
 ```
 
-`validate.mjs` plays a few thousand matches and checks that neither end of the
-pitch is worth anything, that scorelines look like football, that every match
-terminates, and that watching a match and skipping it give the same result.
+`validate.mjs` proves each arena is exactly 180°-symmetric in its colliders,
+fields, hazards and spawns, then plays a few thousand matches and checks that
+neither end of the pitch is worth anything, that scorelines look like football,
+that every match finishes inside 60 seconds, and that watching a match and
+skipping it give the same result. The symmetry check earned its place
+immediately: it caught a three-armed turnstile that was quietly worth 65% of
+results to one end.
 
 `tournament-test.mjs` plays whole campaigns and checks the draw obeys its
 constraints, the bracket is wired correctly, all 495 possible third-place

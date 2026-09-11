@@ -2,9 +2,10 @@
 
 ## The pitch
 
-Forty-eight glass marbles, one per nation, and a tournament that is genuinely the
-tournament — real pots, real draw restrictions, real tiebreakers, real bracket.
-You pick who you are following. Then you watch.
+Forty-eight glass marbles, each carrying its nation's flag and its three-letter
+code, and a tournament that is genuinely the tournament — real pots, real draw
+restrictions, real tiebreakers, real bracket. You pick who you are following.
+Then you watch.
 
 The appeal is not skill. It is **investment**: you chose Saudi Arabia, Saudi
 Arabia is one point off qualifying, and there are ninety seconds left in a match
@@ -45,7 +46,7 @@ Choose the nations you follow  (one, or up to six)
    ↓
 Watch the draw                 (pots, restrictions, your nation's group)
    ↓
-Watch a match                  (45–90 seconds, or fast-forward, or skip)
+Watch a match                  (45–55 seconds, or fast-forward, or skip)
    ↓
 See the consequence            ("Still in contention." / "Eliminated on aggregate.")
    ↓
@@ -55,8 +56,13 @@ Win, or go out                 → start another journey
 ```
 
 The loop is deliberately short at the bottom and long at the top: a single match
-is under two minutes, a World Cup campaign is seven matches for your nation and
-104 in the tournament around it.
+is under a minute, a World Cup campaign is seven matches for your nation and 104
+in the tournament around it.
+
+Each match opens with an arena card naming which of the nine challenges you are
+about to watch, and the arena itself is interactive: tap a marble to follow it,
+drag and pinch the camera, tap to cheer, tap a goal in the ticker to see it
+again. None of that can change the score, which is the point.
 
 ### Following several nations
 

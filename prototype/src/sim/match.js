@@ -11,17 +11,17 @@
 // result cannot depend on how you watched it.
 
 import { makeWorld, makeBody, step as physStep, STEP } from '../core/physics.js';
-import { buildArena, drainActive, CX } from './arenas.js';
+import { buildArena, drainActive, fieldActive, CX } from './arenas.js';
 import { makeRng } from '../core/rng.js';
 import { PI, dsin, dcos, len } from '../core/dmath.js';
 
 export const SIM_VERSION = '1.1.0';
 
 const MARBLE_R = 2.25;
-const HALF_SECONDS = 32;        // sim seconds per half -> displayed as 45 minutes
-const ET_HALF_SECONDS = 11;     // -> displayed as 15 minutes
-const CELEBRATION = 1.5;
-const KICKOFF_PAUSE = 0.7;
+const HALF_SECONDS = 19;        // sim seconds per half -> displayed as 45 minutes
+const ET_HALF_SECONDS = 6.5;    // -> displayed as 15 minutes
+const CELEBRATION = 1.1;
+const KICKOFF_PAUSE = 0.55;
 const DRAIN_OUT = 1.2;
 const STALL_SPEED = 10.0;
 const STALL_TIME = 0.85;
@@ -70,7 +70,7 @@ export function createMatch(cfg) {
     periods: periodPlan(cfg.rules),
     periodIndex: 0,
     periodElapsed: 0,
-    stoppage: [play.range(1.0, 4.2), play.range(1.6, 5.6), play.range(0.4, 1.6), play.range(0.6, 2.0)],
+    stoppage: [play.range(0.6, 2.2), play.range(0.9, 3.1), play.range(0.3, 1.0), play.range(0.4, 1.3)],
     phase: P.KICKOFF,
     phaseTimer: KICKOFF_PAUSE,
     score: [0, 0],
@@ -135,6 +135,26 @@ function respawn(m, i) {
   const v = launch(m.rng, i, m.arena, 0.82);
   b.vx = v.vx; b.vy = v.vy;
   m.stall[i] = 0;
+}
+
+// Force fields pull or push any marble inside their radius. Fields come in
+// 180-degree pairs, so this cannot favour an end.
+function applyFields(m) {
+  const fs = m.arena.fields;
+  if (!fs || !fs.length) return;
+  for (const f of fs) {
+    if (!fieldActive(f, m.world.t)) continue;
+    for (const b of m.world.bodies) {
+      if (!b.alive) continue;
+      const dx = f.x - b.x, dy = f.y - b.y;
+      const d = len(dx, dy);
+      if (d > f.r || d < 0.001) continue;
+      const falloff = 1 - d / f.r;
+      const acc = (f.strength * falloff * falloff) / d;
+      b.vx += dx * acc * STEP;
+      b.vy += dy * acc * STEP;
+    }
+  }
 }
 
 function checkGoal(m, i) {
@@ -330,6 +350,7 @@ export function step(m) {
   }
 
   // live play
+  applyFields(m);
   physStep(m.world);
   m.periodElapsed += STEP;
 

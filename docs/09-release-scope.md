@@ -13,14 +13,18 @@ qualification journey on top of it:
   named;
 - a functioning knockout bracket including the eight best third-placed teams,
   extra time and penalty shoot-outs;
-- six genuinely different arenas plus the penalty challenge;
+- nine genuinely different arenas plus the penalty challenge, each announced by
+  its own arena card;
+- flag marbles for 107 nations, drawn procedurally, identified by FIFA trigramme;
+- an interactive live arena — tap to follow a marble, drag and pinch the camera,
+  tap to cheer, tap a goal to watch it again — none of which can alter a result;
 - elimination and victory states, with plain-language consequences;
 - save and resume, verified to finish identically after a reload;
 - authentic and arcade modes, with a retry that restores state consistently;
 - the full five-round AFC qualification journey, 226 matches, with the eight
   direct places and the one play-off place kept distinct;
-- a test harness covering fairness, termination, draw constraints, bracket
-  integrity and determinism.
+- a test harness covering structural symmetry, fairness, termination, draw
+  constraints, bracket integrity and determinism.
 
 ## Version 1.0 — what ships
 
@@ -29,7 +33,7 @@ both at ruleset 2026.x with sources upgraded to governing-body regulations.
 
 **Modes:** Authentic and Arcade.
 
-**Arenas:** the six head-to-head arenas, the penalty challenge, and the
+**Arenas:** the nine head-to-head arenas, the penalty challenge, and the
 multi-marble **Survival Bowl** for arcade play — many nations in one bowl,
 knocked out gradually until one is left. Designed, not yet built.
 
@@ -44,6 +48,7 @@ multiplayer.
 |---|---|
 | Rulesets | Re-source both editions to FIFA and AFC regulation documents plus amendments; replace the approximate AFC seeding order with the published ranking; resolve or retain the Annex C flag |
 | Arenas | Build Survival Bowl; a second variation pass on Grand Arena; audio design |
+| Flags | Review the stylised central charges (Mexico, Iran, Wales, Sri Lanka, Bhutan, Afghanistan, Serbia, Egypt, Oman, Brunei, Vanuatu) and upgrade the ones that read poorly at marble scale; add the abstract-marble accessibility/rights fallback |
 | Platform | Port simulation and tournament layers to Swift against golden-file tests; SpriteKit renderer; SwiftUI screens |
 | Commerce | StoreKit integration with all purchase states and restore |
 | Accessibility | VoiceOver pass on every screen; colour-blind verification of the follow cues; dynamic type |
