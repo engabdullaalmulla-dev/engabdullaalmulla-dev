@@ -7,38 +7,40 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #0B6E3F; } a:hover { color: #07512E; }
+    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
-    .pop { cursor: pointer; transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease, color .25s ease; }
-    .pop:active { transform: scale(.955); }
-    @keyframes bounceIn { 0% { opacity: 0; transform: translateY(18px) scale(.95); } 60% { transform: translateY(-3px) scale(1.012); } 100% { opacity: 1; transform: none; } }
-    @keyframes dropIn { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 70% { transform: translate(-50%, -50%) scale(1.14); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
+    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
+    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
+    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease; }
+    .tap:active { transform: scale(.982); }
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes swell { from { opacity: 0; transform: translateY(16px) scale(.988); } to { opacity: 1; transform: none; } }
+    @keyframes drop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.4); } 70% { transform: translate(-50%,-50%) scale(1.1); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- header -->
-  <div style="padding: 26px 20px 14px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
-    <div style="display: flex; flex-direction: column; gap: 1px;">
-      <div style="font-size: 12px; font-weight: 700; color: #6B7D74;">Thursday 19:00 · Al Quoz</div>
-      <div class="disp" style="font-size: 38px; line-height: 1;">The teams</div>
+  <div style="padding: 30px 20px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl" style="font-size: 10px; color: #C6FF4A;">Thursday 19:00 · Al Quoz</div>
+      <div class="disp" style="font-size: 38px; line-height: .94;">THE TEAMS</div>
     </div>
-    <div style="background: #E3F7EC; color: #0B6E3F; border-radius: 999px; padding: 7px 12px; font-size: 11.5px; font-weight: 800; white-space: nowrap;">7 v 7</div>
+    <div class="lbl" style="font-size: 10px; color: #9FCF7A; border: 1px solid #3D6B3A; border-radius: 999px; padding: 7px 12px; white-space: nowrap;">7 v 7</div>
   </div>
 
   <!-- toggle -->
-  <div style="padding: 0 20px 14px;">
-    <div style="display: flex; gap: 4px; background: #F0EADA; border-radius: 999px; padding: 4px;">
+  <div style="padding: 0 20px 16px;">
+    <div style="display: flex; gap: 3px; background: #0E1C17; border: 1px solid #22392F; border-radius: 999px; padding: 3px;">
       <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
-        <div class="pop" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
-          <span style="font-size: 13.5px; font-weight: 800;">{{t.label}}</span>
+        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; display: flex; align-items: center; justify-content: center;">
+          <span class="lbl" style="font-size: 9.5px;">{{t.label}}</span>
         </div>
       </sc-for>
     </div>
@@ -48,36 +50,36 @@
 
     <!-- PITCH -->
     <sc-if value="{{isPitch}}" hint-placeholder-val="{{ true }}">
-      <div style="position: relative; height: 390px; border-radius: 22px; background-color: #0F9E58; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 34px, transparent 34px 68px); overflow: hidden; box-shadow: 0 8px 0 #0A7A43, 0 20px 36px -16px rgba(10,122,67,.55); animation: bounceIn .6s cubic-bezier(.34,1.56,.64,1) both;">
+      <div style="position: relative; height: 392px; border-radius: 22px; overflow: hidden; border: 1px solid #2A4B39; box-shadow: 0 26px 56px -26px rgba(0,0,0,.95); animation: swell .65s cubic-bezier(.22,1,.36,1) both;">
 
-        <!-- markings -->
-        <div style="position: absolute; left: 10px; right: 10px; top: 10px; bottom: 10px; border: 2px solid rgba(255,255,255,.34); border-radius: 10px;"></div>
-        <div style="position: absolute; left: 10px; right: 10px; top: 50%; height: 2px; background: rgba(255,255,255,.34);"></div>
-        <div style="position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px; border: 2px solid rgba(255,255,255,.34); border-radius: 999px;"></div>
-        <div style="position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 999px; background: rgba(255,255,255,.55);"></div>
-        <div style="position: absolute; left: 50%; top: 10px; width: 132px; height: 52px; margin-left: -66px; border: 2px solid rgba(255,255,255,.34); border-top: none; border-radius: 0 0 8px 8px;"></div>
-        <div style="position: absolute; left: 50%; bottom: 10px; width: 132px; height: 52px; margin-left: -66px; border: 2px solid rgba(255,255,255,.34); border-bottom: none; border-radius: 8px 8px 0 0;"></div>
+        <div style="position: absolute; inset: 0; background-color: #0B3526; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 34px, transparent 34px 68px);"></div>
+        <div style="position: absolute; inset: 0; background: radial-gradient(70% 48% at 50% 0%, rgba(232,255,196,.32), transparent 62%), radial-gradient(70% 48% at 50% 100%, rgba(232,255,196,.22), transparent 62%);"></div>
 
-        <!-- players -->
+        <div style="position: absolute; left: 10px; right: 10px; top: 10px; bottom: 10px; border: 1.5px solid rgba(234,245,238,.3); border-radius: 10px;"></div>
+        <div style="position: absolute; left: 10px; right: 10px; top: 50%; height: 1.5px; background: rgba(234,245,238,.3);"></div>
+        <div style="position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px; border: 1.5px solid rgba(234,245,238,.3); border-radius: 999px;"></div>
+        <div style="position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 999px; background: rgba(234,245,238,.55);"></div>
+        <div style="position: absolute; left: 50%; top: 10px; width: 132px; height: 50px; margin-left: -66px; border: 1.5px solid rgba(234,245,238,.3); border-top: none; border-radius: 0 0 8px 8px;"></div>
+        <div style="position: absolute; left: 50%; bottom: 10px; width: 132px; height: 50px; margin-left: -66px; border: 1.5px solid rgba(234,245,238,.3); border-bottom: none; border-radius: 8px 8px 0 0;"></div>
+
         <sc-for list="{{pitch}}" as="p" hint-placeholder-count="14">
-          <div style="position: absolute; left: {{p.x}}; top: {{p.y}}; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; animation: dropIn .55s cubic-bezier(.34,1.56,.64,1) both; animation-delay: {{p.delay}};">
-            <div style="width: 34px; height: 34px; border-radius: 999px; background: {{p.bg}}; color: {{p.fg}}; border: 2.5px solid {{p.ring}}; border-style: {{p.style}}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; box-shadow: 0 3px 0 {{p.shadow}};">{{p.num}}</div>
-            <div style="font-size: 9.5px; font-weight: 800; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,40,20,.6); white-space: nowrap;">{{p.name}}</div>
+          <div style="position: absolute; left: {{p.x}}; top: {{p.y}}; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; animation: drop .55s cubic-bezier(.22,1,.36,1) both; animation-delay: {{p.delay}};">
+            <div class="disp" style="width: 34px; height: 34px; border-radius: 999px; background: {{p.bg}}; color: {{p.fg}}; border: 1.5px solid {{p.ring}}; border-style: {{p.style}}; box-shadow: {{p.glow}}; display: flex; align-items: center; justify-content: center; font-size: 14px;">{{p.num}}</div>
+            <div style="font-size: 9px; font-weight: 700; color: #EAF5EE; text-shadow: 0 1px 3px rgba(0,0,0,.85); white-space: nowrap;">{{p.name}}</div>
           </div>
         </sc-for>
 
-        <!-- team labels -->
-        <div style="position: absolute; left: 18px; top: 16px; background: rgba(255,255,255,.92); color: #10201A; border-radius: 999px; padding: 5px 10px; font-size: 10.5px; font-weight: 800;">WHITES</div>
-        <div style="position: absolute; left: 18px; bottom: 16px; background: #FFCE2E; color: #10201A; border-radius: 999px; padding: 5px 10px; font-size: 10.5px; font-weight: 800;">YELLOWS</div>
+        <div class="lbl" style="position: absolute; left: 18px; top: 18px; font-size: 9px; color: #07110E; background: #EAF5EE; border-radius: 999px; padding: 5px 10px;">Whites</div>
+        <div class="lbl" style="position: absolute; left: 18px; bottom: 18px; font-size: 9px; color: #07110E; background: #C6FF4A; border-radius: 999px; padding: 5px 10px;">Limes</div>
       </div>
 
-      <div style="border-radius: 20px; background: #FFFFFF; border: 2px solid #F0EADA; padding: 16px; display: flex; align-items: center; gap: 14px; animation: slideUp .5s cubic-bezier(.22,1,.36,1) .25s both;">
-        <div style="width: 46px; height: 46px; border-radius: 999px; background: #E3F7EC; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0B6E3F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+      <div class="panel" style="border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px; animation: rise .5s cubic-bezier(.22,1,.36,1) .25s both;">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(198,255,74,.12); border: 1px solid rgba(198,255,74,.34); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#C6FF4A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-          <div class="disp" style="font-size: 19px;">Dead even</div>
-          <div style="font-size: 12.5px; font-weight: 600; color: #6B7D74; line-height: 1.35;">Sorted from everyone's level. Three goals in it and we swap two at half time.</div>
+        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+          <div class="disp" style="font-size: 17px; color: #C6FF4A;">DEAD EVEN</div>
+          <div style="font-size: 12px; font-weight: 500; color: #8DA79A; line-height: 1.4;">Sorted from everyone's level. Three goals in it and we swap two at half time.</div>
         </div>
       </div>
     </sc-if>
@@ -86,19 +88,19 @@
     <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <sc-for list="{{squad}}" as="p" hint-placeholder-count="7">
-          <div style="display: flex; align-items: center; gap: 13px; background: {{p.rowBg}}; border: 2px solid {{p.rowBorder}}; border-radius: 18px; padding: 11px 14px; animation: slideUp .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{p.delay}};">
-            <div style="width: 38px; height: 38px; border-radius: 999px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0;">{{p.num}}</div>
-            <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: {{p.nameColor}};">{{p.name}}</div>
-              <div style="font-size: 12px; font-weight: 600; color: #6B7D74;">{{p.meta}}</div>
+          <div class="panel" style="border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 13px; border-color: {{p.rowBorder}}; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{p.delay}};">
+            <div class="disp" style="width: 36px; height: 36px; border-radius: 999px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;">{{p.num}}</div>
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+              <div style="font-size: 14.5px; font-weight: 700; letter-spacing: -.01em; color: {{p.nameColor}};">{{p.name}}</div>
+              <div style="font-size: 11.5px; font-weight: 500; color: #8DA79A;">{{p.meta}}</div>
             </div>
-            <div style="background: {{p.teamBg}}; color: {{p.teamFg}}; border-radius: 999px; padding: 5px 9px; font-size: 10px; font-weight: 800; white-space: nowrap;">{{p.team}}</div>
+            <div class="lbl" style="font-size: 8.5px; color: {{p.teamFg}}; border: 1px solid {{p.teamBorder}}; border-radius: 999px; padding: 5px 9px; white-space: nowrap;">{{p.team}}</div>
           </div>
         </sc-for>
-        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 2px;">
-          <div style="height: 3px; border-radius: 999px; background: #EFE9D8; flex-grow: 1;"></div>
-          <div style="font-size: 12.5px; font-weight: 700; color: #6B7D74;">and six more</div>
-          <div style="height: 3px; border-radius: 999px; background: #EFE9D8; flex-grow: 1;"></div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 2px;">
+          <div style="height: 1px; background: #1C3129; flex-grow: 1;"></div>
+          <div class="lbl" style="font-size: 9px; color: #6F8A7C;">and six more</div>
+          <div style="height: 1px; background: #1C3129; flex-grow: 1;"></div>
         </div>
       </div>
     </sc-if>
@@ -106,13 +108,13 @@
   </div>
 
   <!-- CTA -->
-  <div style="padding: 14px 20px 22px; display: flex; flex-direction: column; gap: 11px;">
-    <div class="pop" onClick="{{ join }}" style="min-height: 58px; border-radius: 18px; background: {{ctaBg}}; color: {{ctaFg}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 {{ctaShadow}};">
-      <span class="disp" style="font-size: 19px;">{{ctaLabel}}</span>
+  <div style="padding: 16px 20px 22px; display: flex; flex-direction: column; gap: 11px;">
+    <div class="tap" onClick="{{ join }}" style="min-height: 56px; border-radius: 16px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1px solid {{ctaBorder}}; box-shadow: {{ctaGlow}}; display: flex; align-items: center; justify-content: center;">
+      <span class="disp" style="font-size: 16px; letter-spacing: .01em;">{{ctaLabel}}</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0B6E3F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-      <div style="font-size: 12.5px; font-weight: 700; color: #4C5A52;">Can't make it? Money straight back.</div>
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#9FCF7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+      <div style="font-size: 12px; font-weight: 500; color: #9FCF7A;">Can't make it? Money straight back.</div>
     </div>
   </div>
 
@@ -138,9 +140,8 @@ class Component extends DCLogic {
       const on = t.id === tab;
       return {
         label: t.label,
-        bg: on ? '#FFFFFF' : 'transparent',
-        fg: on ? '#10201A' : '#6B7D74',
-        shadow: on ? '0 2px 0 #E0D8C2' : 'none',
+        bg: on ? '#C6FF4A' : 'transparent',
+        fg: on ? '#07110E' : '#8DA79A',
         pick: () => this.setState({ tab: t.id }),
       };
     });
@@ -153,7 +154,7 @@ class Component extends DCLogic {
       { num: '8', name: 'Deepak', x: 50, y: 33 },
       { num: '7', name: 'Paolo', x: 83, y: 35 },
     ];
-    const yellows = [
+    const limes = [
       { num: '1', name: 'Marco', x: 50, y: 92 },
       { num: '2', name: 'Omar', x: 26, y: 79 },
       { num: '3', name: 'Luis', x: 74, y: 79 },
@@ -166,54 +167,51 @@ class Component extends DCLogic {
     const pitch = [];
     whites.forEach((p, i) => {
       pitch.push({
-        num: p.num, name: p.name,
-        x: p.x + '%', y: p.y + '%',
-        bg: '#FFFFFF', fg: '#10201A', ring: '#FFFFFF', style: 'solid', shadow: 'rgba(0,60,30,.35)',
+        num: p.num, name: p.name, x: p.x + '%', y: p.y + '%',
+        bg: '#EAF5EE', fg: '#07110E', ring: 'rgba(255,255,255,.7)', style: 'solid',
+        glow: '0 4px 14px rgba(0,0,0,.5)',
         delay: (0.1 + i * 0.05) + 's',
       });
     });
-    yellows.forEach((p, i) => {
+    limes.forEach((p, i) => {
       pitch.push({
-        num: p.num, name: p.name,
-        x: p.x + '%', y: p.y + '%',
-        bg: p.me ? '#FF5A3C' : '#FFCE2E',
-        fg: p.me ? '#FFFFFF' : '#10201A',
-        ring: p.me ? '#FFFFFF' : '#FFCE2E',
+        num: p.num, name: p.name, x: p.x + '%', y: p.y + '%',
+        bg: p.me ? '#FF3D7F' : '#C6FF4A',
+        fg: p.me ? '#FFFFFF' : '#07110E',
+        ring: p.me ? 'rgba(255,255,255,.8)' : 'rgba(198,255,74,.8)',
         style: 'solid',
-        shadow: p.me ? 'rgba(150,30,10,.5)' : '#D9A800',
+        glow: p.me ? '0 0 22px rgba(255,61,127,.8)' : '0 0 18px rgba(198,255,74,.5)',
         delay: (0.16 + i * 0.05) + 's',
       });
     });
     pitch.push({
-      num: '+', name: 'open',
-      x: '50%', y: '47%',
-      bg: 'rgba(255,255,255,.16)', fg: '#FFFFFF', ring: 'rgba(255,255,255,.8)', style: 'dashed', shadow: 'transparent',
-      delay: '0.6s',
+      num: '+', name: 'open', x: '50%', y: '47%',
+      bg: 'rgba(234,245,238,.10)', fg: '#EAF5EE', ring: 'rgba(234,245,238,.7)', style: 'dashed',
+      glow: 'none', delay: '0.6s',
     });
 
     const squadDefs = [
-      { num: '8', name: 'You', meta: 'Never missed a game', team: 'Yellows', me: true },
-      { num: '9', name: 'Rami K.', meta: '63 games together', team: 'Yellows', me: false },
-      { num: '1', name: 'Marco A.', meta: 'In goal, as always', team: 'Yellows', me: false },
-      { num: '1', name: 'Tariq M.', meta: 'Kept a clean sheet last week', team: 'Whites', me: false },
+      { num: '8', name: 'You', meta: 'Never missed a game', team: 'Limes', me: true },
+      { num: '9', name: 'Rami K.', meta: '63 games together', team: 'Limes', me: false },
+      { num: '1', name: 'Marco A.', meta: 'In goal, as always', team: 'Limes', me: false },
+      { num: '1', name: 'Tariq M.', meta: 'Clean sheet last week', team: 'Whites', me: false },
       { num: '8', name: 'Deepak S.', meta: '12 games this season', team: 'Whites', me: false },
-      { num: '6', name: 'Jonas T.', meta: 'First game — say hello', team: 'Yellows', me: false },
+      { num: '6', name: 'Jonas T.', meta: 'First game — say hello', team: 'Limes', me: false },
       { num: '7', name: 'Paolo N.', meta: 'Two goals last Thursday', team: 'Whites', me: false },
     ];
     const squad = squadDefs.map((p, i) => {
-      const yellow = p.team === 'Yellows';
+      const lime = p.team === 'Limes';
       return {
         num: p.num,
         name: p.name,
         meta: p.meta,
         team: p.team,
-        bg: p.me ? '#FF5A3C' : (yellow ? '#FFCE2E' : '#FFFFFF'),
-        fg: p.me ? '#FFFFFF' : '#10201A',
-        rowBg: p.me ? '#FFF3F0' : '#FFFFFF',
-        rowBorder: p.me ? '#FFD4CA' : '#F0EADA',
-        nameColor: p.me ? '#C43A20' : '#10201A',
-        teamBg: yellow ? '#FFF6D6' : '#F0EADA',
-        teamFg: yellow ? '#8A6A00' : '#4C5A52',
+        bg: p.me ? '#FF3D7F' : (lime ? '#C6FF4A' : '#EAF5EE'),
+        fg: p.me ? '#FFFFFF' : '#07110E',
+        rowBorder: p.me ? '#5E2440' : '#22392F',
+        nameColor: p.me ? '#FF8FB4' : '#EAF5EE',
+        teamFg: lime ? '#C6FF4A' : '#B8C9BF',
+        teamBorder: lime ? '#4E7A32' : '#3A5248',
         delay: (i * 0.05) + 's',
       };
     });
@@ -224,10 +222,11 @@ class Component extends DCLogic {
       isList: tab === 'list',
       pitch: pitch,
       squad: squad,
-      ctaLabel: joined ? "You're in! Shirt 8" : 'Grab the last shirt · AED 45',
-      ctaBg: joined ? '#0F9E58' : '#FFCE2E',
-      ctaFg: joined ? '#FFFFFF' : '#10201A',
-      ctaShadow: joined ? '#0A7A43' : '#D9A800',
+      ctaLabel: joined ? "YOU'RE IN · SHIRT 8" : 'TAKE THE LAST SHIRT · AED 45',
+      ctaBg: joined ? 'rgba(198,255,74,.10)' : '#C6FF4A',
+      ctaFg: joined ? '#C6FF4A' : '#07110E',
+      ctaBorder: joined ? '#4E7A32' : 'transparent',
+      ctaGlow: joined ? 'none' : '0 0 34px -6px rgba(198,255,74,.55)',
       join: () => this.setState({ joined: !joined }),
     };
   }

@@ -7,105 +7,108 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #0B6E3F; } a:hover { color: #07512E; }
+    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
-    .pop { cursor: pointer; transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease, border-color .25s ease; }
-    .pop:active { transform: scale(.94); }
-    @keyframes fall { 0% { opacity: 0; transform: translateY(-40px) rotate(0deg); } 12% { opacity: 1; } 100% { opacity: 0; transform: translateY(250px) rotate(560deg); } }
-    @keyframes scorePop { 0% { opacity: 0; transform: scale(.4); } 60% { transform: scale(1.14); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes bounceIn { 0% { opacity: 0; transform: translateY(18px) scale(.95); } 60% { transform: translateY(-3px) scale(1.012); } 100% { opacity: 1; transform: none; } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
+    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
+    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
+    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, box-shadow .3s ease; }
+    .tap:active { transform: scale(.96); }
+    @keyframes drift { 0% { opacity: 0; transform: translateY(-30px) rotate(0deg); } 14% { opacity: 1; } 100% { opacity: 0; transform: translateY(230px) rotate(420deg); } }
+    @keyframes scoreIn { 0% { opacity: 0; transform: scale(.55); } 62% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
 
-  <!-- celebration band -->
-  <div style="position: relative; background-color: #0F9E58; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 30px, transparent 30px 60px); color: #FFFFFF; padding: 24px 20px 26px; border-radius: 0 0 28px 28px; overflow: hidden; box-shadow: 0 8px 0 #0A7A43;">
+  <!-- score -->
+  <div style="position: relative; overflow: hidden; border-bottom: 1px solid #1C3129; padding: 28px 20px 26px;">
+    <div style="position: absolute; inset: 0; background-color: #0B2C1E; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 26px, transparent 26px 52px);"></div>
+    <div style="position: absolute; inset: 0; background: radial-gradient(90% 70% at 50% -14%, rgba(226,255,178,.30), rgba(198,255,74,.08) 36%, transparent 68%);"></div>
 
-    <sc-for list="{{confetti}}" as="c" hint-placeholder-count="18">
-      <div style="position: absolute; top: -16px; left: {{c.left}}; width: {{c.size}}; height: {{c.tall}}; background: {{c.color}}; border-radius: 2px; animation: fall {{c.dur}} linear both; animation-delay: {{c.delay}};"></div>
+    <sc-for list="{{sparks}}" as="s" hint-placeholder-count="16">
+      <div style="position: absolute; top: -14px; left: {{s.left}}; width: {{s.w}}; height: {{s.h}}; background: {{s.color}}; border-radius: 1px; box-shadow: 0 0 8px {{s.color}}; animation: drift {{s.dur}} linear both; animation-delay: {{s.delay}};"></div>
     </sc-for>
 
-    <div style="position: relative; display: flex; flex-direction: column; gap: 16px;">
+    <div style="position: relative; display: flex; flex-direction: column; gap: 18px;">
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="background: #FFCE2E; color: #10201A; border-radius: 999px; padding: 6px 12px; font-size: 11.5px; font-weight: 800;">FULL TIME</div>
-        <div style="font-size: 12px; font-weight: 700; color: #BDEFD4;">Thursday · Al Quoz</div>
+        <div class="lbl" style="font-size: 9.5px; color: #07110E; background: #C6FF4A; border-radius: 999px; padding: 6px 11px;">Full time</div>
+        <div class="lbl" style="font-size: 9.5px; color: #8DA79A;">Thursday · Al Quoz</div>
       </div>
 
       <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 7px; flex-grow: 1;">
-          <div style="width: 30px; height: 30px; border-radius: 999px; background: #FFCE2E; border: 2.5px solid #FFFFFF;"></div>
-          <div style="font-size: 11px; font-weight: 800;">YELLOWS</div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex-grow: 1;">
+          <div style="width: 28px; height: 28px; border-radius: 999px; background: #C6FF4A; box-shadow: 0 0 18px rgba(198,255,74,.6);"></div>
+          <div class="lbl" style="font-size: 9px;">Limes</div>
         </div>
-        <div class="disp" style="font-size: 74px; line-height: .84; white-space: nowrap; animation: scorePop .7s cubic-bezier(.34,1.56,.64,1) .1s both;">6–5</div>
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 7px; flex-grow: 1;">
-          <div style="width: 30px; height: 30px; border-radius: 999px; background: #FFFFFF; border: 2.5px solid rgba(255,255,255,.55);"></div>
-          <div style="font-size: 11px; font-weight: 800; color: #BDEFD4;">WHITES</div>
+        <div class="disp" style="font-size: 72px; line-height: .84; white-space: nowrap; color: #FFFFFF; animation: scoreIn .7s cubic-bezier(.22,1,.36,1) .1s both;">6–5</div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex-grow: 1;">
+          <div style="width: 28px; height: 28px; border-radius: 999px; background: #EAF5EE;"></div>
+          <div class="lbl" style="font-size: 9px; color: #8DA79A;">Whites</div>
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(0,0,0,.16); border-radius: 16px; padding: 12px 14px;">
-        <div class="disp" style="font-size: 22px;">You won — and you bagged 2</div>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(0,0,0,.38); border: 1px solid rgba(198,255,74,.22); border-radius: 14px; padding: 13px 14px;">
+        <div class="disp" style="font-size: 18px; color: #C6FF4A;">YOU WON — AND YOU BAGGED 2</div>
       </div>
     </div>
   </div>
 
-  <div style="padding: 16px 20px 0; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
+  <div style="padding: 18px 20px 0; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
 
     <!-- MOTM -->
     <div style="display: flex; flex-direction: column; gap: 12px;">
       <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
-        <div class="disp" style="font-size: 28px;">Man of the match?</div>
-        <div style="font-size: 12.5px; font-weight: 800; color: #FF5A3C; white-space: nowrap;">{{votedLabel}}</div>
+        <div class="disp" style="font-size: 26px;">MAN OF THE MATCH</div>
+        <div class="lbl" style="font-size: 9px; color: {{votedColor}}; white-space: nowrap;">{{votedLabel}}</div>
       </div>
-      <div style="font-size: 13px; font-weight: 600; color: #6B7D74; line-height: 1.45; margin-top: -6px;">One tap. It decides the levels — and the bragging rights.</div>
+      <div style="font-size: 12.5px; font-weight: 500; color: #8DA79A; line-height: 1.5; margin-top: -6px;">One tap. It decides the levels — and the bragging rights.</div>
 
-      <div style="display: flex; gap: 10px;">
+      <div style="display: flex; gap: 9px;">
         <sc-for list="{{mates}}" as="m" hint-placeholder-count="3">
-          <div class="pop" onClick="{{ m.vote }}" style="flex-grow: 1; background: {{m.bg}}; border: 2.5px solid {{m.border}}; border-radius: 20px; padding: 14px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 4px 0 {{m.shadow}};">
-            <div style="width: 50px; height: 50px; border-radius: 999px; background: {{m.faceBg}}; color: {{m.faceFg}}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800;">{{m.initials}}</div>
-            <div style="font-size: 13px; font-weight: 800; color: {{m.nameColor}};">{{m.name}}</div>
-            <div style="font-size: 10.5px; font-weight: 700; color: {{m.metaColor}}; text-align: center; line-height: 1.3;">{{m.meta}}</div>
+          <div class="tap" onClick="{{ m.vote }}" style="flex-grow: 1; background: {{m.bg}}; border: 1px solid {{m.border}}; box-shadow: {{m.glow}}; border-radius: 18px; padding: 15px 8px; display: flex; flex-direction: column; align-items: center; gap: 9px;">
+            <div style="width: 48px; height: 48px; border-radius: 999px; background: {{m.faceBg}}; color: {{m.faceFg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">{{m.initials}}</div>
+            <div style="font-size: 13px; font-weight: 700; color: {{m.nameColor}};">{{m.name}}</div>
+            <div style="font-size: 10.5px; font-weight: 500; color: {{m.metaColor}}; text-align: center; line-height: 1.35;">{{m.meta}}</div>
           </div>
         </sc-for>
       </div>
     </div>
 
     <!-- clips -->
-    <div style="border-radius: 22px; background: #10201A; color: #FFFFFF; padding: 16px; display: flex; flex-direction: column; gap: 13px; animation: bounceIn .55s cubic-bezier(.34,1.56,.64,1) .2s both;">
-      <div class="pop" onClick="{{ togglePlay }}" style="display: flex; align-items: center; gap: 13px;">
-        <div style="width: 50px; height: 50px; border-radius: 999px; background: #FF5A3C; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 0 #C43A20;">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="{{playIcon}}" fill="#FFFFFF"></path></svg>
+    <div class="panel" style="border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 13px; animation: rise .5s cubic-bezier(.22,1,.36,1) .2s both;">
+      <div class="tap" onClick="{{ togglePlay }}" style="display: flex; align-items: center; gap: 13px;">
+        <div style="width: 48px; height: 48px; border-radius: 999px; background: #C6FF4A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 26px -4px rgba(198,255,74,.7);">
+          <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="{{playIcon}}" fill="#07110E"></path></svg>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-          <div class="disp" style="font-size: 21px;">Your goals are up</div>
-          <div style="font-size: 12.5px; font-weight: 600; color: #9FBCAE;">{{clipCaption}}</div>
+        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+          <div class="disp" style="font-size: 19px;">YOUR GOALS ARE UP</div>
+          <div style="font-size: 12px; font-weight: 500; color: #8DA79A;">{{clipCaption}}</div>
         </div>
-        <div style="background: #FFCE2E; color: #10201A; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 800; white-space: nowrap;">Share</div>
+        <div class="lbl" style="font-size: 8.5px; color: #C6FF4A; border: 1px solid #4E7A32; border-radius: 999px; padding: 6px 10px; white-space: nowrap;">Share</div>
       </div>
       <div style="display: flex; gap: 7px;">
         <sc-for list="{{clips}}" as="c" hint-placeholder-count="3">
-          <div class="pop" onClick="{{ c.pick }}" style="flex-grow: 1; height: 56px; border-radius: 14px; background: {{c.bg}}; border: 2.5px solid {{c.ring}}; display: flex; align-items: flex-end; padding: 7px;">
-            <span style="font-size: 11px; font-weight: 800; color: #FFFFFF;">{{c.label}}</span>
+          <div class="tap" onClick="{{ c.pick }}" style="flex-grow: 1; height: 56px; border-radius: 13px; background: {{c.bg}}; border: 1px solid {{c.ring}}; display: flex; align-items: flex-end; padding: 8px;">
+            <span class="lbl" style="font-size: 8.5px; color: {{c.labelColor}};">{{c.label}}</span>
           </div>
         </sc-for>
       </div>
     </div>
 
-    <!-- level progress -->
-    <div style="border-radius: 22px; background: #FFFFFF; border: 2px solid #F0EADA; padding: 18px; display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px; animation: slideUp .5s cubic-bezier(.22,1,.36,1) .3s both;">
+    <!-- level -->
+    <div class="panel" style="border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px; animation: rise .5s cubic-bezier(.22,1,.36,1) .28s both;">
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-        <div class="disp" style="font-size: 20px;">Level 4 → 5</div>
-        <div style="background: #FFF6D6; color: #8A6A00; border-radius: 999px; padding: 6px 11px; font-size: 11.5px; font-weight: 800; white-space: nowrap;">2 wins away</div>
+        <div class="disp" style="font-size: 18px;">LEVEL 4 → 5</div>
+        <div class="lbl" style="font-size: 9px; color: #FFB23D; border: 1px solid rgba(255,178,61,.45); border-radius: 999px; padding: 6px 10px; white-space: nowrap;">2 wins away</div>
       </div>
-      <div style="height: 12px; border-radius: 999px; background: #F0EADA; overflow: hidden;">
-        <div style="width: 72%; height: 12px; border-radius: 999px; background: linear-gradient(90deg, #0F9E58, #FFCE2E);"></div>
+      <div style="height: 6px; border-radius: 999px; background: #16281F; overflow: hidden;">
+        <div style="width: 72%; height: 6px; border-radius: 999px; background: linear-gradient(90deg, #4E7A32, #C6FF4A); box-shadow: 0 0 16px rgba(198,255,74,.6);"></div>
       </div>
     </div>
 
@@ -127,7 +130,6 @@ class Component extends DCLogic {
       { id: 'ma', initials: 'MA', name: 'Marco', meta: 'Two big saves' },
       { id: 'jt', initials: 'JT', name: 'Jonas', meta: 'Debut, never stopped' },
     ];
-
     const picked = this.state.motm;
 
     const mates = mateDefs.map((m) => {
@@ -136,52 +138,54 @@ class Component extends DCLogic {
         initials: m.initials,
         name: m.name,
         meta: m.meta,
-        bg: on ? '#0F9E58' : '#FFFFFF',
-        border: on ? '#0F9E58' : '#F0EADA',
-        shadow: on ? '#0A7A43' : '#EDE6D3',
-        faceBg: on ? '#FFCE2E' : '#F0EADA',
-        faceFg: '#10201A',
-        nameColor: on ? '#FFFFFF' : '#10201A',
-        metaColor: on ? '#BDEFD4' : '#6B7D74',
+        bg: on ? 'rgba(198,255,74,.10)' : '#0E1C17',
+        border: on ? '#C6FF4A' : '#22392F',
+        glow: on ? '0 0 30px -8px rgba(198,255,74,.7)' : 'inset 0 1px 0 rgba(255,255,255,.05)',
+        faceBg: on ? '#C6FF4A' : '#1B2F25',
+        faceFg: on ? '#07110E' : '#C3D6CB',
+        nameColor: on ? '#C6FF4A' : '#EAF5EE',
+        metaColor: on ? '#9FCF7A' : '#8DA79A',
         vote: () => this.setState({ motm: on ? null : m.id }),
       };
     });
 
     const clipDefs = [
-      { label: "0'12 ⚽", caption: 'Near post, first time.', bg: '#1A3A2A' },
-      { label: "1'04 🧤", caption: 'Marco tipped it over.', bg: '#24402F' },
-      { label: "2'31 ⚽", caption: 'Your second of the night.', bg: '#163024' },
+      { label: "0'12 · goal", caption: 'Near post, first time.' },
+      { label: "1'04 · save", caption: 'Marco tipped it over.' },
+      { label: "2'31 · goal", caption: 'Your second of the night.' },
     ];
     const sel = this.state.clip;
     const playing = this.state.playing;
-    const clips = clipDefs.map((c, i) => ({
-      label: c.label,
-      bg: c.bg,
-      ring: i === sel ? '#FFCE2E' : 'transparent',
-      pick: () => this.setState({ clip: i, playing: false }),
-    }));
+    const clips = clipDefs.map((c, i) => {
+      const on = i === sel;
+      return {
+        label: c.label,
+        bg: on ? 'rgba(198,255,74,.12)' : '#132219',
+        ring: on ? '#C6FF4A' : '#22392F',
+        labelColor: on ? '#C6FF4A' : '#8DA79A',
+        pick: () => this.setState({ clip: i, playing: false }),
+      };
+    });
 
-    const colors = ['#FFCE2E', '#FF5A3C', '#FFFFFF', '#3DA5FF', '#BDEFD4'];
-    const confetti = [];
-    for (let i = 0; i < 18; i++) {
-      confetti.push({
-        left: (4 + ((i * 37) % 92)) + '%',
-        size: (5 + (i % 3) * 2) + 'px',
-        tall: (9 + (i % 4) * 3) + 'px',
+    const colors = ['#C6FF4A', '#FFB23D', '#FF3D7F', '#EAF5EE'];
+    const sparks = [];
+    for (let i = 0; i < 16; i++) {
+      sparks.push({
+        left: (5 + ((i * 41) % 90)) + '%',
+        w: (3 + (i % 2) * 2) + 'px',
+        h: (8 + (i % 4) * 3) + 'px',
         color: colors[i % colors.length],
-        dur: (1.9 + (i % 5) * 0.35) + 's',
-        delay: ((i % 7) * 0.18) + 's',
+        dur: (2.0 + (i % 5) * 0.3) + 's',
+        delay: ((i % 6) * 0.2) + 's',
       });
     }
-
-    let votedLabel = 'Pick one';
-    if (picked) { votedLabel = 'Vote counted'; }
 
     return {
       mates: mates,
       clips: clips,
-      confetti: confetti,
-      votedLabel: votedLabel,
+      sparks: sparks,
+      votedLabel: picked ? 'Vote counted' : 'Pick one',
+      votedColor: picked ? '#C6FF4A' : '#FF3D7F',
       playIcon: playing ? 'M8 5h3v14H8zM13 5h3v14h-3z' : 'M8 5.5v13l11-6.5z',
       clipCaption: playing ? 'Playing — ' + clipDefs[sel].label : clipDefs[sel].caption,
       togglePlay: () => this.setState({ playing: !playing }),

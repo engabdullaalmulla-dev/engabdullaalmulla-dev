@@ -7,43 +7,41 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #0B6E3F; } a:hover { color: #07512E; }
+    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
     * { box-sizing: border-box; }
-    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
-    .stripes { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 30px, transparent 30px 60px); }
+    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
+    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
+    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
   </style>
 </helmet>
 
-<div style="width: 1240px; height: 980px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; padding: 40px; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
+<div style="width: 1240px; height: 980px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; padding: 42px; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
 
   <!-- head -->
   <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 44px;">
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <div style="background: #FFCE2E; color: #10201A; border-radius: 999px; padding: 6px 13px; font-size: 11.5px; font-weight: 800;">DESIGN SYSTEM</div>
-        <div style="background: #E3F7EC; color: #0B6E3F; border-radius: 999px; padding: 6px 13px; font-size: 11.5px; font-weight: 800;">MATCHDAY</div>
-      </div>
-      <div class="disp" style="font-size: 66px; line-height: .94;">Football, not a banking app</div>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="lbl" style="font-size: 10px; color: #C6FF4A;">Design system · Matchday</div>
+      <div class="disp" style="font-size: 66px; line-height: .92;">FLOODLIT AFTER DARK</div>
     </div>
-    <div style="font-size: 15px; font-weight: 600; line-height: 1.6; color: #4C5A52; max-width: 40ch;">Pitch green, floodlight yellow, chunky shirt numbers and a bit of banter. Everything sits on a hard-edged drop shadow so it feels like a physical thing you can press — because the whole point is that Thursday night is the best part of the week.</div>
+    <div style="font-size: 15px; font-weight: 500; line-height: 1.65; color: #8DA79A; max-width: 42ch;">Nobody plays at midday in Dubai. The whole app lives at 9pm under the lights: black-green turf, one electric lime that behaves like a floodlight, and broadcast-wide numbers. Glow instead of drop shadows, because light is the material here.</div>
   </div>
 
-  <div style="height: 4px; border-radius: 999px; background: linear-gradient(90deg, #0F9E58, #FFCE2E, #FF5A3C);"></div>
+  <div style="height: 1px; background: linear-gradient(90deg, rgba(198,255,74,.7), rgba(255,178,61,.4), rgba(255,61,127,.4), transparent);"></div>
 
   <!-- colour -->
-  <div style="display: flex; flex-direction: column; gap: 12px;">
-    <div style="font-size: 11.5px; font-weight: 800; letter-spacing: .14em; color: #6B7D74;">COLOUR</div>
+  <div style="display: flex; flex-direction: column; gap: 13px;">
+    <div class="lbl" style="font-size: 10px; color: #6F8A7C;">Colour</div>
     <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px;">
       <sc-for list="{{swatches}}" as="s" hint-placeholder-count="7">
-        <div style="display: flex; flex-direction: column; gap: 9px;">
-          <div style="height: 74px; border-radius: 18px; background: {{s.bg}}; border: 2.5px solid {{s.ring}}; box-shadow: 0 5px 0 {{s.shadow}};"></div>
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <div style="font-size: 13px; font-weight: 800;">{{s.name}}</div>
-            <div style="font-size: 11px; font-weight: 600; color: #A9B5AE;">{{s.hex}}</div>
-            <div style="font-size: 11.5px; font-weight: 600; color: #6B7D74; line-height: 1.4;">{{s.role}}</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="height: 72px; border-radius: 16px; background: {{s.bg}}; border: 1px solid {{s.ring}}; box-shadow: {{s.glow}};"></div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 13px; font-weight: 700;">{{s.name}}</div>
+            <div style="font-size: 11px; font-weight: 500; color: #5E7568;">{{s.hex}}</div>
+            <div style="font-size: 11.5px; font-weight: 500; color: #8DA79A; line-height: 1.4;">{{s.role}}</div>
           </div>
         </div>
       </sc-for>
@@ -51,88 +49,95 @@
   </div>
 
   <!-- type -->
-  <div style="display: flex; flex-direction: column; gap: 12px;">
-    <div style="font-size: 11.5px; font-weight: 800; letter-spacing: .14em; color: #6B7D74;">TYPE &amp; VOICE</div>
+  <div style="display: flex; flex-direction: column; gap: 13px;">
+    <div class="lbl" style="font-size: 10px; color: #6F8A7C;">Type &amp; voice</div>
     <div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 18px;">
 
-      <div class="stripes" style="border-radius: 22px; background-color: #00A55C; color: #FFFFFF; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 7px 0 #07733F;">
-        <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 12.5px; font-weight: 800;">Bricolage Grotesque</div>
-          <div style="font-size: 11px; font-weight: 700; color: #BDEFD4;">Shout with it</div>
-        </div>
-        <div class="disp" style="font-size: 62px; line-height: .88;">19:00 · 6–5</div>
-        <div style="font-size: 12.5px; font-weight: 600; line-height: 1.5; color: #BDEFD4;">Kick-off times, scorelines, names on the card. Big, tight and unapologetic — football numbers should look like they're printed on a shirt.</div>
-      </div>
-
-      <div style="border-radius: 22px; background: #FFFFFF; border: 2.5px solid #F0EADA; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 5px 0 #EDE6D3;">
-        <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 12.5px; font-weight: 800;">Plus Jakarta Sans</div>
-          <div style="font-size: 11px; font-weight: 700; color: #A9B5AE;">Everything else</div>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 7px;">
-          <div style="font-size: 18px; font-weight: 800;">Grab the last shirt</div>
-          <div style="font-size: 15px; font-weight: 700;">Al Quoz Sports Park</div>
-          <div style="font-size: 13px; font-weight: 600; color: #6B7D74;">7-a-side · astro · floodlit</div>
+      <div style="position: relative; border-radius: 22px; overflow: hidden; border: 1px solid #2A4B39; padding: 24px;">
+        <div style="position: absolute; inset: 0; background-color: #0C3826; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 26px, transparent 26px 52px);"></div>
+        <div style="position: absolute; inset: 0; background: radial-gradient(110% 85% at 20% -16%, rgba(226,255,178,.28), transparent 62%);"></div>
+        <div style="position: relative; display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between;">
+            <div style="font-size: 12.5px; font-weight: 700;">Archivo Expanded</div>
+            <div class="lbl" style="font-size: 8.5px; color: #9FCF7A;">Scoreboard</div>
+          </div>
+          <div class="disp" style="font-size: 58px; line-height: .88; color: #FFFFFF;">19:00<br>6–5</div>
+          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #9FCF7A;">Wide and heavy, like a broadcast lower-third. Kick-off times, scorelines, shirt numbers, names on the card. Uppercase only.</div>
         </div>
       </div>
 
-      <div style="border-radius: 22px; background: #FFF6D6; border: 2.5px solid #F6E4A8; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 5px 0 #F0DC9A;">
-        <div style="font-size: 12.5px; font-weight: 800;">How it talks</div>
-        <div style="font-size: 16px; font-weight: 700; line-height: 1.5; color: #5A4A10;">"Rami snapped it up 🙌 — 45.00 back in your pocket."</div>
-        <div style="font-size: 12.5px; font-weight: 600; line-height: 1.5; color: #8A6A00;">Like a mate in the group chat, not a terms-and-conditions page. Warm, short, a little bit of banter — never salesy, never cutesy.</div>
+      <div class="panel" style="border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 13px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <div style="font-size: 12.5px; font-weight: 700;">Sora</div>
+          <div class="lbl" style="font-size: 8.5px; color: #6F8A7C;">Everything else</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 17px; font-weight: 700;">Al Quoz Sports Park</div>
+          <div style="font-size: 14px; font-weight: 500; color: #C3D6CB;">7-a-side · astro · floodlit</div>
+          <div style="font-size: 12.5px; font-weight: 500; color: #8DA79A;">Three of your crew are playing</div>
+          <div class="lbl" style="font-size: 9px; color: #C6FF4A;">Kick-off 5h 42m</div>
+        </div>
+      </div>
+
+      <div class="panel" style="border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 13px;">
+        <div style="font-size: 12.5px; font-weight: 700;">How it talks</div>
+        <div style="font-size: 16px; font-weight: 600; line-height: 1.5; color: #C6FF4A;">"Rami took it. 45.00 back in your account."</div>
+        <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #8DA79A;">Short, warm, a bit of edge. Like the group chat on a Thursday, not a terms-and-conditions page. No exclamation marks, no emoji — the colour does the shouting.</div>
       </div>
 
     </div>
   </div>
 
   <!-- components -->
-  <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-    <div style="font-size: 11.5px; font-weight: 800; letter-spacing: .14em; color: #6B7D74;">COMPONENTS</div>
+  <div style="display: flex; flex-direction: column; gap: 13px; flex-grow: 1;">
+    <div class="lbl" style="font-size: 10px; color: #6F8A7C;">Components</div>
     <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px;">
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">Buttons sit on a hard shadow</div>
-        <div class="disp" style="min-height: 54px; border-radius: 18px; background: #FFCE2E; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 5px 0 #D9A800;">Grab a shirt</div>
-        <div class="disp" style="min-height: 54px; border-radius: 18px; background: #0F9E58; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 5px 0 #0A7A43;">You're in!</div>
-        <div style="min-height: 54px; border-radius: 18px; background: #FFFFFF; border: 2.5px solid #E5DECB; color: #4C5A52; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; box-shadow: 0 4px 0 #E5DECB;">I can't make it</div>
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 500; color: #5E7568;">One action, and it glows</div>
+        <div class="disp" style="min-height: 54px; border-radius: 16px; background: #C6FF4A; color: #07110E; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 34px -6px rgba(198,255,74,.55);">TAKE A SHIRT</div>
+        <div class="disp" style="min-height: 54px; border-radius: 16px; background: rgba(198,255,74,.10); border: 1px solid #4E7A32; color: #C6FF4A; display: flex; align-items: center; justify-content: center; font-size: 16px;">YOU'RE IN</div>
+        <div class="disp" style="min-height: 54px; border-radius: 16px; background: #0E1C17; border: 1px solid #2C4739; color: #B8C9BF; display: flex; align-items: center; justify-content: center; font-size: 15px;">I CAN'T MAKE IT</div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">Shirt numbers &amp; faces</div>
-        <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 500; color: #5E7568;">Shirts, chips, states</div>
+        <div style="display: flex; gap: 9px; align-items: center;">
           <sc-for list="{{shirts}}" as="s" hint-placeholder-count="4">
-            <div style="width: 46px; height: 46px; border-radius: 999px; background: {{s.bg}}; color: {{s.fg}}; border: 2.5px solid {{s.ring}}; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; box-shadow: 0 3px 0 {{s.shadow}};">{{s.num}}</div>
+            <div class="disp" style="width: 44px; height: 44px; border-radius: 999px; background: {{s.bg}}; color: {{s.fg}}; border: 1.5px solid {{s.ring}}; border-style: {{s.style}}; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: {{s.glow}};">{{s.num}}</div>
           </sc-for>
         </div>
         <div style="display: flex; gap: 7px; flex-wrap: wrap;">
           <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
-            <div style="border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; font-size: 11px; font-weight: 800; padding: 6px 11px;">{{c.label}}</div>
+            <div class="lbl" style="border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; border: 1px solid {{c.border}}; font-size: 8.5px; padding: 6px 11px;">{{c.label}}</div>
           </sc-for>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">The pitch is a real surface</div>
-        <div style="position: relative; flex-grow: 1; min-height: 150px; border-radius: 18px; background-color: #0F9E58; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 22px, transparent 22px 44px); overflow: hidden; box-shadow: 0 5px 0 #0A7A43;">
-          <div style="position: absolute; left: 8px; right: 8px; top: 8px; bottom: 8px; border: 2px solid rgba(255,255,255,.34); border-radius: 8px;"></div>
-          <div style="position: absolute; left: 8px; right: 8px; top: 50%; height: 2px; background: rgba(255,255,255,.34);"></div>
-          <div style="position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border: 2px solid rgba(255,255,255,.34); border-radius: 999px;"></div>
-          <div style="position: absolute; left: 50%; top: 26%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 999px; background: #FFFFFF; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;">7</div>
-          <div style="position: absolute; left: 50%; top: 72%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 999px; background: #FFCE2E; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;">8</div>
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 500; color: #5E7568;">The pitch under lights</div>
+        <div style="position: relative; flex-grow: 1; min-height: 152px; border-radius: 18px; overflow: hidden; border: 1px solid #2A4B39;">
+          <div style="position: absolute; inset: 0; background-color: #0B3526; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 22px, transparent 22px 44px);"></div>
+          <div style="position: absolute; inset: 0; background: radial-gradient(70% 48% at 50% 0%, rgba(232,255,196,.3), transparent 62%);"></div>
+          <div style="position: absolute; left: 8px; right: 8px; top: 8px; bottom: 8px; border: 1.5px solid rgba(234,245,238,.28); border-radius: 8px;"></div>
+          <div style="position: absolute; left: 8px; right: 8px; top: 50%; height: 1.5px; background: rgba(234,245,238,.28);"></div>
+          <div style="position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px; border: 1.5px solid rgba(234,245,238,.28); border-radius: 999px;"></div>
+          <div class="disp" style="position: absolute; left: 50%; top: 26%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 999px; background: #EAF5EE; color: #07110E; display: flex; align-items: center; justify-content: center; font-size: 13px;">7</div>
+          <div class="disp" style="position: absolute; left: 50%; top: 72%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 999px; background: #C6FF4A; color: #07110E; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 18px rgba(198,255,74,.6);">8</div>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="font-size: 11.5px; font-weight: 700; color: #A9B5AE;">Celebrate the good bits</div>
-        <div style="border-radius: 20px; background: #10201A; color: #FFFFFF; padding: 20px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; box-shadow: 0 5px 0 #000000;">
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 500; color: #5E7568;">Spend motion on the good bits</div>
+        <div class="panel" style="border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 13px; flex-grow: 1;">
           <div style="display: flex; gap: 6px;">
-            <div style="width: 7px; height: 13px; background: #FFCE2E; border-radius: 2px;"></div>
-            <div style="width: 7px; height: 13px; background: #FF5A3C; border-radius: 2px;"></div>
-            <div style="width: 7px; height: 13px; background: #3DA5FF; border-radius: 2px;"></div>
-            <div style="width: 7px; height: 13px; background: #BDEFD4; border-radius: 2px;"></div>
+            <div style="width: 4px; height: 13px; background: #C6FF4A; border-radius: 1px; box-shadow: 0 0 8px #C6FF4A;"></div>
+            <div style="width: 4px; height: 13px; background: #FFB23D; border-radius: 1px; box-shadow: 0 0 8px #FFB23D;"></div>
+            <div style="width: 4px; height: 13px; background: #FF3D7F; border-radius: 1px; box-shadow: 0 0 8px #FF3D7F;"></div>
+            <div style="width: 4px; height: 13px; background: #EAF5EE; border-radius: 1px; box-shadow: 0 0 8px #EAF5EE;"></div>
           </div>
-          <div class="disp" style="font-size: 30px; line-height: .96;">You won — and you bagged 2</div>
-          <div style="font-size: 12px; font-weight: 600; line-height: 1.5; color: #9FBCAE;">Confetti on full time, a bouncing ball while we find someone to take your shirt. Motion is the reward, so spend it on the moments that actually feel good.</div>
+          <div class="disp" style="font-size: 24px; line-height: .98;">YOU WON — AND YOU BAGGED 2</div>
+          <div style="font-size: 12px; font-weight: 500; line-height: 1.5; color: #8DA79A;">Sparks at full time, a spinning ball while we find someone to take your shirt, a glow that tightens on the button you can press. Everywhere else, nothing moves.</div>
         </div>
       </div>
 
@@ -147,25 +152,25 @@ class Component extends DCLogic {
   renderVals() {
     return {
       swatches: [
-        { name: 'Pitch', hex: '#00A55C', bg: '#00A55C', ring: '#00A55C', role: 'The brand. Hero cards and the pitch itself.' },
-        { name: 'Deep pitch', hex: '#0B6E3F', bg: '#0B6E3F', ring: '#0B6E3F', role: 'Shadows under green, and text on light.' },
-        { name: 'Floodlight', hex: '#FFCE2E', bg: '#FFCE2E', ring: '#FFCE2E', role: 'The main action. Grab a shirt, get paid.' },
-        { name: 'Kit orange', hex: '#FF5A3C', bg: '#FF5A3C', ring: '#FF5A3C', role: 'You, urgency, last shirt going.' },
-        { name: 'Night', hex: '#10201A', bg: '#10201A', ring: '#10201A', role: 'Type, and the clips panel.' },
-        { name: 'Paper', hex: '#FFFCF2', bg: '#FFFCF2', ring: '#F0EADA', role: 'The page. Warm, never cold white.' },
-        { name: 'Chalk', hex: '#F0EADA', bg: '#F0EADA', ring: '#E5DECB', role: 'Borders, tracks, resting chips.' },
+        { name: 'Night', hex: '#07110E', bg: '#07110E', ring: '#22392F', glow: 'none', role: 'The page. Black with green in it, never grey.' },
+        { name: 'Panel', hex: '#0E1C17', bg: '#0E1C17', ring: '#22392F', glow: 'none', role: 'Cards and rows, lifted by a hairline.' },
+        { name: 'Turf', hex: '#0C3826', bg: '#0C3826', ring: '#2A4B39', glow: 'none', role: 'Hero surfaces and the pitch, always striped.' },
+        { name: 'Floodlight', hex: '#C6FF4A', bg: '#C6FF4A', ring: '#C6FF4A', glow: '0 0 26px -4px rgba(198,255,74,.7)', role: 'The action. Every primary button, your team.' },
+        { name: 'Sodium', hex: '#FFB23D', bg: '#FFB23D', ring: '#FFB23D', glow: '0 0 22px -6px rgba(255,178,61,.6)', role: 'Draws, warnings, progress to the next level.' },
+        { name: 'Kit pink', hex: '#FF3D7F', bg: '#FF3D7F', ring: '#FF3D7F', glow: '0 0 22px -6px rgba(255,61,127,.6)', role: 'You on the pitch, countdowns, relegation.' },
+        { name: 'Chalk', hex: '#EAF5EE', bg: '#EAF5EE', ring: '#EAF5EE', glow: 'none', role: 'Type, pitch markings, the other team.' },
       ],
       shirts: [
-        { num: '8', bg: '#FFCE2E', fg: '#10201A', ring: '#FFCE2E', shadow: '#D9A800' },
-        { num: '9', bg: '#FF5A3C', fg: '#FFFFFF', ring: '#FFFFFF', shadow: '#C43A20' },
-        { num: '1', bg: '#FFFFFF', fg: '#10201A', ring: '#F0EADA', shadow: '#E5DECB' },
-        { num: '+', bg: '#F0EADA', fg: '#6B7D74', ring: '#E5DECB', shadow: 'transparent' },
+        { num: '8', bg: '#C6FF4A', fg: '#07110E', ring: 'rgba(198,255,74,.8)', style: 'solid', glow: '0 0 18px rgba(198,255,74,.55)' },
+        { num: '9', bg: '#FF3D7F', fg: '#FFFFFF', ring: 'rgba(255,255,255,.8)', style: 'solid', glow: '0 0 20px rgba(255,61,127,.7)' },
+        { num: '1', bg: '#EAF5EE', fg: '#07110E', ring: 'rgba(255,255,255,.7)', style: 'solid', glow: 'none' },
+        { num: '+', bg: 'rgba(234,245,238,.10)', fg: '#EAF5EE', ring: 'rgba(234,245,238,.7)', style: 'dashed', glow: 'none' },
       ],
       chips: [
-        { label: 'LAST SHIRT GOING!', bg: '#FFF3F0', fg: '#C43A20' },
-        { label: 'YOUR LEVEL', bg: '#E3F7EC', fg: '#0B6E3F' },
-        { label: 'SHIRT 8', bg: '#FFCE2E', fg: '#10201A' },
-        { label: 'FULL — WAITLIST', bg: '#F0EADA', fg: '#6B7D74' },
+        { label: 'Kick-off 5h 42m', bg: 'rgba(255,61,127,.16)', fg: '#FF8FB4', border: 'rgba(255,61,127,.45)' },
+        { label: 'Your level', bg: 'transparent', fg: '#9FCF7A', border: '#3D6B3A' },
+        { label: 'Shirt 8', bg: '#C6FF4A', fg: '#07110E', border: 'transparent' },
+        { label: 'Full — waitlist', bg: '#0E1C17', fg: '#6F8A7C', border: '#22392F' },
       ],
     };
   }

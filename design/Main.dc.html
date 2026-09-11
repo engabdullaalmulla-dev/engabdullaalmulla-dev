@@ -7,101 +7,108 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #0B6E3F; } a:hover { color: #07512E; }
+    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
-    .pop { cursor: pointer; transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease; }
-    .pop:active { transform: scale(.955); }
-    .stripes { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 30px, transparent 30px 60px); }
-    @keyframes bounceIn { 0% { opacity: 0; transform: translateY(20px) scale(.94); } 60% { transform: translateY(-4px) scale(1.015); } 100% { opacity: 1; transform: none; } }
-    @keyframes popIn { 0% { opacity: 0; transform: scale(.5); } 65% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-    @keyframes pulseDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.82); } }
+    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
+    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
+    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
+    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, box-shadow .3s ease; }
+    .tap:active { transform: scale(.982); }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes swell { from { opacity: 0; transform: translateY(18px) scale(.986); } to { opacity: 1; transform: none; } }
+    @keyframes pop { 0% { opacity: 0; transform: scale(.6); } 65% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- header -->
-  <div style="padding: 26px 20px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
-    <div style="display: flex; flex-direction: column; gap: 1px;">
-      <div style="font-size: 12px; font-weight: 700; color: #6B7D74;">Thursday · Al Quoz</div>
-      <div class="disp" style="font-size: 40px; line-height: 1;">Tonight ⚡</div>
+  <div style="padding: 30px 20px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl" style="font-size: 10px; color: #C6FF4A;">Thursday · Al Quoz</div>
+      <div class="disp" style="font-size: 42px; line-height: .94;">TONIGHT</div>
     </div>
-    <div class="pop" style="width: 46px; height: 46px; border-radius: 999px; background: #FFCE2E; color: #10201A; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 4px 0 #D9A800;">AA</div>
+    <div class="tap" style="width: 44px; height: 44px; border-radius: 999px; background: #152820; border: 1px solid #2C4739; color: #EAF5EE; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;">AA</div>
   </div>
 
   <!-- hero -->
   <div style="padding: 0 20px;">
-    <div class="stripes" style="border-radius: 26px; background-color: #00A55C; color: #FFFFFF; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 0 #07733F, 0 22px 40px -18px rgba(11,110,63,.6); animation: bounceIn .7s cubic-bezier(.34,1.56,.64,1) both;">
+    <div style="position: relative; border-radius: 24px; overflow: hidden; border: 1px solid #2A4B39; box-shadow: 0 26px 56px -26px rgba(0,0,0,.95), 0 0 40px -18px rgba(198,255,74,.28); animation: swell .7s cubic-bezier(.22,1,.36,1) both;">
 
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 7px; background: #FF5A3C; border-radius: 999px; padding: 6px 11px;">
-          <div style="width: 7px; height: 7px; border-radius: 999px; background: #FFFFFF; animation: pulseDot 1.4s ease-in-out infinite;"></div>
-          <span style="font-size: 11.5px; font-weight: 800; letter-spacing: .02em;">{{hero.countdown}}</span>
+      <div style="position: absolute; inset: 0; background-color: #0C3826; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 26px, transparent 26px 52px);"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% -18%, rgba(226,255,178,.34) 0%, rgba(198,255,74,.10) 34%, transparent 66%);"></div>
+
+      <div style="position: relative; padding: 20px; display: flex; flex-direction: column; gap: 18px;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,61,127,.16); border: 1px solid rgba(255,61,127,.45); border-radius: 999px; padding: 6px 11px;">
+            <div style="width: 6px; height: 6px; border-radius: 999px; background: #FF3D7F; animation: blink 1.5s ease-in-out infinite;"></div>
+            <span class="lbl" style="font-size: 9.5px; color: #FF8FB4;">{{hero.countdown}}</span>
+          </div>
+          <div class="lbl" style="font-size: 9.5px; color: #9FCF7A; border: 1px solid #3D6B3A; border-radius: 999px; padding: 6px 11px;">{{hero.tier}}</div>
         </div>
-        <div style="background: rgba(255,255,255,.2); border-radius: 999px; padding: 6px 11px; font-size: 11.5px; font-weight: 800;">{{hero.tier}}</div>
-      </div>
 
-      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
-        <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
-          <div class="disp" style="font-size: 64px; line-height: .86;">{{hero.time}}</div>
-          <div style="font-size: 15.5px; font-weight: 800;">{{hero.venue}}</div>
-          <div style="font-size: 13px; font-weight: 600; color: #BDEFD4;">{{hero.meta}}</div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+            <div class="disp" style="font-size: 62px; line-height: .84; color: #FFFFFF;">{{hero.time}}</div>
+            <div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em;">{{hero.venue}}</div>
+            <div style="font-size: 12.5px; font-weight: 500; color: #8DA79A;">{{hero.meta}}</div>
+          </div>
+          <div class="disp" style="font-size: 22px; line-height: 1; color: #C6FF4A; flex-shrink: 0;">{{hero.price}}</div>
         </div>
-        <div class="disp" style="font-size: 26px; line-height: 1; color: #FFCE2E; flex-shrink: 0;">{{hero.price}}</div>
-      </div>
 
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <div style="display: flex;">
-          <sc-for list="{{hero.faces}}" as="f" hint-placeholder-count="5">
-            <div style="width: 32px; height: 32px; border-radius: 999px; background: {{f.bg}}; color: {{f.fg}}; border: 2.5px solid #00A55C; margin-left: {{f.shift}}; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 800; animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both; animation-delay: {{f.delay}};">{{f.label}}</div>
-          </sc-for>
+        <div style="display: flex; align-items: center; gap: 11px;">
+          <div style="display: flex;">
+            <sc-for list="{{hero.faces}}" as="f" hint-placeholder-count="5">
+              <div style="width: 31px; height: 31px; border-radius: 999px; background: {{f.bg}}; color: {{f.fg}}; border: 2px solid #0C3826; margin-left: {{f.shift}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; animation: pop .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{f.delay}};">{{f.label}}</div>
+            </sc-for>
+          </div>
+          <div style="font-size: 12.5px; font-weight: 600; line-height: 1.35; color: #C3D6CB;">{{hero.crew}}</div>
         </div>
-        <div style="font-size: 13px; font-weight: 700; line-height: 1.3;">{{hero.crew}}</div>
-      </div>
 
-      <div class="pop" onClick="{{ book }}" style="min-height: 58px; border-radius: 18px; background: {{ctaBg}}; color: {{ctaFg}}; display: flex; align-items: center; justify-content: center; gap: 9px; box-shadow: 0 5px 0 {{ctaShadow}};">
-        <span class="disp" style="font-size: 19px; letter-spacing: -.02em;">{{ctaLabel}}</span>
-      </div>
+        <div class="tap" onClick="{{ book }}" style="min-height: 56px; border-radius: 16px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1px solid {{ctaBorder}}; box-shadow: {{ctaGlow}}; display: flex; align-items: center; justify-content: center;">
+          <span class="disp" style="font-size: 16px; letter-spacing: .01em;">{{ctaLabel}}</span>
+        </div>
 
-      <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BDEFD4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-        <div style="font-size: 12.5px; font-weight: 700; color: #BDEFD4;">Can't make it? Money straight back.</div>
-      </div>
+        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#9FCF7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+          <div style="font-size: 12px; font-weight: 500; color: #9FCF7A;">Can't make it? Money straight back.</div>
+        </div>
 
+      </div>
     </div>
   </div>
 
-  <!-- also tonight -->
-  <div style="padding: 20px 20px 8px; display: flex; align-items: center; gap: 10px;">
-    <div class="disp" style="font-size: 17px;">Also on tonight</div>
-    <div style="height: 3px; border-radius: 999px; background: #EFE9D8; flex-grow: 1;"></div>
+  <!-- also -->
+  <div style="padding: 22px 20px 10px; display: flex; align-items: center; gap: 12px;">
+    <div class="lbl" style="font-size: 10px; color: #6F8A7C;">Also on tonight</div>
+    <div style="height: 1px; background: #1C3129; flex-grow: 1;"></div>
   </div>
 
-  <div style="padding: 0 20px 12px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+  <div style="padding: 0 20px 12px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 9px;">
     <sc-for list="{{others}}" as="g" hint-placeholder-count="2">
-      <div class="pop" onClick="{{ g.pick }}" style="border-radius: 20px; background: #FFFFFF; padding: 13px 14px; display: flex; align-items: center; gap: 13px; border: 2px solid #F0EADA; animation: slideUp .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
-        <div class="disp" style="font-size: 22px; line-height: 1; background: {{g.chipBg}}; color: {{g.chipFg}}; border-radius: 14px; padding: 10px 11px; min-width: 74px; text-align: center;">{{g.time}}</div>
-        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-          <div style="font-size: 14.5px; font-weight: 800; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{g.venue}}</div>
-          <div style="font-size: 12.5px; font-weight: 700; color: {{g.statusColor}};">{{g.status}}</div>
+      <div class="tap panel" onClick="{{ g.pick }}" style="border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 14px; animation: rise .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
+        <div class="disp" style="font-size: 21px; line-height: 1; color: {{g.timeColor}}; min-width: 66px;">{{g.time}}</div>
+        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{g.venue}}</div>
+          <div style="font-size: 12px; font-weight: 600; color: {{g.statusColor}};">{{g.status}}</div>
         </div>
-        <div style="font-size: 14px; font-weight: 800; color: #6B7D74; flex-shrink: 0;">{{g.price}}</div>
+        <div style="font-size: 13px; font-weight: 700; color: #8DA79A; flex-shrink: 0;">{{g.price}}</div>
       </div>
     </sc-for>
   </div>
 
   <!-- nav -->
-  <div style="display: flex; padding: 8px 12px 20px; gap: 2px; border-top: 2px solid #F0EADA;">
+  <div style="display: flex; padding: 8px 12px 20px; gap: 2px; border-top: 1px solid #1C3129;">
     <sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
-      <div class="pop" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 54px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: {{n.bg}};">
-        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="{{n.color}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
-        <div style="font-size: 10.5px; font-weight: 800; color: {{n.color}};">{{n.label}}</div>
+      <div class="tap" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 54px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: {{n.bg}};">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="{{n.color}}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
+        <div class="lbl" style="font-size: 8.5px; color: {{n.color}};">{{n.label}}</div>
       </div>
     </sc-for>
   </div>
@@ -118,24 +125,24 @@ class Component extends DCLogic {
 
   renderVals() {
     const defs = [
-      { time: '19:00', venue: 'Al Quoz Sports Park', meta: '7-a-side · astro · floodlit', tier: 'Your level', price: 'AED 45', taken: 13, total: 14, countdown: 'Kick-off in 5h 42m', crew: '3 of your crew are playing' },
-      { time: '20:30', venue: 'The Sevens', meta: '5-a-side · indoor · aircon', tier: 'A level up', price: 'AED 38', taken: 10, total: 10, countdown: 'Kick-off in 7h 12m', crew: 'Rami and Marco are in' },
-      { time: '21:00', venue: 'Insportz Indoor', meta: '7-a-side · indoor', tier: 'Your level', price: 'AED 50', taken: 8, total: 14, countdown: 'Kick-off in 7h 42m', crew: 'Plenty of room — bring a mate' },
+      { time: '19:00', venue: 'Al Quoz Sports Park', meta: '7-a-side · astro · floodlit', tier: 'Your level', price: 'AED 45', taken: 13, total: 14, countdown: 'Kick-off 5h 42m', crew: 'Three of your crew are playing' },
+      { time: '20:30', venue: 'The Sevens', meta: '5-a-side · indoor', tier: 'A level up', price: 'AED 38', taken: 10, total: 10, countdown: 'Kick-off 7h 12m', crew: 'Rami and Marco are in' },
+      { time: '21:00', venue: 'Insportz Indoor', meta: '7-a-side · indoor', tier: 'Your level', price: 'AED 50', taken: 8, total: 14, countdown: 'Kick-off 7h 42m', crew: 'Plenty of room — bring someone' },
     ];
 
     const say = (d) => {
       const left = d.total - d.taken;
-      if (left <= 0) { return 'Full — hop on the waitlist'; }
-      if (left === 1) { return 'Last shirt going!'; }
+      if (left <= 0) { return 'Full — waitlist open'; }
+      if (left === 1) { return 'One shirt left'; }
       return left + ' shirts left';
     };
 
     const palette = [
-      { bg: '#FFCE2E', fg: '#10201A' },
-      { bg: '#FF5A3C', fg: '#FFFFFF' },
-      { bg: '#3DA5FF', fg: '#FFFFFF' },
-      { bg: '#FFFFFF', fg: '#10201A' },
-      { bg: '#0B6E3F', fg: '#FFFFFF' },
+      { bg: '#C6FF4A', fg: '#07110E' },
+      { bg: '#FFB23D', fg: '#07110E' },
+      { bg: '#FF3D7F', fg: '#FFFFFF' },
+      { bg: '#2F4C3E', fg: '#EAF5EE' },
+      { bg: '#EAF5EE', fg: '#07110E' },
     ];
     const names = ['RK', 'MA', 'DS', 'JT', 'SH'];
 
@@ -148,24 +155,13 @@ class Component extends DCLogic {
       label: n,
       bg: palette[k].bg,
       fg: palette[k].fg,
-      shift: k === 0 ? '0' : '-11px',
+      shift: k === 0 ? '0' : '-10px',
       delay: (0.3 + k * 0.06) + 's',
     }));
 
-    let ctaLabel = 'Grab a shirt · ' + h.price;
-    if (booked) { ctaLabel = "You're in! See you there"; }
-    else if (full) { ctaLabel = 'Join the waitlist'; }
-
-    const hero = {
-      time: h.time,
-      venue: h.venue,
-      meta: h.meta,
-      tier: h.tier,
-      price: h.price,
-      countdown: h.countdown,
-      crew: h.crew,
-      faces: faces,
-    };
+    let ctaLabel = 'TAKE A SHIRT · ' + h.price;
+    if (booked) { ctaLabel = "YOU'RE IN"; }
+    else if (full) { ctaLabel = 'JOIN THE WAITLIST'; }
 
     const others = [];
     defs.forEach((d, k) => {
@@ -176,9 +172,8 @@ class Component extends DCLogic {
         venue: d.venue,
         price: d.price,
         status: say(d),
-        chipBg: isFull ? '#F0EADA' : '#E3F7EC',
-        chipFg: isFull ? '#6B7D74' : '#0B6E3F',
-        statusColor: isFull ? '#6B7D74' : '#FF5A3C',
+        timeColor: isFull ? '#6F8A7C' : '#EAF5EE',
+        statusColor: isFull ? '#6F8A7C' : '#C6FF4A',
         delay: (others.length * 0.08 + 0.3) + 's',
         pick: () => this.setState({ hero: k, booked: false }),
       });
@@ -195,20 +190,21 @@ class Component extends DCLogic {
       return {
         label: n.label,
         icon: n.icon,
-        color: on ? '#0B6E3F' : '#A9B5AE',
-        bg: on ? '#E3F7EC' : 'transparent',
+        color: on ? '#C6FF4A' : '#5E7568',
+        bg: on ? '#132219' : 'transparent',
         pick: () => {},
       };
     });
 
     return {
-      hero: hero,
+      hero: { time: h.time, venue: h.venue, meta: h.meta, tier: h.tier, price: h.price, countdown: h.countdown, crew: h.crew, faces: faces },
       others: others,
       nav: nav,
       ctaLabel: ctaLabel,
-      ctaBg: booked ? '#10201A' : '#FFCE2E',
-      ctaFg: booked ? '#FFFFFF' : '#10201A',
-      ctaShadow: booked ? '#000000' : '#D9A800',
+      ctaBg: booked ? 'rgba(198,255,74,.10)' : '#C6FF4A',
+      ctaFg: booked ? '#C6FF4A' : '#07110E',
+      ctaBorder: booked ? '#4E7A32' : 'transparent',
+      ctaGlow: booked ? 'none' : '0 0 34px -6px rgba(198,255,74,.55)',
       book: () => this.setState({ booked: !booked }),
     };
   }

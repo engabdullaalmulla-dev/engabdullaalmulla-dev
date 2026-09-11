@@ -7,176 +7,189 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #0B6E3F; } a:hover { color: #07512E; }
+    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.03em; }
-    .pop { cursor: pointer; transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease; }
-    .pop:active { transform: scale(.955); }
-    .stripes { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 30px, transparent 30px 60px); }
-    @keyframes bounceIn { 0% { opacity: 0; transform: translateY(20px) scale(.94); } 60% { transform: translateY(-4px) scale(1.015); } 100% { opacity: 1; transform: none; } }
-    @keyframes popIn { 0% { opacity: 0; transform: scale(.45); } 65% { transform: scale(1.14); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-    @keyframes roll { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-    @keyframes fill { from { width: 4%; } to { width: 100%; } }
+    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
+    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
+    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
+    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, box-shadow .3s ease; }
+    .tap:active { transform: scale(.982); }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes swell { from { opacity: 0; transform: translateY(18px) scale(.986); } to { opacity: 1; transform: none; } }
+    @keyframes pop { 0% { opacity: 0; transform: scale(.55); } 65% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes beam { 0%,100% { opacity: .28; } 50% { opacity: .62; } }
+    @keyframes fillbar { from { width: 3%; } to { width: 100%; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #FFFCF2; font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif; color: #10201A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
 
-  <!-- ===== 0 ===== -->
+  <!-- 0 -->
   <sc-if value="{{isBooked}}" hint-placeholder-val="{{ true }}">
     <div style="display: flex; flex-direction: column; height: 844px;">
 
-      <div style="padding: 26px 20px 14px;">
-        <div class="disp" style="font-size: 34px;">You're in 🎉</div>
+      <div style="padding: 30px 20px 16px;">
+        <div class="lbl" style="font-size: 10px; color: #C6FF4A;">You're in</div>
       </div>
 
       <div style="padding: 0 20px;">
-        <div class="stripes" style="border-radius: 26px; background-color: #00A55C; color: #FFFFFF; padding: 22px 20px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 10px 0 #07733F, 0 22px 40px -18px rgba(11,110,63,.6); animation: bounceIn .65s cubic-bezier(.34,1.56,.64,1) both;">
-          <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
-            <div class="disp" style="font-size: 64px; line-height: .86;">19:00</div>
-            <div style="background: #FFCE2E; color: #10201A; border-radius: 999px; padding: 7px 12px; font-size: 11.5px; font-weight: 800; white-space: nowrap;">Shirt 8</div>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 3px;">
-            <div style="font-size: 16px; font-weight: 800;">Al Quoz Sports Park</div>
-            <div style="font-size: 13px; font-weight: 600; color: #BDEFD4;">Thursday · 7-a-side · Pitch 3, gate B</div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 11px; background: rgba(0,0,0,.16); border-radius: 14px; padding: 11px 13px;">
-            <div style="font-size: 20px; line-height: 1;">⚽</div>
-            <div style="font-size: 13px; font-weight: 700; line-height: 1.35;">Squad's full — 14 of 14. Bibs and ball sorted.</div>
+        <div style="position: relative; border-radius: 24px; overflow: hidden; border: 1px solid #2A4B39; box-shadow: 0 26px 56px -26px rgba(0,0,0,.95); animation: swell .65s cubic-bezier(.22,1,.36,1) both;">
+          <div style="position: absolute; inset: 0; background-color: #0C3826; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 26px, transparent 26px 52px);"></div>
+          <div style="position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% -18%, rgba(226,255,178,.32), rgba(198,255,74,.08) 36%, transparent 66%);"></div>
+          <div style="position: relative; padding: 22px 20px; display: flex; flex-direction: column; gap: 18px;">
+            <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
+              <div class="disp" style="font-size: 62px; line-height: .84; color: #FFFFFF;">19:00</div>
+              <div class="lbl" style="font-size: 9.5px; color: #07110E; background: #C6FF4A; border-radius: 999px; padding: 7px 12px; white-space: nowrap;">Shirt 8</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 15.5px; font-weight: 700;">Al Quoz Sports Park</div>
+              <div style="font-size: 12.5px; font-weight: 500; color: #8DA79A;">Thursday · 7-a-side · Pitch 3, gate B</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,.32); border: 1px solid rgba(198,255,74,.2); border-radius: 14px; padding: 12px 14px;">
+              <div style="height: 3px; border-radius: 999px; background: rgba(234,245,238,.14); flex-grow: 1; overflow: hidden;"><div style="width: 100%; height: 3px; border-radius: 999px; background: #C6FF4A;"></div></div>
+              <div class="lbl" style="font-size: 9px; color: #C6FF4A; white-space: nowrap;">14 of 14</div>
+            </div>
           </div>
         </div>
       </div>
 
       <div style="flex-grow: 1;"></div>
 
-      <div style="padding: 0 20px 26px; display: flex; flex-direction: column; gap: 14px;">
-        <div style="border-radius: 20px; background: #FFF6D6; border: 2px solid #F6E4A8; padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start;">
-          <div style="font-size: 20px; line-height: 1;">👍</div>
-          <div style="font-size: 13.5px; font-weight: 600; line-height: 1.5; color: #5A4A10;">Something come up? No cut-off, no penalty. We'll pass your shirt to the next lad and your money goes straight back.</div>
+      <div style="padding: 0 20px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <div class="panel" style="border-radius: 18px; padding: 17px 18px; display: flex; gap: 13px; align-items: flex-start;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C6FF4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+          <div style="font-size: 13.5px; font-weight: 500; line-height: 1.55; color: #C3D6CB;">Something come up? No cut-off, no penalty. We pass your shirt to the next player and your money goes straight back.</div>
         </div>
-        <div class="pop" onClick="{{ toRelease }}" style="min-height: 56px; border-radius: 18px; background: #FFFFFF; border: 2.5px solid #E5DECB; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #E5DECB;">
-          <span style="font-size: 15.5px; font-weight: 800; color: #4C5A52;">I can't make it</span>
+        <div class="tap" onClick="{{ toRelease }}" style="min-height: 56px; border-radius: 16px; border: 1px solid #2C4739; background: #0E1C17; display: flex; align-items: center; justify-content: center;">
+          <span class="disp" style="font-size: 15px; color: #B8C9BF;">I CAN'T MAKE IT</span>
         </div>
       </div>
 
     </div>
   </sc-if>
 
-  <!-- ===== 1 ===== -->
+  <!-- 1 -->
   <sc-if value="{{isConfirm}}" hint-placeholder-val="{{ true }}">
     <div style="display: flex; flex-direction: column; height: 844px;">
 
-      <div style="padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 12px;">
-        <div class="disp" style="font-size: 42px; line-height: 1.02; animation: slideUp .5s cubic-bezier(.22,1,.36,1) both;">Six lads want<br>your shirt</div>
-        <div style="font-size: 14.5px; font-weight: 600; line-height: 1.55; color: #4C5A52; animation: slideUp .5s cubic-bezier(.22,1,.36,1) .08s both;">We offer it to whoever's been waiting longest at your level. Shirts at this pitch usually go in about four minutes.</div>
+      <div style="padding: 30px 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+        <div class="lbl" style="font-size: 10px; color: #FF3D7F; animation: rise .45s cubic-bezier(.22,1,.36,1) both;">Passing it on</div>
+        <div class="disp" style="font-size: 44px; line-height: .96; animation: rise .55s cubic-bezier(.22,1,.36,1) .06s both;">SIX PLAYERS<br>WANT YOUR<br>SHIRT</div>
+        <div style="font-size: 14px; font-weight: 500; line-height: 1.6; color: #8DA79A; animation: rise .55s cubic-bezier(.22,1,.36,1) .14s both;">It goes to whoever has waited longest at your level. Shirts at this pitch usually go in about four minutes.</div>
       </div>
 
-      <div style="padding: 0 20px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="padding: 0 20px; display: flex; flex-direction: column; gap: 9px;">
         <sc-for list="{{queue}}" as="q" hint-placeholder-count="3">
-          <div style="display: flex; align-items: center; gap: 13px; background: #FFFFFF; border: 2px solid #F0EADA; border-radius: 20px; padding: 13px 15px; animation: slideUp .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{q.delay}};">
-            <div style="width: 44px; height: 44px; border-radius: 999px; background: {{q.bg}}; color: {{q.fg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0;">{{q.initials}}</div>
+          <div class="panel" style="border-radius: 16px; padding: 13px 15px; display: flex; align-items: center; gap: 13px; animation: rise .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{q.delay}};">
+            <div style="width: 40px; height: 40px; border-radius: 999px; background: {{q.bg}}; color: {{q.fg}}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;">{{q.initials}}</div>
             <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 15.5px; font-weight: 800;">{{q.name}}</div>
-              <div style="font-size: 12.5px; font-weight: 600; color: #6B7D74;">{{q.meta}}</div>
+              <div style="font-size: 15px; font-weight: 700;">{{q.name}}</div>
+              <div style="font-size: 12px; font-weight: 500; color: #8DA79A;">{{q.meta}}</div>
             </div>
-            <div style="background: #F0EADA; color: #4C5A52; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 800; white-space: nowrap;">{{q.wait}}</div>
+            <div class="lbl" style="font-size: 8.5px; color: #8DA79A; border: 1px solid #2C4739; border-radius: 999px; padding: 5px 9px; white-space: nowrap;">{{q.wait}}</div>
           </div>
         </sc-for>
       </div>
 
       <div style="flex-grow: 1;"></div>
 
-      <div style="padding: 0 20px 26px; display: flex; flex-direction: column; gap: 8px;">
-        <div class="pop" onClick="{{ toSearching }}" style="min-height: 58px; border-radius: 18px; background: #FFCE2E; color: #10201A; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #D9A800;">
-          <span class="disp" style="font-size: 19px;">Pass my shirt on</span>
+      <div style="padding: 0 20px 28px; display: flex; flex-direction: column; gap: 8px;">
+        <div class="tap" onClick="{{ toSearching }}" style="min-height: 58px; border-radius: 16px; background: #C6FF4A; color: #07110E; box-shadow: 0 0 34px -6px rgba(198,255,74,.55); display: flex; align-items: center; justify-content: center;">
+          <span class="disp" style="font-size: 16px; letter-spacing: .01em;">PASS MY SHIRT ON</span>
         </div>
-        <div class="pop" onClick="{{ toBooked }}" style="min-height: 52px; display: flex; align-items: center; justify-content: center;">
-          <span style="font-size: 15px; font-weight: 800; color: #6B7D74;">Actually, I'll play</span>
+        <div class="tap" onClick="{{ toBooked }}" style="min-height: 52px; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 14px; font-weight: 600; color: #6F8A7C;">Actually, I'll play</span>
         </div>
       </div>
 
     </div>
   </sc-if>
 
-  <!-- ===== 2 ===== -->
+  <!-- 2 -->
   <sc-if value="{{isSearching}}" hint-placeholder-val="{{ true }}">
-    <div class="stripes" style="display: flex; flex-direction: column; height: 844px; background-color: #0B6E3F; color: #FFFFFF; animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;">
+    <div style="position: relative; display: flex; flex-direction: column; height: 844px; overflow: hidden; animation: rise .4s cubic-bezier(.22,1,.36,1) both;">
+      <div style="position: absolute; inset: 0; background: radial-gradient(80% 45% at 50% 8%, rgba(226,255,178,.26), transparent 60%); animation: beam 3s ease-in-out infinite;"></div>
+      <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 26px, transparent 26px 52px);"></div>
 
-      <div style="padding: 26px 20px 0;">
-        <div style="font-size: 12px; font-weight: 800; letter-spacing: .1em; color: #BDEFD4;">PASSING IT ON…</div>
+      <div style="position: relative; padding: 30px 20px 0;">
+        <div class="lbl" style="font-size: 10px; color: #C6FF4A;">Offering your shirt</div>
       </div>
 
-      <div style="padding: 70px 24px 0; display: flex; flex-direction: column; align-items: center; gap: 36px; text-align: center;">
-        <div style="animation: bob 1.6s ease-in-out infinite;">
-          <svg viewBox="0 0 100 100" width="104" height="104" aria-hidden="true" style="animation: roll 2.4s linear infinite;">
-            <circle cx="50" cy="50" r="46" fill="#FFFFFF"></circle>
-            <path d="M50 22 L66 34 L60 54 L40 54 L34 34 Z" fill="#10201A"></path>
-            <path d="M50 22 L50 8 M66 34 L80 28 M60 54 L70 68 M40 54 L30 68 M34 34 L20 28" stroke="#10201A" stroke-width="5" stroke-linecap="round" fill="none"></path>
+      <div style="position: relative; padding: 84px 24px 0; display: flex; flex-direction: column; align-items: center; gap: 40px; text-align: center;">
+        <div style="position: relative; width: 118px; height: 118px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; border-radius: 999px; background: radial-gradient(circle, rgba(198,255,74,.24), transparent 68%);"></div>
+          <div style="position: absolute; inset: 12px; border-radius: 999px; border: 1px solid rgba(198,255,74,.22);"></div>
+          <div style="position: absolute; inset: 12px; border-radius: 999px; border: 1.5px solid transparent; border-top-color: #C6FF4A; animation: spin 1.8s linear infinite;"></div>
+          <svg viewBox="0 0 100 100" width="54" height="54" style="position: relative;" aria-hidden="true">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#EAF5EE" stroke-width="3"></circle>
+            <path d="M50 24 L67 36 L60 56 L40 56 L33 36 Z" fill="none" stroke="#C6FF4A" stroke-width="3" stroke-linejoin="round"></path>
+            <path d="M50 24 L50 8 M67 36 L82 30 M60 56 L70 71 M40 56 L30 71 M33 36 L18 30" stroke="#EAF5EE" stroke-width="3" stroke-linecap="round" fill="none"></path>
           </svg>
         </div>
 
-        <div class="disp" style="font-size: 40px; line-height: 1.02;">Finding someone<br>to take it</div>
+        <div class="disp" style="font-size: 40px; line-height: .98;">FINDING SOMEONE<br>TO TAKE IT</div>
 
-        <div style="width: 100%; height: 10px; border-radius: 999px; background: rgba(0,0,0,.22); overflow: hidden;">
-          <div style="width: 4%; height: 10px; border-radius: 999px; background: #FFCE2E; animation: fill 2.4s cubic-bezier(.4,0,.15,1) both;"></div>
+        <div style="width: 100%; height: 3px; border-radius: 999px; background: rgba(234,245,238,.1); overflow: hidden;">
+          <div style="width: 3%; height: 3px; border-radius: 999px; background: #C6FF4A; box-shadow: 0 0 14px rgba(198,255,74,.8); animation: fillbar 2.4s cubic-bezier(.4,0,.15,1) both;"></div>
         </div>
       </div>
 
       <div style="flex-grow: 1;"></div>
-
-      <div style="padding: 0 24px 34px;">
-        <div style="font-size: 14px; font-weight: 700; line-height: 1.55; color: #BDEFD4; text-align: center;">Still your shirt until someone takes it. Nothing charged, nothing lost.</div>
+      <div style="position: relative; padding: 0 24px 36px;">
+        <div style="font-size: 13.5px; font-weight: 500; line-height: 1.6; color: #8DA79A; text-align: center;">Still your shirt until someone takes it. Nothing charged, nothing lost.</div>
       </div>
-
     </div>
   </sc-if>
 
-  <!-- ===== 3 ===== -->
+  <!-- 3 -->
   <sc-if value="{{isDone}}" hint-placeholder-val="{{ true }}">
     <div style="display: flex; flex-direction: column; height: 844px;">
 
-      <div style="padding: 30px 20px 0; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center;">
-        <div style="width: 78px; height: 78px; border-radius: 999px; background: #0F9E58; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #0A7A43; animation: popIn .6s cubic-bezier(.34,1.56,.64,1) both;">
-          <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+      <div style="padding: 34px 20px 0; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;">
+        <div style="width: 68px; height: 68px; border-radius: 999px; background: #C6FF4A; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 42px -4px rgba(198,255,74,.7); animation: pop .6s cubic-bezier(.22,1,.36,1) both;">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#07110E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
         </div>
-        <div class="disp" style="font-size: 36px; line-height: 1.04; animation: slideUp .5s cubic-bezier(.22,1,.36,1) .12s both;">Rami snapped<br>it up 🙌</div>
+        <div class="disp" style="font-size: 36px; line-height: 1; animation: rise .5s cubic-bezier(.22,1,.36,1) .12s both;">RAMI TOOK IT</div>
       </div>
 
-      <div style="padding: 24px 20px 0;">
-        <div style="border-radius: 26px; background: #FFCE2E; color: #10201A; padding: 24px 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 9px 0 #D9A800; animation: bounceIn .65s cubic-bezier(.34,1.56,.64,1) .2s both;">
-          <div style="font-size: 12px; font-weight: 800; letter-spacing: .1em; color: #8A6A00;">BACK IN YOUR POCKET</div>
-          <div style="display: flex; align-items: baseline; gap: 9px;">
-            <div class="disp" style="font-size: 68px; line-height: .84;">45.00</div>
-            <div style="font-size: 16px; font-weight: 800; color: #8A6A00;">AED</div>
-          </div>
-          <div style="height: 2.5px; border-radius: 999px; background: rgba(0,0,0,.14);"></div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8A6A00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="3"></rect><path d="M2.5 10h19"></path></svg>
-            <div style="font-size: 13.5px; font-weight: 700;">Visa ·· 4417 — two working days</div>
+      <div style="padding: 26px 20px 0;">
+        <div style="position: relative; border-radius: 24px; overflow: hidden; border: 1px solid rgba(198,255,74,.32); box-shadow: 0 26px 56px -26px rgba(0,0,0,.95), 0 0 46px -20px rgba(198,255,74,.5); animation: swell .65s cubic-bezier(.22,1,.36,1) .2s both;">
+          <div style="position: absolute; inset: 0; background: #0C1F16;"></div>
+          <div style="position: absolute; inset: 0; background: radial-gradient(110% 90% at 12% -10%, rgba(198,255,74,.20), transparent 62%);"></div>
+          <div style="position: relative; padding: 24px 22px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="lbl" style="font-size: 9.5px; color: #9FCF7A;">Back in your account</div>
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+              <div class="disp" style="font-size: 66px; line-height: .84; color: #C6FF4A;">45.00</div>
+              <div class="lbl" style="font-size: 13px; color: #9FCF7A;">AED</div>
+            </div>
+            <div style="height: 1px; background: rgba(198,255,74,.22);"></div>
+            <div style="display: flex; align-items: center; gap: 11px;">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#8DA79A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="3"></rect><path d="M2.5 10h19"></path></svg>
+              <div style="font-size: 13px; font-weight: 600; color: #C3D6CB;">Visa ·· 4417 — two working days</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div style="padding: 22px 20px 0; display: flex; flex-direction: column; gap: 14px;">
-        <div class="disp" style="font-size: 26px; animation: slideUp .5s cubic-bezier(.22,1,.36,1) .3s both;">Real money. Not points.</div>
-        <div style="font-size: 14.5px; font-weight: 600; line-height: 1.55; color: #4C5A52; animation: slideUp .5s cubic-bezier(.22,1,.36,1) .36s both;">Your cash never gets stuck in a wallet you can only spend here. No cut-off to miss, no credits to lose. That's the whole policy.</div>
+      <div style="padding: 24px 20px 0; display: flex; flex-direction: column; gap: 12px;">
+        <div class="disp" style="font-size: 24px; animation: rise .5s cubic-bezier(.22,1,.36,1) .3s both;">REAL MONEY. NOT POINTS.</div>
+        <div style="font-size: 14px; font-weight: 500; line-height: 1.6; color: #8DA79A; animation: rise .5s cubic-bezier(.22,1,.36,1) .36s both;">Your cash never gets stuck in a wallet you can only spend here. No cut-off to miss, no credits to lose. That is the whole policy.</div>
       </div>
 
       <div style="flex-grow: 1;"></div>
 
-      <div style="padding: 0 20px 24px; display: flex; flex-direction: column; gap: 12px;">
-        <div style="border-radius: 18px; background: #E3F7EC; padding: 14px 16px; display: flex; align-items: center; gap: 11px;">
-          <div style="font-size: 18px; line-height: 1;">⚽</div>
-          <div style="font-size: 13px; font-weight: 700; color: #0B6E3F;">Teams stay even — still 14 for Thursday.</div>
+      <div style="padding: 0 20px 26px; display: flex; flex-direction: column; gap: 12px;">
+        <div class="panel" style="border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px;">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#C6FF4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+          <div style="font-size: 12.5px; font-weight: 600; color: #C3D6CB;">Teams stay even — still 14 for Thursday.</div>
         </div>
-        <div class="pop" onClick="{{ toBooked }}" style="min-height: 46px; display: flex; align-items: center; justify-content: center;">
-          <span style="font-size: 14px; font-weight: 800; color: #6B7D74;">Replay this flow</span>
+        <div class="tap" onClick="{{ toBooked }}" style="min-height: 46px; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 13px; font-weight: 600; color: #6F8A7C;">Replay this flow</span>
         </div>
       </div>
 
@@ -201,9 +214,9 @@ class Component extends DCLogic {
     const step = this.state.step;
 
     const queueDefs = [
-      { initials: 'RK', name: 'Rami K.', meta: 'Plays at your level', wait: '2 days', bg: '#FFCE2E', fg: '#10201A' },
-      { initials: 'DS', name: 'Deepak S.', meta: 'Plays at your level', wait: '1 day', bg: '#3DA5FF', fg: '#FFFFFF' },
-      { initials: 'YB', name: 'Youssef B.', meta: 'New to the club', wait: '6 hours', bg: '#FF5A3C', fg: '#FFFFFF' },
+      { initials: 'RK', name: 'Rami K.', meta: 'Plays at your level', wait: '2 days', bg: '#C6FF4A', fg: '#07110E' },
+      { initials: 'DS', name: 'Deepak S.', meta: 'Plays at your level', wait: '1 day', bg: '#FFB23D', fg: '#07110E' },
+      { initials: 'YB', name: 'Youssef B.', meta: 'New to the club', wait: '6 hours', bg: '#FF3D7F', fg: '#FFFFFF' },
     ];
 
     return {
@@ -212,13 +225,8 @@ class Component extends DCLogic {
       isSearching: step === 2,
       isDone: step === 3,
       queue: queueDefs.map((q, i) => ({
-        initials: q.initials,
-        name: q.name,
-        meta: q.meta,
-        wait: q.wait,
-        bg: q.bg,
-        fg: q.fg,
-        delay: (0.14 + i * 0.08) + 's',
+        initials: q.initials, name: q.name, meta: q.meta, wait: q.wait, bg: q.bg, fg: q.fg,
+        delay: (0.16 + i * 0.08) + 's',
       })),
       toRelease: () => this.setState({ step: 1 }),
       toBooked: () => this.setState({ step: 0 }),
