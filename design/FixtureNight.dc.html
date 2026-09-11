@@ -24,7 +24,6 @@
     .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
     @keyframes slam { 0% { opacity: 0; transform: translateY(-16px) scale(1.2); } 60% { transform: translateY(2px) scale(.98); } 100% { opacity: 1; transform: none; } }
     @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
-    @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
@@ -33,7 +32,7 @@
 
   <!-- the occasion -->
   <div style="position: relative; overflow: hidden; background: #14141B; border-bottom: 3px solid #14141B; flex-shrink: 0;">
-    <div class="burst" style="position: absolute; left: 50%; top: 50%; width: 700px; height: 700px; margin-left: -350px; margin-top: -350px; opacity: .16; animation: spin 40s linear infinite;"></div>
+    <div class="burst" style="position: absolute; left: 50%; top: 50%; width: 560px; height: 560px; margin-left: -280px; margin-top: -280px; opacity: .16;"></div>
     <div class="halftone-lt" style="position: absolute; inset: 0; opacity: .2;"></div>
     <div style="position: relative; padding: 22px 18px 20px; display: flex; flex-direction: column; gap: 12px;">
       <div class="sub" style="font-size: 10.5px; color: #FFC42E;">Saturday 4 October · Al Quoz</div>

@@ -26,7 +26,6 @@
     @keyframes slam { 0% { opacity: 0; transform: translateY(-16px) scale(1.22); } 60% { transform: translateY(2px) scale(.98); } 100% { opacity: 1; transform: none; } }
     @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
     @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
-    @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
@@ -36,7 +35,7 @@
   <!-- full-bleed alert panel -->
   <div style="position: relative; overflow: hidden; background: {{panel.bg}}; border-bottom: 3px solid #14141B; flex-shrink: 0;">
     <div class="speed" style="position: absolute; inset: 0;"></div>
-    <div class="burst" style="position: absolute; left: 50%; top: 44%; width: 620px; height: 620px; margin-left: -310px; margin-top: -310px; opacity: {{panel.burst}}; animation: spin 34s linear infinite;"></div>
+    <div class="burst" style="position: absolute; left: 50%; top: 44%; width: 620px; height: 620px; margin-left: -310px; margin-top: -310px; opacity: {{panel.burst}};"></div>
     <div class="halftone-lt" style="position: absolute; inset: 0; opacity: .34;"></div>
 
     <div style="position: relative; padding: 30px 18px 24px; display: flex; flex-direction: column; align-items: center; gap: 13px;">
