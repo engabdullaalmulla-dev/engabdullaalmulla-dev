@@ -12,80 +12,82 @@
     body { margin: 0; }
     a { color: #1F4A3A; } a:hover { color: #16382C; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .card { border-radius: 22px; box-shadow: 0 1px 2px rgba(26,29,26,.05), 0 14px 34px -16px rgba(26,29,26,.26); }
-    .tap { cursor: pointer; transition: transform .5s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease; }
+    .lift { box-shadow: 0 2px 4px rgba(26,29,26,.04), 0 24px 56px -24px rgba(26,29,26,.42); }
+    .lift-s { box-shadow: 0 1px 2px rgba(26,29,26,.04), 0 12px 30px -18px rgba(26,29,26,.32); }
+    .tap { cursor: pointer; transition: transform .5s cubic-bezier(.22,1,.36,1), background .35s ease, border-color .35s ease; }
     .tap:active { transform: scale(.96); }
-    @keyframes ease-in-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes swell { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #F5F3EF; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #1A1D1A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F4F2ED; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #16190F; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- scoreline -->
-  <div style="background: #1A1D1A; color: #F5F3EF; padding: 32px 24px 28px; border-radius: 0 0 28px 28px; display: flex; flex-direction: column; gap: 20px;">
+  <div style="background: radial-gradient(130% 110% at 50% -12%, #2A3A31 0%, #191C18 56%, #14170F 100%); color: #F4F2ED; padding: 32px 24px 28px; border-radius: 0 0 32px 32px; display: flex; flex-direction: column; gap: 22px; animation: swell .7s cubic-bezier(.22,1,.36,1) both;">
     <div style="display: flex; align-items: center; justify-content: space-between;">
-      <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8A9189;">Full time</div>
-      <div style="font-size: 12.5px; font-weight: 600; color: #8A9189;">Thursday · Al Quoz</div>
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C6AE79;">Full time</div>
+      <div style="font-size: 12px; font-weight: 500; color: #8C968B;">Thursday · Al Quoz</div>
     </div>
+
+    <div style="display: flex; align-items: center; justify-content: center; gap: 18px;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex-grow: 1;">
+        <div style="width: 10px; height: 10px; border-radius: 999px; background: #4E9E7C;"></div>
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;">Greens</div>
+      </div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 84px; line-height: .8; letter-spacing: -.034em; animation: rise .8s cubic-bezier(.22,1,.36,1) .08s both; white-space: nowrap;">6&nbsp;–&nbsp;5</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex-grow: 1;">
+        <div style="width: 10px; height: 10px; border-radius: 999px; border: 1.5px solid #8C968B;"></div>
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8C968B;">Whites</div>
+      </div>
+    </div>
+
+    <div style="height: 1px; background: linear-gradient(90deg, rgba(214,196,150,.06), rgba(214,196,150,.44), rgba(214,196,150,.06));"></div>
 
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 9px; flex-grow: 1;">
-        <div style="width: 11px; height: 11px; border-radius: 999px; background: #4E9E7C;"></div>
-        <div style="font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">Greens</div>
-      </div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 58px; line-height: .9; letter-spacing: -.01em; animation: ease-in-up .5s cubic-bezier(.22,1,.36,1) both;">6&nbsp;–&nbsp;5</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 9px; flex-grow: 1;">
-        <div style="width: 11px; height: 11px; border-radius: 999px; border: 1.5px solid #8A9189;"></div>
-        <div style="font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A9189;">Whites</div>
-      </div>
-    </div>
-
-    <div style="height: 1px; background: #2E3330;"></div>
-
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-      <div style="font-size: 14px; font-weight: 600;">You scored twice</div>
-      <div style="border-radius: 999px; background: #1F4A3A; font-size: 13px; font-weight: 700; padding: 7px 13px;">Level up soon</div>
+      <div style="font-size: 14.5px; font-weight: 600;">You scored twice</div>
+      <div style="border-radius: 999px; border: 1px solid rgba(214,196,150,.42); color: #D9C08A; font-size: 11.5px; font-weight: 700; padding: 6px 12px; white-space: nowrap;">Level 5 is close</div>
     </div>
   </div>
 
-  <div style="padding: 16px 24px 0; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+  <div style="padding: 18px 22px 0; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;">
 
     <!-- highlights -->
-    <div class="card" style="background: #FFFFFF; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
-      <div class="tap" onClick="{{ togglePlay }}" style="display: flex; align-items: center; gap: 14px;">
-        <div style="width: 52px; height: 52px; border-radius: 999px; background: #1F4A3A; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="{{playIcon}}" fill="#FFFFFF"></path></svg>
+    <div class="lift-s" style="border-radius: 24px; background: #FFFFFF; padding: 18px; display: flex; flex-direction: column; gap: 15px; animation: rise .55s cubic-bezier(.22,1,.36,1) .16s both;">
+      <div class="tap" onClick="{{ togglePlay }}" style="display: flex; align-items: center; gap: 15px;">
+        <div style="width: 54px; height: 54px; border-radius: 999px; background: #2E6B52; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="{{playIcon}}" fill="#FFFFFF"></path></svg>
         </div>
         <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
-          <div style="font-size: 16.5px; font-weight: 700; letter-spacing: -.01em;">Your three clips</div>
-          <div style="font-size: 13px; font-weight: 500; color: #8E938C;">{{clipCaption}}</div>
+          <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 25px; line-height: 1.05; letter-spacing: -.018em;">Your three clips</div>
+          <div style="font-size: 13px; font-weight: 500; color: #8C9189;">{{clipCaption}}</div>
         </div>
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#B4B9B2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#B2B7AE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
       </div>
       <div style="display: flex; gap: 8px;">
         <sc-for list="{{clips}}" as="c" hint-placeholder-count="3">
-          <div class="tap" onClick="{{ c.pick }}" style="flex-grow: 1; height: 58px; border-radius: 14px; background: {{c.bg}}; border: 2px solid {{c.ring}}; display: flex; align-items: flex-end; padding: 8px;">
-            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: .02em; color: #F5F3EF;">{{c.label}}</span>
+          <div class="tap" onClick="{{ c.pick }}" style="flex-grow: 1; height: 62px; border-radius: 16px; background: {{c.bg}}; border: 2px solid {{c.ring}}; display: flex; align-items: flex-end; padding: 9px;">
+            <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; color: #F4F2ED;">{{c.label}}</span>
           </div>
         </sc-for>
       </div>
     </div>
 
     <!-- ratings -->
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      <div style="display: flex; align-items: baseline; justify-content: space-between;">
-        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1.1;">Who played well?</div>
-        <div style="font-size: 13px; font-weight: 600; color: #8E938C; font-variant-numeric: tabular-nums;">{{ratedCount}} of 3</div>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1.02; letter-spacing: -.022em;">Who played well?</div>
+        <div style="font-size: 13px; font-weight: 600; color: #A8894F; font-variant-numeric: tabular-nums; white-space: nowrap;">{{ratedCount}} of 3</div>
       </div>
-      <div style="font-size: 13.5px; font-weight: 500; line-height: 1.5; color: #8E938C; margin-top: -6px;">Two taps. This is what keeps the levels honest.</div>
+      <div style="font-size: 14px; font-weight: 500; line-height: 1.55; color: #8C9189; margin-top: -8px;">Two taps. This is what keeps the levels honest.</div>
 
       <sc-for list="{{mates}}" as="m" hint-placeholder-count="3">
-        <div class="card" style="background: {{m.rowBg}}; padding: 13px 16px; display: flex; align-items: center; gap: 13px;">
-          <div style="width: 40px; height: 40px; border-radius: 999px; background: #EDEAE4; color: #1A1D1A; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0;">{{m.initials}}</div>
+        <div style="border-radius: 22px; background: {{m.rowBg}}; box-shadow: {{m.rowShadow}}; padding: 13px 15px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 999px; background: #EAE7DE; color: #16190F; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0;">{{m.initials}}</div>
           <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-            <div style="font-size: 15.5px; font-weight: 700; letter-spacing: -.01em;">{{m.name}}</div>
-            <div style="font-size: 12.5px; font-weight: 500; color: #8E938C;">{{m.meta}}</div>
+            <div style="font-size: 16px; font-weight: 700; letter-spacing: -.014em;">{{m.name}}</div>
+            <div style="font-size: 12.5px; font-weight: 500; color: #8C9189;">{{m.meta}}</div>
           </div>
           <div class="tap" onClick="{{ m.voteDown }}" style="width: 46px; height: 46px; border-radius: 999px; border: 1.5px solid {{m.downBorder}}; background: {{m.downBg}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="{{m.downStroke}}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 13l6 6 6-6"></path></svg>
@@ -98,13 +100,13 @@
     </div>
 
     <!-- progress -->
-    <div style="background: #EDEAE4; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-      <div style="display: flex; align-items: baseline; justify-content: space-between;">
-        <div style="font-size: 14.5px; font-weight: 700;">Level 4 → Level 5</div>
-        <div style="font-size: 13px; font-weight: 600; color: #5C625B;">a few games away</div>
+    <div style="border-radius: 22px; background: #EAE7DE; padding: 20px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 24px; line-height: 1;">Level 4 → 5</div>
+        <div style="font-size: 13px; font-weight: 600; color: #5A6057;">a few games away</div>
       </div>
-      <div style="height: 5px; border-radius: 999px; background: #DAD6CE; overflow: hidden;">
-        <div style="width: 72%; height: 5px; border-radius: 999px; background: #A8894F;"></div>
+      <div style="height: 3px; border-radius: 999px; background: #D6D2C6; overflow: hidden;">
+        <div style="width: 72%; height: 3px; border-radius: 999px; background: #A8894F;"></div>
       </div>
     </div>
 
@@ -143,22 +145,23 @@ class Component extends DCLogic {
         initials: m.initials,
         name: m.name,
         meta: m.meta,
-        rowBg: v ? '#FFFFFF' : '#FBFAF8',
-        upBg: up ? '#1F4A3A' : 'transparent',
-        upBorder: up ? '#1F4A3A' : '#E4E1DA',
-        upStroke: up ? '#FFFFFF' : '#8E938C',
-        downBg: down ? '#A64B3C' : 'transparent',
-        downBorder: down ? '#A64B3C' : '#E4E1DA',
-        downStroke: down ? '#FFFFFF' : '#8E938C',
+        rowBg: v ? '#FFFFFF' : '#FAF9F5',
+        rowShadow: v ? '0 1px 2px rgba(26,29,26,.04), 0 12px 30px -18px rgba(26,29,26,.32)' : 'none',
+        upBg: up ? '#2E6B52' : 'transparent',
+        upBorder: up ? '#2E6B52' : '#E1DED5',
+        upStroke: up ? '#FFFFFF' : '#8C9189',
+        downBg: down ? '#A6503F' : 'transparent',
+        downBorder: down ? '#A6503F' : '#E1DED5',
+        downStroke: down ? '#FFFFFF' : '#8C9189',
         voteUp: () => setVote(m.id, 'up'),
         voteDown: () => setVote(m.id, 'down'),
       };
     });
 
     const clipDefs = [
-      { label: "0'12", caption: 'Near post, first time.', bg: '#2E3330' },
-      { label: "1'04", caption: 'Cleared off the line.', bg: '#3C433C' },
-      { label: "2'31", caption: 'Your second of the night.', bg: '#26302A' },
+      { label: "0'12", caption: 'Near post, first time.', bg: '#2A302B' },
+      { label: "1'04", caption: 'Cleared off the line.', bg: '#3A423A' },
+      { label: "2'31", caption: 'Your second of the night.', bg: '#232E27' },
     ];
 
     const sel = this.state.clip;
@@ -167,7 +170,7 @@ class Component extends DCLogic {
     const clips = clipDefs.map((c, i) => ({
       label: c.label,
       bg: c.bg,
-      ring: i === sel ? '#1F4A3A' : 'transparent',
+      ring: i === sel ? '#A8894F' : 'transparent',
       pick: () => this.setState({ clip: i, playing: false }),
     }));
 

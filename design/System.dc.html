@@ -12,34 +12,35 @@
     body { margin: 0; }
     a { color: #1F4A3A; } a:hover { color: #16382C; }
     * { box-sizing: border-box; }
-    .card { border-radius: 22px; box-shadow: 0 1px 2px rgba(26,29,26,.05), 0 14px 34px -16px rgba(26,29,26,.26); }
+    .lift { box-shadow: 0 2px 4px rgba(26,29,26,.04), 0 24px 56px -24px rgba(26,29,26,.42); }
+    .lift-s { box-shadow: 0 1px 2px rgba(26,29,26,.04), 0 12px 30px -18px rgba(26,29,26,.32); }
   </style>
 </helmet>
 
-<div style="width: 1240px; height: 980px; background: #F5F3EF; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #1A1D1A; padding: 44px; display: flex; flex-direction: column; gap: 30px; overflow: hidden;">
+<div style="width: 1240px; height: 980px; background: #F4F2ED; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #16190F; padding: 42px; display: flex; flex-direction: column; gap: 28px; overflow: hidden;">
 
   <!-- head -->
-  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px;">
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <div style="font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8E938C;">Design system</div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 62px; line-height: .96; letter-spacing: -.02em;">Quiet luxury, obvious controls</div>
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 44px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #A8894F;">Design system</div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 70px; line-height: .9; letter-spacing: -.032em;">Few things, beautifully</div>
     </div>
-    <div style="font-size: 15px; font-weight: 500; line-height: 1.6; color: #5C625B; max-width: 42ch;">Expensive here means restraint, not ornament: one action per screen, a great deal of space around it, and a serif reserved for the few numbers that matter. Nothing gold, nothing loud — the luxury is how little you have to think.</div>
+    <div style="font-size: 15px; font-weight: 500; line-height: 1.65; color: #5A6057; max-width: 40ch;">The serif appears about four times a screen and each time it is the largest thing in view. Everything else is quiet, so those four moments carry the whole impression — and there is only ever one button to press.</div>
   </div>
 
-  <div style="height: 1px; background: #E4E1DA;"></div>
+  <div style="height: 1px; background: linear-gradient(90deg, rgba(168,137,79,.55), rgba(168,137,79,.06));"></div>
 
   <!-- colour -->
-  <div style="display: flex; flex-direction: column; gap: 14px;">
-    <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8E938C;">Colour</div>
+  <div style="display: flex; flex-direction: column; gap: 13px;">
+    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8C9189;">Colour</div>
     <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px;">
       <sc-for list="{{swatches}}" as="s" hint-placeholder-count="7">
         <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="height: 76px; border-radius: 16px; background: {{s.hex}}; border: 1px solid {{s.ring}};"></div>
-          <div style="display: flex; flex-direction: column; gap: 3px;">
-            <div style="font-size: 13px; font-weight: 700; letter-spacing: -.01em;">{{s.name}}</div>
-            <div style="font-size: 11.5px; font-weight: 500; color: #A8ADA6; font-variant-numeric: tabular-nums;">{{s.hex}}</div>
-            <div style="font-size: 12px; font-weight: 500; color: #8E938C; line-height: 1.4;">{{s.role}}</div>
+          <div style="height: 72px; border-radius: 16px; background: {{s.bg}}; border: 1px solid {{s.ring}};"></div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 13px; font-weight: 700; letter-spacing: -.012em;">{{s.name}}</div>
+            <div style="font-size: 11px; font-weight: 500; color: #A9AEA5; font-variant-numeric: tabular-nums;">{{s.hex}}</div>
+            <div style="font-size: 11.5px; font-weight: 500; color: #8C9189; line-height: 1.4;">{{s.role}}</div>
           </div>
         </div>
       </sc-for>
@@ -47,94 +48,87 @@
   </div>
 
   <!-- type -->
-  <div style="display: flex; flex-direction: column; gap: 14px;">
-    <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8E938C;">Type</div>
-    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;">
+  <div style="display: flex; flex-direction: column; gap: 13px;">
+    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8C9189;">Type</div>
+    <div style="display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 20px;">
 
-      <div class="card" style="background: #FFFFFF; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div class="lift" style="border-radius: 24px; background: radial-gradient(140% 130% at 15% -20%, #2A3A31 0%, #191C18 58%, #14170F 100%); color: #F4F2ED; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
         <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 13px; font-weight: 700;">Instrument Serif</div>
-          <div style="font-size: 11.5px; font-weight: 500; color: #A8ADA6;">Moments only</div>
+          <div style="font-size: 12.5px; font-weight: 700;">Instrument Serif</div>
+          <div style="font-size: 11px; font-weight: 500; color: #8C968B;">Moments only</div>
         </div>
-        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 48px; line-height: .98; letter-spacing: -.015em;">19:00 · 45.00</div>
-        <div style="font-size: 13px; font-weight: 500; line-height: 1.5; color: #8E938C;">Kick-off times, the refunded amount, the score, a name on the member card. Used perhaps four times per screen — that scarcity is what makes it read as expensive.</div>
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 66px; line-height: .84; letter-spacing: -.032em;">19:00<br>45.00</div>
+        <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #97A296;">Kick-off, the refund, the scoreline, the name on the card. Four uses a screen, always the biggest thing in view. Scarcity is what makes it read as expensive.</div>
       </div>
 
-      <div class="card" style="background: #FFFFFF; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div class="lift-s" style="border-radius: 24px; background: #FFFFFF; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
         <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 13px; font-weight: 700;">Manrope</div>
-          <div style="font-size: 11.5px; font-weight: 500; color: #A8ADA6;">Everything else</div>
+          <div style="font-size: 12.5px; font-weight: 700;">Manrope</div>
+          <div style="font-size: 11px; font-weight: 500; color: #A9AEA5;">Everything else</div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 7px;">
-          <div style="font-size: 20px; font-weight: 700; letter-spacing: -.01em;">Reserve a place</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 19px; font-weight: 700; letter-spacing: -.014em;">Reserve your place</div>
           <div style="font-size: 15.5px; font-weight: 600;">Al Quoz Sports Park</div>
-          <div style="font-size: 13.5px; font-weight: 500; color: #8E938C;">7-a-side · astro · floodlit</div>
-          <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8E938C;">Your next game</div>
+          <div style="font-size: 13px; font-weight: 500; color: #8C9189;">7-a-side · astro · floodlit</div>
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #A8894F;">Your next game</div>
         </div>
       </div>
 
-      <div class="card" style="background: #FFFFFF; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div class="lift-s" style="border-radius: 24px; background: #FFFFFF; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
         <div style="display: flex; align-items: baseline; justify-content: space-between;">
-          <div style="font-size: 13px; font-weight: 700;">Voice</div>
-          <div style="font-size: 11.5px; font-weight: 500; color: #A8ADA6;">Plain, never salesy</div>
+          <div style="font-size: 12.5px; font-weight: 700;">Voice</div>
+          <div style="font-size: 11px; font-weight: 500; color: #A9AEA5;">Plain, never salesy</div>
         </div>
-        <div style="font-size: 16px; font-weight: 500; line-height: 1.55;">Release your place any time before kick-off. If someone takes it, the money goes back to your card.</div>
-        <div style="font-size: 13px; font-weight: 500; line-height: 1.5; color: #8E938C;">Short sentences, no exclamation marks, no "oops". A policy stated calmly sounds like a policy you can trust.</div>
+        <div style="font-size: 16px; font-weight: 500; line-height: 1.6;">Release your place any time before kick-off. If someone takes it, your money goes back to your card.</div>
+        <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #8C9189;">Short sentences, no exclamation marks, no "oops". A policy stated calmly sounds like one you can trust.</div>
       </div>
 
     </div>
   </div>
 
   <!-- components -->
-  <div style="display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
-    <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8E938C;">Components</div>
+  <div style="display: flex; flex-direction: column; gap: 13px; flex-grow: 1;">
+    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8C9189;">Components</div>
     <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px;">
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-size: 12px; font-weight: 600; color: #A8ADA6;">Actions — 58px, pill, one per screen</div>
-        <div style="min-height: 56px; border-radius: 999px; background: #1A1D1A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Reserve a place</div>
-        <div style="min-height: 56px; border-radius: 999px; background: #1F4A3A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">You're in</div>
-        <div style="min-height: 56px; border-radius: 999px; border: 1.5px solid #D6D2C9; color: #5C625B; display: flex; align-items: center; justify-content: center; font-size: 15.5px; font-weight: 600;">I can't make it</div>
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">One action, 60px, pill</div>
+        <div class="lift" style="min-height: 56px; border-radius: 999px; background: #16190F; color: #F4F2ED; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Offer my place</div>
+        <div style="min-height: 56px; border-radius: 999px; background: #2E6B52; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">You're in</div>
+        <div style="min-height: 56px; border-radius: 999px; border: 1.5px solid #D3CEC2; color: #5A6057; display: flex; align-items: center; justify-content: center; font-size: 15.5px; font-weight: 600;">I can't make it</div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-size: 12px; font-weight: 600; color: #A8ADA6;">Segmented control &amp; chips</div>
-        <div style="display: flex; gap: 4px; background: #EDEAE4; border-radius: 999px; padding: 4px;">
-          <div style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(26,29,26,.10); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600;">Your level</div>
-          <div style="flex-grow: 1; min-height: 44px; border-radius: 999px; color: #8E938C; display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600;">All games</div>
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">Segmented control &amp; chips</div>
+        <div style="display: flex; gap: 3px; background: #E7E4DA; border-radius: 999px; padding: 3px;">
+          <div style="flex-grow: 1; min-height: 46px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(26,29,26,.12); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600;">Who is playing</div>
+          <div style="flex-grow: 1; min-height: 46px; border-radius: 999px; color: #8C9189; display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600;">The two sides</div>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
-            <div style="border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; padding: 7px 12px;">{{c.label}}</div>
+            <div style="border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; border: 1px solid {{c.border}}; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 6px 11px;">{{c.label}}</div>
           </sc-for>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-size: 12px; font-weight: 600; color: #A8ADA6;">How full, how even</div>
-        <div class="card" style="background: #FFFFFF; padding: 18px; display: flex; flex-direction: column; gap: 16px;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="height: 4px; border-radius: 999px; background: #EDEAE4; flex-grow: 1; overflow: hidden;"><div style="width: 93%; height: 4px; border-radius: 999px; background: #1F4A3A;"></div></div>
-            <div style="font-size: 12.5px; font-weight: 600; color: #1F4A3A; white-space: nowrap;">1 spot left</div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="height: 4px; border-radius: 999px; background: #EDEAE4; flex-grow: 1; overflow: hidden;"><div style="width: 100%; height: 4px; border-radius: 999px; background: #C9C5BC;"></div></div>
-            <div style="font-size: 12.5px; font-weight: 600; color: #8E938C; white-space: nowrap;">Waitlist</div>
-          </div>
-          <div style="height: 1px; background: #EFEDE7;"></div>
-          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.45; color: #8E938C;">A hairline, never a row of icons. Fullness is context, not the headline.</div>
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">Depth &amp; the brass rule</div>
+        <div class="lift-s" style="border-radius: 22px; background: #FFFFFF; padding: 18px; display: flex; flex-direction: column; gap: 15px; flex-grow: 1;">
+          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #5A6057;">Two shadows on every lifted surface — a tight one for the edge, a wide soft one for the ground it sits on.</div>
+          <div style="height: 1px; background: linear-gradient(90deg, rgba(168,137,79,.55), rgba(168,137,79,.05));"></div>
+          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.5; color: #5A6057;">The brass hairline fades out rather than stopping. It appears only on dark surfaces, once each.</div>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-size: 12px; font-weight: 600; color: #A8ADA6;">Dark surface — used three times</div>
-        <div class="card" style="background: #1A1D1A; color: #F5F3EF; padding: 20px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
-          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8A9189;">Refunded in full</div>
+      <div style="display: flex; flex-direction: column; gap: 11px;">
+        <div style="font-size: 11.5px; font-weight: 600; color: #A9AEA5;">Dark surface — three uses</div>
+        <div class="lift" style="border-radius: 22px; background: radial-gradient(140% 130% at 80% -20%, #2A3A31 0%, #191C18 58%, #14170F 100%); color: #F4F2ED; padding: 22px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C6AE79;">Refunded in full</div>
           <div style="display: flex; align-items: baseline; gap: 9px;">
-            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 46px; line-height: .9;">45.00</div>
-            <div style="font-size: 13px; font-weight: 700; color: #8A9189;">AED</div>
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 54px; line-height: .84; letter-spacing: -.03em;">45.00</div>
+            <div style="font-size: 12px; font-weight: 700; letter-spacing: .1em; color: #C6AE79;">AED</div>
           </div>
-          <div style="font-size: 12.5px; font-weight: 500; line-height: 1.45; color: #A2A8A0;">Reserved for the scoreline, the member card and the refund. If everything is a moment, nothing is.</div>
+          <div style="font-size: 12px; font-weight: 500; line-height: 1.45; color: #97A296;">The hero fixture, the member card, the refund. A bloom from one corner gives it depth without a gradient you can name.</div>
         </div>
       </div>
 
@@ -149,19 +143,19 @@ class Component extends DCLogic {
   renderVals() {
     return {
       swatches: [
-        { name: 'Bone', hex: '#F5F3EF', ring: '#E4E1DA', role: 'The page. Warm, never pure white.' },
-        { name: 'Card', hex: '#FFFFFF', ring: '#E4E1DA', role: 'Anything lifted off the page.' },
-        { name: 'Sunk', hex: '#EDEAE4', ring: '#E4E1DA', role: 'Segmented tracks and quiet notes.' },
-        { name: 'Ink', hex: '#1A1D1A', ring: '#1A1D1A', role: 'Type, and the three dark surfaces.' },
-        { name: 'Muted', hex: '#8E938C', ring: '#8E938C', role: 'Second-rank text. Never below this.' },
-        { name: 'Green', hex: '#1F4A3A', ring: '#1F4A3A', role: 'Confirmed, refunded, even sides.' },
-        { name: 'Brass', hex: '#A8894F', ring: '#A8894F', role: 'Level and milestones. Sparing.' },
+        { name: 'Bone', hex: '#F4F2ED', bg: '#F4F2ED', ring: '#E1DED5', role: 'The page. Warm, never pure white.' },
+        { name: 'Card', hex: '#FFFFFF', bg: '#FFFFFF', ring: '#E1DED5', role: 'Anything lifted off the page.' },
+        { name: 'Sunk', hex: '#E7E4DA', bg: '#E7E4DA', ring: '#E1DED5', role: 'Segmented tracks, quiet notes.' },
+        { name: 'Bloom', hex: '#191C18', bg: 'radial-gradient(140% 130% at 20% -20%, #2A3A31 0%, #191C18 58%, #14170F 100%)', ring: '#14170F', role: 'The dark surface, lit from one corner.' },
+        { name: 'Green', hex: '#2E6B52', bg: '#2E6B52', ring: '#2E6B52', role: 'Confirmed, refunded, even sides.' },
+        { name: 'Brass', hex: '#A8894F', bg: '#A8894F', ring: '#A8894F', role: 'Level, milestones, one hairline.' },
+        { name: 'Gilt', hex: '#D9C08A', bg: '#D9C08A', ring: '#D9C08A', role: 'Brass on dark only. Never on bone.' },
       ],
       chips: [
-        { label: 'Your level', bg: '#E8EFEA', fg: '#1F4A3A' },
-        { label: 'Confirmed', bg: '#E8EFEA', fg: '#1F4A3A' },
-        { label: 'A level up', bg: '#EDEAE4', fg: '#8E938C' },
-        { label: 'You play free', bg: '#1F4A3A', fg: '#FFFFFF' },
+        { label: 'Your level', bg: '#E2EDE6', fg: '#2E6B52', border: 'transparent' },
+        { label: 'Confirmed', bg: '#E2EDE6', fg: '#2E6B52', border: 'transparent' },
+        { label: 'A level up', bg: '#E7E4DA', fg: '#8C9189', border: 'transparent' },
+        { label: 'Level 5 is close', bg: 'transparent', fg: '#A8894F', border: 'rgba(168,137,79,.5)' },
       ],
     };
   }

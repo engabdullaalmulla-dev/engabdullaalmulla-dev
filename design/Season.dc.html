@@ -12,61 +12,71 @@
     body { margin: 0; }
     a { color: #1F4A3A; } a:hover { color: #16382C; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .card { border-radius: 22px; box-shadow: 0 1px 2px rgba(26,29,26,.05), 0 14px 34px -16px rgba(26,29,26,.26); }
-    .tap { cursor: pointer; transition: transform .5s cubic-bezier(.22,1,.36,1), background .3s ease, color .3s ease, box-shadow .3s ease; }
+    .lift { box-shadow: 0 2px 4px rgba(26,29,26,.04), 0 24px 56px -24px rgba(26,29,26,.42); }
+    .lift-s { box-shadow: 0 1px 2px rgba(26,29,26,.04), 0 12px 30px -18px rgba(26,29,26,.32); }
+    .tap { cursor: pointer; transition: transform .55s cubic-bezier(.22,1,.36,1), background .35s ease, color .35s ease, box-shadow .35s ease; }
     .tap:active { transform: scale(.99); }
-    @keyframes ease-in-up { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes swell { from { opacity: 0; transform: translateY(16px) scale(.988); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #F5F3EF; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #1A1D1A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F4F2ED; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #16190F; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- header -->
-  <div style="padding: 32px 24px 18px; display: flex; flex-direction: column; gap: 14px;">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-      <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8E938C;">Autumn · week 6 of 8</div>
-      <div style="border-radius: 999px; background: #1A1D1A; color: #F5F3EF; font-size: 11.5px; font-weight: 700; padding: 6px 12px;">3rd</div>
+  <div style="padding: 30px 22px 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; animation: rise .6s cubic-bezier(.22,1,.36,1) both;">
+    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #A8894F;">Autumn · week 6 of 8</div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 44px; line-height: .96; letter-spacing: -.026em;">Division<br>three</div>
     </div>
-    <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 38px; line-height: 1; letter-spacing: -.015em;">Division three</div>
-    <div style="font-size: 14.5px; font-weight: 500; line-height: 1.55; color: #5C625B;">Top two move up, bottom two move down. Two games left — you are <strong style="font-weight: 700; color: #1F4A3A;">two points</strong> from promotion.</div>
+    <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0;">
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 62px; line-height: .84; letter-spacing: -.03em; color: #2E6B52;">3<span style="font-size: 26px;">rd</span></div>
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #8C9189;">of eight</div>
+    </div>
+  </div>
+
+  <div style="padding: 0 22px 18px;">
+    <div style="font-size: 15px; font-weight: 500; line-height: 1.6; color: #5A6057;">Top two move up, bottom two move down. Two games left — you are <strong style="font-weight: 700; color: #2E6B52;">two points</strong> from promotion.</div>
   </div>
 
   <!-- tabs -->
-  <div style="padding: 4px 24px 16px;">
-    <div style="display: flex; gap: 4px; background: #EDEAE4; border-radius: 999px; padding: 4px;">
+  <div style="padding: 0 22px 16px;">
+    <div style="display: flex; gap: 3px; background: #E7E4DA; border-radius: 999px; padding: 3px;">
       <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
-        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
+        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 46px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
           <span style="font-size: 13.5px; font-weight: 600;">{{t.label}}</span>
         </div>
       </sc-for>
     </div>
   </div>
 
-  <div style="padding: 0 24px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+  <div style="padding: 0 22px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
 
     <!-- TABLE -->
     <sc-if value="{{isTable}}" hint-placeholder-val="{{ true }}">
-      <div class="card" style="background: #FFFFFF; padding: 6px 18px 14px; display: flex; flex-direction: column;">
+      <div style="display: flex; flex-direction: column;">
         <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
-          <div style="display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid {{r.rule}}; animation: ease-in-up .28s cubic-bezier(.22,1,.36,1) both; animation-delay: {{r.delay}};">
-            <div style="width: 4px; height: 26px; border-radius: 999px; background: {{r.zone}}; flex-shrink: 0;"></div>
-            <div style="font-size: 13.5px; font-weight: 600; color: #A8ADA6; min-width: 14px; font-variant-numeric: tabular-nums;">{{r.pos}}</div>
-            <div style="width: 34px; height: 34px; border-radius: 999px; background: {{r.chipBg}}; color: {{r.chipFg}}; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0;">{{r.initials}}</div>
-            <div style="font-size: 15px; font-weight: {{r.weight}}; letter-spacing: -.01em; flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.name}}</div>
-            <div style="font-size: 12.5px; font-weight: 500; color: #A8ADA6; font-variant-numeric: tabular-nums;">{{r.played}}</div>
-            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 21px; min-width: 28px; text-align: right; font-variant-numeric: tabular-nums;">{{r.pts}}</div>
+          <div style="display: flex; align-items: center; gap: 13px; padding: 12px 2px; border-bottom: 1px solid #E4E1D8; animation: rise .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{r.delay}};">
+            <div style="width: 3px; height: 30px; border-radius: 999px; background: {{r.zone}}; flex-shrink: 0;"></div>
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 21px; color: {{r.posColor}}; min-width: 18px;">{{r.pos}}</div>
+            <div style="width: 36px; height: 36px; border-radius: 999px; background: {{r.chipBg}}; color: {{r.chipFg}}; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0;">{{r.initials}}</div>
+            <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: {{r.weight}}; letter-spacing: -.014em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.name}}</div>
+              <div style="font-size: 11.5px; font-weight: 500; color: #A9AEA5;">{{r.played}}</div>
+            </div>
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 27px; min-width: 30px; text-align: right; letter-spacing: -.018em;">{{r.pts}}</div>
           </div>
         </sc-for>
 
-        <div style="display: flex; gap: 18px; padding-top: 14px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 4px; height: 14px; border-radius: 999px; background: #1F4A3A;"></div>
-            <div style="font-size: 12px; font-weight: 500; color: #8E938C;">Moving up</div>
+        <div style="display: flex; gap: 20px; padding: 16px 2px 8px;">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="width: 3px; height: 14px; border-radius: 999px; background: #2E6B52;"></div>
+            <div style="font-size: 12px; font-weight: 500; color: #8C9189;">Moving up</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 4px; height: 14px; border-radius: 999px; background: #D8CBC6;"></div>
-            <div style="font-size: 12px; font-weight: 500; color: #8E938C;">Moving down</div>
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="width: 3px; height: 14px; border-radius: 999px; background: #D5C6C1;"></div>
+            <div style="font-size: 12px; font-weight: 500; color: #8C9189;">Moving down</div>
           </div>
         </div>
       </div>
@@ -76,33 +86,33 @@
     <sc-if value="{{isFixtures}}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <sc-for list="{{fixtures}}" as="f" hint-placeholder-count="4">
-          <div class="card" style="background: {{f.bg}}; padding: 18px; display: flex; align-items: center; gap: 16px; animation: ease-in-up .28s cubic-bezier(.22,1,.36,1) both; animation-delay: {{f.delay}};">
-            <div style="display: flex; flex-direction: column; align-items: center; min-width: 44px;">
-              <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1; color: {{f.dayColor}};">{{f.day}}</div>
-              <div style="font-size: 11px; font-weight: 600; color: #8E938C;">{{f.month}}</div>
+          <div class="lift-s" style="border-radius: 22px; background: #FFFFFF; padding: 18px; display: flex; align-items: center; gap: 17px; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{f.delay}};">
+            <div style="display: flex; flex-direction: column; align-items: center; min-width: 42px;">
+              <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 32px; line-height: .94; letter-spacing: -.02em; color: {{f.dayColor}};">{{f.day}}</div>
+              <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #8C9189;">{{f.month}}</div>
             </div>
-            <div style="width: 1px; align-self: stretch; background: #EDEAE4;"></div>
+            <div style="width: 1px; align-self: stretch; background: #EBE8DF;"></div>
             <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em;">{{f.venue}}</div>
-              <div style="font-size: 12.5px; font-weight: 500; color: #8E938C;">{{f.meta}}</div>
+              <div style="font-size: 15px; font-weight: 700; letter-spacing: -.014em;">{{f.venue}}</div>
+              <div style="font-size: 12.5px; font-weight: 500; color: #8C9189;">{{f.meta}}</div>
             </div>
             <div style="border-radius: 999px; background: {{f.tagBg}}; color: {{f.tagColor}}; font-size: 11px; font-weight: 700; padding: 6px 11px; white-space: nowrap;">{{f.tag}}</div>
           </div>
         </sc-for>
-        <div style="font-size: 13.5px; font-weight: 500; line-height: 1.5; color: #8E938C; padding: 4px 2px;">Season games are ordinary games. You don't need a team — you need to turn up.</div>
+        <div style="font-size: 13.5px; font-weight: 500; line-height: 1.55; color: #8C9189; padding: 4px 2px;">Season games are ordinary games. You don't need a team — you need to turn up.</div>
       </div>
     </sc-if>
 
   </div>
 
   <!-- footer -->
-  <div style="padding: 16px 24px 26px;">
-    <div style="background: #1A1D1A; color: #F5F3EF; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
-      <div style="display: flex; flex-direction: column; gap: 3px;">
-        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: #8A9189;">To go up</div>
-        <div style="font-size: 14.5px; font-weight: 600;">Win both remaining games</div>
+  <div style="padding: 16px 22px 24px;">
+    <div class="lift" style="border-radius: 24px; background: radial-gradient(140% 130% at 85% -20%, #2A3A31 0%, #191C18 60%, #14170F 100%); color: #F4F2ED; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-size: 9.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C6AE79;">To go up</div>
+        <div style="font-size: 15px; font-weight: 600;">Win both remaining games</div>
       </div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; color: #C9A661;">+2</div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 46px; line-height: .88; letter-spacing: -.026em; color: #D9C08A;">+2</div>
     </div>
   </div>
 
@@ -128,8 +138,8 @@ class Component extends DCLogic {
       return {
         label: t.label,
         bg: on ? '#FFFFFF' : 'transparent',
-        fg: on ? '#1A1D1A' : '#8E938C',
-        shadow: on ? '0 1px 3px rgba(26,29,26,.10)' : 'none',
+        fg: on ? '#16190F' : '#8C9189',
+        shadow: on ? '0 1px 3px rgba(26,29,26,.12)' : 'none',
         pick: () => this.setState({ tab: t.id }),
       };
     });
@@ -152,12 +162,12 @@ class Component extends DCLogic {
       name: r.name,
       played: r.played + ' played',
       pts: r.pts,
-      zone: r.pos <= 2 ? '#1F4A3A' : (r.pos > total - 2 ? '#D8CBC6' : 'transparent'),
-      chipBg: r.me ? '#1F4A3A' : '#EDEAE4',
-      chipFg: r.me ? '#FFFFFF' : '#1A1D1A',
+      zone: r.pos <= 2 ? '#2E6B52' : (r.pos > total - 2 ? '#D5C6C1' : 'transparent'),
+      posColor: r.me ? '#2E6B52' : '#B2B7AE',
+      chipBg: r.me ? '#2E6B52' : '#EAE7DE',
+      chipFg: r.me ? '#FFFFFF' : '#16190F',
       weight: r.me ? '800' : '600',
-      rule: i === total - 1 ? 'transparent' : '#EFEDE7',
-      delay: (i * 0.03) + 's',
+      delay: (i * 0.035) + 's',
     }));
 
     const fixtureDefs = [
@@ -172,11 +182,10 @@ class Component extends DCLogic {
       venue: f.venue,
       meta: f.meta,
       tag: f.tag,
-      bg: '#FFFFFF',
-      dayColor: f.live ? '#1F4A3A' : '#8E938C',
-      tagBg: f.live ? '#E8EFEA' : '#EDEAE4',
-      tagColor: f.live ? '#1F4A3A' : '#8E938C',
-      delay: (i * 0.05) + 's',
+      dayColor: f.live ? '#2E6B52' : '#8C9189',
+      tagBg: f.live ? '#E2EDE6' : '#EAE7DE',
+      tagColor: f.live ? '#2E6B52' : '#8C9189',
+      delay: (i * 0.06) + 's',
     }));
 
     return {

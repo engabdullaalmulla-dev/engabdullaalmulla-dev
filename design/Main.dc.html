@@ -12,83 +12,93 @@
     body { margin: 0; }
     a { color: #1F4A3A; } a:hover { color: #16382C; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .card { border-radius: 22px; box-shadow: 0 1px 2px rgba(26,29,26,.05), 0 14px 34px -16px rgba(26,29,26,.26); }
-    .tap { cursor: pointer; transition: transform .5s cubic-bezier(.22,1,.36,1), box-shadow .4s ease, background .3s ease, color .3s ease; }
-    .tap:active { transform: scale(.982); }
-    @keyframes ease-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .lift { box-shadow: 0 2px 4px rgba(26,29,26,.04), 0 24px 56px -24px rgba(26,29,26,.42); }
+    .lift-s { box-shadow: 0 1px 2px rgba(26,29,26,.04), 0 10px 26px -16px rgba(26,29,26,.30); }
+    .tap { cursor: pointer; transition: transform .55s cubic-bezier(.22,1,.36,1), background .35s ease, color .35s ease, box-shadow .35s ease; }
+    .tap:active { transform: scale(.985); }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes swell { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #F5F3EF; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #1A1D1A; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F4F2ED; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #16190F; display: flex; flex-direction: column; overflow: hidden;">
 
   <!-- header -->
-  <div style="padding: 34px 24px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
-    <div style="display: flex; flex-direction: column; gap: 5px;">
-      <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8E938C;">Thursday, 10 September</div>
-      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1.02; letter-spacing: -.01em;">Good evening</div>
+  <div style="padding: 32px 22px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #A8894F;">Thursday, 10 September</div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 46px; line-height: 1; letter-spacing: -.022em;">Tonight</div>
     </div>
-    <div class="tap" style="width: 46px; height: 46px; border-radius: 999px; background: #1A1D1A; color: #F5F3EF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0;">AA</div>
+    <div class="tap lift-s" style="width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; color: #16190F; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;">AA</div>
   </div>
 
-  <!-- filter -->
-  <div style="padding: 0 24px 18px;">
-    <div style="display: flex; gap: 4px; background: #EDEAE4; border-radius: 999px; padding: 4px;">
-      <sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
-        <div class="tap" onClick="{{ f.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{f.bg}}; color: {{f.fg}}; box-shadow: {{f.shadow}}; display: flex; align-items: center; justify-content: center;">
-          <span style="font-size: 13.5px; font-weight: 600; letter-spacing: -.005em;">{{f.label}}</span>
+  <!-- hero fixture -->
+  <div style="padding: 0 22px;">
+    <div class="lift" style="border-radius: 28px; background: radial-gradient(135% 100% at 18% -10%, #2A3A31 0%, #191C18 58%, #14170F 100%); color: #F4F2ED; padding: 26px 24px 24px; display: flex; flex-direction: column; gap: 20px; animation: swell .7s cubic-bezier(.22,1,.36,1) both;">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #C6AE79;">{{hero.eyebrow}}</div>
+        <div style="border-radius: 999px; border: 1px solid rgba(214,196,150,.42); color: #D9C08A; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; padding: 5px 11px; white-space: nowrap;">{{hero.tier}}</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 76px; line-height: .84; letter-spacing: -.032em; animation: rise .75s cubic-bezier(.22,1,.36,1) .06s both;">{{hero.time}}</div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 18px; font-weight: 700; letter-spacing: -.015em;">{{hero.venue}}</div>
+          <div style="font-size: 13px; font-weight: 500; color: #9BA79A;">{{hero.meta}}</div>
         </div>
-      </sc-for>
+      </div>
+
+      <div style="height: 1px; background: linear-gradient(90deg, rgba(214,196,150,.40), rgba(214,196,150,.06));"></div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-width: 0;">
+          <div style="height: 3px; border-radius: 999px; background: rgba(244,242,237,.14); overflow: hidden;">
+            <div style="width: {{hero.fillPct}}; height: 3px; border-radius: 999px; background: {{hero.fillColor}};"></div>
+          </div>
+          <div style="font-size: 12.5px; font-weight: 600; color: {{hero.statusColor}};">{{hero.status}}</div>
+        </div>
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 1; letter-spacing: -.01em; flex-shrink: 0;">{{hero.price}}</div>
+      </div>
+
+      <div class="tap" onClick="{{ book }}" style="min-height: 58px; border-radius: 999px; background: {{ctaBg}}; color: {{ctaFg}}; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <span style="font-size: 16px; font-weight: 700; letter-spacing: -.012em;">{{ctaLabel}}</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 9px; justify-content: center;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C6AE79" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+        <div style="font-size: 12.5px; font-weight: 500; color: #9BA79A;">Free to cancel. Refunded to your card.</div>
+      </div>
+
     </div>
   </div>
 
-  <!-- fixtures -->
-  <div style="display: flex; flex-direction: column; gap: 14px; padding: 2px 24px 20px; flex-grow: 1; min-height: 0; overflow-y: auto;">
-    <sc-for list="{{games}}" as="g" hint-placeholder-count="3">
-      <div class="card tap" onClick="{{ g.pick }}" style="background: #FFFFFF; display: flex; flex-direction: column; padding: 20px;">
+  <!-- later -->
+  <div style="padding: 24px 22px 8px; display: flex; align-items: center; gap: 12px;">
+    <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #9A9E95;">Also tonight</div>
+    <div style="height: 1px; background: #E1DED5; flex-grow: 1;"></div>
+  </div>
 
-        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
-          <div style="display: flex; flex-direction: column; gap: 7px; min-width: 0;">
-            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1;">{{g.time}}</div>
-            <div style="font-size: 16px; font-weight: 700; letter-spacing: -.01em;">{{g.venue}}</div>
-            <div style="font-size: 13px; font-weight: 500; color: #8E938C;">{{g.meta}}</div>
-          </div>
-          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0;">
-            <div style="font-size: 17px; font-weight: 700; letter-spacing: -.01em;">{{g.price}}</div>
-            <div style="border-radius: 999px; background: {{g.tierBg}}; color: {{g.tierFg}}; font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 5px 10px; white-space: nowrap;">{{g.tier}}</div>
-          </div>
+  <div style="padding: 0 22px 14px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+    <sc-for list="{{others}}" as="g" hint-placeholder-count="2">
+      <div class="tap" onClick="{{ g.pick }}" style="border-radius: 20px; background: {{g.bg}}; padding: 15px 16px; display: flex; align-items: center; gap: 15px; animation: rise .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 27px; line-height: 1; letter-spacing: -.015em; min-width: 62px; color: {{g.timeColor}};">{{g.time}}</div>
+        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+          <div style="font-size: 15px; font-weight: 700; letter-spacing: -.012em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{g.venue}}</div>
+          <div style="font-size: 12.5px; font-weight: 500; color: {{g.statusColor}};">{{g.status}}</div>
         </div>
-
-        <div style="display: flex; align-items: center; gap: 12px; padding-top: 18px;">
-          <div style="height: 4px; border-radius: 999px; background: #EDEAE4; flex-grow: 1; overflow: hidden;">
-            <div style="width: {{g.fillPct}}; height: 4px; border-radius: 999px; background: {{g.fillColor}};"></div>
-          </div>
-          <div style="font-size: 12.5px; font-weight: 600; color: {{g.statusColor}}; white-space: nowrap; font-variant-numeric: tabular-nums;">{{g.status}}</div>
-        </div>
-
-        <sc-if value="{{g.isOpen}}" hint-placeholder-val="{{ true }}">
-          <div style="display: flex; flex-direction: column; gap: 14px; padding-top: 20px; animation: ease-in-up .45s cubic-bezier(.22,1,.36,1) both;">
-            <div style="height: 1px; background: #EDEAE4;"></div>
-            <div class="tap" onClick="{{ g.book }}" style="min-height: 56px; border-radius: 999px; background: {{g.ctaBg}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
-              <span style="font-size: 16px; font-weight: 700; letter-spacing: -.01em;">{{g.cta}}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 9px; justify-content: center;">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#1F4A3A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-              <div style="font-size: 13px; font-weight: 500; color: #5C625B;">Free to cancel. Refunded to your card.</div>
-            </div>
-          </div>
-        </sc-if>
-
+        <div style="font-size: 14px; font-weight: 700; color: #6B7268; flex-shrink: 0;">{{g.price}}</div>
       </div>
     </sc-for>
   </div>
 
   <!-- nav -->
-  <div style="display: flex; padding: 10px 16px 24px; background: #F5F3EF; border-top: 1px solid #E4E1DA;">
+  <div style="display: flex; padding: 8px 14px 22px; gap: 2px; border-top: 1px solid #E1DED5;">
     <sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
-      <div class="tap" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 56px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: {{n.bg}};">
-        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="{{n.color}}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
-        <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .02em; color: {{n.color}};">{{n.label}}</div>
+      <div class="tap" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 54px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: {{n.bg}};">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="{{n.color}}" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
+        <div style="font-size: 10px; font-weight: 600; letter-spacing: .03em; color: {{n.color}};">{{n.label}}</div>
       </div>
     </sc-for>
   </div>
@@ -100,67 +110,62 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { filter: 'level', open: 0, booked: null };
+    this.state = { hero: 0, booked: false };
   }
 
   renderVals() {
-    const filterDefs = [
-      { id: 'level', label: 'Your level' },
-      { id: 'all', label: 'All games' },
-      { id: 'near', label: 'Nearby' },
-    ];
-
-    const filters = filterDefs.map((f) => {
-      const on = f.id === this.state.filter;
-      return {
-        label: f.label,
-        bg: on ? '#FFFFFF' : 'transparent',
-        fg: on ? '#1A1D1A' : '#8E938C',
-        shadow: on ? '0 1px 3px rgba(26,29,26,.10)' : 'none',
-        pick: () => this.setState({ filter: f.id }),
-      };
-    });
-
     const defs = [
       { time: '19:00', venue: 'Al Quoz Sports Park', meta: '7-a-side · astro · floodlit', tier: 'Your level', price: 'AED 45', taken: 13, total: 14 },
-      { time: '20:30', venue: 'The Sevens', meta: '5-a-side · indoor', tier: 'A level up', price: 'AED 38', taken: 10, total: 10 },
+      { time: '20:30', venue: 'The Sevens', meta: '5-a-side · indoor · air conditioned', tier: 'A level up', price: 'AED 38', taken: 10, total: 10 },
       { time: '21:00', venue: 'Insportz Indoor', meta: '7-a-side · indoor', tier: 'Your level', price: 'AED 50', taken: 8, total: 14 },
     ];
 
-    const games = defs.map((d, i) => {
-      const isOpen = i === this.state.open;
-      const isBooked = this.state.booked === i;
+    const describe = (d) => {
       const left = d.total - d.taken;
-      const full = left <= 0;
-      const pct = Math.round((d.taken / d.total) * 100);
-      const yours = d.tier === 'Your level';
+      if (left <= 0) { return 'Full — join the waitlist'; }
+      if (left === 1) { return 'One place left'; }
+      return left + ' places left';
+    };
 
-      let status = left + ' spots left';
-      if (full) { status = 'Waitlist'; }
-      else if (left === 1) { status = '1 spot left'; }
+    const heroIndex = this.state.hero;
+    const h = defs[heroIndex];
+    const heroLeft = h.total - h.taken;
+    const heroFull = heroLeft <= 0;
+    const booked = this.state.booked;
 
-      return {
+    const hero = {
+      eyebrow: heroIndex === 0 ? 'Your next game' : 'Selected game',
+      time: h.time,
+      venue: h.venue,
+      meta: h.meta,
+      tier: h.tier,
+      price: h.price,
+      status: describe(h),
+      fillPct: Math.round((h.taken / h.total) * 100) + '%',
+      fillColor: heroFull ? '#6E7A70' : '#D9C08A',
+      statusColor: heroFull ? '#9BA79A' : '#D9C08A',
+    };
+
+    const others = [];
+    defs.forEach((d, i) => {
+      if (i === heroIndex) { return; }
+      const full = d.total - d.taken <= 0;
+      others.push({
         time: d.time,
         venue: d.venue,
-        meta: d.meta,
-        tier: d.tier,
         price: d.price,
-        status: status,
-        isOpen: isOpen,
-        fillPct: pct + '%',
-        fillColor: full ? '#C9C5BC' : '#1F4A3A',
-        statusColor: full ? '#8E938C' : '#1F4A3A',
-        tierBg: yours ? '#E8EFEA' : '#EDEAE4',
-        tierFg: yours ? '#1F4A3A' : '#8E938C',
-        cta: isBooked ? "You're in" : 'Reserve a place',
-        ctaBg: isBooked ? '#1F4A3A' : '#1A1D1A',
-        pick: () => this.setState({ open: isOpen ? -1 : i }),
-        book: (e) => {
-          if (e && e.stopPropagation) { e.stopPropagation(); }
-          this.setState({ booked: isBooked ? null : i });
-        },
-      };
+        status: describe(d),
+        bg: '#FFFFFF',
+        timeColor: '#16190F',
+        statusColor: full ? '#9A9E95' : '#1F4A3A',
+        delay: (others.length * 0.07 + 0.25) + 's',
+        pick: () => this.setState({ hero: i, booked: false }),
+      });
     });
+
+    let ctaLabel = 'Reserve your place';
+    if (booked) { ctaLabel = "You're in — see you Thursday"; }
+    else if (heroFull) { ctaLabel = 'Join the waitlist'; }
 
     const navDefs = [
       { id: 'play', label: 'Play', icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 8l4 3-1.5 4.5h-5L8 11z' },
@@ -168,19 +173,26 @@ class Component extends DCLogic {
       { id: 'crew', label: 'Crew', icon: 'M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.3' },
       { id: 'you', label: 'You', icon: 'M5 21v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8' },
     ];
-
     const nav = navDefs.map((n) => {
       const on = n.id === 'play';
       return {
         label: n.label,
         icon: n.icon,
-        color: on ? '#1A1D1A' : '#A8ADA6',
-        bg: on ? '#EDEAE4' : 'transparent',
+        color: on ? '#16190F' : '#A9ADA4',
+        bg: on ? '#EAE7DE' : 'transparent',
         pick: () => {},
       };
     });
 
-    return { filters: filters, games: games, nav: nav };
+    return {
+      hero: hero,
+      others: others,
+      nav: nav,
+      ctaLabel: ctaLabel,
+      ctaBg: booked ? '#2E6B52' : '#F4F2ED',
+      ctaFg: booked ? '#FFFFFF' : '#16190F',
+      book: () => this.setState({ booked: !booked }),
+    };
   }
 }
 </script>
