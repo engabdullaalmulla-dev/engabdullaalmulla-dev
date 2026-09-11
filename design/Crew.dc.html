@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;1,600;1,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #E5342A; } a:hover { color: #B8241C; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    .impact { font-family: Kanit, 'Arial Narrow', Impact, sans-serif; font-weight: 800; font-style: italic; letter-spacing: -.02em; }
+    .sub { font-family: Kanit, 'Arial Narrow', sans-serif; font-weight: 600; font-style: italic; letter-spacing: .04em; text-transform: uppercase; }
+    .halftone { background-image: radial-gradient(rgba(20,20,27,.26) 1.3px, transparent 1.4px); background-size: 6px 6px; }
+    .ink { border: 3px solid #14141B; }
+    .drop { box-shadow: 5px 5px 0 #14141B; }
+    .drop-sm { box-shadow: 3px 3px 0 #14141B; }
+    .tap { cursor: pointer; transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, background .2s ease; }
+    .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
+    @keyframes slam { 0% { opacity: 0; transform: translateY(-14px) scale(1.2); } 60% { transform: translateY(2px) scale(.98); } 100% { opacity: 1; transform: none; } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #F6F2E7; font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif; color: #14141B; display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="padding: 22px 18px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <div class="sub" style="font-size: 10.5px; color: #E5342A;">Eleven games together</div>
+      <div class="impact" style="font-size: 38px; line-height: .9; text-shadow: 3px 3px 0 #14141B; color: #F6F2E7; -webkit-text-stroke: 2.5px #14141B; animation: slam .5s cubic-bezier(.34,1.56,.64,1) both;">THE REGULARS</div>
+    </div>
+  </div>
+
+  <div style="padding: 0 18px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 13px;">
+
+    <!-- the crew -->
+    <div class="ink drop-sm" style="background: #FFFFFF; padding: 13px 14px; display: flex; flex-direction: column; gap: 9px;">
+      <sc-for list="{{members}}" as="m" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 12px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{m.delay}};">
+          <div class="ink" style="width: 38px; height: 38px; border-width: 2.5px; border-radius: 999px; background: {{m.bg}}; color: {{m.fg}}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex-shrink: 0;">{{m.initials}}</div>
+          <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+            <div style="font-size: 14.5px; font-weight: 900; letter-spacing: -.01em;">{{m.name}}</div>
+            <div style="font-size: 11px; font-weight: 500; color: #5A5A66;">{{m.meta}}</div>
+          </div>
+          <div class="ink sub" style="border-width: 2.5px; background: {{m.tagBg}}; color: {{m.tagFg}}; padding: 4px 8px; font-size: 9.5px; flex-shrink: 0;">{{m.tag}}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- next game together -->
+    <div class="ink drop" style="position: relative; overflow: hidden; background: #2050E0; color: #FFFFFF; padding: 15px;">
+      <div class="halftone" style="position: absolute; inset: 0; opacity: .3;"></div>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 10px;">
+        <div class="sub" style="font-size: 10px; color: #FFC42E;">All four in, Thursday</div>
+        <div class="impact" style="font-size: 34px; line-height: .92; text-shadow: 3px 3px 0 #14141B;">20:00 · AL QUOZ</div>
+        <div style="font-size: 12.5px; font-weight: 700; line-height: 1.42;">Book the next one for everyone in one go. Anyone who can't make it passes their place on as normal.</div>
+      </div>
+    </div>
+
+    <div class="tap ink drop-sm" onClick="{{ bookAll }}" style="background: {{ctaBg}}; color: {{ctaFg}}; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 9px;">
+      <span class="impact" style="font-size: 19px;">{{ctaLabel}}</span>
+    </div>
+
+    <!-- the honest bit about balancing -->
+    <div class="ink" style="background: transparent; border-style: dashed; border-width: 2.5px; padding: 13px 14px; display: flex; gap: 11px;">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#8C8C99" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+      <div style="font-size: 12.5px; font-weight: 700; line-height: 1.45; color: #5A5A66;">Four of you won't be on the same side. Pairs stay together most weeks, but a whole crew on one team is the other team's bad night — and next week it'd be yours.</div>
+    </div>
+
+    <div style="height: 4px;"></div>
+  </div>
+
+  <div style="padding: 10px 14px 16px; border-top: 3px solid #14141B; display: flex; gap: 4px;">
+    <sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
+      <div class="tap" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 46px; background: {{n.bg}}; border: {{n.border}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="{{n.color}}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
+        <span class="sub" style="font-size: 8.5px; color: {{n.color}};">{{n.label}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const tab = this.state?.tab ?? 'crew';
+    const booked = this.state?.booked ?? false;
+
+    const memberDefs = [
+      { initials: 'AA', name: 'You', meta: 'Level 4 · 96% reliable', tag: 'IN', on: true },
+      { initials: 'OM', name: 'Omar Mansour', meta: 'Level 4 · 91% reliable', tag: 'IN', on: true },
+      { initials: 'RK', name: 'Rayan Khalil', meta: 'Level 3 · 88% reliable', tag: 'IN', on: true },
+      { initials: 'YS', name: 'Yusuf Saeed', meta: 'Level 5 · keeper', tag: 'IN', on: true },
+    ];
+
+    const members = memberDefs.map((m, i) => ({
+      initials: m.initials,
+      name: m.name,
+      meta: m.meta,
+      tag: m.tag,
+      bg: i === 0 ? '#FFC42E' : '#F6F2E7',
+      fg: '#14141B',
+      tagBg: '#1F9E55',
+      tagFg: '#FFFFFF',
+      delay: (0.04 + i * 0.06).toFixed(2) + 's',
+    }));
+
+    const navDefs = [
+      { id: 'play', label: 'Play', icon: 'M12 3a9 9 0 100 18 9 9 0 000-18zM3.6 9h16.8M3.6 15h16.8M12 3a14 14 0 000 18M12 3a14 14 0 010 18' },
+      { id: 'games', label: 'Games', icon: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z' },
+      { id: 'crew', label: 'Crew', icon: 'M17 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 108 0 4 4 0 00-8 0' },
+      { id: 'you', label: 'You', icon: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8z' },
+    ];
+
+    const nav = navDefs.map((n) => {
+      const on = n.id === tab;
+      return {
+        label: n.label,
+        icon: n.icon,
+        color: on ? '#14141B' : '#8C8C99',
+        bg: on ? '#FFC42E' : 'transparent',
+        border: on ? '2.5px solid #14141B' : '2.5px solid transparent',
+        pick: () => this.setState({ tab: n.id }),
+      };
+    });
+
+    return {
+      members: members,
+      nav: nav,
+      ctaLabel: booked ? 'ALL FOUR BOOKED' : 'BOOK ALL FOUR — AED 180',
+      ctaBg: booked ? '#1F9E55' : '#E5342A',
+      ctaFg: '#FFFFFF',
+      bookAll: () => this.setState({ booked: !booked }),
+    };
+  }
+}
+</script>
+</body>
+</html>

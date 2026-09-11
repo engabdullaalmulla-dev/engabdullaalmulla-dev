@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;1,600;1,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #E5342A; } a:hover { color: #B8241C; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    .impact { font-family: Kanit, 'Arial Narrow', Impact, sans-serif; font-weight: 800; font-style: italic; letter-spacing: -.02em; }
+    .sub { font-family: Kanit, 'Arial Narrow', sans-serif; font-weight: 600; font-style: italic; letter-spacing: .04em; text-transform: uppercase; }
+    .halftone { background-image: radial-gradient(rgba(20,20,27,.26) 1.3px, transparent 1.4px); background-size: 6px 6px; }
+    .ink { border: 3px solid #14141B; }
+    .drop { box-shadow: 5px 5px 0 #14141B; }
+    .drop-sm { box-shadow: 3px 3px 0 #14141B; }
+    .tap { cursor: pointer; transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, background .2s ease; }
+    .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #F6F2E7; font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif; color: #14141B; display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="padding: 22px 18px 12px; display: flex; flex-direction: column; gap: 4px;">
+    <div class="sub" style="font-size: 10.5px; color: #E5342A;">One place · Thursday</div>
+    <div class="impact" style="font-size: 36px; line-height: .92; text-shadow: 3px 3px 0 #14141B; color: #F6F2E7; -webkit-text-stroke: 2.5px #14141B;">YOUR SHIRT</div>
+  </div>
+
+  <div style="padding: 0 18px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 13px;">
+
+    <!-- the fixture -->
+    <div class="ink drop-sm" style="background: #FFFFFF; padding: 14px; display: flex; align-items: center; gap: 13px;">
+      <div class="ink" style="width: 52px; height: 52px; border-width: 2.5px; background: #1F9E55; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; color: #FFFFFF;">
+        <div class="impact" style="font-size: 20px; line-height: 1;">17</div>
+        <div class="sub" style="font-size: 8.5px;">SEP</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+        <div style="font-size: 15.5px; font-weight: 900; letter-spacing: -.01em;">Al Quoz · Pitch 2</div>
+        <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66;">20:00 · 7-a-side · Level 3–4</div>
+      </div>
+    </div>
+
+    <!-- price -->
+    <div class="ink drop-sm" style="background: #FFFFFF; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+      <sc-for list="{{lines}}" as="r" hint-placeholder-count="2">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+          <div style="font-size: 13.5px; font-weight: {{r.weight}}; color: {{r.fg}};">{{r.label}}</div>
+          <div class="impact" style="font-size: {{r.size}}; color: {{r.fg}};">{{r.value}}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- the guarantee: the wedge, in writing -->
+    <div class="ink drop" style="position: relative; overflow: hidden; background: #E5342A; color: #FFFFFF; padding: 15px; transform: rotate(-.7deg);">
+      <div class="halftone" style="position: absolute; inset: 0; opacity: .28;"></div>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 8px;">
+        <div class="impact" style="font-size: 25px; line-height: .96; text-shadow: 2.5px 2.5px 0 #14141B;">CAN'T MAKE IT?<br>YOU GET IT BACK.</div>
+        <div style="font-size: 12.5px; font-weight: 700; line-height: 1.45;">Tell us any time and we'll offer your place on. The moment someone takes it, your <b>AED 45 comes back as cash</b> — not credit, not a voucher.</div>
+        <div class="ink" style="background: #14141B; border-width: 2.5px; padding: 7px 10px;">
+          <div style="font-size: 11px; font-weight: 700; line-height: 1.4; color: #FFC42E;">Inside 24 hours and nobody takes it: no refund, and it counts against your reliability.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- bring someone -->
+    <div class="tap ink drop-sm" onClick="{{ toggleCrew }}" style="background: {{crew.bg}}; padding: 13px 14px; display: flex; align-items: center; gap: 12px; min-height: 56px;">
+      <div class="ink" style="width: 26px; height: 26px; border-width: 2.5px; background: {{crew.boxBg}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <sc-if value="{{crew.on}}" hint-placeholder-val="{{ true }}">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#14141B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>
+        </sc-if>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+        <div style="font-size: 14px; font-weight: 900;">Bring someone</div>
+        <div style="font-size: 11.5px; font-weight: 500; line-height: 1.35; color: #5A5A66;">{{crew.note}}</div>
+      </div>
+    </div>
+
+    <div style="height: 4px;"></div>
+  </div>
+
+  <div style="padding: 12px 18px 20px; background: #F6F2E7; border-top: 3px solid #14141B; display: flex; flex-direction: column; gap: 9px;">
+    <div class="tap ink drop" onClick="{{ pay }}" style="background: {{ctaBg}}; color: #FFFFFF; min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <span class="impact" style="font-size: 22px;">{{ctaLabel}}</span>
+    </div>
+    <div style="font-size: 10.5px; font-weight: 500; text-align: center; color: #8C8C99;">Apple Pay · Google Pay · card</div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const withCrew = this.state?.withCrew ?? false;
+    const paid = this.state?.paid ?? false;
+    const total = withCrew ? 90 : 45;
+
+    const lines = [
+      { label: withCrew ? 'Two places' : 'One place', value: 'AED ' + (withCrew ? '90' : '45'), weight: '700', fg: '#5A5A66', size: '15px' },
+      { label: 'Total', value: 'AED ' + total, weight: '900', fg: '#14141B', size: '23px' },
+    ];
+
+    return {
+      lines: lines,
+      crew: {
+        on: withCrew,
+        bg: withCrew ? '#FFC42E' : '#FFFFFF',
+        boxBg: withCrew ? '#FFFFFF' : '#F6F2E7',
+        note: withCrew
+          ? "You two will be on the same side most weeks. Three or more and we split you — otherwise it stops being a game."
+          : 'Book a second place. Pairs stay together most weeks.',
+      },
+      ctaLabel: paid ? "YOU'RE IN" : 'PAY AED ' + total,
+      ctaBg: paid ? '#1F9E55' : '#E5342A',
+      toggleCrew: () => this.setState({ withCrew: !withCrew }),
+      pay: () => this.setState({ paid: !paid }),
+    };
+  }
+}
+</script>
+</body>
+</html>
