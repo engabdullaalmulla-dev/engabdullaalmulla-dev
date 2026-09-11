@@ -40,33 +40,29 @@ This is why we can undercut on price *and* out-differentiate at the same time. I
 Both incumbents let you pick your own tier and never check it. Ours moves with real results and peer votes, corrects fast, and everything downstream reads from it. **The only asset here that compounds — it takes as many games to build as you have played, and cannot be bought.** The purest technology advantage on the list.
 `Marginal cost: compute` · `Gap G05` · `Copy time: years`
 
-### 2. The only cost of pulling out is telling us
-> *"Cancel and the money comes back. Leave it late and it costs you standing, not cash."*
+### 2. Twenty-four hours' free cancellation — refunded in cash
+> *"Cancel by this time tomorrow and the money's back on your card. Later than that, we'll offer your place on."*
 
-**This must not be made conditional on a waitlist.** "You get your money back if someone replaces you" is not a promise, it is a lottery — and it fails hardest on quiet slots, half-empty games and launch week, which is exactly when the differentiation is worth most.
+CeleBreak gives you a 15-hour cutoff, returns **credits** rather than cash, and makes no attempt to refill the shirt — so the seat stays empty and the game plays uneven. We give a full day of no-questions cancellation, refund to the card, and actively offer the place on after that.
 
-It doesn't need to be conditional, because **a refunded seat costs about AED 24, not AED 45.** Under revenue share the venue's share reverses with the booking, the host is paid on attendance so that fee never goes out, and the only cash actually lost is the processor's fee (~AED 2.30, non-refundable). The rest is the AED 21.95 of contribution you would have earned. That is affordable to absorb unconditionally.
+**The principle: you pay when the game is actually damaged.** If the place resells, nobody was hurt and nothing is charged. If it doesn't, nine other people play a man short — that is real harm, and it costs.
 
-| | Unresold refunds | Cost per game | % of contribution |
-|---|---|---|---|
-| Mature, waitlist exists | ~0.6 seats | ~AED 14 | 5% |
-| Launch, no waitlist at all | ~2.4 seats | ~AED 58 | 22% |
+| When | Money | Reliability |
+|---|---|---|
+| More than 24h before kick-off | **Cash back, automatic** — no waitlist involved | No cost |
+| Inside 24h, place resells | **Cash back** | No cost — no harm done |
+| Inside 24h, place doesn't resell | **No refund** | Counts against you |
+| No-show, never told us | No refund | Counts heavily |
 
-The worst case is survivable and, in absolute terms at launch, about AED 760 a week across 20 games. **The cost falls as waitlists appear — the guarantee is cheapest exactly where it is most needed.**
+**What this costs.** A refunded seat is about AED 24, not AED 45 — under revenue share the venue's share reverses with the booking, the host is paid on attendance so that fee never goes out, and the only cash genuinely lost is the processor's ~AED 2.31, which isn't returned. Because only the >24h window is unconditional, the exposure is roughly **AED 9 a game, about 3% of contribution** — and it barely moves at launch, because late cancellations cost nothing whether a waitlist exists or not.
 
-**The three tiers:**
+**Two cheap ways to make the resale work more often** — which is now directly in the player's interest as well as ours: make the waitlist *cross-game* ("notify me for any Tier-4 game on a Thursday evening") so scattered city-wide demand pools instead of sitting in separate queues; and **spend earned free-game credits on released seats first**, redeeming a liability you already owe into a filled shirt.
 
-1. **More than 24h before kick-off** — cash back, automatic, no waitlist required, no reliability cost. Advertise with no asterisk.
-2. **Inside 24h** — we offer the place on. It goes: cash back, clean. It doesn't: **still cash back**, but it counts against reliability.
-3. **No-show, never told us** — no refund. The only case where money is kept, and defensible to everyone, because they took a place and denied it to someone else.
+**Watch for one perverse incentive.** Resale is least likely on quiet slots, so the player who books an unpopular game carries the most risk — exactly the slot you're trying to build. If fill on new slots stalls, the cheap fix is to guarantee resale below a fill threshold rather than to soften the policy everywhere.
 
-The risk this creates is behavioural, not financial — speculative booking and casual cancelling. That is handled by standing, per principle 4, never by keeping money.
+**Negotiate against this:** the arithmetic holds only on a share of *collected* revenue. A minimum guarantee per slot breaks it, because refunded seats would still cost the floor. That clause is worth more than the headline percentage.
 
-**Two cheap ways to manufacture a waitlist:** make it *cross-game* ("notify me for any Tier-4 game on a Thursday evening") so scattered city-wide demand pools instead of sitting in separate queues; and **spend earned free-game credits on released seats first**, redeeming a liability you already owe into a filled shirt and even sides.
-
-**Negotiate against this:** if a venue insists on a *minimum guarantee per slot* rather than a share of collected revenue, the arithmetic above breaks — refunded seats would still cost you the floor. Share-of-collected with the lowest possible floor is worth more than the headline percentage.
-
-`Marginal cost: ~AED 24 per unresold refund` · `Gaps G02 G03 G08` · `Copy time: needs a new cost base`
+`Marginal cost: ~AED 9 per game` · `Gaps G02 G03 G08` · `Copy time: needs a new cost base`
 
 ### 3. Your organiser keeps their game — and stops chasing money
 > *"Bring your WhatsApp group. Keep your players. Play for free."*

@@ -126,7 +126,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | B2 | **Cash-refundable wallet** — never credit-locked | G03 | P0 | R1 | RPT |
 | B3 | **Unconditional cash refund when cancelled >24h out** | G02 G03 | P0 | R1 | RPT |
 | B4 | **Spot auto-lists to waitlist on cancel; cash refund either way** | G02 G08 | P0 | R1 | FR RPT |
-| B5 | Late release (<24h) refunds cash but costs reliability | G02 G07 | P0 | R1 | NS |
+| B5 | Late release (<24h) refunds only if it resells; otherwise forfeits and costs reliability | G02 G07 | P0 | R1 | NS |
 | B5a | No-show without cancelling — the only case that forfeits | G07 | P0 | R1 | NS |
 | B5b | Cross-game waitlist — "any Tier-4 game, Thursday evening" | G08 | P1 | R2 | FR |
 | B5c | Spend earned free-game credits on released seats first | G08 | P2 | R3 | FR |

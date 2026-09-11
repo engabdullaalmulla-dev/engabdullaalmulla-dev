@@ -62,9 +62,11 @@ Revenue share converts a fixed-cost business with a 69% break-even into a variab
 
 ---
 
-## 2b. What a refund actually costs
+## 2b. What the refund guarantee actually costs
 
-The refund guarantee is only credible if it is unconditional, and it can be — because a refunded seat does **not** cost AED 45.
+Policy: cash back automatically more than 24h before kick-off; inside 24h the place is offered on and refunded in cash if it resells; if it doesn't resell there is no refund and it counts against reliability; a no-show never refunds.
+
+A refunded seat does **not** cost AED 45.
 
 | Line | Effect on a reversed booking |
 |---|---|
@@ -74,14 +76,18 @@ The refund guarantee is only credible if it is unconditional, and it can be — 
 | Payment processing | **−2.31 real cash, not returned by the processor** |
 | **Net economic cost** | **≈ AED 24** — the AED 21.95 of contribution foregone, plus the fee |
 
-| Scenario | Unresold refunds/game | Cost/game | % of contribution |
+Only the >24h window is unconditional, so that is the whole exposure. A resold place is cost-neutral — the replacement pays — and a late cancellation that doesn't resell costs nothing at all.
+
+| Scenario | Unconditional refunds/game | Cost/game | % of contribution |
 |---|---:|---:|---:|
-| Mature — waitlist exists | ~0.6 seats | ~AED 14 | 5% |
-| Launch — no waitlist at all | ~2.4 seats | ~AED 58 | 22% |
+| Mature | ~0.36 seats | ~AED 9 | 3% |
+| Launch, no waitlist | ~0.36 seats | ~AED 9 | 5% |
 
-Worst case is survivable, and in absolute terms at launch it is roughly AED 760 a week across 20 games. **The cost falls as waitlists appear, so the guarantee is cheapest exactly where it is most needed.**
+**The figure barely moves with liquidity**, because the expensive case — late cancellations on games nobody wants — is the case that no longer refunds. That is the main commercial advantage of this policy over an unconditional one, which would have run to roughly AED 58 a game at launch.
 
-The residual risk is behavioural, not financial — speculative booking and casual cancelling — and is handled by the reliability score, never by keeping money.
+The residual risk is behavioural and lands on the >24h window: nothing discourages a speculative booking cancelled two days out. Reliability scoring does not currently touch that case. Monitor whether early-cancel rates climb once the policy is public.
+
+**Perverse incentive to watch:** resale is least likely on quiet slots, so a player booking an unpopular game carries the most risk — exactly the slot the business is trying to build. If fill on new slots stalls, guarantee resale below a fill threshold rather than softening the policy everywhere.
 
 **Contract risk:** this holds only if the venue takes a share of *collected* revenue. A minimum guarantee per slot breaks it, because refunded seats would still cost the floor. Negotiate share-of-collected with the lowest possible floor; that clause matters more than the percentage.
 
