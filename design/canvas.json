@@ -1,19 +1,108 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Tonight", "is_interactive": true },
-    { "file": "TeamSheet.dc.html", "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 · The teams", "is_interactive": true },
-    { "file": "Resale.dc.html", "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 · Passing your shirt on", "is_interactive": true },
-    { "file": "PostMatch.dc.html", "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 · Full time", "is_interactive": true },
-    { "file": "Passport.dc.html", "x": 0, "y": 964, "w": 390, "h": 844, "title": "5 · Your player card", "is_interactive": true },
-    { "file": "Season.dc.html", "x": 470, "y": 964, "w": 390, "h": 844, "title": "6 · Season", "is_interactive": true },
-    { "file": "HostMode.dc.html", "x": 940, "y": 964, "w": 390, "h": 844, "title": "7 · Gaffer mode", "is_interactive": true },
-    { "file": "System.dc.html", "x": 0, "y": 1928, "w": 1240, "h": 980, "title": "Design system" }
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 · Tonight",
+      "is_interactive": true
+    },
+    {
+      "file": "TeamSheet.dc.html",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "2 · The teams",
+      "is_interactive": true
+    },
+    {
+      "file": "Resale.dc.html",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3 · Passing your shirt on",
+      "is_interactive": true
+    },
+    {
+      "file": "PostMatch.dc.html",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "4 · Full time",
+      "is_interactive": true
+    },
+    {
+      "file": "Passport.dc.html",
+      "x": 0,
+      "y": 964,
+      "w": 390,
+      "h": 844,
+      "title": "5 · Your player card",
+      "is_interactive": true
+    },
+    {
+      "file": "Level.dc.html",
+      "x": 470,
+      "y": 964,
+      "w": 390,
+      "h": 844,
+      "title": "6 · Your level",
+      "is_interactive": true
+    },
+    {
+      "file": "HostMode.dc.html",
+      "x": 940,
+      "y": 964,
+      "w": 390,
+      "h": 844,
+      "title": "7 · Gaffer mode",
+      "is_interactive": true
+    },
+    {
+      "file": "System.dc.html",
+      "x": 0,
+      "y": 1928,
+      "w": 1240,
+      "h": 980,
+      "title": "Design system"
+    }
   ],
   "annotations": [
-    { "id": "brief", "x": 0, "y": -330, "w": 700, "text": "DRAWN LIKE A SPORTS MANGA\n\nEveryone here grew up on كابتن ماجد — Captain Majid. This takes the visual LANGUAGE of that 80s football-manga era: halftone screentone, converging speed lines, 3px inked panel borders, leaning impact lettering with a hard shadow behind it. Not its characters or artwork, which belong to their creators — the genre is the part people are actually nostalgic for, and it is yours to use.\n\nWarm newsprint page, kit red, big dramatic sky, flash yellow. Every screen is live." },
-    { "id": "flow-note", "x": 1880, "y": 0, "w": 300, "text": "WHAT TO TRY\n\nScreen 3 — \"I can't make it\" → \"Pass my shirt on\". The search is a full-bleed speed-line panel with the ball hanging in the middle of it. That is the most Tsubasa-era moment in the app, and it is pointed at the one thing CeleBreak does worst.\n\nScreen 4 — the score lands on a sunburst. Screen 2 — the teams are inked onto a manga pitch; you are the yellow 8." },
-    { "id": "retention-note", "x": 1410, "y": 964, "w": 300, "text": "BUILT TO BE SHARED\n\nThe player card is now a character stats page — huge shirt number ghosted behind, screentone burst, stat boxes along the bottom. That is the screen people screenshot into the group chat, which is free marketing you do not have to buy.\n\nThe table gives you a gold panel when you are in the promotion places." },
-    { "id": "system-note", "x": 1340, "y": 1928, "w": 320, "text": "THE ONE RULE\n\nSunbursts, tilted panels and full-bleed speed lines are reserved for three beats: the goal, the win, and the money coming back.\n\nEverywhere else the page stays flat and calm. Drama that never stops is just noise — the reason the big panels hit is that most screens do not have one." }
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -330,
+      "w": 700,
+      "text": "DRAWN LIKE A SPORTS MANGA\n\nEveryone here grew up on كابتن ماجد — Captain Majid. This takes the visual LANGUAGE of that 80s football-manga era: halftone screentone, converging speed lines, 3px inked panel borders, leaning impact lettering with a hard shadow behind it. Not its characters or artwork, which belong to their creators — the genre is the part people are actually nostalgic for, and it is yours to use.\n\nWarm newsprint page, kit red, big dramatic sky, flash yellow. Every screen is live."
+    },
+    {
+      "id": "flow-note",
+      "x": 1880,
+      "y": 0,
+      "w": 300,
+      "text": "WHAT TO TRY\n\nScreen 3 — \"I can't make it\" → \"Pass my shirt on\". The search is a full-bleed speed-line panel with the ball hanging in the middle of it. That is the most Tsubasa-era moment in the app, and it is pointed at the one thing CeleBreak does worst.\n\nScreen 4 — the score lands on a sunburst. Screen 2 — the teams are inked onto a manga pitch; you are the yellow 8."
+    },
+    {
+      "id": "retention-note",
+      "x": 1410,
+      "y": 964,
+      "w": 300,
+      "text": "BUILT TO BE SHARED\n\nThe player card is a character stats page — huge shirt number ghosted behind, screentone burst, stat boxes along the bottom. That is the screen people screenshot into the group chat, which is free marketing you do not have to buy.\n\nScreen 6 is the level mechanic made visible. Divisions and the league table are cut — level progression is the only ladder now, so it has to be legible. Flip between the two tabs: what you see after a game, and the three rules behind it."
+    },
+    {
+      "id": "system-note",
+      "x": 1340,
+      "y": 1928,
+      "w": 320,
+      "text": "THE ONE RULE\n\nSunbursts, tilted panels and full-bleed speed lines are reserved for three beats: the goal, the win, and the money coming back.\n\nEverywhere else the page stays flat and calm. Drama that never stops is just noise — the reason the big panels hit is that most screens do not have one."
+    }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }

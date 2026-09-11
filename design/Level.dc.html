@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;1,600;1,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #E5342A; } a:hover { color: #B8241C; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    .impact { font-family: Kanit, 'Arial Narrow', Impact, sans-serif; font-weight: 800; font-style: italic; letter-spacing: -.02em; }
+    .sub { font-family: Kanit, 'Arial Narrow', sans-serif; font-weight: 600; font-style: italic; letter-spacing: .04em; text-transform: uppercase; }
+    .halftone { background-image: radial-gradient(rgba(20,20,27,.24) 1.3px, transparent 1.4px); background-size: 6px 6px; }
+    .ink { border: 3px solid #14141B; }
+    .drop { box-shadow: 5px 5px 0 #14141B; }
+    .drop-sm { box-shadow: 3px 3px 0 #14141B; }
+    .tap { cursor: pointer; transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, background .2s ease, color .2s ease; }
+    .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
+    @keyframes fillBar { from { width: 84%; } to { width: 94%; } }
+    @keyframes slam { 0% { opacity: 0; transform: translateY(-16px) scale(1.25); } 62% { transform: translateY(2px) scale(.97); } 100% { opacity: 1; transform: none; } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #F6F2E7; font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif; color: #14141B; display: flex; flex-direction: column; overflow: hidden;">
+
+  <!-- toggle -->
+  <div style="padding: 20px 18px 14px; display: flex; gap: 7px;">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+      <div class="tap ink" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 42px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
+        <span class="sub" style="font-size: 10.5px;">{{t.label}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- ============ AFTER THE GAME ============ -->
+  <sc-if value="{{isAfter}}" hint-placeholder-val="{{ true }}">
+    <div style="padding: 0 18px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+
+      <div class="ink drop" style="position: relative; overflow: hidden; background: #2050E0; color: #FFFFFF; padding: 16px;">
+        <div class="halftone" style="position: absolute; inset: 0; opacity: .3;"></div>
+        <div style="position: relative; display: flex; flex-direction: column; gap: 11px;">
+          <div class="sub" style="font-size: 10px;">Thursday · Al Quoz</div>
+          <div class="ink drop-sm" style="align-self: flex-start; border-width: 2.5px; background: #FFC42E; color: #14141B; padding: 5px 10px; transform: rotate(-2deg);">
+            <span class="sub" style="font-size: 10px;">You were the underdogs</span>
+          </div>
+          <div class="impact" style="font-size: 40px; line-height: .92; text-shadow: 3px 3px 0 #14141B;">YOU WON 6–5</div>
+        </div>
+      </div>
+
+      <!-- the bar: the teacher -->
+      <div class="ink drop-sm" style="background: #FFFFFF; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+          <div class="impact" style="font-size: 26px;">LEVEL 4</div>
+          <div class="sub" style="font-size: 10px; color: #5A5A66;">94% to Level 5</div>
+        </div>
+
+        <div class="ink" style="position: relative; height: 26px; border-width: 2.5px; background: #EFE9DA; overflow: hidden;">
+          <div style="width: 84%; height: 100%; background: #14141B; position: absolute; left: 0; top: 0;"></div>
+          <div style="height: 100%; background: #1F9E55; border-right: 2.5px solid #14141B; position: absolute; left: 0; top: 0; animation: fillBar 1.1s cubic-bezier(.34,1.4,.64,1) .3s both;"></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{reasons}}" as="r" hint-placeholder-count="2">
+            <div style="display: flex; align-items: flex-start; gap: 10px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{r.delay}};">
+              <div class="ink" style="width: 22px; height: 22px; border-width: 2.5px; background: {{r.bg}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg>
+              </div>
+              <div style="font-size: 13.5px; font-weight: 700; line-height: 1.35;">{{r.text}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div class="ink drop-sm" style="background: #FFC42E; padding: 14px 16px; display: flex; align-items: center; gap: 12px; transform: rotate(-.6deg);">
+        <div class="impact" style="font-size: 30px; line-height: 1;">3</div>
+        <div style="font-size: 13.5px; font-weight: 700; line-height: 1.4;">more nights like that and you're <b>Level 5</b>.</div>
+      </div>
+
+      <div class="tap" onClick="{{ toHow }}" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 0 18px;">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5A5A66" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+        <span class="sub" style="font-size: 10.5px; color: #5A5A66;">How does this work?</span>
+      </div>
+
+    </div>
+  </sc-if>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <sc-if value="{{isHow}}" hint-placeholder-val="{{ true }}">
+    <div style="padding: 0 18px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 13px;">
+
+      <div class="impact" style="font-size: 30px; line-height: .96; text-shadow: 3px 3px 0 #14141B; color: #F6F2E7; -webkit-text-stroke: 2.5px #14141B;">HOW YOUR<br>LEVEL WORKS</div>
+
+      <div style="font-size: 14px; font-weight: 700; line-height: 1.5;">Your level goes up when you do better than we expected — and when the people you played with say you played well.</div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+          <div class="ink drop-sm" style="background: #FFFFFF; padding: 13px 14px; display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 3px 11px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{r.delay}};">
+            <div class="impact" style="font-size: 22px; color: #E5342A; grid-row: span 2;">{{r.n}}</div>
+            <div style="font-size: 14px; font-weight: 900; line-height: 1.25;">{{r.title}}</div>
+            <div style="font-size: 12.5px; font-weight: 500; color: #5A5A66; line-height: 1.45;">{{r.body}}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div class="ink" style="background: #14141B; color: #F6F2E7; padding: 14px 16px; display: flex; flex-direction: column; gap: 9px;">
+        <div class="sub" style="font-size: 10px; color: #FFC42E;">Three promises</div>
+        <sc-for list="{{promises}}" as="p" hint-placeholder-count="3">
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FFC42E" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px;" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+            <div style="font-size: 13px; font-weight: 700; line-height: 1.4;">{{p.text}}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div class="ink drop-sm" style="background: #EFE9DA; padding: 13px 15px; display: flex; flex-direction: column; gap: 7px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+          <span class="sub" style="font-size: 10px; color: #5A5A66;">Your rating, if you want it</span>
+          <span class="impact" style="font-size: 24px;">1,294</span>
+        </div>
+        <div style="height: 2px; background: #D8D0BC;"></div>
+        <div style="font-size: 12px; font-weight: 500; color: #5A5A66; line-height: 1.45;">Level 4 runs from 1,200 to 1,299. We don't show this on your profile because it's not the point — but it's yours, so it's here.</div>
+      </div>
+
+      <div style="padding-bottom: 18px;">
+        <div class="tap ink drop-sm" onClick="{{ toAfter }}" style="min-height: 48px; background: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+          <span class="impact" style="font-size: 16px;">GOT IT</span>
+        </div>
+      </div>
+
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { view: 'after' };
+  }
+
+  renderVals() {
+    const view = this.state.view;
+    const tabDefs = [
+      { id: 'after', label: 'After the game' },
+      { id: 'how', label: 'How it works' },
+    ];
+    const tabs = tabDefs.map((t) => {
+      const on = t.id === view;
+      return {
+        label: t.label,
+        bg: on ? '#14141B' : '#FFFFFF',
+        fg: on ? '#F6F2E7' : '#14141B',
+        shadow: on ? '3px 3px 0 #14141B' : 'none',
+        pick: () => this.setState({ view: t.id }),
+      };
+    });
+
+    return {
+      tabs: tabs,
+      isAfter: view === 'after',
+      isHow: view === 'how',
+      reasons: [
+        { text: 'You won as underdogs — that counts for more', bg: '#1F9E55', icon: 'M12 19V5M6 11l6-6 6 6', delay: '.5s' },
+        { text: 'Two teammates voted you up', bg: '#1F9E55', icon: 'M12 19V5M6 11l6-6 6 6', delay: '.62s' },
+      ],
+      rules: [
+        { n: '1', title: 'Beating better teams counts more', body: 'We work out who should win before kick-off. Win when you weren’t supposed to and you move up faster. Beat a side you were meant to beat and you’ll barely move.', delay: '.05s' },
+        { n: '2', title: 'Your teammates have a say', body: 'They vote after the game. It’s the only way we can see the keeper who kept you in it, or the player whose side won despite them.', delay: '.13s' },
+        { n: '3', title: 'Goals don’t count', body: 'If they did, every defender and keeper would be stuck at the bottom forever. How often you play doesn’t count either — that’s your reliability, which is a separate thing.', delay: '.21s' },
+      ],
+      promises: [
+        { text: 'Winning never moves you down.' },
+        { text: 'Not playing never moves you down.' },
+        { text: 'Your first five games move you a lot, so we find your level fast.' },
+      ],
+      toHow: () => this.setState({ view: 'how' }),
+      toAfter: () => this.setState({ view: 'after' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

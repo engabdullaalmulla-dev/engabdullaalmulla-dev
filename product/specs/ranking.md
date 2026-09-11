@@ -149,14 +149,63 @@ Late cancellations that do not resell count against it (see the cancellation pol
 
 ---
 
-## What the player actually sees
+## The player-facing mechanism
 
-| Number | Surface | Never shown |
-|---|---|---|
-| Level | "Level 4" and a progress bar to 5 | The rating number, the K factor, the delta |
-| Reliability | A percentage on the profile and team sheet | The individual events behind it |
+A number that moves for reasons a player can't see is the thing that makes a rating system feel arbitrary. **Comprehension and hiding the machinery are not the same goal** — the fix is not to expose the maths, it is to make cause and effect legible in plain words. Designed in `design/Level.dc.html`.
 
-Per positioning rule 2: **show the conclusion, never the computation.** Exposing the rating number invites arguments about the rating number, and the raw figure is useless to the person it describes.
+### The one sentence
+
+> *Your level goes up when you do better than we expected — and when the people you played with say you played well.*
+
+Every player should be able to repeat that after one reading. Everything below is detail.
+
+### The three rules, as a player reads them
+
+**1. Beating better teams counts more.** We work out who should win before kick-off. Win when you weren't supposed to and you move up faster. Beat a side you were meant to beat and you'll barely move.
+
+**2. Your teammates have a say.** They vote after the game. It's the only way we can see the keeper who kept you in it, or the player whose side won despite them.
+
+**3. Goals don't count.** If they did, every defender and keeper would be stuck at the bottom forever. How often you play doesn't count either — that's reliability, which is a separate thing.
+
+### The three promises
+
+These exist to pre-empt the three complaints every rating system gets. They are guarantees, not tendencies, and they all hold under the maths above.
+
+- **Winning never moves you down.** With S = 1, Δ is always positive.
+- **Not playing never moves you down.** Absence widens uncertainty; it does not reduce the rating.
+- **Your first five games move you a lot,** so we find your level fast rather than leaving you in the wrong games for a month.
+
+One more that is true and worth saying if asked: *losing always costs something, but playing well costs you less* — peer votes shrink a negative delta, they never flip it.
+
+### The progress bar is the teacher
+
+It is the only place the mechanism becomes visible, so it must move **after every single game**, including small moves and downward ones. A bar that only moves on good nights teaches nothing and, worse, looks like it is hiding something.
+
+After each game the player sees:
+
+| Element | Example |
+|---|---|
+| The expectation they were under | "You were the underdogs" |
+| The result | "You won 6–5" |
+| The bar, animating from its old position | 84% → 94% |
+| Each reason, in words | "Won as underdogs — that counts for more" · "Two teammates voted you up" |
+| What's left | "3 more nights like that and you're Level 5" |
+
+Reasons are shown as **words, not numbers**. The delta is a detail; the cause is the lesson.
+
+### The number, on tap — a revision
+
+The earlier version of this spec said the rating must never be shown. That was wrong. A hidden number is *more* likely to feel unfair than a visible one, because players correctly infer that something is being withheld.
+
+**Corrected rule:** the tier and the bar are the default surface. The raw rating and the band it sits in are available on one tap, inside "How your level works" — not on the profile, not on the team sheet, not in any list where it could become a thing people compare. Anyone curious enough to tap is owed a straight answer.
+
+### What is never shown
+
+The K factor, the expected-score calculation, the per-game delta arithmetic, and any other player's rating.
+
+### "Silent demotion" means quiet, not hidden
+
+Crossing a tier downward fires no notification and no banner. It does **not** mean the bar lies. The bar shows the real position at all times, and a player who watches it will see the tier change. A system caught concealing a number loses the trust the number depends on.
 
 ---
 
@@ -171,7 +220,11 @@ Per positioning rule 2: **show the conclusion, never the computation.** Exposing
 - [ ] Eight weeks of absence widens uncertainty and raises K, and does not lower the rating.
 - [ ] Tier promotion fires a notification; demotion does not.
 - [ ] Demotion requires a sustained drop past a buffer, and a test that oscillates a player around a boundary never demotes them twice in a season.
-- [ ] The rating number is not exposed in any API response reaching the client.
+- [ ] The rating number appears only in the "How your level works" view — never on a profile, team sheet, leaderboard or any list.
+- [ ] No player can see another player's rating or tier progress.
+- [ ] The progress bar moves after every rated game, including downward, and matches the stored rating exactly.
+- [ ] Every rated game produces at least one plain-language reason; a game that produces none is a bug.
+- [ ] The "how many more games" estimate is derived from current form, and is phrased as an estimate.
 
 ---
 
