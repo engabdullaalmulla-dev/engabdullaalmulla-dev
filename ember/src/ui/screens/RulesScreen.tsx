@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import type { Power } from '../../../shared/types';
+import type { Power, Rank } from '../../../shared/types';
 import { useLanguage } from '../../i18n';
 import { Button } from '../components/Button';
 import { colors, radius, space, type as typography } from '../theme';
@@ -17,14 +17,16 @@ const POWERS: Array<{ on: string; power: Power }> = [
 export function RulesScreen({ onBack }: { onBack: () => void }) {
   const { t, n } = useLanguage();
 
-  const values: Array<{ card: string; tint?: string; points: string; note?: string }> = [
-    { card: 'K♥ K♦', tint: colors.suitRed, points: n(0), note: t.rules.valueNotes.bestCard },
-    { card: 'A', points: n(1) },
-    { card: `2 – 10`, points: t.rules.valueNotes.faceValue },
-    { card: 'J', points: n(11) },
-    { card: 'Q', points: n(12) },
-    { card: 'K♠ K♣', points: n(13) },
-    { card: t.cards.rank('JOKER'), tint: colors.ember, points: n(15), note: t.rules.valueNotes.getRidOfIt },
+  // The chip shows the card as it is printed; the line under it gives the name
+  // people actually say, which is the whole point of this table in Arabic.
+  const values: Array<{ card: string; rank?: Rank; tint?: string; points: string; note?: string }> = [
+    { card: 'K♥ K♦', rank: 'K', tint: colors.suitRed, points: n(0), note: t.rules.valueNotes.bestCard },
+    { card: 'A', rank: 'A', points: n(1) },
+    { card: '2 – 10', points: t.rules.valueNotes.faceValue },
+    { card: 'J', rank: 'J', points: n(11) },
+    { card: 'Q', rank: 'Q', points: n(12) },
+    { card: 'K♠ K♣', rank: 'K', points: n(13) },
+    { card: 'JOKER', rank: 'JOKER', tint: colors.ember, points: n(15), note: t.rules.valueNotes.getRidOfIt },
   ];
 
   return (
@@ -75,17 +77,23 @@ export function RulesScreen({ onBack }: { onBack: () => void }) {
 
         <Section title={t.rules.values}>
           <View style={styles.table}>
-            {values.map((row) => (
-              <View key={row.card} style={styles.valueRow}>
-                <View style={styles.chip}>
-                  <Text style={[styles.chipText, row.tint ? { color: row.tint } : null]}>
-                    {row.card}
-                  </Text>
+            {values.map((row) => {
+              const spoken = row.rank ? t.cards.rank(row.rank) : '';
+              return (
+                <View key={row.card} style={styles.valueRow}>
+                  <View style={styles.chip}>
+                    <Text style={[styles.chipText, row.tint ? { color: row.tint } : null]}>
+                      {row.card}
+                    </Text>
+                    {spoken && spoken !== row.rank ? (
+                      <Text style={styles.chipSpoken}>{spoken}</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.points}>{row.points}</Text>
+                  {row.note ? <Text style={styles.note}>{row.note}</Text> : null}
                 </View>
-                <Text style={styles.points}>{row.points}</Text>
-                {row.note ? <Text style={styles.note}>{row.note}</Text> : null}
-              </View>
-            ))}
+              );
+            })}
           </View>
         </Section>
 
@@ -94,9 +102,7 @@ export function RulesScreen({ onBack }: { onBack: () => void }) {
             {POWERS.map((row) => (
               <View key={row.on} style={styles.powerRow}>
                 <View style={styles.chip}>
-                  <Text style={styles.chipText}>
-                    {row.on === 'JOKER' ? t.cards.rank('JOKER') : row.on}
-                  </Text>
+                  <Text style={styles.chipText}>{row.on}</Text>
                 </View>
                 <View style={styles.powerText}>
                   <Text style={styles.powerName}>{t.powers[row.power].name}</Text>
@@ -163,6 +169,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chipText: { ...typography.small, color: colors.text },
+  chipSpoken: { ...typography.small, fontSize: 10, color: colors.goldFaint, marginTop: 1 },
   points: { ...typography.body, color: colors.text, fontWeight: '800', minWidth: 86 },
   note: { ...typography.small, fontSize: 11, color: colors.textFaint, flexShrink: 1, lineHeight: 16 },
 });

@@ -130,6 +130,15 @@ language. Numbers are written in Arabic-Indic digits where they are prose —
 scores, counts, round numbers — and stay Western on the faces of the cards,
 which is how a deck sold in the Gulf is printed.
 
+The card names are the ones used at a table in the Gulf rather than the ones
+in a dictionary: a King is **الشايب**, a Queen is **البنت**, a Jack is
+**الولد**, and the suits are بستوني ♠، كبة ♥، ديناري ♦، شيريا ♣. Baloot's own
+jargon (سبيت، هاص، ديمن، كلفس) is more deeply Khaleeji still, but it is
+game-specific in a way a casual player may not use. The faces of the cards keep
+the Latin A K Q J, which is how decks sold in the region are printed and what
+Gulf card apps show; the rules screen puts the spoken name under each one so
+the two connect.
+
 Two details worth knowing about how it is built:
 
 - **The rules engine no longer writes sentences.** It records what happened —

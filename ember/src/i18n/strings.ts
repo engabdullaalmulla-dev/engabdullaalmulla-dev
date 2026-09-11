@@ -588,6 +588,13 @@ function arabicDigits(value: number | string): string {
   return String(value).replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]);
 }
 
+/**
+ * What the cards are called at a table in the Gulf, which is not what the
+ * dictionary calls them: a King is الشايب, the old man, and a Queen is البنت.
+ * Suits take the names that travel furthest across the GCC rather than the
+ * Baloot-specific jargon (سبيت، هاص، ديمن، كلفس), which not every casual
+ * player uses.
+ */
 const AR_RANK: Record<Rank, string> = {
   A: 'آس',
   '2': '٢',
@@ -600,8 +607,8 @@ const AR_RANK: Record<Rank, string> = {
   '9': '٩',
   '10': '١٠',
   J: 'ولد',
-  Q: 'ملكة',
-  K: 'ملك',
+  Q: 'بنت',
+  K: 'شايب',
   JOKER: 'جوكر',
 };
 
@@ -627,9 +634,9 @@ function person(
 
 const AR_SUIT: Record<Suit, string> = {
   S: 'بستوني',
-  H: 'قلوب',
+  H: 'كبة',
   D: 'ديناري',
-  C: 'سباتي',
+  C: 'شيريا',
 };
 
 export const ar: Strings = {
@@ -859,7 +866,7 @@ export const ar: Strings = {
       faceValue: 'حسب رقمها',
     },
     powersTitle: 'القوى',
-    redKingNote: 'الملك الأحمر لا يساوي شيئًا أصلًا، فلا قوة له تُنفق — احتفظ به.',
+    redKingNote: 'الشايب الأحمر لا يساوي شيئًا أصلًا، فلا قوة له تُنفق — احتفظ به.',
     ending: 'النهاية',
     endingBody:
       'تتراكم نقاط الجولات. وما إن يبلغ أحدهم ١٠٠ حتى تنتهي المباراة، ويفوز صاحب أقل النقاط. وإن أحرقت أوراقك كلها انتهت الجولة في الحال ولم تسجّل عليك نقطة.',
@@ -950,7 +957,9 @@ export const ar: Strings = {
     suit: (suit) => (suit ? AR_SUIT[suit] : ''),
     name: (ref) => {
       if (ref.rank === 'JOKER') return 'جوكر';
-      if (ref.rank === 'K') return isRed(ref.suit) ? 'ملكًا أحمر' : 'ملكًا أسود';
+      // The colour is the thing worth saying about a King: the red one is
+      // worth nothing at all.
+      if (ref.rank === 'K') return isRed(ref.suit) ? 'الشايب الأحمر' : 'الشايب الأسود';
       const rank = AR_RANK[ref.rank];
       return ref.suit ? `${rank} ${AR_SUIT[ref.suit]}` : rank;
     },
@@ -958,8 +967,8 @@ export const ar: Strings = {
       if (rank === 'JOKER') return 'جوكر';
       if (rank === 'A') return 'آسًا';
       if (rank === 'J') return 'ولدًا';
-      if (rank === 'Q') return 'ملكة';
-      if (rank === 'K') return 'ملكًا';
+      if (rank === 'Q') return 'بنتًا';
+      if (rank === 'K') return 'شايبًا';
       return AR_RANK[rank];
     },
   },
