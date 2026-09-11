@@ -163,6 +163,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | D5 | Bib and shirt-number assignment | G06 | P1 | R2 | — |
 | D6 | Score entry (host or any player, with confirmation) | G11 | P0 | R2 | — |
 | D7 | Goal and assist attribution | G11 | P1 | R3 | FREQ |
+| D8 | **Sides named after the night's real fixture, on big-match nights only** | G11 | P1 | R2 | FREQ |
 
 ### E · Reliability & behaviour
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -291,18 +292,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | P3 | Lapse detection — reach out at three missed weeks, not thirteen | G07 | P1 | R3 | RPT |
 | P4 | Win-back offer tuned to why they stopped | G07 | P2 | R4 | RPT |
 
-### S · Matchday nights *(tying our games to the real fixture list)*
-| ID | Feature | Gap | Pri | Rel | Moves |
-|---|---|---|---|---|---|
-| S1 | Daily fixture pull into our own database — no live polling | — | P0 | R2 | — |
-| S2 | **Fixture-aware scheduling — never kick off against a big match, or land just before it** | — | P0 | R2 | FR |
-| S3 | **Sides named after the night's real fixture on big-match nights** | G11 | P0 | R3 | FREQ |
-| S4 | **Play then watch — game, then the match on the venue's screens** | G10 | P1 | R3 | RPT |
-| S5 | Venue F&B revenue share on watch nights | — | P1 | R4 | — |
-| S6 | Big-match calendar surfaced at booking — "Clásico night, 19:30" | G11 | P2 | R3 | FR |
-| S7 | Predictions for standing only, no prize of value — *legal review first* | G11 | P2 | R4 | FREQ |
-
-**Count:** 125 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 119 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 
