@@ -5,14 +5,16 @@ import type { PublicUser, RoomView } from '../../../shared/protocol';
 import type { Difficulty } from '../../../shared/types';
 import { Button } from '../components/Button';
 import { Flame } from '../components/Flame';
+import type { ErrorCode } from '../../../shared/protocol';
+import { useLanguage } from '../../i18n';
 import { tap } from '../haptics';
-import { DIFFICULTIES, DIFFICULTY_LABEL } from '../labels';
+import { DIFFICULTIES } from '../labels';
 import { colors, radius, space, type as typography } from '../theme';
 
 interface Props {
   room: RoomView;
   user: PublicUser | null;
-  error: string | null;
+  error: ErrorCode | null;
   onAddBot: (difficulty: Difficulty) => void;
   onRemoveSeat: (seatId: string) => void;
   onStart: () => void;
@@ -20,15 +22,14 @@ interface Props {
 }
 
 export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart, onLeave }: Props) {
+  const { t, n } = useLanguage();
   const isHost = user?.id === room.hostId;
   const canStart = isHost && room.seats.length >= 3;
   const free = room.maxSeats - room.seats.length;
 
   const invite = () => {
     tap();
-    void Share.share({
-      message: `Sit down at my EMBER table. Room code: ${room.code}`,
-    }).catch(() => {
+    void Share.share({ message: t.room.invite(room.code) }).catch(() => {
       // Sharing is a convenience; the code is on screen either way.
     });
   };
@@ -36,31 +37,31 @@ export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart,
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <Pressable accessibilityRole="button" onPress={onLeave} hitSlop={12}>
-        <Text style={styles.back}>← LEAVE TABLE</Text>
+        <Text style={styles.back}>{t.common.backArrow} {t.common.leaveTable}</Text>
       </Pressable>
 
       {room.isPrivate ? (
         <Pressable accessibilityRole="button" accessibilityLabel={`Room code ${room.code.split('').join(' ')}`} onPress={invite}>
           <View style={styles.codeCard}>
             <Flame size={22} />
-            <Text style={styles.codeLabel}>ROOM CODE</Text>
+            <Text style={styles.codeLabel}>{t.room.roomCode}</Text>
             <Text style={styles.code}>{room.code}</Text>
-            <Text style={styles.codeHint}>Tap to send it to someone.</Text>
+            <Text style={styles.codeHint}>{t.room.tapToSend}</Text>
           </View>
         </Pressable>
       ) : (
         <View style={styles.codeCard}>
           <Flame size={22} />
-          <Text style={styles.codeLabel}>PUBLIC TABLE</Text>
-          <Text style={styles.codeHint}>Anyone looking for a game can sit down here.</Text>
+          <Text style={styles.codeLabel}>{t.room.publicTable}</Text>
+          <Text style={styles.codeHint}>{t.room.publicBlurb}</Text>
         </View>
       )}
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>{t.errors[error] ?? t.errors.server_error}</Text> : null}
 
       <View style={styles.seats}>
         <Text style={styles.sectionTitle}>
-          AT THE TABLE · {room.seats.length}/{room.maxSeats}
+          {t.room.atTable(n(room.seats.length), n(room.maxSeats))}
         </Text>
 
         {room.seats.map((seat) => (
@@ -68,17 +69,17 @@ export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart,
             <View style={[styles.seatDot, seat.isBot && styles.seatDotBot, !seat.connected && styles.seatDotAway]} />
             <Text style={styles.seatName} numberOfLines={1}>
               {seat.name}
-              {seat.id === user?.id ? ' (you)' : ''}
+              {seat.id === user?.id ? t.room.youSuffix : ''}
             </Text>
-            {seat.id === room.hostId ? <Text style={styles.tag}>HOST</Text> : null}
+            {seat.id === room.hostId ? <Text style={styles.tag}>{t.room.host}</Text> : null}
             {seat.isBot ? (
-              <Text style={styles.tag}>{DIFFICULTY_LABEL[seat.difficulty].toUpperCase()}</Text>
+              <Text style={styles.tag}>{t.difficulty[seat.difficulty].toUpperCase()}</Text>
             ) : null}
-            {!seat.connected ? <Text style={[styles.tag, styles.away]}>AWAY</Text> : null}
+            {!seat.connected ? <Text style={[styles.tag, styles.away]}>{t.room.away}</Text> : null}
             {isHost && seat.isBot ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Remove ${seat.name}`}
+                accessibilityLabel={t.room.remove(seat.name)}
                 onPress={() => {
                   tap();
                   onRemoveSeat(seat.id);
@@ -93,19 +94,19 @@ export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart,
 
         {Array.from({ length: Math.max(0, free) }).map((_, index) => (
           <View key={`free-${index}`} style={[styles.seat, styles.seatEmpty]}>
-            <Text style={styles.seatEmptyText}>Empty seat</Text>
+            <Text style={styles.seatEmptyText}>{t.room.emptySeat}</Text>
           </View>
         ))}
       </View>
 
       {isHost ? (
         <View style={styles.block}>
-          <Text style={styles.sectionTitle}>ADD A BOT</Text>
+          <Text style={styles.sectionTitle}>{t.room.addBot}</Text>
           <View style={styles.botRow}>
             {DIFFICULTIES.map((difficulty) => (
               <Button
                 key={difficulty}
-                label={DIFFICULTY_LABEL[difficulty].toUpperCase()}
+                label={t.difficulty[difficulty].toUpperCase()}
                 tone="ghost"
                 small
                 disabled={free <= 0}
@@ -120,12 +121,12 @@ export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart,
       <View style={styles.actions}>
         {isHost ? (
           <Button
-            label={canStart ? 'DEAL' : 'THREE PLAYERS TO START'}
+            label={canStart ? t.room.deal : t.room.needThree}
             onPress={onStart}
             disabled={!canStart}
           />
         ) : (
-          <Text style={styles.waiting}>Waiting for the host to deal…</Text>
+          <Text style={styles.waiting}>{t.room.waitingForHost}</Text>
         )}
       </View>
     </ScrollView>

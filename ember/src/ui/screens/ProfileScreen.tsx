@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { LeaderboardRow, PublicUser, UserStats } from '../../../shared/protocol';
+import { useLanguage } from '../../i18n';
 import { api } from '../../net/api';
 import { colors, radius, space, type as typography } from '../theme';
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function ProfileScreen({ user, stats, onBack }: Props) {
+  const { t, n } = useLanguage();
   const [board, setBoard] = useState<LeaderboardRow[] | null>(null);
 
   useEffect(() => {
@@ -35,59 +37,63 @@ export function ProfileScreen({ user, stats, onBack }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12}>
-        <Text style={styles.back}>← BACK</Text>
+        <Text style={styles.back}>{t.common.backArrow} {t.common.back}</Text>
       </Pressable>
 
-      <Text style={styles.name}>{user?.name ?? 'You'}</Text>
+      <Text style={styles.name}>{user?.name ?? t.common.you}</Text>
 
       {stats ? (
         <>
           <View style={styles.grid}>
-            <Stat value={String(stats.matches)} label="MATCHES" />
-            <Stat value={String(stats.wins)} label="WON" tone="good" />
-            <Stat value={`${winRate}%`} label="WIN RATE" />
-            <Stat value={String(stats.rounds)} label="ROUNDS" />
-            <Stat value={String(stats.roundWins)} label="ROUNDS WON" />
+            <Stat value={n(stats.matches)} label={t.profile.matches} />
+            <Stat value={n(stats.wins)} label={t.profile.won} tone="good" />
+            <Stat value={`${n(winRate)}%`} label={t.profile.winRate} />
+            <Stat value={n(stats.rounds)} label={t.profile.rounds} />
+            <Stat value={n(stats.roundWins)} label={t.profile.roundsWon} />
             <Stat
-              value={stats.bestRound == null ? '—' : String(stats.bestRound)}
-              label="BEST PILE"
+              value={stats.bestRound == null ? t.profile.none : n(stats.bestRound)}
+              label={t.profile.bestPile}
               tone="ember"
             />
           </View>
 
           <View style={styles.lines}>
             <Line
-              label="Knocks"
-              value={`${stats.knocksStuck} of ${stats.knocks} stuck${stats.knocks ? ` · ${knockRate}%` : ''}`}
+              label={t.profile.knocks}
+              value={t.profile.knocksValue(
+                n(stats.knocksStuck),
+                n(stats.knocks),
+                stats.knocks ? n(knockRate) : '',
+              )}
             />
-            <Line label="Cards burned" value={String(stats.burns)} />
-            <Line label="Misfires" value={String(stats.misfires)} />
-            <Line label="Ash outs" value={String(stats.ashOuts)} />
-            <Line label="Points taken" value={String(stats.totalPoints)} />
+            <Line label={t.profile.cardsBurned} value={n(stats.burns)} />
+            <Line label={t.profile.misfires} value={n(stats.misfires)} />
+            <Line label={t.profile.ashOuts} value={n(stats.ashOuts)} />
+            <Line label={t.profile.pointsTaken} value={n(stats.totalPoints)} />
           </View>
         </>
       ) : (
-        <Text style={styles.empty}>No record yet. Play a match online.</Text>
+        <Text style={styles.empty}>{t.profile.noRecord}</Text>
       )}
 
-      <Text style={styles.sectionTitle}>LEADERBOARD</Text>
+      <Text style={styles.sectionTitle}>{t.profile.leaderboard}</Text>
       {board == null ? (
         <ActivityIndicator color={colors.ember} />
       ) : board.length === 0 ? (
-        <Text style={styles.empty}>Nobody has finished enough matches yet.</Text>
+        <Text style={styles.empty}>{t.profile.noLeaders}</Text>
       ) : (
         <View style={styles.lines}>
           {board.map((row, index) => (
             <View key={row.name} style={styles.boardRow}>
-              <Text style={styles.rank}>{index + 1}</Text>
+              <Text style={styles.rank}>{n(index + 1)}</Text>
               <Text
                 style={[styles.boardName, row.name === user?.name && styles.boardYou]}
                 numberOfLines={1}
               >
                 {row.name}
               </Text>
-              <Text style={styles.boardStat}>{Math.round(row.winRate * 100)}%</Text>
-              <Text style={styles.boardStat}>{row.matches}</Text>
+              <Text style={styles.boardStat}>{n(Math.round(row.winRate * 100))}%</Text>
+              <Text style={styles.boardStat}>{n(row.matches)}</Text>
             </View>
           ))}
         </View>

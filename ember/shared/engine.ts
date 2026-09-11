@@ -1,11 +1,14 @@
-import { buildShuffledDeck, cardName, POWER_LABEL } from './cards';
+import { buildShuffledDeck } from './cards';
 import { shuffle } from './rng';
 import type {
   Card,
+  CardRef,
   Difficulty,
   GameAction,
   GameConfig,
   GameState,
+  LogEntry,
+  LogKey,
   Player,
   Reveal,
   RoundResult,
@@ -16,7 +19,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   openingPeeks: 2,
   knockPenalty: 10,
   targetScore: 100,
-  burnWindowMs: 4200,
+  burnWindowMs: 3200,
 };
 
 export const HUMAN_ID = 'you';
@@ -91,13 +94,20 @@ export function cardsLeft(player: Player): number {
   return player.slots.filter(Boolean).length;
 }
 
+/** Records what happened. The wording is the phone's business, not ours. */
 function log(
   state: GameState,
-  text: string,
-  kind: 'info' | 'good' | 'bad' | 'hot' = 'info',
+  kind: LogEntry['kind'],
+  key: LogKey,
+  parts: Omit<LogEntry, 'id' | 'kind' | 'key'> = {},
 ): void {
-  state.log.push({ id: state.logSeq++, text, kind });
+  state.log.push({ id: state.logSeq++, kind, key, ...parts });
   if (state.log.length > 40) state.log.splice(0, state.log.length - 40);
+}
+
+/** Just enough of a card to name it later. */
+function ref(card: Card): CardRef {
+  return { rank: card.rank, suit: card.suit };
 }
 
 /** Draws one card, folding the discard pile back in when the stock runs dry. */
@@ -109,7 +119,7 @@ function drawCard(state: GameState): Card | null {
     state.stock = reshuffled.items;
     state.rng = reshuffled.seed;
     state.discard = [top];
-    log(state, 'Stock ran out — the discards were shuffled back in.', 'info');
+    log(state, 'info', 'reshuffled');
   }
   return state.stock.pop() ?? null;
 }
@@ -214,7 +224,7 @@ export function dealRound(previous: GameState): GameState {
   // The deal rotates each round, so nobody keeps the first-turn advantage.
   state.turn = (state.round - 1) % state.players.length;
   state.log = [];
-  log(state, `Round ${state.round}. Memorise two of your cards.`, 'info');
+  log(state, 'info', 'round_dealt', { count: state.round });
   return state;
 }
 
@@ -307,10 +317,9 @@ function endRound(state: GameState, ashOutId: string | null = null): void {
     const knocker = playerById(state, knockerId) as Player;
     log(
       state,
-      knockSucceeded
-        ? `${knocker.name} knocked and got away with it — no points.`
-        : `${knocker.name} knocked and missed. +${state.config.knockPenalty}.`,
       knockSucceeded ? 'good' : 'bad',
+      knockSucceeded ? 'knock_stuck' : 'knock_missed',
+      { name: knocker.name, actorId: knocker.id, count: state.config.knockPenalty },
     );
   }
 
@@ -330,7 +339,7 @@ function endRound(state: GameState, ashOutId: string | null = null): void {
 function checkAshOut(state: GameState, playerId: string): boolean {
   const player = playerById(state, playerId);
   if (!player || cardsLeft(player) > 0) return false;
-  log(state, `${player.name} burned away every card. Ash out!`, 'hot');
+  log(state, 'hot', 'ash_out', { name: player.name, actorId: player.id });
   endRound(state, playerId);
   return true;
 }
@@ -368,7 +377,7 @@ function resolvePower(state: GameState, now: number): void {
     const tmp = me.slots[mine.slot];
     me.slots[mine.slot] = them.slots[theirs.slot];
     them.slots[theirs.slot] = tmp;
-    log(state, `${actor.name} swapped a card with ${them.name}, sight unseen.`, 'hot');
+    log(state, 'hot', 'blind_swap', { name: actor.name, actorId: actor.id, other: them.name, otherId: them.id });
   }
 
   if (power.kind === 'LOOK_SWAP' && power.picked.length === 2) {
@@ -378,7 +387,7 @@ function resolvePower(state: GameState, now: number): void {
     const tmp = me.slots[mine.slot];
     me.slots[mine.slot] = them.slots[theirs.slot];
     them.slots[theirs.slot] = tmp;
-    log(state, `${actor.name} looked, liked it, and took it from ${them.name}.`, 'hot');
+    log(state, 'hot', 'look_swap_took', { name: actor.name, actorId: actor.id, other: them.name, otherId: them.id });
   }
 
   state.power = null;
@@ -428,7 +437,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
         if (!stillChoosing && !stillLooking) {
           state.phase = 'TURN_START';
           // Kept neutral: at an online table this line is read by everyone.
-          log(state, `Round ${state.round} is under way.`, 'info');
+          log(state, 'info', 'round_begins', { count: state.round });
         }
         return state;
       }
@@ -454,7 +463,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       if (state.phase !== 'TURN_START' || state.knockerId) return previous;
       const player = currentPlayer(state);
       state.knockerId = player.id;
-      log(state, `${player.name} knocked! One last turn each.`, 'hot');
+      log(state, 'hot', 'knocked', { name: player.name, actorId: player.id });
       finishTurn(state);
       state.turnsSinceKnock = 0;
       return state;
@@ -481,7 +490,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       state.held = card;
       state.heldFromDiscard = true;
       state.phase = 'HOLDING';
-      log(state, `${currentPlayer(state).name} took ${cardName(card)} off the pile.`, 'info');
+      log(state, 'info', 'took_discard', { name: currentPlayer(state).name, actorId: currentPlayer(state).id, card: ref(card) });
       return state;
     }
 
@@ -494,7 +503,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
 
       player.slots[action.slot] = state.held;
       state.discard.push(replaced);
-      log(state, `${player.name} swapped a card and threw ${cardName(replaced)}.`, 'info');
+      log(state, 'info', 'swapped_threw', { name: player.name, actorId: player.id, card: ref(replaced) });
       state.held = null;
       state.heldFromDiscard = false;
       openBurnWindow(state, now);
@@ -510,13 +519,13 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       state.held = null;
 
       if (action.usePower && card.power) {
-        log(state, `${player.name} threw ${cardName(card)} — ${POWER_LABEL[card.power]}.`, 'hot');
+        log(state, 'hot', 'threw_power', { name: player.name, actorId: player.id, card: ref(card), power: card.power });
         state.power = { kind: card.power, picked: [] };
         state.phase = 'POWER';
         return state;
       }
 
-      log(state, `${player.name} threw ${cardName(card)}.`, 'info');
+      log(state, 'info', 'threw', { name: player.name, actorId: player.id, card: ref(card) });
       openBurnWindow(state, now);
       return state;
     }
@@ -551,7 +560,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
           return state;
         }
         target.slots.push(card);
-        log(state, `${actor.name} forced a card on ${target.name}. Ember!`, 'hot');
+        log(state, 'hot', 'ember', { name: actor.name, actorId: actor.id, other: target.name, otherId: target.id });
         state.power = null;
         openBurnWindow(state, now);
         return state;
@@ -567,7 +576,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
           targets: [{ playerId: action.playerId, slot: action.slot }],
         });
         if (power.kind !== 'LOOK_SWAP') {
-          log(state, `${actor.name} looked at a card.`, 'info');
+          log(state, 'info', 'looked', { name: actor.name, actorId: actor.id });
         }
         return state;
       }
@@ -581,7 +590,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       if (state.phase !== 'POWER' || !state.power) return previous;
       // Only the second half of a black king can be waved off.
       if (state.power.kind === 'LOOK_SWAP' && state.power.picked.length === 1) {
-        log(state, `${currentPlayer(state).name} looked and left it alone.`, 'info');
+        log(state, 'info', 'look_swap_left', { name: currentPlayer(state).name, actorId: currentPlayer(state).id });
         state.power = null;
         openBurnWindow(state, now);
         return state;
@@ -603,12 +612,12 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       if (card.rank === state.burn.rank) {
         player.slots[action.slot] = null;
         state.discard.push(card);
-        log(state, `${player.name} burned ${cardName(card)}. One card lighter.`, 'good');
+        log(state, 'good', 'burned', { name: player.name, actorId: player.id, card: ref(card) });
         if (checkAshOut(state, player.id)) return state;
         return state;
       }
 
-      log(state, `${player.name} misfired on ${cardName(card)} — penalty card.`, 'bad');
+      log(state, 'bad', 'misfire', { name: player.name, actorId: player.id, card: ref(card) });
       setReveal(state, {
         viewerId: '*',
         reason: 'failed_burn',

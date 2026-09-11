@@ -16,9 +16,9 @@ export const config = {
   /** How long a player has to make a move online before the table moves on. */
   turnSeconds: number('TURN_SECONDS', 30),
   /** How long the burn window stays open. Lowered in tests. */
-  burnWindowMs: number('BURN_WINDOW_MS', 4200),
+  burnWindowMs: number('BURN_WINDOW_MS', 3200),
   /** How long the scoring sheet stays up between rounds. */
-  roundBreakSeconds: number('ROUND_BREAK_SECONDS', 12),
+  roundBreakSeconds: number('ROUND_BREAK_SECONDS', 8),
   /** A dropped player is held open this long before a bot takes the seat. */
   reconnectSeconds: number('RECONNECT_SECONDS', 45),
   /** Quick match waits this long for people before filling up with bots. */

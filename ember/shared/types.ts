@@ -96,11 +96,52 @@ export interface RoundResult {
   winnerId: string;
 }
 
+/** Enough of a card to name it in whatever language the reader has set. */
+export interface CardRef {
+  rank: Rank;
+  suit: Suit | null;
+}
+
+/** Everything the table can announce. */
+export type LogKey =
+  | 'round_begins'
+  | 'round_dealt'
+  | 'reshuffled'
+  | 'knocked'
+  | 'knock_stuck'
+  | 'knock_missed'
+  | 'took_discard'
+  | 'swapped_threw'
+  | 'threw'
+  | 'threw_power'
+  | 'blind_swap'
+  | 'look_swap_took'
+  | 'look_swap_left'
+  | 'looked'
+  | 'ember'
+  | 'burned'
+  | 'misfire'
+  | 'ash_out';
+
+/**
+ * A line in the feed, kept as what happened rather than as a sentence. The
+ * rules engine has no idea what language anyone is reading in, so the wording
+ * is put together on the phone.
+ */
 export interface LogEntry {
   id: number;
-  text: string;
   /** Tone used for colouring the feed. */
   kind: 'info' | 'good' | 'bad' | 'hot';
+  key: LogKey;
+  /** Whoever did it. */
+  name?: string;
+  actorId?: string;
+  /** Whoever it was done to. */
+  other?: string;
+  otherId?: string;
+  card?: CardRef;
+  power?: Power;
+  count?: number;
 }
 
 export interface GameState {

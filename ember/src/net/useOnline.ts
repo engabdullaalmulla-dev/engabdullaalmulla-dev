@@ -9,9 +9,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
-  ERROR_TEXT,
   PROTOCOL_VERSION,
   type ClientMessage,
+  type ErrorCode,
   type PublicUser,
   type RoomView,
   type ServerMessage,
@@ -43,7 +43,8 @@ export function useOnline(token: string | null) {
   const [table, setTable] = useState<TableState | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [queue, setQueue] = useState<QueueState | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Kept as the code the server sent, so the wording can be in any language.
+  const [error, setError] = useState<ErrorCode | null>(null);
 
   const socket = useRef<WebSocket | null>(null);
   const attempt = useRef(0);
@@ -98,7 +99,7 @@ export function useOnline(token: string | null) {
         setStats(message.stats);
         break;
       case 'error':
-        setError(message.message || ERROR_TEXT[message.code]);
+        setError(message.code);
         break;
       case 'pong':
         break;
@@ -160,11 +161,7 @@ export function useOnline(token: string | null) {
         // reconnecting with the same token would only fail the same way.
         if (event.code === 4003 || event.code === 4004) {
           setStatus('failed');
-          setError(
-            event.code === 4004
-              ? ERROR_TEXT.version_mismatch
-              : 'Your session expired. Sign in again.',
-          );
+          setError(event.code === 4004 ? 'version_mismatch' : 'unauthorised');
           return;
         }
         retry();

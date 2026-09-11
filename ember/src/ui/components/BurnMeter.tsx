@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
+import { useLanguage } from '../../i18n';
 import { colors, radius, space, type as typography } from '../theme';
 
 /** The bar that runs down while the burn window is open. */
 export function BurnMeter({ closesAt, totalMs }: { closesAt: number; totalMs: number }) {
+  const { t } = useLanguage();
   const progress = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export function BurnMeter({ closesAt, totalMs }: { closesAt: number; totalMs: nu
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>BURN WINDOW</Text>
+      <Text style={styles.label}>{t.table.burnWindow}</Text>
       <View style={styles.track}>
         <Animated.View
           style={[

@@ -353,10 +353,13 @@ export function decideBurn(
   return null;
 }
 
-/** How long a bot should appear to think, in milliseconds. */
+/**
+ * How long a bot appears to think. Long enough to read as a decision, short
+ * enough that three bots in a row do not feel like a queue.
+ */
 export function thinkingTime(state: GameState, difficulty: Difficulty): number {
-  const base = state.phase === 'POWER' ? 750 : 900;
-  const jitter = difficulty === 'sharp' ? 250 : 500;
+  const base = state.phase === 'POWER' ? 380 : 520;
+  const jitter = difficulty === 'sharp' ? 180 : 320;
   return base + Math.random() * jitter;
 }
 

@@ -116,6 +116,33 @@ had actually been shown. Lose signal and your seat is covered the same way until
 you come back to it — the app reconnects on its own, with the seat marked *away*
 in the meantime.
 
+## Arabic
+
+The whole app is in Arabic as well as English — the table, the rules, sign-in,
+the lobby, the scoring sheet, and every error the server can send. It opens in
+whichever language the device is set to, and the toggle on the home screen
+overrides that and is remembered.
+
+Arabic lays the app out right to left, which is a layout change rather than a
+mirror image: rows, alignment and the back arrow all turn round, while the
+playing cards stay exactly as they are, because a card reads the same in any
+language. Numbers are written in Arabic-Indic digits where they are prose —
+scores, counts, round numbers — and stay Western on the faces of the cards,
+which is how a deck sold in the Gulf is printed.
+
+Two details worth knowing about how it is built:
+
+- **The rules engine no longer writes sentences.** It records what happened —
+  who did it, which card, which power — and the phone puts the sentence
+  together. That is what makes a feed line translatable at all, and it is why
+  the same match can be read in Arabic by one player and English by another at
+  the same table.
+- **Arabic conjugates for who is speaking and who is spoken about**, so your
+  own moves read in the second person («رميتَ ٧ بستوني») and everyone else's in
+  the third, with the verb agreeing with them — «نورة بدّلت» and «راشد بدّل».
+  A player online could be anyone, so an unfamiliar name takes the masculine,
+  which is the ordinary fallback.
+
 ## How it looks, and why
 
 EMBER is a card table, not a dashboard: baize with a visible weave, a light hung

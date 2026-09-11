@@ -13,6 +13,7 @@ import {
 
 import { isRed, SUIT_SYMBOL } from '../../../shared/cards';
 import type { Card, Rank } from '../../../shared/types';
+import { useLanguage } from '../../i18n';
 import { colors, fonts, shadow } from '../theme';
 import { CARD_BACK } from '../textures';
 import { Flame } from './Flame';
@@ -79,6 +80,7 @@ export function PlayingCard({
   inFlight,
   style,
 }: Props) {
+  const { t } = useLanguage();
   const height = width * RATIO;
   const corner = width * 0.075;
   const spin = useRef(new Animated.Value(faceUp ? 1 : 0)).current;
@@ -121,7 +123,7 @@ export function PlayingCard({
     return (
       <View
         accessible
-        accessibilityLabel="burned away, empty space"
+        accessibilityLabel={t.table.emptySpace}
         style={[styles.burned, { width, height, borderRadius: corner }, style]}
       >
         <Flame size={width * 0.34} dim />
@@ -131,13 +133,13 @@ export function PlayingCard({
 
   const label =
     card && faceUp
-      ? `${card.rank === 'JOKER' ? 'Joker' : card.rank} ${card.suit ? SUIT_SYMBOL[card.suit] : ''}, ${card.value} points`
-      : 'face down card';
+      ? t.table.cardWorth(t.cards.rank(card.rank), t.cards.suit(card.suit), t.digits(card.value))
+      : t.table.faceDownCard;
 
   const ring = highlight === 'burn' ? colors.ember : highlight === 'chosen' ? colors.goldSoft : colors.gold;
 
   const body = (
-    <View style={{ width, height, opacity: inFlight ? 0 : 1 }}>
+    <View style={{ width, height, opacity: inFlight ? 0 : 1, direction: 'ltr' }}>
       <Animated.View
         style={[
           styles.face,

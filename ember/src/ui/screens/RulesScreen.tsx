@@ -1,95 +1,86 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { POWER_HINT, POWER_LABEL } from '../../../shared/cards';
 import type { Power } from '../../../shared/types';
-import { colors, radius, space, type as typography } from '../theme';
+import { useLanguage } from '../../i18n';
 import { Button } from '../components/Button';
-
-const VALUES: Array<{ card: string; tint?: string; points: string; note?: string }> = [
-  { card: 'K♥ K♦', tint: colors.suitRed, points: '0', note: 'the best card in the deck' },
-  { card: 'A', points: '1' },
-  { card: '2 – 10', points: 'face value' },
-  { card: 'J', points: '11' },
-  { card: 'Q', points: '12' },
-  { card: 'K♠ K♣', points: '13' },
-  { card: 'Joker', tint: colors.ember, points: '15', note: 'get rid of it' },
-];
+import { colors, radius, space, type as typography } from '../theme';
 
 const POWERS: Array<{ on: string; power: Power }> = [
   { on: '7 · 8', power: 'PEEK' },
   { on: '9 · 10', power: 'SPY' },
   { on: 'J · Q', power: 'SWAP' },
   { on: 'K♠ K♣', power: 'LOOK_SWAP' },
-  { on: 'Joker', power: 'EMBER' },
+  { on: 'JOKER', power: 'EMBER' },
 ];
 
 export function RulesScreen({ onBack }: { onBack: () => void }) {
+  const { t, n } = useLanguage();
+
+  const values: Array<{ card: string; tint?: string; points: string; note?: string }> = [
+    { card: 'K♥ K♦', tint: colors.suitRed, points: n(0), note: t.rules.valueNotes.bestCard },
+    { card: 'A', points: n(1) },
+    { card: `2 – 10`, points: t.rules.valueNotes.faceValue },
+    { card: 'J', points: n(11) },
+    { card: 'Q', points: n(12) },
+    { card: 'K♠ K♣', points: n(13) },
+    { card: t.cards.rank('JOKER'), tint: colors.ember, points: n(15), note: t.rules.valueNotes.getRidOfIt },
+  ];
+
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack} hitSlop={12}>
-          <Text style={styles.back} numberOfLines={1}>← BACK</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={t.common.back} onPress={onBack} hitSlop={12}>
+          <Text style={styles.back} numberOfLines={1}>
+            {t.common.backArrow} {t.common.back}
+          </Text>
         </Pressable>
-        <Text style={styles.title}>HOW TO PLAY</Text>
+        <Text style={styles.title}>{t.rules.title}</Text>
         <View style={{ width: 62 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Section title="The point">
-          <Body>
-            Two decks, 108 cards. Everyone gets four, face down. The pile in front of you is worth
-            points, and points are bad — you want the lowest total at the table.
-          </Body>
-          <Body>
-            Before play starts you look at two of your own cards. That is the last honest look you
-            get. Everything after that is memory.
-          </Body>
+        <Section title={t.rules.thePoint}>
+          {t.rules.pointBody.map((line) => (
+            <Text key={line} style={styles.text}>
+              {line}
+            </Text>
+          ))}
         </Section>
 
-        <Section title="Your turn">
-          <Bullet n="1">
-            Draw the top of the stock, or take the face-up discard. A card you take off the discard
-            has to go into your pile — no changing your mind.
-          </Bullet>
-          <Bullet n="2">
-            Swap it for one of your cards (the old one goes face up on the discard), or throw the
-            drawn card away.
-          </Bullet>
-          <Bullet n="3">
-            Throw away a 7 or higher and you may use its power instead of keeping it. That is the
-            trade: points now, or information now.
-          </Bullet>
+        <Section title={t.rules.yourTurn}>
+          {t.rules.turnSteps.map((step, index) => (
+            <View key={step} style={styles.bullet}>
+              <Text style={styles.bulletNumber}>{n(index + 1)}</Text>
+              <Text style={[styles.text, styles.bulletText]}>{step}</Text>
+            </View>
+          ))}
         </Section>
 
-        <Section title="Burning">
-          <Body>
-            The moment a card lands face up, anyone may burn a card of the same rank straight out of
-            their own pile — fewer cards, fewer points, and nobody gets to replace it.
-          </Body>
-          <Body>
-            Get it wrong and you take a penalty card, face down, on top of what you already had. Be
-            sure before you tap.
-          </Body>
+        <Section title={t.rules.burning}>
+          {t.rules.burningBody.map((line) => (
+            <Text key={line} style={styles.text}>
+              {line}
+            </Text>
+          ))}
         </Section>
 
-        <Section title="Knocking">
-          <Body>
-            When you think your pile is the smallest, knock at the start of your turn. Everyone else
-            gets one last turn, then every card is turned over.
-          </Body>
-          <Body>
-            Lowest at the table and the knock costs you nothing. Beaten by anyone, even tied, and it
-            costs your pile plus ten.
-          </Body>
+        <Section title={t.rules.knocking}>
+          {t.rules.knockingBody.map((line) => (
+            <Text key={line} style={styles.text}>
+              {line}
+            </Text>
+          ))}
         </Section>
 
-        <Section title="What cards are worth">
+        <Section title={t.rules.values}>
           <View style={styles.table}>
-            {VALUES.map((row) => (
+            {values.map((row) => (
               <View key={row.card} style={styles.valueRow}>
                 <View style={styles.chip}>
-                  <Text style={[styles.chipText, row.tint ? { color: row.tint } : null]}>{row.card}</Text>
+                  <Text style={[styles.chipText, row.tint ? { color: row.tint } : null]}>
+                    {row.card}
+                  </Text>
                 </View>
                 <Text style={styles.points}>{row.points}</Text>
                 {row.note ? <Text style={styles.note}>{row.note}</Text> : null}
@@ -98,34 +89,30 @@ export function RulesScreen({ onBack }: { onBack: () => void }) {
           </View>
         </Section>
 
-        <Section title="Powers">
+        <Section title={t.rules.powersTitle}>
           <View style={styles.table}>
             {POWERS.map((row) => (
               <View key={row.on} style={styles.powerRow}>
                 <View style={styles.chip}>
-                  <Text style={styles.chipText}>{row.on}</Text>
+                  <Text style={styles.chipText}>
+                    {row.on === 'JOKER' ? t.cards.rank('JOKER') : row.on}
+                  </Text>
                 </View>
                 <View style={styles.powerText}>
-                  <Text style={styles.powerName}>{POWER_LABEL[row.power]}</Text>
-                  <Text style={styles.note}>{POWER_HINT[row.power]}</Text>
+                  <Text style={styles.powerName}>{t.powers[row.power].name}</Text>
+                  <Text style={styles.note}>{t.powers[row.power].hint}</Text>
                 </View>
               </View>
             ))}
           </View>
-          <Body>
-            A red King is already worth nothing, so it has nothing to spend — keep it.
-          </Body>
+          <Text style={styles.text}>{t.rules.redKingNote}</Text>
         </Section>
 
-        <Section title="Ending it">
-          <Body>
-            Round scores stack up. As soon as anyone reaches 100 the match is over, and whoever has
-            the fewest points wins. Burn your pile away to nothing and the round ends on the spot,
-            scoring you zero.
-          </Body>
+        <Section title={t.rules.ending}>
+          <Text style={styles.text}>{t.rules.endingBody}</Text>
         </Section>
 
-        <Button label="GOT IT" onPress={onBack} />
+        <Button label={t.common.gotIt} onPress={onBack} />
       </ScrollView>
     </View>
   );
@@ -140,28 +127,24 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-const Body = ({ children }: { children: React.ReactNode }) => <Text style={styles.text}>{children}</Text>;
-
-const Bullet = ({ n, children }: { n: string; children: React.ReactNode }) => (
-  <View style={styles.bullet}>
-    <Text style={styles.bulletNumber}>{n}</Text>
-    <Text style={[styles.text, styles.bulletText]}>{children}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   screen: { flex: 1, paddingHorizontal: space(5) },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: space(3) },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: space(3),
+  },
   back: { ...typography.label, fontSize: 10, color: colors.textFaint, width: 62 },
-  title: { ...typography.label, fontSize: 11, color: colors.textMuted },
+  title: { ...typography.label, fontSize: 11, color: colors.goldSoft },
   body: { gap: space(6), paddingBottom: space(10) },
 
   section: { gap: space(2) },
-  sectionTitle: { ...typography.heading, fontSize: 17, color: colors.ember },
-  text: { ...typography.body, color: colors.textMuted, lineHeight: 22 },
+  sectionTitle: { ...typography.heading, fontSize: 18, color: colors.goldSoft },
+  text: { ...typography.body, color: colors.textMuted, lineHeight: 24 },
 
   bullet: { flexDirection: 'row', gap: space(3) },
-  bulletNumber: { ...typography.label, fontSize: 11, color: colors.gold, marginTop: 3, width: 12 },
+  bulletNumber: { ...typography.numeral, fontSize: 15, color: colors.ember, marginTop: 2, width: 14 },
   bulletText: { flex: 1 },
 
   table: { gap: space(2), marginTop: space(1) },
@@ -170,7 +153,7 @@ const styles = StyleSheet.create({
   powerText: { flex: 1, gap: 2 },
   powerName: { ...typography.body, color: colors.text },
   chip: {
-    minWidth: 74,
+    minWidth: 78,
     paddingVertical: space(1.5),
     paddingHorizontal: space(2),
     borderRadius: radius.sm,
@@ -180,6 +163,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chipText: { ...typography.small, color: colors.text },
-  points: { ...typography.body, color: colors.text, fontWeight: '800', minWidth: 80 },
+  points: { ...typography.body, color: colors.text, fontWeight: '800', minWidth: 86 },
   note: { ...typography.small, fontSize: 11, color: colors.textFaint, flexShrink: 1, lineHeight: 16 },
 });

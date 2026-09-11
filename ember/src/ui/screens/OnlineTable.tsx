@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import type { PublicUser } from '../../../shared/protocol';
+import type { ErrorCode, PublicUser } from '../../../shared/protocol';
 import type { ConnectionStatus, TableState } from '../../net/useOnline';
 import type { GameAction } from '../../../shared/types';
+import { useLanguage } from '../../i18n';
 import { GameScreen } from './GameScreen';
 import { RoundOverlay } from './RoundOverlay';
 
@@ -11,7 +12,7 @@ interface Props {
   table: TableState;
   status: ConnectionStatus;
   user: PublicUser | null;
-  error: string | null;
+  error: ErrorCode | null;
   assist: boolean;
   yourMemory: Record<string, unknown>;
   onPlay: (action: GameAction) => void;
@@ -48,6 +49,7 @@ export function OnlineTable({
   onNextRound,
   onLeave,
 }: Props) {
+  const { t, n } = useLanguage();
   const { view, clock, nextRoundAt } = table;
   const yours = clock && (clock.playerId === view.youId || clock.playerId === '*');
   const secondsLeft = useSecondsUntil(yours ? clock.endsAt : null);
@@ -57,11 +59,11 @@ export function OnlineTable({
 
   const banner =
     status === 'reconnecting' || status === 'connecting'
-      ? { text: 'Reconnecting — a bot is covering your seat.', tone: 'bad' as const }
+      ? { text: t.lobby.status.reconnecting, tone: 'bad' as const }
       : status === 'failed'
-        ? { text: 'Lost the server.', tone: 'bad' as const }
+        ? { text: t.lobby.status.failed, tone: 'bad' as const }
         : error
-          ? { text: error, tone: 'bad' as const }
+          ? { text: t.errors[error] ?? t.errors.server_error, tone: 'bad' as const }
           : null;
 
   return (
@@ -83,7 +85,7 @@ export function OnlineTable({
           onHome={onLeave}
           waitingOn={
             view.phase === 'ROUND_OVER' && untilNextRound != null
-              ? `Next round deals in ${untilNextRound}s.`
+              ? t.overlay.nextRoundIn(n(untilNextRound))
               : null
           }
         />

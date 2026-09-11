@@ -5,6 +5,7 @@ import type { Card } from '../../../shared/types';
 import { AnchoredCard } from '../motion/AnchoredCard';
 import { anchorKeys } from '../motion/anchors';
 import { tap } from '../haptics';
+import { useLanguage } from '../../i18n';
 import { colors, space, type as typography } from '../theme';
 import { PlayingCard } from './PlayingCard';
 
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscard, live }: Props) {
+  const { t, n } = useLanguage();
   const height = width * 1.45;
 
   return (
@@ -26,7 +28,7 @@ export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscar
       <View style={styles.column}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Stock, ${stockCount} cards left`}
+          accessibilityLabel={t.table.stockCount(n(stockCount))}
           disabled={!live || !onDrawStock}
           onPress={() => {
             tap();
@@ -47,13 +49,13 @@ export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscar
             />
           </View>
         </Pressable>
-        <Text style={styles.caption}>{stockCount}</Text>
+        <Text style={styles.caption}>{n(stockCount)}</Text>
       </View>
 
       <View style={styles.column}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Discard pile"
+          accessibilityLabel={t.table.discardPile}
           disabled={!live || !onDrawDiscard || !discardTop}
           onPress={() => {
             tap();
@@ -73,7 +75,7 @@ export function Piles({ stockCount, discardTop, width, onDrawStock, onDrawDiscar
             <EmptyPile width={width} height={height} />
           )}
         </Pressable>
-        <Text style={styles.caption}>PILE</Text>
+        <Text style={styles.caption}>{t.table.pile}</Text>
       </View>
     </View>
   );

@@ -4,7 +4,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { PlayerView } from '../../../shared/view';
 import { AnchoredCard } from '../motion/AnchoredCard';
 import { anchorKeys, useAnchor } from '../motion/anchors';
+import { useLanguage } from '../../i18n';
 import { colors, radius, space, type as typography } from '../theme';
+import { Score } from './Score';
 import { type CardHighlight } from './PlayingCard';
 
 interface Props {
@@ -14,10 +16,21 @@ interface Props {
   /** Slots you are currently allowed to tap, for a power. */
   targetable?: number[];
   onPressSlot?: (slot: number) => void;
+  /** True while a copy of that card is still in the air. */
+  inFlight?: (slot: number) => boolean;
   cardWidth: number;
 }
 
-export function Opponent({ player, active, knocked, targetable = [], onPressSlot, cardWidth }: Props) {
+export function Opponent({
+  player,
+  active,
+  knocked,
+  targetable = [],
+  onPressSlot,
+  inFlight,
+  cardWidth,
+}: Props) {
+  const { t, n } = useLanguage();
   const seat = useAnchor(anchorKeys.seat(player.id));
 
   return (
@@ -29,9 +42,9 @@ export function Opponent({ player, active, knocked, targetable = [], onPressSlot
         >
           {player.name}
         </Text>
-        {!player.connected ? <Text style={styles.tag}>AWAY</Text> : null}
-        {knocked ? <Text style={[styles.tag, styles.knock]}>KNOCK</Text> : null}
-        <Text style={styles.score}>{player.matchScore}</Text>
+        {!player.connected ? <Text style={styles.tag}>{t.table.away}</Text> : null}
+        {knocked ? <Text style={[styles.tag, styles.knock]}>{t.table.knocked}</Text> : null}
+        <Score value={n(player.matchScore)} style={styles.score} />
       </View>
 
       <View style={styles.cards}>
@@ -46,6 +59,7 @@ export function Opponent({ player, active, knocked, targetable = [], onPressSlot
               burned={slot.kind === 'burned'}
               width={cardWidth}
               highlight={highlight}
+              inFlight={inFlight?.(index)}
               onPress={targetable.includes(index) ? () => onPressSlot?.(index) : undefined}
             />
           );
@@ -77,7 +91,7 @@ const styles = StyleSheet.create({
     ...typography.numeral,
     fontSize: 13,
     color: colors.text,
-    marginLeft: 'auto',
+    marginStart: 'auto',
   },
   tag: {
     fontSize: 8,

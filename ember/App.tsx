@@ -4,6 +4,8 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Difficulty } from './shared/types';
+import { deviceLocale, LanguageProvider, useLanguage, type LocaleCode } from './src/i18n';
+import { DEFAULT_PREFS, loadPrefs, savePrefs, type Prefs } from './src/store/prefs';
 import { api, ONLINE_ENABLED, type AuthResponse } from './src/net/api';
 import { useOnline } from './src/net/useOnline';
 import { clearSession, loadSession, saveSession, type StoredSession } from './src/store/session';
@@ -17,20 +19,16 @@ import { RoomScreen } from './src/ui/screens/RoomScreen';
 import { RoundOverlay } from './src/ui/screens/RoundOverlay';
 import { RulesScreen } from './src/ui/screens/RulesScreen';
 import { FeltTable } from './src/ui/components/FeltTable';
+import { setSoundEnabled } from './src/ui/sound';
 import { colors } from './src/ui/theme';
 import { useEmber } from './src/ui/useEmber';
-
-const BOT_NAMES = ['Rashid', 'Noura', 'Salem', 'Maitha'];
 
 type Screen = 'home' | 'rules' | 'auth' | 'lobby' | 'profile' | 'offline';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
-  const [settings, setSettings] = useState<Settings>({
-    rivals: 2,
-    difficulty: 'normal',
-    assist: false,
-  });
+  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
+  const [locale, setLocaleState] = useState<LocaleCode>(() => deviceLocale());
   // Bumping this remounts the offline table, which is what starts a fresh match.
   const [matchId, setMatchId] = useState(0);
 
@@ -39,15 +37,50 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    void loadSession().then((stored) => {
+    void Promise.all([loadSession(), loadPrefs()]).then(([stored, saved]) => {
       if (!alive) return;
       setSession(stored);
+      setPrefs(saved);
+      // A language the player picked wins over the one the device suggests.
+      if (saved.locale) setLocaleState(saved.locale);
       setRestoring(false);
     });
     return () => {
       alive = false;
     };
   }, []);
+
+  const remember = useCallback((next: Prefs) => {
+    setPrefs(next);
+    void savePrefs(next);
+  }, []);
+
+  const setLocale = useCallback(
+    (next: LocaleCode) => {
+      setLocaleState(next);
+      setPrefs((current) => {
+        const updated = { ...current, locale: next };
+        void savePrefs(updated);
+        return updated;
+      });
+    },
+    [],
+  );
+
+  const settings: Settings = {
+    rivals: prefs.rivals,
+    difficulty: prefs.difficulty,
+    assist: prefs.assist,
+    sound: prefs.sound,
+  };
+  const setSettings = useCallback(
+    (next: Settings) => remember({ ...prefs, ...next }),
+    [prefs, remember],
+  );
+
+  useEffect(() => {
+    setSoundEnabled(prefs.sound);
+  }, [prefs.sound]);
 
   const online = useOnline(session?.token ?? null);
 
@@ -193,14 +226,18 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
+      <LanguageProvider locale={locale} setLocale={setLocale}>
       <FeltTable>
         <StatusBar style="light" />
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
           {/* A card table is a phone-shaped thing: on a wide screen it sits in
               the middle rather than stretching across the whole window. */}
-          <View style={styles.column}>{body()}</View>
+          <View style={[styles.column, { direction: locale === 'ar' ? 'rtl' : 'ltr' }]}>
+            {body()}
+          </View>
         </SafeAreaView>
       </FeltTable>
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 }
@@ -219,8 +256,10 @@ function OfflineTable({
   onHome: () => void;
   onPlayAgain: () => void;
 }) {
+  const { t } = useLanguage();
   const { view, dispatch, yourMemory } = useEmber({
-    bots: BOT_NAMES.slice(0, rivals).map((name) => ({ name, difficulty })),
+    playerName: t.common.you,
+    bots: t.bots.slice(0, rivals).map((name) => ({ name, difficulty })),
   });
 
   const finished = view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER';

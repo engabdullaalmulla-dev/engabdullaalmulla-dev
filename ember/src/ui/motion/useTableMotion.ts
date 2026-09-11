@@ -54,7 +54,7 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
     // Anchors are measured after the browser or the platform has laid the
     // table out, so the diff waits a beat for the new positions. It is not
     // cancelled on cleanup: the move happened, and it should still be shown.
-    const timer = setTimeout(() => run(prev), prev ? 40 : 140);
+    const timer = setTimeout(() => run(prev), prev ? 0 : 140);
     return () => clearTimeout(timer);
 
     function run(prev: TableView | null) {
@@ -101,8 +101,8 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
         card,
         faceUp: true,
         flip: true,
-        arc: 26,
-        durationMs: 420,
+        arc: 24,
+        durationMs: 360,
         toKey: anchorKeys.discard,
         ...options,
       });
@@ -123,9 +123,10 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
               to: target,
               card: null,
               faceUp: false,
-              durationMs: 300,
-              delayMs: order * 55,
+              durationMs: 280,
+              delayMs: order * 45,
               arc: 14,
+              toKey: anchorKeys.slot(player.id, index),
             });
             order += 1;
           }
@@ -149,7 +150,7 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
           faceUp: view.held?.kind === 'face',
           flip: view.held?.kind === 'face' && !view.heldFromDiscard,
           arc: 18,
-          durationMs: 340,
+          durationMs: 300,
           toKey: seatOf(actor.id),
         });
         onEvent?.('draw');
@@ -177,8 +178,12 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
             to: slotRect,
             card: null,
             faceUp: false,
-            durationMs: 320,
+            durationMs: 300,
             arc: 12,
+            toKey:
+              actor.id === view.youId && hints.current.placeSlot != null
+                ? anchorKeys.slot(actor.id, hints.current.placeSlot)
+                : undefined,
           });
           toDiscard(slotRect, top, { delayMs: 90 });
           onEvent?.('place');
@@ -202,7 +207,14 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
           const stock = at(anchorKeys.stock);
           const target = landing(player.id, index);
           if (stock && target) {
-            controller.fly({ from: stock, to: target, card: null, faceUp: false, arc: 16 });
+            controller.fly({
+              from: stock,
+              to: target,
+              card: null,
+              faceUp: false,
+              arc: 16,
+              toKey: anchorKeys.slot(player.id, index),
+            });
             onEvent?.('penalty');
           }
           return;
@@ -225,8 +237,14 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
       const a = landing(one.playerId, one.slot);
       const b = landing(two.playerId, two.slot);
       if (a && b) {
-        controller.fly({ from: a, to: b, card: null, faceUp: false, arc: 34, durationMs: 460 });
-        controller.fly({ from: b, to: a, card: null, faceUp: false, arc: -34, durationMs: 460 });
+        controller.fly({
+          from: a, to: b, card: null, faceUp: false, arc: 34, durationMs: 420,
+          toKey: anchorKeys.slot(two.playerId, two.slot),
+        });
+        controller.fly({
+          from: b, to: a, card: null, faceUp: false, arc: -34, durationMs: 420,
+          toKey: anchorKeys.slot(one.playerId, one.slot),
+        });
         onEvent?.('swap');
       }
     }

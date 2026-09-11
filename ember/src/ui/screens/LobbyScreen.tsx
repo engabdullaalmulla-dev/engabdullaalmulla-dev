@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 
 import type { PublicUser } from '../../../shared/protocol';
+import type { ErrorCode } from '../../../shared/protocol';
+import { useLanguage } from '../../i18n';
 import type { ConnectionStatus, QueueState } from '../../net/useOnline';
 import { Button } from '../components/Button';
 import { Wordmark } from '../components/Wordmark';
@@ -19,7 +21,7 @@ interface Props {
   user: PublicUser | null;
   status: ConnectionStatus;
   queue: QueueState | null;
-  error: string | null;
+  error: ErrorCode | null;
   onQuickMatch: () => void;
   onCancelQueue: () => void;
   onCreateRoom: () => void;
@@ -28,14 +30,6 @@ interface Props {
   onSignOut: () => void;
   onBack: () => void;
 }
-
-const STATUS_TEXT: Record<ConnectionStatus, string> = {
-  idle: 'Not connected',
-  connecting: 'Connecting…',
-  online: 'Connected',
-  reconnecting: 'Reconnecting…',
-  failed: 'Cannot reach the server',
-};
 
 export function LobbyScreen({
   user,
@@ -50,6 +44,7 @@ export function LobbyScreen({
   onSignOut,
   onBack,
 }: Props) {
+  const { t, n } = useLanguage();
   const [code, setCode] = useState('');
   const live = status === 'online';
 
@@ -57,16 +52,12 @@ export function LobbyScreen({
     return (
       <View style={styles.queue}>
         <ActivityIndicator color={colors.ember} size="large" />
-        <Text style={styles.queueTitle}>Looking for players…</Text>
+        <Text style={styles.queueTitle}>{t.lobby.lookingForPlayers}</Text>
         <Text style={styles.queueDetail}>
-          {queue.waiting === 1
-            ? 'You are first at the table.'
-            : `${queue.waiting} waiting.`}{' '}
-          {queue.startsInMs != null
-            ? 'If nobody else turns up, bots will fill the empty seats.'
-            : ''}
+          {queue.waiting === 1 ? t.lobby.firstAtTable : t.lobby.waitingCount(n(queue.waiting))}{' '}
+          {queue.startsInMs != null ? t.lobby.botsWillFill : ''}
         </Text>
-        <Button label="CANCEL" tone="ghost" onPress={onCancelQueue} />
+        <Button label={t.common.cancel} tone="ghost" onPress={onCancelQueue} />
       </View>
     );
   }
@@ -75,48 +66,46 @@ export function LobbyScreen({
     <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12}>
-          <Text style={styles.back}>← BACK</Text>
+          <Text style={styles.back}>{t.common.backArrow} {t.common.back}</Text>
         </Pressable>
         <View style={[styles.dot, live && styles.dotLive, status === 'failed' && styles.dotDead]} />
-        <Text style={styles.status}>{STATUS_TEXT[status]}</Text>
+        <Text style={styles.status}>{t.lobby.status[status]}</Text>
       </View>
 
       <View style={styles.hero}>
         <Wordmark size={32} />
-        <Text style={styles.greeting}>{user ? `Playing as ${user.name}.` : 'Online.'}</Text>
+        <Text style={styles.greeting}>
+          {user ? t.lobby.playingAs(user.name) : t.lobby.online}
+        </Text>
       </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>{t.errors[error] ?? t.errors.server_error}</Text> : null}
 
       <View style={styles.block}>
-        <Text style={styles.blockTitle}>PLAY ANYONE</Text>
-        <Text style={styles.blockText}>
-          Join the next table that needs players. Empty seats fill with bots if nobody turns up.
-        </Text>
-        <Button label="QUICK MATCH" onPress={onQuickMatch} disabled={!live} />
+        <Text style={styles.blockTitle}>{t.lobby.playAnyone}</Text>
+        <Text style={styles.blockText}>{t.lobby.playAnyoneBlurb}</Text>
+        <Button label={t.lobby.quickMatch} onPress={onQuickMatch} disabled={!live} />
       </View>
 
       <View style={styles.block}>
-        <Text style={styles.blockTitle}>PLAY YOUR FRIENDS</Text>
-        <Text style={styles.blockText}>
-          Start a private table and share the code. Nobody without it can sit down.
-        </Text>
-        <Button label="CREATE A PRIVATE TABLE" tone="ghost" onPress={onCreateRoom} disabled={!live} />
+        <Text style={styles.blockTitle}>{t.lobby.playFriends}</Text>
+        <Text style={styles.blockText}>{t.lobby.playFriendsBlurb}</Text>
+        <Button label={t.lobby.createPrivate} tone="ghost" onPress={onCreateRoom} disabled={!live} />
 
         <View style={styles.joinRow}>
           <TextInput
             value={code}
             onChangeText={(next) => setCode(next.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
-            placeholder="CODE"
+            placeholder={t.lobby.code}
             placeholderTextColor={colors.textFaint}
             autoCapitalize="characters"
             autoCorrect={false}
             maxLength={6}
             style={styles.codeInput}
-            accessibilityLabel="Room code"
+            accessibilityLabel={t.lobby.roomCode}
           />
           <Button
-            label="JOIN"
+            label={t.lobby.join}
             onPress={() => {
               onJoinRoom(code);
               setCode('');
@@ -128,8 +117,8 @@ export function LobbyScreen({
       </View>
 
       <View style={styles.footer}>
-        <Button label="YOUR RECORD" tone="ghost" onPress={onProfile} small style={styles.footerButton} />
-        <Button label="SIGN OUT" tone="quiet" onPress={onSignOut} small style={styles.footerButton} />
+        <Button label={t.lobby.yourRecord} tone="ghost" onPress={onProfile} small style={styles.footerButton} />
+        <Button label={t.lobby.signOut} tone="quiet" onPress={onSignOut} small style={styles.footerButton} />
       </View>
     </ScrollView>
   );

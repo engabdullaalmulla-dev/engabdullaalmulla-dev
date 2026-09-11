@@ -4,14 +4,16 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import type { Difficulty } from '../../../shared/types';
 import { Button } from '../components/Button';
 import { Wordmark } from '../components/Wordmark';
+import { useLanguage } from '../../i18n';
 import { tap } from '../haptics';
-import { DIFFICULTIES, DIFFICULTY_LABEL } from '../labels';
+import { DIFFICULTIES } from '../labels';
 import { colors, radius, space, type as typography } from '../theme';
 
 export interface Settings {
   rivals: number;
   difficulty: Difficulty;
   assist: boolean;
+  sound: boolean;
 }
 
 interface Props {
@@ -35,62 +37,68 @@ export function HomeScreen({
   signedInAs,
   onlineEnabled = true,
 }: Props) {
+  const { t, n, locale, setLocale } = useLanguage();
+
   return (
     <ScrollView contentContainerStyle={styles.screen} showsVerticalScrollIndicator={false}>
+      <View style={styles.topBar}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t.home.language}
+          onPress={() => {
+            tap();
+            setLocale(locale === 'ar' ? 'en' : 'ar');
+          }}
+          hitSlop={10}
+          style={styles.language}
+        >
+          <Text style={styles.languageText}>{t.home.language}</Text>
+        </Pressable>
+      </View>
+
       <View style={styles.hero}>
         <Wordmark size={46} />
-        <Text style={styles.tagline}>Remember. Burn. Knock.</Text>
-        <Text style={styles.blurb}>
-          Four cards, face down. You saw two of them once. Keep the smallest pile at the table and
-          call it before anyone beats you to it.
-        </Text>
+        <Text style={styles.tagline}>{t.home.tagline}</Text>
+        <Text style={styles.blurb}>{t.home.blurb}</Text>
       </View>
 
       <View style={styles.actions}>
         {onlineEnabled ? (
           <>
-            <Button label="PLAY ONLINE" onPress={onPlayOnline} />
+            <Button label={t.home.playOnline} onPress={onPlayOnline} />
             <Text style={styles.online}>
-              {signedInAs
-                ? `Signed in as ${signedInAs}. Quick match, or a private table with friends.`
-                : 'Quick match against people, or a private table just for your friends.'}
+              {signedInAs ? t.home.onlineSignedIn(signedInAs) : t.home.onlineBlurb}
             </Text>
           </>
         ) : (
-          <Text style={styles.online}>
-            This build plays the bots only. Online tables need the EMBER server —
-            see the README.
-          </Text>
+          <Text style={styles.online}>{t.home.offlineOnly}</Text>
         )}
       </View>
 
       <View style={styles.panel}>
-        <Text style={styles.panelTitle}>AGAINST THE BOTS</Text>
+        <Text style={styles.panelTitle}>{t.home.againstBots}</Text>
         <Segment
-          label="TABLE"
+          label={t.home.table}
           options={[
-            { value: 2, label: '3 players' },
-            { value: 3, label: '4 players' },
-            { value: 4, label: '5 players' },
+            { value: 2, label: t.home.players(n(3)) },
+            { value: 3, label: t.home.players(n(4)) },
+            { value: 4, label: t.home.players(n(5)) },
           ]}
           value={settings.rivals}
           onChange={(rivals) => onChange({ ...settings, rivals })}
         />
 
         <Segment
-          label="OPPONENTS"
-          options={DIFFICULTIES.map((value) => ({
-            value,
-            label: DIFFICULTY_LABEL[value],
-          }))}
+          label={t.home.opponents}
+          options={DIFFICULTIES.map((value) => ({ value, label: t.difficulty[value] }))}
           value={settings.difficulty}
           onChange={(difficulty) => onChange({ ...settings, difficulty })}
         />
 
         <View style={styles.switchRow}>
           <View style={styles.switchText}>
-            <Text style={styles.switchLabel}>Assist mode</Text>
-            <Text style={styles.switchHint}>Marks the cards you have already been shown.</Text>
+            <Text style={styles.switchLabel}>{t.home.assist}</Text>
+            <Text style={styles.switchHint}>{t.home.assistHint}</Text>
           </View>
           <Switch
             value={settings.assist}
@@ -100,10 +108,23 @@ export function HomeScreen({
           />
         </View>
 
-        <Button label="DEAL ME IN" tone="ghost" onPress={onPlay} />
+        <View style={styles.switchRow}>
+          <View style={styles.switchText}>
+            <Text style={styles.switchLabel}>{t.home.sound}</Text>
+            <Text style={styles.switchHint}>{t.home.soundHint}</Text>
+          </View>
+          <Switch
+            value={settings.sound}
+            onValueChange={(sound) => onChange({ ...settings, sound })}
+            trackColor={{ false: colors.line, true: colors.ember }}
+            thumbColor={colors.cream}
+          />
+        </View>
+
+        <Button label={t.home.deal} tone="ghost" onPress={onPlay} />
       </View>
 
-      <Button label="HOW TO PLAY" tone="ghost" onPress={onRules} />
+      <Button label={t.home.howToPlay} tone="ghost" onPress={onRules} />
     </ScrollView>
   );
 }
@@ -146,7 +167,16 @@ function Segment<T extends string | number>({
 }
 
 const styles = StyleSheet.create({
-  screen: { padding: space(6), gap: space(7), flexGrow: 1, justifyContent: 'center' },
+  screen: { padding: space(6), gap: space(6), flexGrow: 1, justifyContent: 'center' },
+  topBar: { alignItems: 'flex-end' },
+  language: {
+    paddingVertical: space(1.5),
+    paddingHorizontal: space(3),
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  languageText: { ...typography.small, fontSize: 12, color: colors.goldSoft },
   hero: { gap: space(3) },
   tagline: { ...typography.label, color: colors.ember, fontSize: 11 },
   blurb: { ...typography.body, color: colors.textMuted, lineHeight: 22 },

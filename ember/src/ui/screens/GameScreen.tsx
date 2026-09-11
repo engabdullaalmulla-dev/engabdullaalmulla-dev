@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { cardName, POWER_LABEL, spokenRank } from '../../../shared/cards';
 import type { GameAction } from '../../../shared/types';
+import { useLanguage, type Language } from '../../i18n';
 import { actingPlayer, faceOf, type PlayerView, type TableView } from '../../../shared/view';
 import { BurnMeter } from '../components/BurnMeter';
 import { Button } from '../components/Button';
 import { FeltTable } from '../components/FeltTable';
+import { Say } from '../components/Say';
+import { Score } from '../components/Score';
 import { Opponent } from '../components/Opponent';
 import { Piles } from '../components/Piles';
 import { PlayingCard, type CardHighlight } from '../components/PlayingCard';
@@ -85,6 +87,8 @@ export function GameScreen(props: Props) {
 }
 
 function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Props) {
+  const language = useLanguage();
+  const { t, n, line } = language;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const youId = view.youId;
   const you = view.players.find((player) => player.id === youId) as PlayerView;
@@ -206,7 +210,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
 
   /* ---------------------------------------------------------------- */
 
-  const prompt = buildPrompt(view, yourTurn, revealIsYours);
+  const prompt = buildPrompt(view, yourTurn, revealIsYours, language);
   const trayCard =
     revealIsYours && reveal && reveal.reason !== 'opening'
       ? faceOf(
@@ -224,12 +228,19 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
     <FeltTable>
       <View style={styles.screen}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Leave game" onPress={onQuit} hitSlop={12}>
-            <Text style={styles.quit}>← LEAVE</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.table.leaveGame}
+            onPress={onQuit}
+            hitSlop={12}
+          >
+            <Text style={styles.quit}>{t.common.backArrow} {t.common.leave}</Text>
           </Pressable>
-          <Text style={styles.round}>ROUND {view.round}</Text>
+          <Text style={styles.round}>{t.common.round(n(view.round))}</Text>
           <Text style={[styles.target, clock != null && styles.clock]}>
-            {clock != null ? `${clock}s` : `TO ${view.config.targetScore}`}
+            {clock != null
+              ? t.common.seconds(n(clock))
+              : t.common.toScore(n(view.config.targetScore))}
           </Text>
         </View>
 
@@ -250,6 +261,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
               knocked={view.knockerId === player.id}
               cardWidth={rivalCardWidth}
               targetable={rivalsTargetable ? liveSlots(player) : []}
+              inFlight={(index) => flights.isFlyingTo(anchorKeys.slot(player.id, index))}
               onPressSlot={(slot) => pressRivalCard(player.id, slot)}
             />
           ))}
@@ -266,14 +278,17 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
             onDrawDiscard={() => dispatch({ type: 'DRAW_DISCARD' })}
           />
 
-          <Tray card={trayCard} width={pileWidth} label={revealIsYours ? 'REMEMBER' : 'IN HAND'} />
+          <Tray
+            card={trayCard}
+            width={pileWidth}
+            label={revealIsYours ? t.table.remember : t.table.inHand}
+            inFlight={flights.isFlyingTo(anchorKeys.hand)}
+          />
         </View>
 
         <View style={styles.say}>
-          <Text style={styles.prompt} numberOfLines={2}>
-            {prompt.title}
-          </Text>
-          {prompt.detail ? <Text style={styles.detail}>{prompt.detail}</Text> : null}
+          <Say text={prompt.title} style={styles.prompt} numberOfLines={2} />
+          <Say text={prompt.detail ?? ' '} style={styles.detail} numberOfLines={1} />
           {view.phase === 'BURN_WINDOW' && view.burn ? (
             <BurnMeter closesAt={view.burn.closesAt} totalMs={view.config.burnWindowMs} />
           ) : null}
@@ -285,8 +300,10 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
             <Text style={[styles.youName, yourTurn && !showdown && styles.youNameActive]}>
               {you.name.toUpperCase()}
             </Text>
-            {view.knockerId === youId ? <Text style={styles.knockBadge}>KNOCKED</Text> : null}
-            <Text style={styles.youScore}>{you.matchScore}</Text>
+            {view.knockerId === youId ? (
+              <Text style={styles.knockBadge}>{t.table.knocked}</Text>
+            ) : null}
+            <Score value={n(you.matchScore)} style={styles.youScore} />
           </View>
 
           <View style={[styles.hand, { width: handWidth, gap: gutter }]}>
@@ -307,6 +324,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
                   seen={assist && !!yourMemory[`${youId}:${index}`]}
                   width={handCardWidth}
                   highlight={highlight}
+                  inFlight={flights.isFlyingTo(anchorKeys.slot(youId, index))}
                   onPress={targetable ? () => pressYourCard(index) : undefined}
                 />
               );
@@ -315,11 +333,17 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
         </View>
 
         <View style={styles.controls}>
-          <Controls view={view} dispatch={dispatch} yourTurn={yourTurn} revealIsYours={revealIsYours} />
+          <Controls
+            view={view}
+            dispatch={dispatch}
+            yourTurn={yourTurn}
+            revealIsYours={revealIsYours}
+            language={language}
+          />
         </View>
 
         <Text numberOfLines={1} style={[styles.feed, logTone(lastLog?.kind)]}>
-          {lastLog ? lastLog.text : ' '}
+          {lastLog ? line(lastLog, youId) : ' '}
         </Text>
       </View>
 
@@ -331,16 +355,26 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
 /* ------------------------------------------------------------------ */
 
 /** The card in your hand, or the one you are being shown. */
-function Tray({ card, width, label }: { card: ReturnType<typeof faceOf>; width: number; label: string }) {
+function Tray({
+  card,
+  width,
+  label,
+  inFlight,
+}: {
+  card: ReturnType<typeof faceOf>;
+  width: number;
+  label: string;
+  inFlight?: boolean;
+}) {
   // The anchor lives on the space, not on the card, so a card can be dealt
   // into an empty hand.
   const anchor = useAnchor(anchorKeys.hand);
   return (
     <View style={[styles.tray, { width: width + space(2) }]}>
       <View {...anchor} style={{ width, height: width * 1.45 }}>
-        {card ? <PlayingCard card={card} faceUp width={width} /> : null}
+        {card ? <PlayingCard card={card} faceUp width={width} inFlight={inFlight} /> : null}
       </View>
-      <Text style={[styles.trayLabel, !card && styles.trayLabelHidden]}>{label}</Text>
+      <Text style={[styles.trayLabel, (!card || inFlight) && styles.trayLabelHidden]}>{label}</Text>
     </View>
   );
 }
@@ -357,17 +391,20 @@ function Controls({
   dispatch,
   yourTurn,
   revealIsYours,
+  language,
 }: {
   view: TableView;
   dispatch: (action: GameAction) => void;
   yourTurn: boolean;
   revealIsYours: boolean;
+  language: Language;
 }) {
+  const { t } = language;
   if (revealIsYours && view.reveal?.viewerId === view.youId) {
     const looksLeft = view.phase === 'OPENING_PEEK' ? view.openingPeeksLeft : 0;
     return (
       <Button
-        label={looksLeft > 0 ? 'DONE LOOKING' : 'GOT IT'}
+        label={looksLeft > 0 ? t.common.doneLooking : t.common.gotIt}
         tone={looksLeft > 0 ? 'ghost' : 'ember'}
         onPress={() => dispatch({ type: 'ACK_REVEAL', playerId: view.youId })}
       />
@@ -381,7 +418,7 @@ function Controls({
   if (view.phase === 'TURN_START') {
     return (
       <Button
-        label={view.knockerId ? 'ALREADY KNOCKED' : 'KNOCK'}
+        label={view.knockerId ? t.table.alreadyKnocked : t.table.knock}
         tone={view.knockerId ? 'quiet' : 'gold'}
         disabled={!!view.knockerId}
         onPress={() => dispatch({ type: 'KNOCK' })}
@@ -397,12 +434,12 @@ function Controls({
         {power ? (
           <>
             <Button
-              label={POWER_LABEL[power].toUpperCase()}
+              label={t.powers[power].name.toUpperCase()}
               onPress={() => dispatch({ type: 'THROW', usePower: true })}
               style={styles.controlButton}
             />
             <Button
-              label="THROW"
+              label={t.table.justThrow}
               tone="ghost"
               onPress={() => dispatch({ type: 'THROW', usePower: false })}
               style={styles.controlButton}
@@ -410,7 +447,7 @@ function Controls({
           </>
         ) : (
           <Button
-            label="THROW IT"
+            label={t.table.throwIt}
             tone="ghost"
             onPress={() => dispatch({ type: 'THROW', usePower: false })}
             style={styles.controlButton}
@@ -421,7 +458,9 @@ function Controls({
   }
 
   if (view.phase === 'POWER' && view.power?.kind === 'LOOK_SWAP' && view.power.picked.length === 1) {
-    return <Button label="LEAVE IT" tone="ghost" onPress={() => dispatch({ type: 'POWER_DECLINE' })} />;
+    return (
+      <Button label={t.table.leaveIt} tone="ghost" onPress={() => dispatch({ type: 'POWER_DECLINE' })} />
+    );
   }
 
   return <View style={styles.controlSpacer} />;
@@ -437,60 +476,63 @@ function buildPrompt(
   view: TableView,
   yourTurn: boolean,
   revealIsYours: boolean,
+  { t, card }: Language,
 ): { title: string; detail?: string } {
   const seat = actingPlayer(view);
   const first = (name: string) => name.split(' ')[0];
 
   if (view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER') {
-    return { title: 'Cards on the table' };
+    return { title: t.table.cardsOnTable };
   }
 
   if (view.phase === 'OPENING_PEEK') {
     const left = view.openingPeeksLeft;
     if (left <= 0) {
       return revealIsYours
-        ? { title: 'Remember them' }
-        : { title: 'Waiting for the table' };
+        ? { title: t.table.rememberThem }
+        : { title: t.table.waitingForTable };
     }
     return {
-      title: left === 2 ? 'Look at two of yours' : 'One more look',
-      detail: 'You will not see them again',
+      title: left === 2 ? t.table.lookAtTwo : t.table.oneMoreLook,
+      detail: t.table.youWillNotSeeAgain,
     };
   }
 
-  if (revealIsYours && view.reveal?.viewerId === '*') return { title: 'Everyone saw that' };
+  if (revealIsYours && view.reveal?.viewerId === '*') return { title: t.table.everyoneSaw };
 
   if (view.phase === 'BURN_WINDOW') {
-    return { title: view.discardTop ? `Burn ${spokenRank(view.discardTop.rank)}?` : 'Burn?' };
+    return {
+      title: view.discardTop
+        ? t.table.burnRank(t.cards.spoken(view.discardTop.rank))
+        : t.table.burnPlain,
+    };
   }
 
   if (view.phase === 'POWER' && view.power) {
     const { kind, picked } = view.power;
-    if (!yourTurn) return { title: `${first(seat.name)} — ${POWER_LABEL[kind]}` };
+    if (!yourTurn) return { title: t.table.usingPower(first(seat.name), t.powers[kind].name) };
     if (kind === 'SWAP') {
       return picked.length === 0
-        ? { title: 'Give away which?' }
-        : { title: 'And take which?' };
+        ? { title: t.table.giveAwayWhich }
+        : { title: t.table.andTakeWhich };
     }
     if (kind === 'LOOK_SWAP') {
-      return picked.length === 0 ? { title: 'Look at whose?' } : { title: 'Take it?' };
+      return picked.length === 0 ? { title: t.table.lookAtWhose } : { title: t.table.takeIt };
     }
-    if (kind === 'PEEK') return { title: 'Look at one of yours' };
-    if (kind === 'SPY') return { title: 'Look at one of theirs' };
-    return { title: 'Who takes a card?' };
+    if (kind === 'PEEK') return { title: t.table.lookAtOneOfYours };
+    if (kind === 'SPY') return { title: t.table.lookAtOneOfTheirs };
+    return { title: t.table.whoTakesCard };
   }
 
-  if (!yourTurn) return { title: `${first(seat.name)}…` };
+  if (!yourTurn) return { title: t.table.thinking(first(seat.name)) };
 
   if (view.phase === 'TURN_START') {
-    return { title: view.knockerId ? 'Last turn' : 'Your move' };
+    return { title: view.knockerId ? t.table.lastTurn : t.table.yourMove };
   }
 
   const held = faceOf(view.held);
   if (view.phase === 'HOLDING' && held) {
-    return view.heldFromDiscard
-      ? { title: 'Swap it in' }
-      : { title: `You drew ${cardName(held)}` };
+    return view.heldFromDiscard ? { title: t.table.swapItIn } : { title: t.table.drew(card(held)) };
   }
 
   return { title: ' ' };
@@ -532,7 +574,7 @@ const styles = StyleSheet.create({
   trayLabel: { ...typography.label, fontSize: 8, color: colors.goldFaint },
   trayLabelHidden: { opacity: 0 },
 
-  say: { alignItems: 'center', gap: space(1), minHeight: 46, justifyContent: 'center' },
+  say: { alignItems: 'center', gap: space(1), minHeight: 66, justifyContent: 'center' },
   prompt: { ...typography.heading, fontSize: 22, color: colors.text, textAlign: 'center' },
   detail: { ...typography.small, fontSize: 11, color: colors.textFaint, textAlign: 'center' },
 
@@ -540,7 +582,7 @@ const styles = StyleSheet.create({
   youHeader: { flexDirection: 'row', alignItems: 'center', gap: space(2) },
   youName: { ...typography.label, fontSize: 10, color: colors.textFaint },
   youNameActive: { color: colors.goldSoft },
-  youScore: { ...typography.numeral, fontSize: 14, color: colors.text, marginLeft: 'auto' },
+  youScore: { ...typography.numeral, fontSize: 14, color: colors.text, marginStart: 'auto' },
   knockBadge: {
     fontSize: 8,
     fontWeight: '800',

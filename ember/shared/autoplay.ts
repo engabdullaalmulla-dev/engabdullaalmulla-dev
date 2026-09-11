@@ -52,9 +52,9 @@ export class Autoplay {
       const moves: ScheduledMove[] = [];
       for (const reveal of state.reveals) {
         if (reveal.viewerId === '*') {
-          moves.push({ action: { type: 'ACK_REVEAL', playerId: '*' }, delayMs: 1900 });
+          moves.push({ action: { type: 'ACK_REVEAL', playerId: '*' }, delayMs: 1500 });
         } else if (!isTheirs(reveal.viewerId)) {
-          moves.push({ action: { type: 'ACK_REVEAL', playerId: reveal.viewerId }, delayMs: 850 });
+          moves.push({ action: { type: 'ACK_REVEAL', playerId: reveal.viewerId }, delayMs: 620 });
         }
       }
       // Nothing else happens while a card is face up on the table.
@@ -70,11 +70,11 @@ export class Autoplay {
           if (isTheirs(player.id)) continue; // people spot their own burns
           const move = decideBurn(state, player.id, memories[player.id] ?? {}, this.random);
           if (move && move.type === 'BURN') {
-            const quickness = player.difficulty === 'sharp' ? 900 : 1500;
+            const quickness = player.difficulty === 'sharp' ? 700 : 1200;
             planned.push({
               playerId: player.id,
               slot: move.slot,
-              at: now + 500 + this.random() * quickness,
+              at: now + 380 + this.random() * quickness,
             });
           }
         }

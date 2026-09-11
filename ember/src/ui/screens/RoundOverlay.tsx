@@ -1,7 +1,8 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
 import type { TableView } from '../../../shared/view';
+import { useLanguage } from '../../i18n';
 import { Button } from '../components/Button';
 import { colors, radius, shadow, space, type as typography } from '../theme';
 
@@ -23,6 +24,18 @@ export function RoundOverlay({
   waitingOn,
   canAdvance = true,
 }: Props) {
+  const { t, n } = useLanguage();
+  const rise = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(rise, {
+      toValue: 1,
+      duration: 340,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [rise]);
+
   const result = view.result;
   if (!result) return null;
   const matchOver = view.phase === 'MATCH_OVER';
@@ -32,30 +45,41 @@ export function RoundOverlay({
 
   const headline = matchOver
     ? view.matchWinnerId === view.youId
-      ? 'You win the match.'
-      : `${named(view.matchWinnerId)} wins the match.`
+      ? t.overlay.youWin
+      : t.overlay.someoneWins(named(view.matchWinnerId))
     : result.ashOutId
-      ? `${named(result.ashOutId)} burned out the whole pile.`
+      ? t.overlay.ashedOut(named(result.ashOutId))
       : result.knockerId
         ? result.knockSucceeded
-          ? `${named(result.knockerId)} knocked and made it stick.`
-          : `${named(result.knockerId)} knocked and paid for it.`
-        : `${winner?.name} takes the round.`;
+          ? t.overlay.knockStuck(named(result.knockerId))
+          : t.overlay.knockPaid(named(result.knockerId))
+        : t.overlay.takesRound(winner?.name ?? '');
 
   const ordered = [...view.players].sort((a, b) => a.matchScore - b.matchScore);
 
   return (
-    <View style={styles.backdrop}>
-      <View style={styles.sheet}>
-        <Text style={styles.eyebrow}>{matchOver ? 'MATCH OVER' : `ROUND ${view.round}`}</Text>
+    <Animated.View style={[styles.backdrop, { opacity: rise }]}>
+      <Animated.View
+        style={[
+          styles.sheet,
+          {
+            transform: [
+              { translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [70, 0] }) },
+            ],
+          },
+        ]}
+      >
+        <Text style={styles.eyebrow}>
+          {matchOver ? t.overlay.matchOver : t.overlay.roundNumber(n(view.round))}
+        </Text>
         <Text style={styles.headline}>{headline}</Text>
 
         <View style={styles.table}>
           <View style={styles.rowHead}>
-            <Text style={[styles.cellName, styles.headText]}>PLAYER</Text>
-            <Text style={[styles.cellNum, styles.headText]}>PILE</Text>
-            <Text style={[styles.cellNum, styles.headText]}>ROUND</Text>
-            <Text style={[styles.cellNum, styles.headText]}>TOTAL</Text>
+            <Text style={[styles.cellName, styles.headText]}>{t.overlay.player}</Text>
+            <Text style={[styles.cellNum, styles.headText]}>{t.overlay.pilePoints}</Text>
+            <Text style={[styles.cellNum, styles.headText]}>{t.overlay.roundPoints}</Text>
+            <Text style={[styles.cellNum, styles.headText]}>{t.overlay.total}</Text>
           </View>
 
           {ordered.map((player) => {
@@ -65,18 +89,18 @@ export function RoundOverlay({
               <View key={player.id} style={styles.row}>
                 <Text style={[styles.cellName, isYou && styles.you]} numberOfLines={1}>
                   {player.name}
-                  {player.id === result.knockerId ? '  ·  knocked' : ''}
+                  {player.id === result.knockerId ? `  ·  ${t.overlay.knockedTag}` : ''}
                 </Text>
-                <Text style={styles.cellNum}>{result.totals[player.id]}</Text>
+                <Text style={styles.cellNum}>{n(result.totals[player.id])}</Text>
                 <Text
                   style={[
                     styles.cellNum,
                     scored === 0 ? { color: colors.good } : scored >= 20 ? { color: colors.bad } : null,
                   ]}
                 >
-                  +{scored}
+                  +{n(scored)}
                 </Text>
-                <Text style={[styles.cellNum, styles.total]}>{player.matchScore}</Text>
+                <Text style={[styles.cellNum, styles.total]}>{n(player.matchScore)}</Text>
               </View>
             );
           })}
@@ -86,20 +110,20 @@ export function RoundOverlay({
           {waitingOn
             ? waitingOn
             : matchOver
-              ? 'Lowest total wins.'
-              : `First to ${view.config.targetScore} ends the match — and the lowest score wins it.`}
+              ? t.overlay.lowestWins
+              : t.overlay.firstTo(n(view.config.targetScore))}
         </Text>
 
         {matchOver ? (
           <View style={styles.buttons}>
-            <Button label="PLAY AGAIN" onPress={onPlayAgain} style={styles.button} />
-            <Button label="HOME" tone="ghost" onPress={onHome} style={styles.button} />
+            <Button label={t.overlay.playAgain} onPress={onPlayAgain} style={styles.button} />
+            <Button label={t.overlay.home} tone="ghost" onPress={onHome} style={styles.button} />
           </View>
         ) : (
-          <Button label="NEXT ROUND" onPress={onNextRound} disabled={!canAdvance} />
+          <Button label={t.overlay.nextRound} onPress={onNextRound} disabled={!canAdvance} />
         )}
-      </View>
-    </View>
+      </Animated.View>
+    </Animated.View>
   );
 }
 

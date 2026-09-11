@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { useLanguage } from '../../i18n';
 import { api, ApiError, SERVER_URL, type AuthResponse } from '../../net/api';
 import { Button } from '../components/Button';
 import { Wordmark } from '../components/Wordmark';
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function AuthScreen({ onSignedIn, onBack }: Props) {
+  const { t } = useLanguage();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +38,12 @@ export function AuthScreen({ onSignedIn, onBack }: Props) {
         mode === 'login' ? await api.login(name, password) : await api.register(name, password);
       onSignedIn(result);
     } catch (problem) {
-      setError(problem instanceof ApiError ? problem.message : 'Something went wrong.');
+      // The server names what went wrong; the wording is ours, in your language.
+      setError(
+        problem instanceof ApiError
+          ? t.errors[problem.code] ?? t.errors.server_error
+          : t.errors.server_error,
+      );
     } finally {
       setBusy(false);
     }
@@ -51,30 +58,30 @@ export function AuthScreen({ onSignedIn, onBack }: Props) {
     >
       <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled">
         <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12}>
-          <Text style={styles.back}>← BACK</Text>
+          <Text style={styles.back}>{t.common.backArrow} {t.common.back}</Text>
         </Pressable>
 
         <View style={styles.hero}>
           <Wordmark size={34} />
           <Text style={styles.tagline}>
-            {mode === 'login' ? 'Sign in to play online.' : 'Pick a name and a password.'}
+            {mode === 'login' ? t.auth.signInTitle : t.auth.registerTitle}
           </Text>
         </View>
 
         <View style={styles.form}>
           <Field
-            label="NAME"
+            label={t.auth.name}
             value={name}
             onChange={setName}
-            placeholder="Abdulla"
+            placeholder={t.auth.namePlaceholder}
             autoComplete="username"
             maxLength={16}
           />
           <Field
-            label="PASSWORD"
+            label={t.auth.password}
             value={password}
             onChange={setPassword}
-            placeholder="At least 8 characters"
+            placeholder={t.auth.passwordPlaceholder}
             secure
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             maxLength={200}
@@ -83,7 +90,7 @@ export function AuthScreen({ onSignedIn, onBack }: Props) {
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Button
-            label={busy ? 'ONE MOMENT…' : mode === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
+            label={busy ? t.auth.oneMoment : mode === 'login' ? t.auth.signIn : t.auth.createAccount}
             onPress={() => void submit()}
             disabled={!ready}
           />
@@ -97,16 +104,12 @@ export function AuthScreen({ onSignedIn, onBack }: Props) {
             }}
           >
             <Text style={styles.switch}>
-              {mode === 'login' ? 'No account yet? Create one.' : 'Already playing? Sign in.'}
+              {mode === 'login' ? t.auth.switchToRegister : t.auth.switchToSignIn}
             </Text>
           </Pressable>
         </View>
 
-        <Text style={styles.footnote}>
-          EMBER keeps a name and a password and nothing else — no email, no address book, no
-          tracking. There is no way to reset a password you forget, so choose one you will
-          remember.
-        </Text>
+        <Text style={styles.footnote}>{t.auth.privacy}</Text>
         <Text style={styles.server}>{SERVER_URL}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
