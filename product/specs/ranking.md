@@ -65,9 +65,39 @@ Beating a side you were expected to beat moves you barely at all. Beating one yo
 | 6–20 | 32 | Still settling. |
 | 21+ | 16 | Stable. A bad night shouldn't move you. |
 
-**Peer adjustment:** teammate votes and man-of-the-match (G5) adjust Δ by up to ±30%. This is not decoration — it is the only signal that catches the keeper who made five saves in a 2–6 defeat, and the player whose side won despite them.
-
 **Cap:** total movement per game is capped so no single result can swing a tier.
+
+### Three layers, in order of weight
+
+Nothing here requires a player to do anything. The rating is automatic; the other two layers only make it converge faster.
+
+**Layer 1 — the result. Always on, no input required.**
+Everyone on the winning side gains, weighted by how unexpected the win was. This alone is correct *in the long run*: because sides are reshuffled every week, being carried by a strong team and being let down by a weak one cancel out over roughly thirty games. It is simply slow, and in the short run it will occasionally be unfair to someone who played brilliantly in a losing side.
+
+**Layer 2 — the host read. Secret, three taps.**
+The person running the game is the only calibrated observer on the pitch. At half time or full time they tap anyone who **played above their level tonight** and anyone who **looked off**. Most games that is two to four taps. Skipping is allowed and nothing breaks.
+
+This is what shortens convergence. One expert observation is worth several games of noisy results — which is why it matters most during placement, where it can take a new player from five games to about two.
+
+**Layer 3 — teammate votes.** Man-of-the-match and thumbs (G5), at a deliberately smaller weight than the host read. Peer voting has a popularity bias — people vote for friends, for the loudest player, and often don't vote at all — so it is a useful cross-check on the host, not a primary signal.
+
+| Layer | Weight on Δ | Needs input from | Fails safe? |
+|---|---|---|---|
+| Result | 100% baseline | Nobody | n/a |
+| Host read | up to ±40% (higher during placement) | The host, 3 taps | Yes — skip is normal |
+| Teammate votes | up to ±15% | Players | Yes — no votes, no adjustment |
+
+### Making the host read trustworthy
+
+A secret input with no accountability is an integrity risk — a host could quietly suppress a rival. Three mitigations, all automatic:
+
+**Calibration.** Each host carries a weight derived from their track record. A host who flags eight of fourteen players every week is not discriminating, and their weight falls. A host whose flags correlate with where players eventually settle gains weight. New hosts start at low weight and earn it.
+
+**Blindness in both directions.** The host never sees the effect of their input. The player never sees they were flagged. Neither can see the other's contribution. This kills lobbying, arguing on the touchline, and reciprocal flagging between hosts who play in each other's games.
+
+**Audit, not punishment.** A host whose reads diverge systematically from outcomes is flagged for human review, the same way sandbagging is. Nothing is auto-reversed and nobody is accused by an algorithm.
+
+**The scaling caveat, stated plainly.** The platform thesis is that most games are eventually host-run (HOST > 50%), and a community host is a player too — biased, distracted, and mid-game. That is exactly why the host read is a *modifier with earned weight*, not an authority. If host reads turn out to be noise at scale, the calibration weights collapse toward zero on their own and the system degrades gracefully back to Layer 1. **Design it so that host input being worthless is survivable.**
 
 ### Worked example
 
@@ -123,10 +153,14 @@ Five games in they are settled around 1234 and K drops to 32. The swings are lar
 | Attendance | That is Reliability's job. |
 
 ### Placement
-Self-assessment at signup seeds a starting rating. The first five games run at K=60, so a badly-placed player is in roughly the right tier by their third game. A host can flag *"this person is nowhere near this level"*, which raises K for their next two games — it does not set the rating directly.
+Self-assessment at signup seeds a starting rating. The first five games run at K=60.
+
+**The host read carries extra weight during placement** — this is where one trained eye beats several games of noisy results. With a host read on game one, a badly-placed player is usually in the right tier by their **second** game rather than their fifth. Without one, the old five-game path still works.
+
+A host can also flag *"this person is nowhere near this level"*, which raises K for their next two games. It never sets the rating directly.
 
 ### Keepers
-A keeper cannot be rated on the scoreline; conceding four in a game their side lost 4–5 says nothing. **Keepers are rated almost entirely on peer votes**, with the result component weighted down heavily. Ties to the keeper programme (L6).
+A keeper cannot be rated on the scoreline; conceding four in a game their side lost 4–5 says nothing. **Keepers are rated almost entirely on the host read**, with the result component weighted right down and teammate votes as a secondary check. The host is standing on the touchline watching the saves — this is the case the host read exists for. Ties to the keeper programme (L6).
 
 ### Decay
 Away for eight weeks or more: widen the uncertainty band, **do not drop the rating.** You do not get worse by not playing — we just become less sure, so the next few games carry a higher K again.
@@ -163,7 +197,9 @@ Every player should be able to repeat that after one reading. Everything below i
 
 **1. Beating better teams counts more.** We work out who should win before kick-off. Win when you weren't supposed to and you move up faster. Beat a side you were meant to beat and you'll barely move.
 
-**2. Your teammates have a say.** They vote after the game. It's the only way we can see the keeper who kept you in it, or the player whose side won despite them.
+**2. Your teammates and the person running the game both have a say.** They vote after the game; the host gives us a quiet read. It's the only way we can see the keeper who kept you in it, or the player whose side won despite them.
+
+*We tell players the host read exists, and never show its content — the same deal as teammate voting. A system caught concealing an input loses the trust the whole number depends on, and hosts talk.*
 
 **3. Goals don't count.** If they did, every defender and keeper would be stuck at the bottom forever. How often you play doesn't count either — that's reliability, which is a separate thing.
 
@@ -216,7 +252,12 @@ Crossing a tier downward fires no notification and no banner. It does **not** me
 - [ ] Placement: a deliberately mis-seeded test player reaches the correct tier within five games.
 - [ ] No single game can move a player across a tier boundary.
 - [ ] Team assignment reads Level and only Level. Reliability must not influence it.
-- [ ] A keeper's Level is stable across a run of heavy defeats where peer votes are positive.
+- [ ] A keeper's Level is stable across a run of heavy defeats where the host read is positive.
+- [ ] A game with no host read and no votes still produces a correct Layer 1 rating change.
+- [ ] Host read is invisible to players, and its effect is invisible to the host.
+- [ ] A host who flags more than half the squad has their weight reduced automatically.
+- [ ] Setting every host weight to zero degrades the system to Layer 1 without errors or gaps.
+- [ ] A host cannot flag themselves.
 - [ ] Eight weeks of absence widens uncertainty and raises K, and does not lower the rating.
 - [ ] Tier promotion fires a notification; demotion does not.
 - [ ] Demotion requires a sustained drop past a buffer, and a test that oscillates a player around a boundary never demotes them twice in a season.
@@ -234,5 +275,6 @@ Crossing a tier downward fires no notification and no banner. It does **not** me
 |---|---|---|
 | R1 | How many games before placement is trustworthy? Brief Q6 — validate against real data, not assumption. | R2 entry |
 | R2 | Are seven tiers right, or does Dubai's spread need fewer? Check against the first 200 rated players. | R2 entry |
-| R3 | Does the peer-vote weighting of ±30% under- or over-correct for keepers? | R2 exit |
+| R3 | Does the host read at ±40% under- or over-correct for keepers? | R2 exit |
+| R5 | Do community hosts produce usable reads, or only staff? If community reads are noise, the calibration should show it within ~20 games each. | R3 entry |
 | R4 | Is one ladder enough to carry G11 ("nothing is at stake"), or does something else need to? Watch FREQ after levels ship. | R3 entry |

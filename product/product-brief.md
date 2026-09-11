@@ -150,6 +150,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | C6 | Sandbagging / smurf detection and flagging | G05 | P2 | R4 | RPT |
 | C7 | Rating portability between cities | G20 | P1 | R4 | RPT |
 | C8 | Collect match results from game one — *even on paper* | G05 | P0 | **R0** | — |
+| C9 | Host calibration — weight each host's read by their track record | G05 | P1 | R3 | RPT |
 
 > **C8 is the single most important row in this document.** The dataset cannot be bought and starts accruing the day we begin. It ships in R0, before any software.
 
@@ -222,6 +223,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | I7 | Host payout + host plays free | G13 G14 | P0 | R1 | HOST |
 | I8 | Host reputation and rating | G13 | P2 | R3 | HOST |
 | I9 | Import an existing WhatsApp group roster | G13 | P1 | R2 | HOST CAC |
+| I10 | **Host read — three taps at full time, never seen by players** | G05 | P0 | R2 | RPT |
 
 ### J · Venue
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -289,7 +291,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | P3 | Lapse detection — reach out at three missed weeks, not thirteen | G07 | P1 | R3 | RPT |
 | P4 | Win-back offer tuned to why they stopped | G07 | P2 | R4 | RPT |
 
-**Count:** 116 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 118 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 

@@ -173,13 +173,13 @@ class Component extends DCLogic {
       ],
       rules: [
         { n: '1', title: 'Beating better teams counts more', body: 'We work out who should win before kick-off. Win when you weren’t supposed to and you move up faster. Beat a side you were meant to beat and you’ll barely move.', delay: '.05s' },
-        { n: '2', title: 'Your teammates have a say', body: 'They vote after the game. It’s the only way we can see the keeper who kept you in it, or the player whose side won despite them.', delay: '.13s' },
+        { n: '2', title: 'Your teammates and the host have a say', body: 'They vote after the game and the person running it gives us a quiet read. It’s the only way we can see the keeper who kept you in it, or the player whose side won despite them.', delay: '.13s' },
         { n: '3', title: 'Goals don’t count', body: 'If they did, every defender and keeper would be stuck at the bottom forever. How often you play doesn’t count either — that’s your reliability, which is a separate thing.', delay: '.21s' },
       ],
       promises: [
         { text: 'Winning never moves you down.' },
         { text: 'Not playing never moves you down.' },
-        { text: 'Your first five games move you a lot, so we find your level fast.' },
+        { text: 'Your first games move you a lot, so we find your level fast.' },
       ],
       toHow: () => this.setState({ view: 'how' }),
       toAfter: () => this.setState({ view: 'after' }),

@@ -14,12 +14,13 @@ generated, gitignored, rebuilt from these files.
 | `Resale` | Release a spot, waitlist refill, cash refund | G02, G03, G04, G08 |
 | `PostMatch` | Score, peer votes, tier movement, highlight clips | G05, G09, G11 |
 | `Passport` | Form, badges, portable standing across cities | G19, G20 |
-| `Season` | Division table, promotion and relegation | G11 |
+| `Level` | Level after a game, and the three rules behind it | G05, G11 |
 | `HostMode` | Roster check-in, host fee, no-show flags | G07, G13, G14 |
 | `System` | Palette, three type roles, components | — |
 
-Direction: matchday programme. Warm stock, letterpress weight, one dark
-chalkboard surface rationed to team sheets and the resale moment.
-Programme red is the only action colour — one primary action per screen.
+Direction: 80s sports manga. Warm newsprint, 3px inked panel borders with a
+hard offset shadow, halftone screentone, leaning impact lettering. Sunbursts
+and full-bleed speed lines are rationed to three beats — the goal, the win,
+and the money coming back. Kit red is the only action colour.
 
 Names, prices and venues are sample data.
