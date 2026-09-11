@@ -76,6 +76,7 @@ export interface Strings {
     everyoneSaw: string;
     burnRank: (rank: string) => string;
     burnPlain: string;
+    burnHint: string;
     yourMove: string;
     lastTurn: string;
     thinking: (name: string) => string;
@@ -310,6 +311,7 @@ export const en: Strings = {
     everyoneSaw: 'Everyone saw that',
     burnRank: (rank) => `Burn ${rank}?`,
     burnPlain: 'Burn?',
+    burnHint: 'Yours or theirs — a wrong card costs you one',
     yourMove: 'Your move',
     lastTurn: 'Last turn',
     thinking: (name) => `${name}…`,
@@ -710,6 +712,7 @@ export const ar: Strings = {
     everyoneSaw: 'رآها الجميع',
     burnRank: (rank) => `تحرق ${rank}؟`,
     burnPlain: 'تحرق؟',
+    burnHint: 'من أوراقك أو أوراقه — والورقة الخطأ تكلّفك ورقة',
     yourMove: 'دورك',
     lastTurn: 'الدور الأخير',
     thinking: (name) => `${name}…`,

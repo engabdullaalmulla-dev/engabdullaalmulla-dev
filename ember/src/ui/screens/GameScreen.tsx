@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import type { GameAction } from '../../../shared/types';
 import { useLanguage, type Language } from '../../i18n';
@@ -124,6 +132,26 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
   /* motion                                                            */
   /* ---------------------------------------------------------------- */
 
+  // A window is identified by when it closes, so a new one is a new alarm.
+  const burnWindow = view.phase === 'BURN_WINDOW' ? (view.burn?.closesAt ?? 0) : 0;
+  const [armed, setArmed] = useState(false);
+
+  useEffect(() => {
+    if (!burnWindow) {
+      setArmed(false);
+      return;
+    }
+    // The window opens the instant you throw, which put it under your own
+    // finger: a second tap meant for the card you just played landed as a
+    // burn. Nothing is burnable for a beat, which is also long enough for the
+    // alarm to register as an alarm.
+    play('alert');
+    slam();
+    setArmed(false);
+    const timer = setTimeout(() => setArmed(true), 420);
+    return () => clearTimeout(timer);
+  }, [burnWindow]);
+
   const flights = useFlights();
   const hints = useRef<MotionHints>({});
   const motion = useTableMotion({ view, controller: flights, hints, onEvent: announce });
@@ -151,7 +179,8 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
       const shown = reveal?.targets.map((target) => target.slot) ?? [];
       return liveSlots(you).filter((slot) => !shown.includes(slot));
     }
-    if (view.phase === 'BURN_WINDOW' && !view.burn?.attempted.includes(youId) && !reveal) {
+    if (view.phase === 'BURN_WINDOW') {
+      if (!armed || view.burn?.attempted.includes(youId) || reveal) return [];
       return liveSlots(you);
     }
     if (!yourTurn || reveal) return [];
@@ -164,13 +193,13 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
     }
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, you, yourTurn, reveal, showdown, youId]);
+  }, [view, you, yourTurn, reveal, showdown, youId, armed]);
 
   const rivalsTargetable = useMemo(() => {
     // Anyone's card can be burned, not just your own — which is the whole
     // reason for remembering what a rival is holding.
     if (view.phase === 'BURN_WINDOW') {
-      return !view.burn?.attempted.includes(youId) && !reveal;
+      return armed && !view.burn?.attempted.includes(youId) && !reveal;
     }
     if (!yourTurn || reveal || view.phase !== 'POWER' || !view.power) return false;
     const { kind, picked } = view.power;
@@ -178,7 +207,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
     if (kind === 'SWAP' && picked.length === 1) return true;
     if (kind === 'LOOK_SWAP' && picked.length === 0) return true;
     return false;
-  }, [view, yourTurn, reveal, youId]);
+  }, [view, yourTurn, reveal, youId, armed]);
 
   /* ---------------------------------------------------------------- */
   /* acting                                                            */
@@ -357,12 +386,39 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
         </Text>
       </View>
 
+      {burnWindow ? <BurnFrame /> : null}
+
       <MotionLayer controller={flights} onLand={(flight) => onLand(flight.toKey)} />
     </FeltTable>
   );
 }
 
 /* ------------------------------------------------------------------ */
+
+/** The table edge, lit while a burn is on the table. */
+function BurnFrame() {
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const beat = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 360, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 360, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    beat.start();
+    return () => beat.stop();
+  }, [pulse]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.burnFrame,
+        { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.95] }) },
+      ]}
+    />
+  );
+}
 
 /** The card in your hand, or the one you are being shown. */
 function Tray({
@@ -515,6 +571,9 @@ function buildPrompt(
       title: view.discardTop
         ? t.table.burnRank(t.cards.spoken(view.discardTop.rank))
         : t.table.burnPlain,
+      // The one prompt that earns its second line: this is the only tap in
+      // the game that can cost you something.
+      detail: t.table.burnHint,
     };
   }
 
@@ -586,6 +645,7 @@ const styles = StyleSheet.create({
 
   say: { alignItems: 'center', gap: space(1), minHeight: 66, justifyContent: 'center' },
   prompt: { ...typography.heading, fontSize: 22, color: colors.text, textAlign: 'center' },
+  promptBurn: { color: colors.ember },
   detail: { ...typography.small, fontSize: 11, color: colors.textFaint, textAlign: 'center' },
 
   youWrap: { alignItems: 'center', gap: space(1.5) },
@@ -610,6 +670,13 @@ const styles = StyleSheet.create({
   controlButton: { flex: 1 },
   controlSpacer: { height: 48 },
 
+  burnFrame: {
+    ...StyleSheet.absoluteFill,
+    borderWidth: 4,
+    borderColor: colors.ember,
+    borderRadius: radius.md,
+    pointerEvents: 'none',
+  },
   feed: {
     ...typography.small,
     fontSize: 10,

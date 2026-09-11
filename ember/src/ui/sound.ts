@@ -9,7 +9,16 @@
 
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 
-export type Cue = 'deal' | 'draw' | 'throw' | 'land' | 'burn' | 'knock' | 'flip' | 'chime';
+export type Cue =
+  | 'deal'
+  | 'draw'
+  | 'throw'
+  | 'land'
+  | 'burn'
+  | 'knock'
+  | 'alert'
+  | 'flip'
+  | 'chime';
 
 const SOURCES: Record<Cue, number> = {
   deal: require('../../assets/sfx/deal.wav'),
@@ -18,6 +27,7 @@ const SOURCES: Record<Cue, number> = {
   land: require('../../assets/sfx/land.wav'),
   burn: require('../../assets/sfx/burn.wav'),
   knock: require('../../assets/sfx/knock.wav'),
+  alert: require('../../assets/sfx/alert.wav'),
   flip: require('../../assets/sfx/flip.wav'),
   chime: require('../../assets/sfx/chime.wav'),
 };
@@ -30,6 +40,7 @@ const LEVEL: Record<Cue, number> = {
   land: 0.6,
   burn: 0.85,
   knock: 0.9,
+  alert: 0.75,
   flip: 0.4,
   chime: 0.55,
 };

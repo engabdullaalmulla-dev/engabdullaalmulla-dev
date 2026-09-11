@@ -207,6 +207,21 @@ function flip() {
   return normalise(out, 0.5);
 }
 
+/**
+ * The burn window opening: a struck alarm, close enough to a fire bell to
+ * read as one without being a novelty.
+ */
+function alert() {
+  const out = silence(0.45);
+  // Two strikes, the second higher, over a short rush of air.
+  mix(out, tone({ seconds: 0.28, frequency: 660, endFrequency: 620, decay: 0.09 }), 0, 0.5);
+  mix(out, tone({ seconds: 0.28, frequency: 990, endFrequency: 930, decay: 0.07 }), 0, 0.28);
+  mix(out, tone({ seconds: 0.3, frequency: 880, endFrequency: 820, decay: 0.1 }), 0.11, 0.45);
+  mix(out, tone({ seconds: 0.3, frequency: 1320, endFrequency: 1240, decay: 0.08 }), 0.11, 0.22);
+  mix(out, noiseBurst({ seconds: 0.14, attack: 0.004, decay: 0.05, cutoff: 5200, highCut: 900, seed: 91 }), 0, 0.3);
+  return normalise(out, 0.8);
+}
+
 /** The end of a round: a small warm cadence, not a fanfare. */
 function chime() {
   const out = silence(0.9);
@@ -227,6 +242,7 @@ const sounds = {
   land: land(),
   burn: burn(),
   knock: knock(),
+  alert: alert(),
   flip: flip(),
   chime: chime(),
 };
