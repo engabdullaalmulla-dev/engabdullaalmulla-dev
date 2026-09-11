@@ -19,7 +19,13 @@ If this works and you later want it automated, that is a separate decision with 
 
 ## The rules
 
-**1. Rarity is the mechanic.** If every Thursday is a themed night, no night is. Cap it at roughly one a fortnight in season. This is the same discipline as the sunbursts in the design system — the big panels only land because most screens don't have one.
+**1. The mechanic is rarity *per player*, not per calendar.** A regular plays about three games a month. If all three are themed, the theme is wallpaper inside a month. If one in three or four is, it's an event.
+
+So the cap sits on the **slot**, not the schedule: *a given recurring slot gets a themed night at most once a month.* Across a full week that can still be three or four themed nights — Tuesday's Champions League crowd, Saturday's league crowd, a Sunday derby — because they're different people. Rotate which slot gets it. Never theme the same Thursday 19:00 two weeks running; those regulars are the ones who'll stop noticing first.
+
+This is the same discipline as the sunbursts in the design system — the big panels only land because most screens don't have one.
+
+**1b. Two tiers, and don't inflate them.** Most themed nights are *only* the naming. Two or three nights a season are genuinely bigger — a Clásico, a final, a World Cup knockout — and those can carry something extra. If a midweek derby gets the same treatment as the final, the final is worth nothing. Decide which tier a night is when you add it to the table, and keep tier one scarce enough to count on one hand.
 
 **2. The name is cosmetic. It must never touch team balancing.** Sides are still drawn from the ratings of whoever checked in (D2). The naming layer renames the output; it never influences it. If this rule is ever bent — letting people pick a side, seeding by supporter — the balancing is compromised and the whole product regresses.
 
@@ -53,6 +59,8 @@ Nothing else changes. No new screen, no new tab, no banner.
 - [ ] If two big matches fall on the same night, the admin picks one. The system never guesses.
 - [ ] A game created after the team sheet has gone out still picks up the fixture names.
 - [ ] Names are capped in length so they don't break the pitch view or the WhatsApp line.
+- [ ] An admin is warned before marking a slot that already had a themed night within the last month — the per-slot cap is enforced by the tool, not by memory.
+- [ ] Each themed night is recorded as tier one or tier two, and the count of tier-one nights this season is visible when adding another.
 
 ---
 
