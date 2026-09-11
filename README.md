@@ -7,9 +7,7 @@ produced by marbles actually going in.
 
 Working title. Naming options are in [docs/01-concept.md](docs/01-concept.md).
 
-**Playable prototype (hosted):** <https://claude.ai/code/artifact/4a7d93a1-95d2-4466-a0f0-4a83d246b2a0>
-
-**Playable prototype (local):** `prototype/` — open `prototype/index.html` from any static
+**Playable prototype:** `prototype/` — open `prototype/index.html` from any static
 server. Three complete, verified competitions — **Road to Glory** (Asian qualification,
 the inter-confederation play-off and the World Cup finals as one 334-match
 campaign), the World Cup finals on their own, and Asian qualification on its
@@ -35,6 +33,7 @@ line, and a match takes **45–55 seconds** to watch.
 | [docs/08-fairness-and-testing.md](docs/08-fairness-and-testing.md) | The fairness argument and the measurements that back it |
 | [docs/09-release-scope.md](docs/09-release-scope.md) | First release scope, what is deliberately out, and the order after that |
 | [docs/10-rights.md](docs/10-rights.md) | What is original, what needs rights review before publication |
+| [docs/11-ios-release.md](docs/11-ios-release.md) | The route to the App Store: which architecture, what is missing, what Apple will ask |
 
 ## Running the prototype
 
@@ -46,6 +45,20 @@ open http://127.0.0.1:8123/index.html
 
 It needs no build step, no network and no account. Everything is ES modules and
 a `<canvas>`.
+
+## Building the iOS app
+
+```bash
+cd app
+npm install
+npm run build        # assembles www/ from prototype and checks it is offline
+npm run add:ios      # generates the Xcode project (once, needs a Mac)
+npm run ios          # sync and open Xcode
+```
+
+The web bundle is 345 KB and makes **zero network requests** — fonts are bundled,
+nothing is fetched, and the build fails if that ever stops being true. See
+[app/README.md](app/README.md) and [docs/11-ios-release.md](docs/11-ios-release.md).
 
 ## Running the tests
 
