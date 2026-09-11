@@ -143,7 +143,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | ID | Feature | Gap | Pri | Rel | Moves |
 |---|---|---|---|---|---|
 | C1 | Onboarding self-assessment to seed a level | G05 | P0 | R2 | RPT |
-| C2 | **Earned rating from match results + peer votes** | G05 | P0 | R2 | RPT |
+| C2 | **Earned rating — opponents, your own rating, the result** | G05 | P0 | R2 | RPT |
 | C3 | Fast correction inside first three games | G05 | P0 | R2 | RPT |
 | C4 | Show a coarse tier, never the raw number | G05 | P1 | R2 | RPT |
 | C5 | Surface games at the player's level by default | G05 | P1 | R2 | FR |
@@ -151,6 +151,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | C7 | Rating portability between cities | G20 | P1 | R4 | RPT |
 | C8 | Collect match results from game one — *even on paper* | G05 | P0 | **R0** | — |
 | C9 | Host calibration — weight each host's read by their track record | G05 | P1 | R3 | RPT |
+| C10 | Margin of victory, capped — only on a host-confirmed score | G05 | P2 | R3 | RPT |
 
 > **C8 is the single most important row in this document.** The dataset cannot be bought and starts accruing the day we begin. It ships in R0, before any software.
 
@@ -291,7 +292,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | P3 | Lapse detection — reach out at three missed weeks, not thirteen | G07 | P1 | R3 | RPT |
 | P4 | Win-back offer tuned to why they stopped | G07 | P2 | R4 | RPT |
 
-**Count:** 118 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 119 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 

@@ -31,7 +31,7 @@
 
   <!-- toggle -->
   <div style="padding: 20px 18px 14px; display: flex; gap: 7px;">
-    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
       <div class="tap ink" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 42px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
         <span class="sub" style="font-size: 10.5px;">{{t.label}}</span>
       </div>
@@ -96,7 +96,7 @@
 
       <div class="impact" style="font-size: 30px; line-height: .96; text-shadow: 3px 3px 0 #14141B; color: #F6F2E7; -webkit-text-stroke: 2.5px #14141B;">HOW YOUR<br>LEVEL WORKS</div>
 
-      <div style="font-size: 14px; font-weight: 700; line-height: 1.5;">Your level goes up when you do better than we expected — and when the people you played with say you played well.</div>
+      <div style="font-size: 14px; font-weight: 700; line-height: 1.5;">Your level goes up when you do better than we expected of you — and when the people you played with say you played well.</div>
 
       <div style="display: flex; flex-direction: column; gap: 9px;">
         <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
@@ -170,9 +170,10 @@ class Component extends DCLogic {
       reasons: [
         { text: 'You won as underdogs — that counts for more', bg: '#1F9E55', icon: 'M12 19V5M6 11l6-6 6 6', delay: '.5s' },
         { text: 'Two teammates voted you up', bg: '#1F9E55', icon: 'M12 19V5M6 11l6-6 6 6', delay: '.62s' },
+        { text: 'You were the second-strongest in your side — a bit more was expected', bg: '#8C8578', icon: 'M5 12h14', delay: '.74s' },
       ],
       rules: [
-        { n: '1', title: 'Beating better teams counts more', body: 'We work out who should win before kick-off. Win when you weren’t supposed to and you move up faster. Beat a side you were meant to beat and you’ll barely move.', delay: '.05s' },
+        { n: '1', title: 'Who you played, where you stand, what happened', body: 'We work out who should win before kick-off, from who is actually on the pitch — and we work it out for you, not for your team. Win when you weren’t supposed to and you move up faster. If you’re the strongest in your side you gain a little less from the same win, and the newest player gains a little more.', delay: '.05s' },
         { n: '2', title: 'Your teammates and the host have a say', body: 'They vote after the game and the person running it gives us a quiet read. It’s the only way we can see the keeper who kept you in it, or the player whose side won despite them.', delay: '.13s' },
         { n: '3', title: 'Goals don’t count', body: 'If they did, every defender and keeper would be stuck at the bottom forever. How often you play doesn’t count either — that’s your reliability, which is a separate thing.', delay: '.21s' },
       ],

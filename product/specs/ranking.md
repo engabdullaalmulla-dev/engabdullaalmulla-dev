@@ -46,16 +46,52 @@ Each tier is **100 rating points wide**, on a scale starting around 1000:
 
 ### How it moves
 
-Standard Elo, applied to sides rather than individuals.
+Three inputs, and only three: **who you played against**, **where you already sit**, and **what happened**. Everything else in this document is a correction on top of those.
+
+Standard Elo, with one departure: the expectation is not computed for the side, it is computed **for you**.
 
 ```
-Team rating   = mean of the checked-in players' ratings on that side
-Expected      E = 1 / (1 + 10^((R_opponent − R_own) / 400))
-Actual        S = 1 win · 0.5 draw · 0 loss
-Base change   Δ = K × (S − E)
+Side rating       mean of the checked-in players' ratings on that side
+Opponent rating   R_opp = mean of the opposition
+
+Expected, you     E_you  = 1 / (1 + 10^((R_opp − R_you)  / 400))
+Expected, side    E_side = 1 / (1 + 10^((R_opp − R_side) / 400))
+Your expectation  E = ½·E_you + ½·E_side
+
+Actual            S = 1 win · 0.5 draw · 0 loss
+Base change       Δ = K × (S − E)
 ```
+
+**Why the blend rather than the side alone.** A team mean gives everyone on the pitch the same delta, which throws away the thing that makes the number personal: a 1400 and an 1150 on the same winning side did not achieve the same thing. Half the expectation comes from your own rating against the opposition, so **more is expected of the stronger player in your own team** — they gain less from the same win and lose more from the same defeat. Half still comes from the side, because football is a team game and a lone strong player does not decide it.
+
+Because the balancer makes sides even by design, `E_side ≈ 0.5` most weeks and `E_you` is what actually varies. The blend is therefore mostly a statement about you, which is what it should be.
+
+**This is self-limiting, not exploitable.** An underrated player on a winning side over-gains — until they rise to the point where `E_you ≈ E_side` and the over-gain disappears. That is convergence working, not a leak. Players cannot pick their side; the balancer assigns it.
 
 Beating a side you were expected to beat moves you barely at all. Beating one you were expected to lose to moves you properly. That is the whole point of the formula and it is worth explaining to players in those words if they ask.
+
+**Margin of victory — small, capped, and only when the score is trustworthy.**
+
+```
+M = 1 + 0.15 × min(|goal difference| − 1, 4) / 4
+```
+
+A one-goal win in a 6–5 is a coin flip and gets nothing (M = 1.00). A five-goal win is real information and gets the full 15% (M = 1.15). It applies symmetrically — a heavy defeat costs more than a narrow one — and it is capped at four goals of margin so that running the score up past 5–0 earns nothing at all.
+
+It applies **only to a score the host confirmed in Gaffer mode.** Pickup scorelines are disputed, rolling-subs are common and "next goal wins" is normal; an unconfirmed score falls back to plain win / draw / loss. Weight is a single parameter and can be set to zero — see R6.
+
+**Order of operations.**
+
+```
+1. E   = ½·E_you + ½·E_side
+2. Δ   = K × (S − E)
+3. Δ   = Δ × M                              margin, host-confirmed scores only
+4. Δ   = Δ + (host_read   × |Δ|)            up to ±0.40 × the host's weight
+5. Δ   = Δ + (peer_votes  × |Δ|)            up to ±0.15
+6. cap |Δ| so no single game crosses a tier
+```
+
+**Steps 4 and 5 add to the magnitude, they do not scale the signed delta** — this matters and getting it wrong is the obvious bug. If the modifiers multiplied Δ, then a positive host read on a *losing* night would make the loss bigger. Adding a signed fraction of `|Δ|` instead means a good read always pushes you upward: it turns a −7.5 into a −4.5, and a +8.5 into +11.9. Since the two modifiers total at most 0.55, they can never flip the sign of a result — **playing well cannot turn a win into a loss on the ladder, and it cannot turn a loss into a gain either.**
 
 **K by experience — converge fast, then settle:**
 
@@ -72,7 +108,7 @@ Beating a side you were expected to beat moves you barely at all. Beating one yo
 Nothing here requires a player to do anything. The rating is automatic; the other two layers only make it converge faster.
 
 **Layer 1 — the result. Always on, no input required.**
-Everyone on the winning side gains, weighted by how unexpected the win was. This alone is correct *in the long run*: because sides are reshuffled every week, being carried by a strong team and being let down by a weak one cancel out over roughly thirty games. It is simply slow, and in the short run it will occasionally be unfair to someone who played brilliantly in a losing side.
+Everyone on the winning side gains, weighted by how unexpected the win was for *them specifically* — who they were up against, where they already sat, and by how much it finished. This alone is correct *in the long run*: because sides are reshuffled every week, being carried by a strong team and being let down by a weak one cancel out over roughly thirty games. It is simply slow, and in the short run it will occasionally be unfair to someone who played brilliantly in a losing side.
 
 **Layer 2 — the host read. Secret, three taps.**
 The person running the game is the only calibrated observer on the pitch. At half time or full time they tap anyone who **played above their level tonight** and anyone who **looked off**. Most games that is two to four taps. Skipping is allowed and nothing breaks.
@@ -81,11 +117,14 @@ This is what shortens convergence. One expert observation is worth several games
 
 **Layer 3 — teammate votes.** Man-of-the-match and thumbs (G5), at a deliberately smaller weight than the host read. Peer voting has a popularity bias — people vote for friends, for the loudest player, and often don't vote at all — so it is a useful cross-check on the host, not a primary signal.
 
-| Layer | Weight on Δ | Needs input from | Fails safe? |
+| Layer | Effect on Δ | Needs input from | Fails safe? |
 |---|---|---|---|
-| Result | 100% baseline | Nobody | n/a |
-| Host read | up to ±40% (higher during placement) | The host, 3 taps | Yes — skip is normal |
-| Teammate votes | up to ±15% | Players | Yes — no votes, no adjustment |
+| Result — opponents, your rating, W/D/L | 100% baseline | Nobody | n/a |
+| Margin of victory | ×1.00 to ×1.15 | Host confirms the score | Yes — unconfirmed score ⇒ ×1.00 |
+| Host read | up to ±40% of \|Δ\| (higher during placement) | The host, 3 taps | Yes — skip is normal |
+| Teammate votes | up to ±15% of \|Δ\| | Players | Yes — no votes, no adjustment |
+
+The two modifiers total at most 0.55, so neither can flip the sign of a result.
 
 ### Making the host read trustworthy
 
@@ -103,31 +142,59 @@ A secret input with no accountability is an integrity risk — a host could quie
 
 You are on 1284 — Level 4, 84% of the way to Level 5. Thirty games played, so K=16.
 
-Thursday's sides are balanced at check-in. Yours averages 1250, theirs averages 1290. You are slight underdogs.
+Thursday's sides are balanced at check-in. Yours averages 1250, theirs averages 1290. You are slight underdogs, and you are the second-strongest player in your own side.
 
 ```
-E = 1 / (1 + 10^((1290 − 1250) / 400))
-  = 1 / (1 + 10^0.1)
-  = 0.44          ← we expect you to take 0.44 from this game
+E_you  = 1 / (1 + 10^((1290 − 1284) / 400)) = 0.491
+E_side = 1 / (1 + 10^((1290 − 1250) / 400)) = 0.443
+E      = ½(0.491) + ½(0.443)               = 0.467
 ```
 
-**You win.** S = 1.
+**You win 6–5.** S = 1, margin 1, so M = 1.00.
 
 ```
-Δ = 16 × (1 − 0.44) = +8.9
+Δ = 16 × (1 − 0.467) = +8.5
 ```
 
-Two teammates voted you up, so +15%: **+10.3**. You go to **1294** and the bar moves 84% → 94%. Two more nights like that and you are Level 5.
+Two teammates voted you up: +0.15 × 8.5 = **+9.8**. You go to **1294** and the bar moves 84% → 94%. Two more nights like that and you are Level 5.
 
-**Had you lost:** Δ = 16 × (0 − 0.44) = **−7.1**. Down to 1277, bar back to 77%. A bad night costs you less than a good night earns, because you were the underdog.
+**Had you lost:** Δ = 16 × (0 − 0.467) = **−7.5**. Down to 1277, bar back to 77%. A bad night costs you less than a good night earns, because you were the underdog. With a positive host read it would have been −4.5 instead.
 
-Now the same win against different opposition:
+**Had you won 6–1:** M = 1.15, so +8.5 becomes +9.8 before votes and **+11.3** after.
 
-| Their side averages | Expected | You win | Why |
+#### Input 1 — who you played against
+
+Same win, same side, different opposition:
+
+| Their side averages | E | You win | Why |
 |---|---:|---:|---|
-| 1400 — much stronger | 0.30 | **+11.3** | You did something the model didn't expect |
-| 1290 — evenly matched | 0.44 | **+8.9** | Mild surprise |
-| 1100 — much weaker | 0.70 | **+4.7** | You did what was expected of you |
+| 1400 — much stronger | 0.31 | **+11.0** | You did something the model didn't expect |
+| 1290 — evenly matched | 0.47 | **+8.5** | Mild surprise |
+| 1100 — much weaker | 0.72 | **+4.4** | You did what was expected of you |
+
+#### Input 2 — where you already sit
+
+Same game, same 6–5 win, three players **on your side**:
+
+| Their rating | E_you | E | They win | They lose |
+|---|---:|---:|---:|---:|
+| 1150 — weakest in the side | 0.31 | 0.38 | **+10.0** | **−6.0** |
+| 1284 — you | 0.49 | 0.47 | **+8.5** | **−7.5** |
+| 1400 — strongest in the side | 0.65 | 0.55 | **+7.2** | **−8.8** |
+
+One result, three different moves. The better player gains less and loses more from the identical night, because more was expected of them — and the 1150 who keeps winning climbs until their gain flattens out at the level they actually belong to.
+
+#### Input 3 — what happened
+
+| Result | S | M | Δ |
+|---|---:|---:|---:|
+| Win 6–1 | 1 | 1.15 | **+9.8** |
+| Win 6–5 | 1 | 1.00 | **+8.5** |
+| Draw 5–5 | 0.5 | 1.00 | **+0.5** |
+| Lose 5–6 | 0 | 1.00 | **−7.5** |
+| Lose 1–6 | 0 | 1.15 | **−8.6** |
+
+A draw against a side you were expected to lose to is still a small gain. That is correct and it surprises people, so the post-match screen should say *"a draw against that side counts as a good night"* rather than showing them a +0.5.
 
 **A tier takes roughly 30–40 games to cross** at K=16 — six months to a year at three or four games a month. That is deliberate. A level you can win in a month isn't worth having, and a tier that moves quickly breaks matchmaking for everyone else in it.
 
@@ -189,13 +256,13 @@ A number that moves for reasons a player can't see is the thing that makes a rat
 
 ### The one sentence
 
-> *Your level goes up when you do better than we expected — and when the people you played with say you played well.*
+> *Your level goes up when you do better than we expected of you — and when the people you played with say you played well.*
 
 Every player should be able to repeat that after one reading. Everything below is detail.
 
 ### The three rules, as a player reads them
 
-**1. Beating better teams counts more.** We work out who should win before kick-off. Win when you weren't supposed to and you move up faster. Beat a side you were meant to beat and you'll barely move.
+**1. Beating better teams counts more — and more is expected of the better players.** We work out who should win before kick-off, from who's actually on the pitch. Win when you weren't supposed to and you move up faster; beat a side you were meant to beat and you'll barely move. It's worked out for *you*, not for your team, so if you're the strongest player in your side you'll gain a little less from the same win — and the newest player in it will gain a little more. A thumping counts for slightly more than a one-goal win, up to a point; past five goals it stops counting, so there's nothing to be gained from running up a score.
 
 **2. Your teammates and the person running the game both have a say.** They vote after the game; the host gives us a quiet read. It's the only way we can see the keeper who kept you in it, or the player whose side won despite them.
 
@@ -251,6 +318,11 @@ Crossing a tier downward fires no notification and no banner. It does **not** me
 - [ ] A player's Level after a game is reproducible from the inputs — same players, same result, same votes, same answer.
 - [ ] Placement: a deliberately mis-seeded test player reaches the correct tier within five games.
 - [ ] No single game can move a player across a tier boundary.
+- [ ] Two players on the same side in the same game receive **different** deltas when their ratings differ, and the stronger one receives the smaller gain and the larger loss.
+- [ ] The host read and peer votes add a signed fraction of \|Δ\|; a positive read on a losing night reduces the loss and never increases it, and no combination of modifiers flips the sign of a result.
+- [ ] A game whose score the host did not confirm scores at M = 1.00 and is indistinguishable from a one-goal result.
+- [ ] Goal difference above five changes nothing; a 9–0 and a 5–0 produce identical deltas.
+- [ ] A draw against a side the player was expected to lose to produces a positive delta.
 - [ ] Team assignment reads Level and only Level. Reliability must not influence it.
 - [ ] A keeper's Level is stable across a run of heavy defeats where the host read is positive.
 - [ ] A game with no host read and no votes still produces a correct Layer 1 rating change.
@@ -277,4 +349,6 @@ Crossing a tier downward fires no notification and no banner. It does **not** me
 | R2 | Are seven tiers right, or does Dubai's spread need fewer? Check against the first 200 rated players. | R2 entry |
 | R3 | Does the host read at ±40% under- or over-correct for keepers? | R2 exit |
 | R5 | Do community hosts produce usable reads, or only staff? If community reads are noise, the calibration should show it within ~20 games each. | R3 entry |
+| R6 | Is the ½/½ split between your own rating and your side's the right one, and should margin of victory carry 15% or nothing? Both are single parameters — tune against the first 500 rated games, don't guess now. | R3 entry |
+| R7 | Do hosts actually confirm scores often enough for the margin term to fire? If confirmation runs below ~70% of games, margin is adding variance between players rather than information. | R3 entry |
 | R4 | Is one ladder enough to carry G11 ("nothing is at stake"), or does something else need to? Watch FREQ after levels ship. | R3 entry |
