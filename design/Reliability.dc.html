@@ -22,7 +22,7 @@
     .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
     @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
     @keyframes slam { 0% { opacity: 0; transform: translateY(-14px) scale(1.2); } 60% { transform: translateY(2px) scale(.98); } 100% { opacity: 1; transform: none; } }
-    @keyframes fillBar { from { width: 0; } to { width: 96%; } }
+    @keyframes fillBar { from { width: 0; } to { width: 98%; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
@@ -40,15 +40,15 @@
       <div class="halftone" style="position: absolute; inset: 0; opacity: .3;"></div>
       <div style="position: relative; display: flex; flex-direction: column; gap: 12px;">
         <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
-          <div class="impact" style="font-size: 68px; line-height: .84; text-shadow: 4px 4px 0 #14141B; animation: slam .5s cubic-bezier(.34,1.56,.64,1) both;">96%</div>
+          <div class="impact" style="font-size: 68px; line-height: .84; text-shadow: 4px 4px 0 #14141B; animation: slam .5s cubic-bezier(.34,1.56,.64,1) both;">98%</div>
           <div class="ink drop-sm" style="background: #FFC42E; color: #14141B; border-width: 2.5px; padding: 6px 11px; transform: rotate(-2deg); margin-bottom: 6px;">
             <span class="sub" style="font-size: 10.5px;">Top tier</span>
           </div>
         </div>
         <div class="ink" style="position: relative; height: 22px; border-width: 2.5px; background: rgba(20,20,27,.35); overflow: hidden;">
-          <div style="width: 96%; height: 100%; background: #FFC42E; border-right: 2.5px solid #14141B; position: absolute; left: 0; top: 0; animation: fillBar 1.1s cubic-bezier(.34,1.4,.64,1) .25s both;"></div>
+          <div style="width: 98%; height: 100%; background: #FFC42E; border-right: 2.5px solid #14141B; position: absolute; left: 0; top: 0; animation: fillBar 1.1s cubic-bezier(.34,1.4,.64,1) .25s both;"></div>
         </div>
-        <div style="font-size: 13px; font-weight: 700; line-height: 1.4;">You've turned up to 23 of the last 24 games you booked.</div>
+        <div style="font-size: 13px; font-weight: 700; line-height: 1.4;">You've turned up to 41 of the last 42 games you booked.</div>
       </div>
     </div>
 
@@ -65,10 +65,10 @@
       </sc-for>
     </div>
 
-    <!-- next free game -->
+    <!-- the streak -->
     <div class="ink drop-sm" style="background: #FFC42E; padding: 14px 16px; display: flex; align-items: center; gap: 13px; transform: rotate(-.6deg);">
-      <div class="impact" style="font-size: 32px; line-height: 1;">2</div>
-      <div style="font-size: 13.5px; font-weight: 700; line-height: 1.4;">more turn-ups and your <b>tenth game is free</b>.</div>
+      <div class="impact" style="font-size: 32px; line-height: 1;">11</div>
+      <div style="font-size: 13.5px; font-weight: 700; line-height: 1.4;">games in a row. Miss one and the streak goes — your standing barely moves.</div>
     </div>
 
     <!-- the separation, said plainly -->

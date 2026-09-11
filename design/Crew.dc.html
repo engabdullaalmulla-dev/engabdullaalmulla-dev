@@ -55,9 +55,9 @@
     <div class="ink drop" style="position: relative; overflow: hidden; background: #2050E0; color: #FFFFFF; padding: 15px;">
       <div class="halftone" style="position: absolute; inset: 0; opacity: .3;"></div>
       <div style="position: relative; display: flex; flex-direction: column; gap: 10px;">
-        <div class="sub" style="font-size: 10px; color: #FFC42E;">All four in, Thursday</div>
+        <div class="sub" style="font-size: 10px; color: #FFC42E;">Three of four in · Thursday</div>
         <div class="impact" style="font-size: 34px; line-height: .92; text-shadow: 3px 3px 0 #14141B;">20:00 · AL QUOZ</div>
-        <div style="font-size: 12.5px; font-weight: 700; line-height: 1.42;">Book the next one for everyone in one go. Anyone who can't make it passes their place on as normal.</div>
+        <div style="font-size: 12.5px; font-weight: 700; line-height: 1.42;">Yusuf is the only one missing, and he's your keeper. Get him in and the sides stay even.</div>
       </div>
     </div>
 
@@ -92,10 +92,10 @@ class Component extends DCLogic {
     const booked = this.state?.booked ?? false;
 
     const memberDefs = [
-      { initials: 'AA', name: 'You', meta: 'Level 4 · 96% reliable', tag: 'IN', on: true },
+      { initials: 'AA', name: 'You', meta: 'Level 4 · 98% reliable', tag: 'IN', on: true },
       { initials: 'OM', name: 'Omar Mansour', meta: 'Level 4 · 91% reliable', tag: 'IN', on: true },
       { initials: 'RK', name: 'Rayan Khalil', meta: 'Level 3 · 88% reliable', tag: 'IN', on: true },
-      { initials: 'YS', name: 'Yusuf Saeed', meta: 'Level 5 · keeper', tag: 'IN', on: true },
+      { initials: 'YS', name: 'Yusuf Saeed', meta: 'Level 5 · keeper', tag: 'NOT YET', on: false },
     ];
 
     const members = memberDefs.map((m, i) => ({
@@ -105,8 +105,8 @@ class Component extends DCLogic {
       tag: m.tag,
       bg: i === 0 ? '#FFC42E' : '#F6F2E7',
       fg: '#14141B',
-      tagBg: '#1F9E55',
-      tagFg: '#FFFFFF',
+      tagBg: m.on ? '#1F9E55' : '#F6F2E7',
+      tagFg: m.on ? '#FFFFFF' : '#8C8C99',
       delay: (0.04 + i * 0.06).toFixed(2) + 's',
     }));
 
@@ -132,7 +132,7 @@ class Component extends DCLogic {
     return {
       members: members,
       nav: nav,
-      ctaLabel: booked ? 'ALL FOUR BOOKED' : 'BOOK ALL FOUR — AED 180',
+      ctaLabel: booked ? 'ALL FOUR IN' : 'ADD YUSUF — AED 45',
       ctaBg: booked ? '#1F9E55' : '#E5342A',
       ctaFg: '#FFFFFF',
       bookAll: () => this.setState({ booked: !booked }),
