@@ -266,7 +266,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | O4 | Arabic localisation | — | P1 | R4 | CAC |
 | O5 | Notifications — reminders, waitlist hits, clips, team sheets | G07 | P0 | R1 | NS |
 
-**Count:** 91 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 97 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 
