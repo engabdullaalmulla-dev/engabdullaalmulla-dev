@@ -15,7 +15,7 @@ export function Flame({ size = 26, dim = false }: { size?: number; dim?: boolean
         style={{
           width: size * 0.86,
           height: size * 0.86,
-          backgroundColor: dim ? colors.line : colors.ember,
+          backgroundColor: dim ? colors.line : colors.coral,
           transform: [{ rotate: '45deg' }],
           borderTopLeftRadius: size * 0.1,
           borderTopRightRadius: corner,
@@ -30,7 +30,7 @@ export function Flame({ size = 26, dim = false }: { size?: number; dim?: boolean
           width: size * 0.38,
           height: size * 0.38,
           borderRadius: size * 0.19,
-          backgroundColor: dim ? colors.panelRaised : colors.gold,
+          backgroundColor: dim ? colors.surfaceRaised : colors.coral,
           opacity: 0.9,
         }}
       />

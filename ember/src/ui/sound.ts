@@ -34,15 +34,15 @@ const SOURCES: Record<Cue, number> = {
 
 /** Balance, set by ear rather than by meter. */
 const LEVEL: Record<Cue, number> = {
-  deal: 0.6,
-  draw: 0.5,
-  throw: 0.7,
-  land: 0.6,
-  burn: 0.85,
-  knock: 0.9,
-  alert: 0.75,
-  flip: 0.4,
-  chime: 0.55,
+  deal: 0.45,
+  draw: 0.4,
+  throw: 0.5,
+  land: 0.45,
+  burn: 0.6,
+  knock: 0.65,
+  alert: 0.6,
+  flip: 0.3,
+  chime: 0.5,
 };
 
 const players = new Map<Cue, AudioPlayer>();

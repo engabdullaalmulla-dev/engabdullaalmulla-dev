@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { Difficulty } from './shared/types';
 import { deviceLocale, LanguageProvider, useLanguage, type LocaleCode } from './src/i18n';
@@ -18,10 +18,10 @@ import { ProfileScreen } from './src/ui/screens/ProfileScreen';
 import { RoomScreen } from './src/ui/screens/RoomScreen';
 import { RoundOverlay } from './src/ui/screens/RoundOverlay';
 import { RulesScreen } from './src/ui/screens/RulesScreen';
-import { FeltTable } from './src/ui/components/FeltTable';
+import { TableSurface } from './src/ui/components/TableSurface';
 import { asDir, directionStyle } from './src/ui/ltr';
 import { setSoundEnabled } from './src/ui/sound';
-import { colors } from './src/ui/theme';
+import { colors, space } from './src/ui/theme';
 import { useEmber } from './src/ui/useEmber';
 
 type Screen = 'home' | 'rules' | 'auth' | 'lobby' | 'profile' | 'offline';
@@ -128,7 +128,7 @@ export default function App() {
     if (restoring) {
       return (
         <View style={styles.centre}>
-          <ActivityIndicator color={colors.ember} />
+          <ActivityIndicator color={colors.coral} />
         </View>
       );
     }
@@ -228,9 +228,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <LanguageProvider locale={locale} setLocale={setLocale}>
-      <FeltTable>
-        <StatusBar style="light" />
-        <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <TableSurface>
+        <StatusBar style="dark" />
+        <Safe>
           {/* A card table is a phone-shaped thing: on a wide screen it sits in
               the middle rather than stretching across the whole window. */}
           <View
@@ -239,10 +239,34 @@ export default function App() {
           >
             {body()}
           </View>
-        </SafeAreaView>
-      </FeltTable>
+        </Safe>
+      </TableSurface>
       </LanguageProvider>
     </SafeAreaProvider>
+  );
+}
+
+/**
+ * Keeps the table clear of the notch and the home bar — and, where a device
+ * reports no inset at all, still leaves the top and bottom lines room to
+ * breathe rather than running them into the edge of the glass.
+ */
+function Safe({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View
+      style={[
+        styles.safe,
+        {
+          paddingTop: Math.max(insets.top, space(3)),
+          paddingBottom: Math.max(insets.bottom, space(2)),
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}
+    >
+      {children}
+    </View>
   );
 }
 
@@ -290,7 +314,7 @@ function OfflineTable({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.feltDeep },
+  root: { flex: 1, backgroundColor: colors.paperShade },
   safe: { flex: 1 },
   column: { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center' },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },

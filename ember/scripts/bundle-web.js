@@ -73,7 +73,7 @@ if (bundle.includes('</script')) {
 const page = `<title>EMBER</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
 <style>
-  html, body { height: 100%; background: #14100E; }
+  html, body { height: 100%; background: #F6EEE4; }
   body { overflow: hidden; margin: 0; }
   #root { display: flex; height: 100%; flex: 1; }
   /* Nothing here is text you would want to select mid-game. */

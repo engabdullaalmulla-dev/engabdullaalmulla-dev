@@ -133,7 +133,7 @@ function draw() {
   const out = silence(0.18);
   mix(out, noiseBurst({ seconds: 0.16, attack: 0.012, decay: 0.055, cutoff: 3200, seed: 11 }), 0, 0.5);
   mix(out, noiseBurst({ seconds: 0.05, attack: 0.001, decay: 0.012, cutoff: 9000, highCut: 1800, seed: 12 }), 0.1, 0.35);
-  return normalise(out, 0.5);
+  return normalise(out, 0.4);
 }
 
 /** A card landing flat on the pile. */
@@ -141,7 +141,7 @@ function land() {
   const out = silence(0.22);
   mix(out, noiseBurst({ seconds: 0.09, attack: 0.001, decay: 0.02, cutoff: 11000, highCut: 900, seed: 21 }), 0, 0.75);
   mix(out, tone({ seconds: 0.14, frequency: 190, endFrequency: 120, decay: 0.035 }), 0.004, 0.35);
-  return normalise(out, 0.75);
+  return normalise(out, 0.52);
 }
 
 /** The card travelling before it lands. */
@@ -150,7 +150,7 @@ function throwCard() {
   const whoosh = noiseBurst({ seconds: 0.22, attack: 0.05, decay: 0.09, cutoff: 2400, seed: 31 });
   mix(out, whoosh, 0, 0.55);
   mix(out, land(), 0.16, 0.9);
-  return normalise(out, 0.8);
+  return normalise(out, 0.55);
 }
 
 /** Dealing: a run of cards off the deck. */
@@ -164,7 +164,7 @@ function deal() {
       0.55 - i * 0.02,
     );
   }
-  return normalise(out, 0.7);
+  return normalise(out, 0.5);
 }
 
 /** A card going up in flames. */
@@ -182,7 +182,7 @@ function burn() {
   highPass(crackle, 900);
   mix(out, crackle, 0.02, 0.8);
   mix(out, noiseBurst({ seconds: 0.25, attack: 0.03, decay: 0.1, cutoff: 1800, seed: 58 }), 0, 0.4);
-  return normalise(out, 0.85);
+  return normalise(out, 0.6);
 }
 
 /** Two knuckles on the table. */
@@ -196,7 +196,7 @@ function knock() {
   };
   mix(out, rap(), 0);
   mix(out, rap(), 0.15, 0.9);
-  return normalise(out, 0.9);
+  return normalise(out, 0.65);
 }
 
 /** The turn of a card, face up. */
@@ -208,18 +208,20 @@ function flip() {
 }
 
 /**
- * The burn window opening: a struck alarm, close enough to a fire bell to
- * read as one without being a novelty.
+ * The burn window opening. Something has to say so, but it is a small struck
+ * bell rather than an alarm — two notes rising, left to ring out.
  */
 function alert() {
-  const out = silence(0.45);
-  // Two strikes, the second higher, over a short rush of air.
-  mix(out, tone({ seconds: 0.28, frequency: 660, endFrequency: 620, decay: 0.09 }), 0, 0.5);
-  mix(out, tone({ seconds: 0.28, frequency: 990, endFrequency: 930, decay: 0.07 }), 0, 0.28);
-  mix(out, tone({ seconds: 0.3, frequency: 880, endFrequency: 820, decay: 0.1 }), 0.11, 0.45);
-  mix(out, tone({ seconds: 0.3, frequency: 1320, endFrequency: 1240, decay: 0.08 }), 0.11, 0.22);
-  mix(out, noiseBurst({ seconds: 0.14, attack: 0.004, decay: 0.05, cutoff: 5200, highCut: 900, seed: 91 }), 0, 0.3);
-  return normalise(out, 0.8);
+  const out = silence(0.75);
+  for (const [at, hz, gain] of [
+    [0, 587.33, 0.45],
+    [0.1, 880, 0.4],
+  ]) {
+    mix(out, tone({ seconds: 0.62, frequency: hz, decay: 0.24 }), at, gain);
+    // A touch of the octave above gives it the ring of struck metal.
+    mix(out, tone({ seconds: 0.4, frequency: hz * 2, decay: 0.1 }), at, gain * 0.22);
+  }
+  return normalise(out, 0.55);
 }
 
 /** The end of a round: a small warm cadence, not a fanfare. */

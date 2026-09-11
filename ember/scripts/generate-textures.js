@@ -31,29 +31,29 @@ function rgba(pixels, width, x, y, r, g, b, a) {
 }
 
 /**
- * Baize: threads running both ways with a little slub in them. It tiles, so
- * the weave has to wrap at the edges — hence the modulo everywhere.
+ * Paper: fibre and a faint tooth, the way a sheet of good card stock catches
+ * the light. It tiles, so the grain has to wrap at the edges.
  */
-function felt(size, base) {
+function paper(size, base) {
   const pixels = Buffer.alloc(size * size * 4);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const warp = Math.sin((x / size) * Math.PI * size * 0.25) * 3;
-      const weft = Math.sin((y / size) * Math.PI * size * 0.25) * 3;
-      const fibre = (noise(x, y, 7) - 0.5) * 13;
-      const slub = (noise(x >> 2, y >> 2, 19) - 0.5) * 7;
-      const lift = warp + weft + fibre + slub;
-      rgba(pixels, size, x, y, base[0] + lift, base[1] + lift * 1.1, base[2] + lift * 0.9, 255);
+      const fibre = (noise(x, y, 7) - 0.5) * 6;
+      const clump = (noise(x >> 2, y >> 2, 19) - 0.5) * 4;
+      const tooth = Math.sin((x + y) / 3) * 0.8;
+      const lift = fibre + clump + tooth;
+      rgba(pixels, size, x, y, base[0] + lift, base[1] + lift * 0.95, base[2] + lift * 0.85, 255);
     }
   }
   return dataUri(size, size, pixels);
 }
 
 /**
- * The light hanging over the table: clear in the middle, deepening to the
- * edges. Drawn as transparent black so it works over any felt colour.
+ * Daylight across the table: brightest in the middle, settling into a warm
+ * shade at the edges. Kept gentle — this should read as light falling on
+ * paper, not as a spotlight.
  */
-function vignette(size) {
+function daylight(size, tint) {
   const pixels = Buffer.alloc(size * size * 4);
   const centre = (size - 1) / 2;
   for (let y = 0; y < size; y++) {
@@ -61,8 +61,8 @@ function vignette(size) {
       const dx = (x - centre) / centre;
       const dy = (y - centre) / centre;
       const distance = Math.min(1, Math.sqrt(dx * dx + dy * dy) / Math.SQRT2);
-      const shade = Math.pow(distance, 1.7) * 190;
-      rgba(pixels, size, x, y, 0, 0, 0, shade);
+      const shade = Math.pow(distance, 2.1) * 46;
+      rgba(pixels, size, x, y, tint[0], tint[1], tint[2], shade);
     }
   }
   return dataUri(size, size, pixels);
@@ -96,9 +96,9 @@ function cardBack(size, ink, line, glint) {
 }
 
 const textures = {
-  FELT: felt(72, [27, 58, 47]),
-  FELT_LIGHT: vignette(160),
-  CARD_BACK: cardBack(64, [88, 26, 22], [176, 62, 40], [201, 162, 39]),
+  PAPER: paper(72, [246, 238, 228]),
+  TABLE_LIGHT: daylight(160, [138, 106, 74]),
+  CARD_BACK: cardBack(64, [232, 115, 74], [250, 235, 225], [193, 81, 43]),
 };
 
 const file = `/**

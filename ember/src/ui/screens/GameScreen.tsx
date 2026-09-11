@@ -14,7 +14,7 @@ import { useLanguage, type Language } from '../../i18n';
 import { actingPlayer, faceOf, type PlayerView, type TableView } from '../../../shared/view';
 import { BurnMeter } from '../components/BurnMeter';
 import { Button } from '../components/Button';
-import { FeltTable } from '../components/FeltTable';
+import { TableSurface } from '../components/TableSurface';
 import { Say } from '../components/Say';
 import { Score } from '../components/Score';
 import { Opponent } from '../components/Opponent';
@@ -146,7 +146,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
     // burn. Nothing is burnable for a beat, which is also long enough for the
     // alarm to register as an alarm.
     play('alert');
-    slam();
+    thud();
     setArmed(false);
     const timer = setTimeout(() => setArmed(true), 420);
     return () => clearTimeout(timer);
@@ -263,7 +263,11 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
   const lastLog = view.log.length ? view.log[view.log.length - 1] : null;
 
   return (
-    <FeltTable>
+    <TableSurface>
+      {/* Under the table, not over it: the frame glows at the edge without
+          washing over the line of text that runs along the top. */}
+      {burnWindow ? <BurnFrame /> : null}
+
       <View style={styles.screen}>
         <View style={styles.header}>
           <Pressable
@@ -386,35 +390,36 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
         </Text>
       </View>
 
-      {burnWindow ? <BurnFrame /> : null}
-
       <MotionLayer controller={flights} onLand={(flight) => onLand(flight.toKey)} />
-    </FeltTable>
+    </TableSurface>
   );
 }
 
 /* ------------------------------------------------------------------ */
 
-/** The table edge, lit while a burn is on the table. */
+/**
+ * The table edge, warm while a burn is on it. It breathes rather than flashes
+ * — you should notice it without your pulse jumping.
+ */
 function BurnFrame() {
-  const pulse = useRef(new Animated.Value(0)).current;
+  const glow = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const beat = Animated.loop(
+    const breathe = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 360, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 360, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(glow, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(glow, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
       ]),
     );
-    beat.start();
-    return () => beat.stop();
-  }, [pulse]);
+    breathe.start();
+    return () => breathe.stop();
+  }, [glow]);
 
   return (
     <Animated.View
       style={[
         styles.burnFrame,
-        { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.95] }) },
+        { opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.8] }) },
       ]}
     />
   );
@@ -448,7 +453,7 @@ function Tray({
 function logTone(kind?: 'info' | 'good' | 'bad' | 'hot') {
   if (kind === 'good') return { color: colors.good };
   if (kind === 'bad') return { color: colors.bad };
-  if (kind === 'hot') return { color: colors.goldSoft };
+  if (kind === 'hot') return { color: colors.coralDeep };
   return null;
 }
 
@@ -610,16 +615,18 @@ function buildPrompt(
 /* ------------------------------------------------------------------ */
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, paddingHorizontal: space(3), gap: space(1.5) },
+  // The vertical padding is the width of the burn frame: the glow runs round
+  // the edge of the table without crossing the lines of text at top and foot.
+  screen: { flex: 1, paddingHorizontal: space(3), paddingVertical: space(2.5), gap: space(1.5) },
 
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   quit: { ...typography.label, fontSize: 9, color: colors.textFaint },
-  round: { ...typography.label, fontSize: 10, color: colors.goldFaint },
+  round: { ...typography.label, fontSize: 10, color: colors.textFaint },
   target: { ...typography.label, fontSize: 9, color: colors.textFaint },
-  clock: { color: colors.ember },
+  clock: { color: colors.coral },
 
   banner: {
-    backgroundColor: '#0E241CCC',
+    backgroundColor: colors.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.line,
@@ -640,24 +647,24 @@ const styles = StyleSheet.create({
     paddingVertical: space(1),
   },
   tray: { alignItems: 'center', gap: space(1) },
-  trayLabel: { ...typography.label, fontSize: 8, color: colors.goldFaint },
+  trayLabel: { ...typography.label, fontSize: 8, color: colors.textFaint },
   trayLabelHidden: { opacity: 0 },
 
   say: { alignItems: 'center', gap: space(1), minHeight: 66, justifyContent: 'center' },
   prompt: { ...typography.heading, fontSize: 22, color: colors.text, textAlign: 'center' },
-  promptBurn: { color: colors.ember },
+  promptBurn: { color: colors.coral },
   detail: { ...typography.small, fontSize: 11, color: colors.textFaint, textAlign: 'center' },
 
   youWrap: { alignItems: 'center', gap: space(1.5) },
   youHeader: { flexDirection: 'row', alignItems: 'center', gap: space(2) },
   youName: { ...typography.label, fontSize: 10, color: colors.textFaint },
-  youNameActive: { color: colors.goldSoft },
+  youNameActive: { color: colors.coralDeep },
   youScore: { ...typography.numeral, fontSize: 14, color: colors.text, marginStart: 'auto' },
   knockBadge: {
     fontSize: 8,
     fontWeight: '800',
-    color: colors.feltEdge,
-    backgroundColor: colors.gold,
+    color: colors.paperEdge,
+    backgroundColor: colors.coral,
     paddingHorizontal: 5,
     paddingVertical: 2,
     borderRadius: 3,
@@ -672,9 +679,9 @@ const styles = StyleSheet.create({
 
   burnFrame: {
     ...StyleSheet.absoluteFill,
-    borderWidth: 4,
-    borderColor: colors.ember,
-    borderRadius: radius.md,
+    borderWidth: 8,
+    borderColor: colors.coralSoft,
+    borderRadius: radius.lg,
     pointerEvents: 'none',
   },
   feed: {

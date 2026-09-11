@@ -14,11 +14,11 @@ interface Props {
 }
 
 const TONES = {
-  ember: { bg: colors.ember, border: colors.emberSoft, text: '#200A03', lit: true },
-  gold: { bg: 'transparent', border: colors.gold, text: colors.goldSoft, lit: false },
-  ghost: { bg: '#0E241C99', border: colors.hairline, text: colors.text, lit: false },
+  ember: { bg: colors.coral, border: colors.coralDeep, text: '#2B1109', lit: true },
+  gold: { bg: colors.coralWash, border: colors.coralSoft, text: colors.coralDeep, lit: false },
+  ghost: { bg: colors.surfaceRaised, border: colors.line, text: colors.text, lit: false },
   quiet: { bg: 'transparent', border: colors.line, text: colors.textFaint, lit: false },
-  danger: { bg: colors.bad, border: colors.bad, text: '#230806', lit: false },
+  danger: { bg: colors.bad, border: colors.bad, text: '#FFF4F3', lit: false },
 } as const;
 
 export function Button({ label, onPress, tone = 'ember', disabled, small, style }: Props) {

@@ -27,7 +27,7 @@ export function RulesScreen({ onBack }: { onBack: () => void }) {
     { card: 'J', rank: 'J', points: n(11) },
     { card: 'Q', rank: 'Q', points: n(12) },
     { card: 'K♠ K♣', rank: 'K', points: n(13) },
-    { card: 'JOKER', rank: 'JOKER', tint: colors.ember, points: n(15), note: t.rules.valueNotes.getRidOfIt },
+    { card: 'JOKER', rank: 'JOKER', tint: colors.coral, points: n(15), note: t.rules.valueNotes.getRidOfIt },
   ];
 
   return (
@@ -145,15 +145,15 @@ const styles = StyleSheet.create({
     paddingVertical: space(3),
   },
   back: { ...typography.label, fontSize: 10, color: colors.textFaint, width: 62 },
-  title: { ...typography.label, fontSize: 11, color: colors.goldSoft },
+  title: { ...typography.label, fontSize: 11, color: colors.coralDeep },
   body: { gap: space(6), paddingBottom: space(10) },
 
   section: { gap: space(2) },
-  sectionTitle: { ...typography.heading, fontSize: 18, color: colors.goldSoft },
+  sectionTitle: { ...typography.heading, fontSize: 18, color: colors.coralDeep },
   text: { ...typography.body, color: colors.textMuted, lineHeight: 24 },
 
   bullet: { flexDirection: 'row', gap: space(3) },
-  bulletNumber: { ...typography.numeral, fontSize: 15, color: colors.ember, marginTop: 2, width: 14 },
+  bulletNumber: { ...typography.numeral, fontSize: 15, color: colors.coral, marginTop: 2, width: 14 },
   bulletText: { flex: 1 },
 
   table: { gap: space(2), marginTop: space(1) },
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     paddingVertical: space(1.5),
     paddingHorizontal: space(2),
     borderRadius: radius.sm,
-    backgroundColor: colors.panel,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.line,
     alignItems: 'center',
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   // "2 – 10" and "J · Q" are card notation, not prose: they read the same way
   // round in either language.
   chipText: { ...typography.small, color: colors.text, writingDirection: 'ltr' },
-  chipSpoken: { ...typography.small, fontSize: 10, color: colors.goldFaint, marginTop: 1 },
+  chipSpoken: { ...typography.small, fontSize: 10, color: colors.textFaint, marginTop: 1 },
   points: { ...typography.body, color: colors.text, fontWeight: '800', minWidth: 86 },
   note: { ...typography.small, fontSize: 11, color: colors.textFaint, flexShrink: 1, lineHeight: 16 },
 });

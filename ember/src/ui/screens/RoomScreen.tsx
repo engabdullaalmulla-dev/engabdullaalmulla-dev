@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   back: { ...typography.label, fontSize: 10, color: colors.textFaint },
 
   codeCard: {
-    backgroundColor: colors.panel,
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -158,12 +158,12 @@ const styles = StyleSheet.create({
   error: { ...typography.small, color: colors.bad },
 
   seats: { gap: space(2) },
-  sectionTitle: { ...typography.label, fontSize: 9, color: colors.ember },
+  sectionTitle: { ...typography.label, fontSize: 9, color: colors.coral },
   seat: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space(2),
-    backgroundColor: colors.panel,
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     paddingVertical: space(3),
     paddingHorizontal: space(3.5),
@@ -171,14 +171,14 @@ const styles = StyleSheet.create({
   seatEmpty: { backgroundColor: 'transparent', borderWidth: 1, borderStyle: 'dashed', borderColor: colors.line },
   seatEmptyText: { ...typography.small, color: colors.textFaint },
   seatDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.good },
-  seatDotBot: { backgroundColor: colors.ember },
+  seatDotBot: { backgroundColor: colors.coral },
   seatDotAway: { backgroundColor: colors.textFaint },
   seatName: { ...typography.body, color: colors.text, flex: 1 },
   tag: {
     fontSize: 8,
     fontWeight: '800',
     letterSpacing: 0.8,
-    color: colors.feltDeep,
+    color: colors.paperShade,
     backgroundColor: colors.textMuted,
     paddingHorizontal: 5,
     paddingVertical: 2,

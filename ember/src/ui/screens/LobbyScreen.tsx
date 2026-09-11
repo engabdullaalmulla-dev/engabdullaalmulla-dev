@@ -52,7 +52,7 @@ export function LobbyScreen({
   if (queue) {
     return (
       <View style={styles.queue}>
-        <ActivityIndicator color={colors.ember} size="large" />
+        <ActivityIndicator color={colors.coral} size="large" />
         <Text style={styles.queueTitle}>{t.lobby.lookingForPlayers}</Text>
         <Text style={styles.queueDetail}>
           {queue.waiting === 1 ? t.lobby.firstAtTable : t.lobby.waitingCount(n(queue.waiting))}{' '}
@@ -140,23 +140,26 @@ const styles = StyleSheet.create({
   error: { ...typography.small, color: colors.bad, lineHeight: 18 },
 
   block: {
-    backgroundColor: colors.panel,
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
     padding: space(4),
     gap: space(3),
   },
-  blockTitle: { ...typography.label, fontSize: 9, color: colors.ember },
+  blockTitle: { ...typography.label, fontSize: 9, color: colors.coral },
   blockText: { ...typography.small, color: colors.textMuted, lineHeight: 18 },
 
   joinRow: { flexDirection: 'row', gap: space(2) },
   codeInput: {
     flex: 1,
-    backgroundColor: colors.feltEdge,
+    // Without this the field's own idea of how wide it wants to be pushes the
+    // JOIN button off the edge of the card.
+    minWidth: 0,
+    backgroundColor: colors.paperLight,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: colors.hairline,
     paddingHorizontal: space(4),
     color: colors.text,
     fontSize: 18,
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     writingDirection: 'ltr',
   },
-  joinButton: { minWidth: 96 },
+  joinButton: { flexShrink: 0, minWidth: 88, paddingHorizontal: space(4) },
 
   footer: { flexDirection: 'row', gap: space(2) },
   footerButton: { flex: 1 },

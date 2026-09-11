@@ -95,7 +95,7 @@ export function PlayingCard({
     if (faceUp) setFaceMounted(true);
     const animation = Animated.timing(spin, {
       toValue: faceUp ? 1 : 0,
-      duration: 380,
+      duration: 460,
       easing: Easing.inOut(Easing.cubic),
       useNativeDriver: true,
     });
@@ -112,8 +112,8 @@ export function PlayingCard({
     }
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 700, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 700, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 950, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 950, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
       ]),
     );
     loop.start();
@@ -137,7 +137,7 @@ export function PlayingCard({
       ? t.table.cardWorth(t.cards.rank(card.rank), t.cards.suit(card.suit), t.digits(card.value))
       : t.table.faceDownCard;
 
-  const ring = highlight === 'burn' ? colors.ember : highlight === 'chosen' ? colors.goldSoft : colors.gold;
+  const ring = highlight === 'burn' ? colors.coral : highlight === 'chosen' ? colors.coralSoft : colors.coral;
 
   const body = (
     <View {...LTR} style={[{ width, height, opacity: inFlight ? 0 : 1 }, directionStyle('ltr')]}>
@@ -178,7 +178,7 @@ export function PlayingCard({
             {
               borderRadius: corner + 3,
               borderColor: ring,
-              opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }),
+              opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }),
             },
           ]}
         />
@@ -212,7 +212,7 @@ export function PlayingCard({
 
 function CardFace({ card, width }: { card: Card; width: number }) {
   const red = isRed(card.suit);
-  const tint = card.rank === 'JOKER' ? colors.ember : red ? colors.suitRed : colors.suitBlack;
+  const tint = card.rank === 'JOKER' ? colors.coral : red ? colors.suitRed : colors.suitBlack;
   const corner = width * 0.075;
   // Below about this width there is no room for corner indices and pips, so a
   // small card says its piece plainly instead of pretending to be a real one.
@@ -273,7 +273,7 @@ function CardFace({ card, width }: { card: Card; width: number }) {
           <View
             style={[
               styles.court,
-              { borderColor: colors.gold, borderRadius: width * 0.05, margin: width * 0.05 },
+              { borderColor: colors.coral, borderRadius: width * 0.05, margin: width * 0.05 },
             ]}
           >
             <Text style={[styles.courtLetter, { color: tint, fontSize: width * 0.4 }]}>
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.creamShade,
     borderWidth: 1,
-    borderColor: colors.gold,
+    borderColor: colors.coral,
   },
   valueText: { fontFamily: fonts.display, fontWeight: '700', color: colors.inkSoft },
 
@@ -410,9 +410,9 @@ const styles = StyleSheet.create({
   medallion: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.backInk,
-    borderWidth: 1,
-    borderColor: colors.gold,
+    backgroundColor: colors.cream,
+    borderWidth: 1.5,
+    borderColor: colors.coralDeep,
   },
 
   ring: { ...StyleSheet.absoluteFill, borderWidth: 3, margin: -3, pointerEvents: 'none' },
@@ -431,6 +431,6 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: colors.gold,
+    backgroundColor: colors.coral,
   },
 });

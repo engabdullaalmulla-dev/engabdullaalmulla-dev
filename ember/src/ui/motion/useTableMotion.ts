@@ -101,8 +101,8 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
         card,
         faceUp: true,
         flip: true,
-        arc: 24,
-        durationMs: 360,
+        arc: 18,
+        durationMs: 460,
         toKey: anchorKeys.discard,
         ...options,
       });
@@ -123,9 +123,9 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
               to: target,
               card: null,
               faceUp: false,
-              durationMs: 280,
-              delayMs: order * 45,
-              arc: 14,
+              durationMs: 360,
+              delayMs: order * 58,
+              arc: 10,
               toKey: anchorKeys.slot(player.id, index),
             });
             order += 1;
@@ -149,8 +149,8 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
           card: faceOf(view.held),
           faceUp: view.held?.kind === 'face',
           flip: view.held?.kind === 'face' && !view.heldFromDiscard,
-          arc: 18,
-          durationMs: 300,
+          arc: 12,
+          durationMs: 380,
           toKey: seatOf(actor.id),
         });
         onEvent?.('draw');
@@ -178,8 +178,8 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
             to: slotRect,
             card: null,
             faceUp: false,
-            durationMs: 300,
-            arc: 12,
+            durationMs: 380,
+            arc: 9,
             toKey:
               actor.id === view.youId && hints.current.placeSlot != null
                 ? anchorKeys.slot(actor.id, hints.current.placeSlot)
@@ -212,7 +212,7 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
               to: target,
               card: null,
               faceUp: false,
-              arc: 16,
+              arc: 12,
               toKey: anchorKeys.slot(player.id, index),
             });
             onEvent?.('penalty');
@@ -223,7 +223,7 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
           const source = landing(player.id, index);
           if (source) {
             controller.burst(source);
-            toDiscard(source, view.discardTop, { arc: 46, spin: true, durationMs: 480 });
+            toDiscard(source, view.discardTop, { arc: 30, spin: true, durationMs: 560 });
             onEvent?.('burn');
           }
         }
@@ -238,11 +238,11 @@ export function useTableMotion({ view, controller, hints, onEvent, enabled = tru
       const b = landing(two.playerId, two.slot);
       if (a && b) {
         controller.fly({
-          from: a, to: b, card: null, faceUp: false, arc: 34, durationMs: 420,
+          from: a, to: b, card: null, faceUp: false, arc: 22, durationMs: 520,
           toKey: anchorKeys.slot(two.playerId, two.slot),
         });
         controller.fly({
-          from: b, to: a, card: null, faceUp: false, arc: -34, durationMs: 420,
+          from: b, to: a, card: null, faceUp: false, arc: -22, durationMs: 520,
           toKey: anchorKeys.slot(one.playerId, one.slot),
         });
         onEvent?.('swap');

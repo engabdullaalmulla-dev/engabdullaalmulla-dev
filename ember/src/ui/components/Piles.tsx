@@ -88,7 +88,7 @@ function EmptyPile({ width, height }: { width: number; height: number }) {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: space(5), alignItems: 'flex-start' },
   column: { alignItems: 'center', gap: space(1.5) },
-  caption: { ...typography.label, fontSize: 9, color: colors.goldFaint },
+  caption: { ...typography.label, fontSize: 9, color: colors.textFaint },
   under: {
     position: 'absolute',
     backgroundColor: colors.backInk,

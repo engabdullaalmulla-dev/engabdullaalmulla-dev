@@ -1,8 +1,9 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { Difficulty } from '../../../shared/types';
 import { Button } from '../components/Button';
+import { Toggle } from '../components/Toggle';
 import { Wordmark } from '../components/Wordmark';
 import { useLanguage } from '../../i18n';
 import { tap } from '../haptics';
@@ -100,11 +101,10 @@ export function HomeScreen({
             <Text style={styles.switchLabel}>{t.home.assist}</Text>
             <Text style={styles.switchHint}>{t.home.assistHint}</Text>
           </View>
-          <Switch
+          <Toggle
+            label={t.home.assist}
             value={settings.assist}
             onValueChange={(assist) => onChange({ ...settings, assist })}
-            trackColor={{ false: colors.line, true: colors.ember }}
-            thumbColor={colors.cream}
           />
         </View>
 
@@ -113,11 +113,10 @@ export function HomeScreen({
             <Text style={styles.switchLabel}>{t.home.sound}</Text>
             <Text style={styles.switchHint}>{t.home.soundHint}</Text>
           </View>
-          <Switch
+          <Toggle
+            label={t.home.sound}
             value={settings.sound}
             onValueChange={(sound) => onChange({ ...settings, sound })}
-            trackColor={{ false: colors.line, true: colors.ember }}
-            thumbColor={colors.cream}
           />
         </View>
 
@@ -176,13 +175,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
   },
-  languageText: { ...typography.small, fontSize: 12, color: colors.goldSoft },
+  languageText: { ...typography.small, fontSize: 12, color: colors.coralDeep },
   hero: { gap: space(3) },
-  tagline: { ...typography.label, color: colors.ember, fontSize: 11 },
+  tagline: { ...typography.label, color: colors.coral, fontSize: 11 },
   blurb: { ...typography.body, color: colors.textMuted, lineHeight: 22 },
 
   panel: {
-    backgroundColor: colors.panel,
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
   segmentLabel: { ...typography.label, fontSize: 9, color: colors.textFaint },
   segment: {
     flexDirection: 'row',
-    backgroundColor: colors.feltEdge,
+    backgroundColor: colors.paperEdge,
     borderRadius: radius.pill,
     padding: 3,
     gap: 3,
@@ -205,7 +204,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  segmentItemActive: { backgroundColor: colors.panelRaised },
+  segmentItemActive: { backgroundColor: colors.surfaceRaised },
   segmentText: { ...typography.small, fontSize: 12, color: colors.textFaint },
   segmentTextActive: { color: colors.text },
 
@@ -216,5 +215,5 @@ const styles = StyleSheet.create({
 
   actions: { gap: space(2) },
   online: { ...typography.small, fontSize: 11, color: colors.textFaint, textAlign: 'center', lineHeight: 16 },
-  panelTitle: { ...typography.label, fontSize: 9, color: colors.ember },
+  panelTitle: { ...typography.label, fontSize: 9, color: colors.coral },
 });

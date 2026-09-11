@@ -58,7 +58,7 @@ export function useFlights(): FlightController {
   const burst = useCallback((rect: Rect) => {
     const id = `burst-${(sequence += 1)}`;
     setBursts((current) => [...current, { id, rect }]);
-    setTimeout(() => setBursts((current) => current.filter((entry) => entry.id !== id)), 700);
+    setTimeout(() => setBursts((current) => current.filter((entry) => entry.id !== id)), 840);
   }, []);
 
   const fly = useCallback((flight: Omit<Flight, 'id'> & { id?: string }) => {
@@ -119,7 +119,7 @@ function EmberBurst({ rect }: { rect: Rect }) {
   React.useEffect(() => {
     Animated.timing(grow, {
       toValue: 1,
-      duration: 620,
+      duration: 760,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
@@ -136,7 +136,7 @@ function EmberBurst({ rect }: { rect: Rect }) {
         height: size,
         borderRadius: size / 2,
         borderWidth: 3,
-        borderColor: colors.ember,
+        borderColor: colors.coral,
         opacity: grow.interpolate({ inputRange: [0, 0.2, 1], outputRange: [0, 0.9, 0] }),
         transform: [{ scale: grow.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1.9] }) }],
       }}
@@ -152,9 +152,9 @@ function FlyingCard({ flight, onDone }: { flight: Flight; onDone: () => void }) 
   React.useEffect(() => {
     const animation = Animated.timing(progress, {
       toValue: 1,
-      duration: flight.durationMs ?? 380,
+      duration: flight.durationMs ?? 460,
       delay: flight.delayMs ?? 0,
-      easing: Easing.bezier(0.22, 0.85, 0.28, 1),
+      easing: Easing.bezier(0.25, 0.9, 0.3, 1),
       useNativeDriver: true,
     });
     animation.start(({ finished }) => {
@@ -177,7 +177,7 @@ function FlyingCard({ flight, onDone }: { flight: Flight; onDone: () => void }) 
   );
   const scale = progress.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [scaleFrom, Math.max(scaleFrom, 1) * 1.08, flight.vanish ? 1.35 : 1],
+    outputRange: [scaleFrom, Math.max(scaleFrom, 1) * 1.04, flight.vanish ? 1.25 : 1],
   });
   const opacity = flight.vanish
     ? progress.interpolate({ inputRange: [0, 0.55, 1], outputRange: [1, 1, 0] })
@@ -192,7 +192,7 @@ function FlyingCard({ flight, onDone }: { flight: Flight; onDone: () => void }) 
     if (!flight.flip) return;
     const timer = setTimeout(
       () => setFaceUp(flight.faceUp),
-      (flight.delayMs ?? 0) + (flight.durationMs ?? 380) * 0.35,
+      (flight.delayMs ?? 0) + (flight.durationMs ?? 460) * 0.35,
     );
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

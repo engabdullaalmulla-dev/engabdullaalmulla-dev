@@ -95,7 +95,7 @@ export function AuthScreen({ onSignedIn, onBack }: Props) {
             onPress={() => void submit()}
             disabled={!ready}
           />
-          {busy ? <ActivityIndicator color={colors.ember} /> : null}
+          {busy ? <ActivityIndicator color={colors.coral} /> : null}
 
           <Pressable
             accessibilityRole="button"
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   field: { gap: space(1.5) },
   fieldLabel: { ...typography.label, fontSize: 9, color: colors.textFaint },
   input: {
-    backgroundColor: colors.panel,
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.line,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   error: { ...typography.small, color: colors.bad, lineHeight: 18 },
-  switch: { ...typography.small, color: colors.ember, textAlign: 'center' },
+  switch: { ...typography.small, color: colors.coral, textAlign: 'center' },
   footnote: { ...typography.small, fontSize: 11, color: colors.textFaint, lineHeight: 17 },
   server: {
     ...typography.small,

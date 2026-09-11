@@ -6,12 +6,12 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "ember",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#14100E",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F6EEE4",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#14100E"
+      "backgroundColor": "#F6EEE4"
     },
     "ios": {
       "supportsTablet": true,
@@ -20,7 +20,7 @@
     "android": {
       "package": "dev.almulla.ember",
       "adaptiveIcon": {
-        "backgroundColor": "#14100E",
+        "backgroundColor": "#F6EEE4",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },

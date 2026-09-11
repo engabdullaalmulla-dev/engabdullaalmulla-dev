@@ -78,7 +78,7 @@ export function ProfileScreen({ user, stats, onBack }: Props) {
 
       <Text style={styles.sectionTitle}>{t.profile.leaderboard}</Text>
       {board == null ? (
-        <ActivityIndicator color={colors.ember} />
+        <ActivityIndicator color={colors.coral} />
       ) : board.length === 0 ? (
         <Text style={styles.empty}>{t.profile.noLeaders}</Text>
       ) : (
@@ -109,7 +109,7 @@ function Stat({ value, label, tone }: { value: string; label: string; tone?: 'go
         style={[
           styles.statValue,
           tone === 'good' && { color: colors.good },
-          tone === 'ember' && { color: colors.ember },
+          tone === 'ember' && { color: colors.coral },
         ]}
       >
         {value}
@@ -134,9 +134,11 @@ const styles = StyleSheet.create({
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space(2) },
   stat: {
+    // Three to a row, all the same size, however long the number is.
     flexGrow: 1,
-    minWidth: 96,
-    backgroundColor: colors.panel,
+    flexBasis: 0,
+    minWidth: 88,
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: space(3.5),
     gap: 2,
@@ -144,28 +146,28 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 24, fontWeight: '800', color: colors.text },
   statLabel: { ...typography.label, fontSize: 8, color: colors.textFaint },
 
-  lines: { backgroundColor: colors.panel, borderRadius: radius.md, paddingHorizontal: space(3.5) },
+  lines: { backgroundColor: colors.surface, borderRadius: radius.md, paddingHorizontal: space(3.5) },
   line: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: space(3),
     borderBottomWidth: 1,
-    borderBottomColor: colors.feltEdge,
+    borderBottomColor: colors.paperEdge,
   },
   lineLabel: { ...typography.body, color: colors.textMuted },
   lineValue: { ...typography.body, color: colors.text, fontWeight: '700' },
 
-  sectionTitle: { ...typography.label, fontSize: 9, color: colors.ember },
+  sectionTitle: { ...typography.label, fontSize: 9, color: colors.coral },
   boardRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space(3),
     paddingVertical: space(2.5),
     borderBottomWidth: 1,
-    borderBottomColor: colors.feltEdge,
+    borderBottomColor: colors.paperEdge,
   },
   rank: { ...typography.small, color: colors.textFaint, width: 18 },
   boardName: { ...typography.body, color: colors.textMuted, flex: 1 },
-  boardYou: { color: colors.ember, fontWeight: '800' },
+  boardYou: { color: colors.coral, fontWeight: '800' },
   boardStat: { ...typography.small, color: colors.text, width: 44, textAlign: 'right' },
 });

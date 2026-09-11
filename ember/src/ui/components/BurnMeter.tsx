@@ -41,8 +41,8 @@ export function BurnMeter({ closesAt, totalMs }: { closesAt: number; totalMs: nu
   useEffect(() => {
     const beat = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 380, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
       ]),
     );
     beat.start();
@@ -52,7 +52,7 @@ export function BurnMeter({ closesAt, totalMs }: { closesAt: number; totalMs: nu
   // Ember while there is time, red as it runs out.
   const heat = progress.interpolate({
     inputRange: [0, 0.45, 1],
-    outputRange: [colors.bad, colors.ember, colors.ember],
+    outputRange: [colors.coralDeep, colors.coral, colors.coralSoft],
   });
 
   return (
@@ -60,7 +60,7 @@ export function BurnMeter({ closesAt, totalMs }: { closesAt: number; totalMs: nu
       <Animated.View
         style={[
           styles.head,
-          { transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) }] },
+          { transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] }) }] },
         ]}
       >
         <Flame size={16} />
@@ -86,12 +86,12 @@ export function BurnMeter({ closesAt, totalMs }: { closesAt: number; totalMs: nu
 const styles = StyleSheet.create({
   wrap: { gap: space(1), alignSelf: 'stretch' },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space(2) },
-  label: { ...typography.label, fontSize: 10, color: colors.ember },
+  label: { ...typography.label, fontSize: 10, color: colors.coral },
   count: { ...typography.numeral, fontSize: 20, minWidth: 18, textAlign: 'center' },
   track: {
     height: 6,
     borderRadius: radius.pill,
-    backgroundColor: colors.feltEdge,
+    backgroundColor: colors.paperShade,
     overflow: 'hidden',
   },
   fill: { height: 6, borderRadius: radius.pill },
