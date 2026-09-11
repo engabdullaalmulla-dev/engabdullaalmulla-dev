@@ -92,8 +92,9 @@ tabs:
 
 Every match opens with an **arena card**: the arena's number, its name, and its
 one rule ("The surface gives way in patches. Lose the floor, lose the attack.").
-It clears after two and a half seconds. Nine arenas therefore read as nine
-different challenges rather than one pitch redecorated.
+It clears after two and a half seconds. Twenty-five arenas therefore read as
+twenty-five different challenges rather than one pitch redecorated — each has its
+own palette as well as its own mechanic.
 
 Scoreboard, live clock, arena name. The canvas fills the screen in portrait.
 Under it a commentary ticker, then controls: **1× / 2× / 4× / camera / skip**.
@@ -131,7 +132,14 @@ follows: who qualified, who of yours is out, and the next tie previewed.
 
 Trophy cabinet, with arcade wins labelled `arcade` and authentic wins labelled
 `authentic` — they are not the same achievement and the cabinet does not pretend
-they are. Campaign history. The premium panel. Accessibility settings. Build
+they are.
+
+The **arena index** lists all 25 arenas by tier, with each one's rule and how
+many times you have played in it. Arenas you have not seen yet are dimmed but not
+hidden: it is a map of what is in the game, not a lockbox, and nothing about it
+is purchasable.
+
+Campaign history. The premium panel. Accessibility settings. Build
 information with the simulation version and a ruleset sheet per competition.
 
 ## When your nations are eliminated

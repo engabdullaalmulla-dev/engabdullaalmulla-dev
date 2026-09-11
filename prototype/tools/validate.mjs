@@ -9,14 +9,13 @@
 //   football-shaped  -- scorelines must look like football scorelines
 
 import { simulate, createMatch, step as stepMatch, resultOf } from '../src/sim/match.js';
-import { ARENA_META, buildArena, W as AW, H as AH } from '../src/sim/arenas.js';
+import { ARENA_META, buildArena, designTension, W as AW, H as AH } from '../src/sim/arenas.js';
 import { makeRng } from '../src/core/rng.js';
 import { STEP } from '../src/core/physics.js';
 
 const N = Number(process.argv[2] || 400);
 const RULES_GROUP = { allowDraw: true, extraTime: false };
 const RULES_KO = { allowDraw: false, extraTime: true, penalties: true };
-const TENSION = { rotor: 0.2, pinball: 0.2, channels: 0.2, tide: 0.4, crumble: 0.5, split: 0.5, magnets: 0.8, bowl: 0.8, grand: 1 };
 
 function pct(x) { return (100 * x).toFixed(1) + '%'; }
 
@@ -99,7 +98,7 @@ console.log('\nStructural symmetry (180-degree rotation about the arena centre)'
   for (const id of Object.keys(ARENA_META)) {
     let worst = null;
     for (let seed = 1; seed <= 12 && !worst; seed++) {
-      const a = buildArena(id, makeRng(seed * 7919), 0.6);
+      const a = buildArena(id, makeRng(seed * 7919), designTension(id));
       const have = new Map();
       for (const c of a.colliders) { const k = key(c, false); have.set(k, (have.get(k) || 0) + 1); }
       for (const c of a.colliders) {
@@ -110,8 +109,9 @@ console.log('\nStructural symmetry (180-degree rotation about the arena centre)'
       // fields and hazards must pair up too
       for (const list of [a.fields || [], a.drains || []]) {
         const fh = new Map();
-        const fk = (f) => `${rnd(f.x)},${rnd(f.y)},${rnd(f.r)},${rnd(f.strength ?? 0)},${rnd(f.cycle ?? 0)},${rnd(f.onFor ?? 0)}`;
-        const fm = (f) => `${rnd(AW - f.x)},${rnd(AH - f.y)},${rnd(f.r)},${rnd(f.strength ?? 0)},${rnd(f.cycle ?? 0)},${rnd(f.onFor ?? 0)}`;
+        const shape = (f) => `${rnd(f.r ?? 0)},${rnd(f.w ?? 0)},${rnd(f.h ?? 0)}`;
+        const fk = (f) => `${rnd(f.x)},${rnd(f.y)},${shape(f)},${rnd(f.strength ?? 0)},${rnd(f.cycle ?? 0)},${rnd(f.onFor ?? 0)},${rnd(f.dirX ?? 0)},${rnd(f.dirY ?? 0)}`;
+        const fm = (f) => `${rnd(AW - f.x)},${rnd(AH - f.y)},${shape(f)},${rnd(f.strength ?? 0)},${rnd(f.cycle ?? 0)},${rnd(f.onFor ?? 0)},${rnd(-(f.dirX ?? 0))},${rnd(-(f.dirY ?? 0))}`;
         for (const f of list) fh.set(fk(f), (fh.get(fk(f)) || 0) + 1);
         for (const f of list) {
           if (!fh.get(fm(f))) { worst = `hazard/field at ${rnd(f.x)},${rnd(f.y)} has no twin (seed ${seed})`; break; }
@@ -130,7 +130,7 @@ console.log('\nStructural symmetry (180-degree rotation about the arena centre)'
 // 3. Per-arena behaviour -----------------------------------------------------
 const rows = [];
 for (const id of Object.keys(ARENA_META)) {
-  const tension = TENSION[id];
+  const tension = designTension(id);
   console.log(`\n${ARENA_META[id].name}  (${id}, tension ${tension})`);
   const g = run(id, tension, RULES_GROUP, N, 1000 + id.length * 13);
 
@@ -151,9 +151,10 @@ for (const id of Object.keys(ARENA_META)) {
   check('no side bias (|z| < 2.6)', z < 2.6, `top ${homeW} / bottom ${awayW} / draw ${draws}  z=${z.toFixed(2)}`);
   check('goals per match in 1.9-3.5', goals >= 1.9 && goals <= 3.5, `${goals.toFixed(2)} (top ${g0.toFixed(2)} / bottom ${g1.toFixed(2)})`);
   check('draw rate in 12-40%', draws / g.length >= 0.12 && draws / g.length <= 0.40, pct(draws / g.length));
-  // Real football produces the occasional 7-1. What must not happen is a
-  // scoreline that reads as a broken simulation rather than a thrashing.
-  check('no absurd scoreline (<= 11 goals)', maxG <= 11, `max ${maxG}`);
+  // The highest-scoring World Cup match on record is Austria 7-5 Switzerland in
+  // 1954: twelve goals. That is the ceiling. Anything above it reads as a broken
+  // simulation rather than a thrashing.
+  check('no scoreline above the real record (<= 12 goals)', maxG <= 12, `max ${maxG}`);
   check('watch time under 60s at 1x', Math.max(...secs) <= 60, `${meanSecs.toFixed(1)}s mean, ${Math.max(...secs).toFixed(1)}s max`);
   check('every match terminated', g.every(r => r.decidedBy !== 'unresolved'));
 

@@ -47,7 +47,15 @@ export const DEFAULT_SETTINGS = {
 export function loadSettings() { return { ...DEFAULT_SETTINGS, ...read(K.settings, {}) }; }
 export function saveSettings(s) { return write(K.settings, s); }
 
-export function loadCabinet() { return read(K.cabinet, { trophies: [], campaigns: [] }); }
+export function loadCabinet() { return read(K.cabinet, { trophies: [], campaigns: [], arenas: {} }); }
+
+/** Count a match played in an arena, for the arena index in the collection. */
+export function recordArena(id) {
+  const cab = loadCabinet();
+  cab.arenas = cab.arenas || {};
+  cab.arenas[id] = (cab.arenas[id] || 0) + 1;
+  saveCabinet(cab);
+}
 export function saveCabinet(c) { return write(K.cabinet, c); }
 
 export function recordFinish(campaign, comp) {

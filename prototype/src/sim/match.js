@@ -11,7 +11,7 @@
 // result cannot depend on how you watched it.
 
 import { makeWorld, makeBody, step as physStep, STEP } from '../core/physics.js';
-import { buildArena, drainActive, fieldActive, CX } from './arenas.js';
+import { buildArena, drainActive, fieldActive, fieldContains, CX } from './arenas.js';
 import { makeRng } from '../core/rng.js';
 import { PI, dsin, dcos, len } from '../core/dmath.js';
 
@@ -32,9 +32,9 @@ const P = {
   PENS: 'pens', DONE: 'done',
 };
 
-function launch(rng, teamIdx, arena, boost) {
+function launch(rng, teamIdx, arena, boost, spreadScale = 1) {
   const base = teamIdx === 0 ? -PI / 2 : PI / 2;   // team 0 heads up-pitch
-  const ang = base + rng.bell(0, arena.launch.spread);
+  const ang = base + rng.bell(0, arena.launch.spread * spreadScale);
   const sp = arena.launch.speed * (0.86 + 0.28 * rng()) * boost;
   return { vx: sp * dcos(ang), vy: sp * dsin(ang) };
 }
@@ -53,6 +53,9 @@ export function createMatch(cfg) {
   const rng = makeRng(cfg.seed);
   const tension = cfg.tension ?? 0.2;
   const arena = buildArena(cfg.arenaId, rng.fork('arena'), tension);
+  // Calibration hook only: tools/calibrate.mjs sweeps drive to find the value
+  // that lands each arena on its target scoring rate. The game never sets it.
+  if (cfg.drive != null) arena.drive = cfg.drive;
   const play = rng.fork('play');
 
   const world = makeWorld({ width: arena.width, height: arena.height, gravity: arena.gravity, drag: arena.drag });
@@ -146,9 +149,16 @@ function applyFields(m) {
     if (!fieldActive(f, m.world.t)) continue;
     for (const b of m.world.bodies) {
       if (!b.alive) continue;
+      if (!fieldContains(f, b.x, b.y)) continue;
+      if (f.dirX != null) {
+        // Directional field (a conveyor belt): constant push along its axis.
+        b.vx += f.dirX * f.strength * STEP;
+        b.vy += f.dirY * f.strength * STEP;
+        continue;
+      }
       const dx = f.x - b.x, dy = f.y - b.y;
       const d = len(dx, dy);
-      if (d > f.r || d < 0.001) continue;
+      if (d < 0.001) continue;
       const falloff = 1 - d / f.r;
       const acc = (f.strength * falloff * falloff) / d;
       b.vx += dx * acc * STEP;
@@ -380,7 +390,10 @@ export function step(m) {
     if (len(b.vx, b.vy) < STALL_SPEED) {
       m.stall[i] += STEP;
       if (m.stall[i] > STALL_TIME) {
-        const v = launch(m.rng, i, m.arena, 0.55);
+        // A loose-ball scramble, not a shot: the nudge is aimed only broadly
+        // up-pitch. A tightly aimed nudge would put a floor under every arena's
+        // scoring rate and take the tuning knob away from the designer.
+        const v = launch(m.rng, i, m.arena, 0.5, 2.6);
         b.vx += v.vx; b.vy += v.vy;
         m.stall[i] = 0;
       }

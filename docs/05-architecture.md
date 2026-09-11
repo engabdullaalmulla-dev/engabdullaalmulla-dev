@@ -94,6 +94,13 @@ and a screen router. The renderer holds exactly one piece of state the simulatio
 does not: marble trails, which are appended by the render loop and are never read
 back.
 
+**Arena tuning** lives in one generated file. `src/sim/tuning.js` holds a
+calibrated forward-drive value per arena, produced by `tools/calibrate.mjs`,
+which binary-searches each arena until it hits its target goals-per-match. Drive
+is monotone in scoring rate, so one search per arena is enough — and because
+drive is a property of the *arena*, applied identically to both marbles, tuning
+twenty-five arenas never touches the fairness argument.
+
 **Flags** are drawn procedurally. `src/data/flags.js` holds a compact op list per
 nation (`['hb', [...]]`, `['cres', ...]`, `['g', 'maple', ...]`), interpreted by
 `flagdraw.js` over a 3:2 field in unit coordinates. Each flag is rasterised once

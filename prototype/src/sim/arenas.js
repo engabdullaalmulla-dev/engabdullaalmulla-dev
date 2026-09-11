@@ -16,7 +16,8 @@
 // -- more moving parts, tighter keepers, more hazards -- and never the teams.
 
 import { seg, bumper, rot, osc, gate } from '../core/physics.js';
-import { dsin, dcos, TAU } from '../core/dmath.js';
+import { dsin, dcos, TAU, PI } from '../core/dmath.js';
+import { DRIVE } from './tuning.js';
 
 export const W = 100;
 export const H = 170;
@@ -51,7 +52,10 @@ function solo(list, c) { list.push(c); return list; }
 // Force fields get the same treatment: the twin sits at the rotated point.
 function fieldPair(list, f) {
   const m = rp(f.x, f.y);
-  list.push(f, { ...f, x: m.x, y: m.y });
+  const twin = { ...f, x: m.x, y: m.y };
+  // A directional field's push vector rotates with it.
+  if (f.dirX != null) { twin.dirX = -f.dirX; twin.dirY = -f.dirY; }
+  list.push(f, twin);
   return list;
 }
 
@@ -60,6 +64,14 @@ export function fieldActive(f, t) {
   let u = (t - f.phase) % f.cycle;
   if (u < 0) u += f.cycle;
   return u < f.onFor;
+}
+
+// Does a point lie inside a field's area? Fields are discs by default and
+// rectangles when `w`/`h` are given (used for conveyor belts).
+export function fieldContains(f, x, y) {
+  if (f.w != null) return Math.abs(x - f.x) <= f.w / 2 && Math.abs(y - f.y) <= f.h / 2;
+  const dx = x - f.x, dy = y - f.y;
+  return dx * dx + dy * dy <= f.r * f.r;
 }
 
 // --- shared furniture -------------------------------------------------------
@@ -158,7 +170,9 @@ function baseSpec(id, name, blurb, rng, tension, over = {}) {
     spawns: SPAWN,
     launch: { speed: over.launchSpeed ?? 30, spread: over.launchSpread ?? 0.55 },
     // Forward drive: how hard each marble pushes towards the end it is attacking.
-    drive: over.drive ?? 20,
+    // Calibrated per arena in tuning.js; `over.drive` is only the fallback used
+    // while a new arena is being written.
+    drive: DRIVE[id] ?? over.drive ?? 16,
     decor: { theme: over.theme || 'grass', tension },
   };
 }
@@ -349,7 +363,7 @@ function buildMagnets(rng, tension) {
 //    turning three-arm gate in the middle. Both marbles have to queue for it.
 function buildSplit(rng, tension) {
   const a = baseSpec('split', 'Split Decision', 'One wall, one turning gate. Nobody attacks until they get through it.', rng, tension, {
-    drag: 0.16, mouth: 12.5, keeper: 8.6, launchSpeed: 30, drive: 4, theme: 'court',
+    drag: 0.16, mouth: 12.5, keeper: 8.6, launchSpeed: 30, drive: 4, theme: 'clay',
   });
   const c = a.colliders;
   const hole = 15;
@@ -398,6 +412,314 @@ function buildTide(rng, tension) {
   return a;
 }
 
+
+// ---------------------------------------------------------------------------
+// Arenas 10-24. Each one leads with a different mechanic rather than a
+// different colour: what changes is what the marble has to solve.
+// ---------------------------------------------------------------------------
+
+// 10. CAROUSEL -- six bumpers ride a turntable around the centre circle, so the
+//     whole middle of the pitch sweeps sideways and nothing holds a line.
+function buildCarousel(rng, tension) {
+  const a = baseSpec('carousel', 'Carousel', 'Six bumpers ride a turntable. The middle of the pitch is always moving sideways.', rng, tension, {
+    drag: 0.16, mouth: 13.5, launchSpeed: 32, theme: 'candy',
+  });
+  const c = a.colliders;
+  const omega = 1.0 + 0.5 * tension, R = 22 + rng.range(-2, 2);
+  for (let i = 0; i < 6; i++) {
+    const ang = (i / 6) * TAU;
+    solo(c, bumper(CX + R * dcos(ang), CY + R * dsin(ang), 4.0, {
+      kick: 11 + 4 * tension, tag: 'bumper', motion: rot(CX, CY, omega, 0),
+    }));
+  }
+  solo(c, bumper(CX, CY, 3.6, { kick: 6, tag: 'hub' }));
+  pair(c, bumper(14, 52, 2.6, { kick: 7, tag: 'peg' }));
+  return a;
+}
+
+// 11. HOURGLASS -- the pitch is pinched to a narrow neck at the halfway line.
+//     Everything has to come through the middle, and the queue is the drama.
+function buildHourglass(rng, tension) {
+  const a = baseSpec('hourglass', 'Hourglass', 'The pitch narrows to a neck at halfway. Everything has to come through it.', rng, tension, {
+    drag: 0.18, mouth: 13.0, keeper: 8.4, launchSpeed: 31, theme: 'sand',
+  });
+  const c = a.colliders;
+  const neck = 15 - 3 * tension;
+  pair(c, seg(1, 54, CX - neck, CY, { rest: 0.95, tag: 'wall' }));
+  pair(c, seg(W - 1, 54, CX + neck, CY, { rest: 0.95, tag: 'wall' }));
+  pair(c, bumper(CX - neck - 5, CY - 9, 2.6, { kick: 8, tag: 'peg' }));
+  pair(c, bumper(24, 40, 3.0, { kick: 7, tag: 'peg' }));
+  solo(c, bumper(CX, CY, 2.4, { kick: 9, tag: 'hub' }));
+  // Break the straight run out of the neck, or the arena scores five a game.
+  pair(c, bumper(CX - 9, 60, 3.4, { kick: 6, tag: 'peg' }));
+  pair(c, seg(CX + 6, 52, CX + 22, 44, { rest: 0.95, tag: 'rail' }));
+  return a;
+}
+
+// 12. SPIRAL VAULT -- two interleaved spiral walls wind out from the centre, so
+//     a marble that enters the middle is carried round before it is spat out.
+function buildSpiral(rng, tension) {
+  const a = baseSpec('spiral', 'Spiral Vault', 'Two spiral walls wind out from the centre. Whatever goes in comes out somewhere else.', rng, tension, {
+    drag: 0.13, mouth: 14.0, launchSpeed: 32, theme: 'deep',
+  });
+  const c = a.colliders;
+  // 1.9 turns of solid wall sealed the middle of the pitch and the arena
+  // finished 0-0 every time. Fewer turns, a shorter reach, and a gap punched
+  // through every fifth panel so a marble can always cross radially.
+  const turns = 1.15, steps = 20, r0 = 8, r1 = 31;
+  for (const off of [0, PI]) {                    // two arms, 180 degrees apart
+    for (let i = 0; i < steps; i++) {
+      if (i % 5 === 3) continue;                  // radial gap
+      const u0 = i / steps, u1 = (i + 1) / steps;
+      const a0 = off + u0 * turns * TAU, a1 = off + u1 * turns * TAU;
+      const R0 = r0 + (r1 - r0) * u0, R1 = r0 + (r1 - r0) * u1;
+      c.push(seg(CX + R0 * dcos(a0), CY + R0 * dsin(a0), CX + R1 * dcos(a1), CY + R1 * dsin(a1),
+        { rest: 0.96, tag: 'rail' }));
+    }
+  }
+  solo(c, bumper(CX, CY, 3.2, { kick: 12, tag: 'hub' }));
+  pair(c, bumper(16, 50, 2.8, { kick: 8, tag: 'peg' }));
+  return a;
+}
+
+// 13. BOUNCE CHAMBER -- almost nothing on the pitch and walls that give back
+//     more than they take. Long, fast, flat ricochets from end to end.
+function buildBounce(rng, tension) {
+  const a = baseSpec('bounce', 'Bounce Chamber', 'Live walls, almost no furniture. Long ricochets, end to end.', rng, tension, {
+    drag: 0.11, mouth: 12.5, keeper: 8.0, launchSpeed: 38, theme: 'mono',
+  });
+  const c = a.colliders;
+  for (const col of c) if (col.tag === 'wall') col.rest = 1.04;
+  pair(c, bumper(20 + rng.range(-3, 3), 64, 3.0, { kick: 9, tag: 'peg' }));
+  solo(c, bumper(CX, CY, 3.8, { kick: 10, tag: 'peg' }));
+  return a;
+}
+
+// 14. CROSSFIRE -- four long diagonals cut the pitch into a saltire with a hole
+//     at the middle. Every route is a diagonal and every deflection is sharp.
+function buildCrossfire(rng, tension) {
+  const a = baseSpec('crossfire', 'Crossfire', 'Four long diagonals and one hole in the middle. Every route is a deflection.', rng, tension, {
+    drag: 0.12, mouth: 14.0, launchSpeed: 33, theme: 'ember',
+  });
+  const c = a.colliders;
+  const gap = 11;
+  pair(c, seg(4, 46, CX - gap, CY - gap, { rest: 1.0, kick: 3, tag: 'rail' }));
+  pair(c, seg(W - 4, 46, CX + gap, CY - gap, { rest: 1.0, kick: 3, tag: 'rail' }));
+  pair(c, bumper(CX, 44, 3.2, { kick: 9, tag: 'peg' }));
+  solo(c, bumper(CX, CY, 4.6, { kick: 13, tag: 'bumper' }));
+  return a;
+}
+
+// 15. PENDULUM ROW -- long arms swing from anchors on the side walls. Slow,
+//     heavy, and they arrive exactly when you have stopped expecting them.
+function buildPendulum(rng, tension) {
+  const a = baseSpec('pendulum', 'Pendulum Row', 'Long arms swing in from the walls. Slow, heavy, and always late.', rng, tension, {
+    drag: 0.17, mouth: 13.5, keeper: 8.2, launchSpeed: 31, theme: 'forest',
+  });
+  const c = a.colliders;
+  const omega = 0.7 + 0.35 * tension;
+  for (const [ax, ay, sign] of [[3, 56, 1], [W - 3, 76, -1], [3, 100, 1], [W - 3, 38, -1]]) {
+    pair(c, seg(ax, ay, ax + sign * 34, ay, {
+      rest: 1.0, tag: 'rotor', motion: rot(ax, ay, omega * sign, rng.range(0, 1)),
+    }));
+  }
+  pair(c, bumper(30, 108, 3.0, { kick: 8, tag: 'peg' }));
+  // A slow bar across the middle, so the pitch is not wide open between sweeps.
+  for (const sgn of [1, -1]) {
+    solo(c, seg(CX, CY, CX + sgn * 20, CY, { rest: 1.0, tag: 'rotor', motion: rot(CX, CY, -omega * 0.8, 0) }));
+  }
+  solo(c, bumper(CX, CY, 3.0, { kick: 5, tag: 'hub' }));
+  return a;
+}
+
+// 16. IRIS GATE -- a ring around the centre circle that opens and shuts. Being
+//     inside when it closes costs you the attack you were about to make.
+function buildIris(rng, tension) {
+  const a = baseSpec('iris', 'Iris Gate', 'A ring around the centre opens and shuts. Do not be inside when it does.', rng, tension, {
+    drag: 0.13, mouth: 14.0, launchSpeed: 32, theme: 'plasma',
+  });
+  const c = a.colliders;
+  const R = 21, N = 16;
+  const g = gate(5.0 - 1.4 * tension, rng.range(0, 1), 0.5);
+  for (let i = 0; i < N; i++) {
+    const a0 = (i / N) * TAU, a1 = ((i + 0.78) / N) * TAU;
+    c.push(seg(CX + R * dcos(a0), CY + R * dsin(a0), CX + R * dcos(a1), CY + R * dsin(a1),
+      { rest: 0.98, tag: 'door', gate: g }));
+  }
+  solo(c, bumper(CX, CY, 5.0, { kick: 12, tag: 'bumper' }));
+  pair(c, bumper(18, 46, 2.8, { kick: 8, tag: 'peg' }));
+  return a;
+}
+
+// 17. CONVEYOR LANES -- belts run up one wing and down the other. Pick the right
+//     lane and you are carried at goal; pick wrong and you are carried home.
+function buildConveyor(rng, tension) {
+  const a = baseSpec('conveyor', 'Conveyor Lanes', 'Belts run up one wing and down the other. The lane you take decides the attack.', rng, tension, {
+    drag: 0.17, mouth: 14.0, launchSpeed: 30, theme: 'copper',
+  });
+  const c = a.colliders;
+  const push = 40 + 14 * tension;
+  fieldPair(a.fields, { x: 17, y: CY, w: 22, h: 78, r: 0, strength: push, dirX: 0, dirY: -1, kind: 'belt' });
+  fieldPair(a.fields, { x: 50, y: 46, w: 40, h: 26, r: 0, strength: push * 0.7, dirX: 1, dirY: 0, kind: 'belt' });
+  pair(c, seg(29, 46, 29, 124, { rest: 0.94, tag: 'rail' }));
+  pair(c, bumper(CX + 8, 62, 3.2, { kick: 9, tag: 'peg' }));
+  return a;
+}
+
+// 18. BUMPER FOREST -- a staggered thicket of small live pegs. No single big
+//     obstacle, just a hundred small decisions.
+function buildForest(rng, tension) {
+  const a = baseSpec('forest', 'Bumper Forest', 'A thicket of small live pegs. No big obstacle, a hundred small ones.', rng, tension, {
+    drag: 0.18, mouth: 14.5, launchSpeed: 32, theme: 'moss',
+  });
+  const c = a.colliders;
+  const kick = 7 + 3 * tension;
+  for (let row = 0; row < 4; row++) {
+    const y = 48 + row * 12;
+    for (let i = 0; i < 4; i++) {
+      const x = 13 + i * 24 + (row % 2 ? 12 : 0) + rng.range(-1.5, 1.5);
+      if (x > W - 8) continue;
+      pair(c, bumper(x, y, 2.2, { kick, tag: 'peg' }));
+    }
+  }
+  solo(c, bumper(CX, CY, 2.8, { kick: kick + 3, tag: 'peg' }));
+  return a;
+}
+
+// 19. TWIN RINGS -- two counter-turning rings sit off each shoulder. Thread the
+//     gap between them or go the long way round.
+function buildTwinRings(rng, tension) {
+  const a = baseSpec('twinrings', 'Twin Rings', 'Two counter-turning rings. Thread the gap between them, or go the long way.', rng, tension, {
+    drag: 0.15, mouth: 13.5, keeper: 8.0, launchSpeed: 31, theme: 'cobalt',
+  });
+  const c = a.colliders;
+  const R = 15, N = 18, omega = 1.2 + 0.5 * tension;
+  const ring = (cx, cy, dir) => {
+    for (let i = 0; i < N; i++) {
+      if (i % 9 < 3) continue;
+      const a0 = (i / N) * TAU, a1 = ((i + 1) / N) * TAU;
+      pair(c, seg(cx + R * dcos(a0), cy + R * dsin(a0), cx + R * dcos(a1), cy + R * dsin(a1),
+        { rest: 0.99, tag: 'ring', motion: rot(cx, cy, omega * dir, 0) }));
+    }
+    pair(c, bumper(cx, cy, 3.0, { kick: 8, tag: 'hub' }));
+  };
+  ring(27, 58, 1);
+  return a;
+}
+
+// 20. GRAVITY WELLS -- four permanent attractors. Marbles are slung round them
+//     like satellites and released on a completely new heading.
+function buildWells(rng, tension) {
+  const a = baseSpec('wells', 'Gravity Wells', 'Four permanent attractors. Marbles swing round them and leave on a new heading.', rng, tension, {
+    drag: 0.16, mouth: 13.5, launchSpeed: 31, theme: 'nebula',
+  });
+  const strength = 70 + 25 * tension;
+  fieldPair(a.fields, { x: 26, y: 54, r: 24, strength, kind: 'pull' });
+  fieldPair(a.fields, { x: 72, y: 104 - 46, r: 20, strength: strength * 0.8, kind: 'pull' });
+  pair(a.colliders, bumper(26, 54, 2.8, { kick: 6, tag: 'node' }));
+  pair(a.colliders, bumper(72, 58, 2.4, { kick: 6, tag: 'node' }));
+  solo(a.colliders, bumper(CX, CY, 3.4, { kick: 8, tag: 'node' }));
+  return a;
+}
+
+// 21. SHUTTER GRID -- a chequerboard of panels that blink open and shut. The
+//     pitch you can use is different every second and a half.
+function buildShutters(rng, tension) {
+  const a = baseSpec('shutters', 'Shutter Grid', 'A chequerboard of panels blinking open and shut. The usable pitch keeps changing.', rng, tension, {
+    drag: 0.14, mouth: 14.0, launchSpeed: 32, theme: 'slate',
+  });
+  const c = a.colliders;
+  const period = 3.0 - 0.8 * tension, ph = rng.range(0, 1);
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 4; col++) {
+      const x = 12 + col * 19, y = 50 + row * 12;
+      const g = gate(period, (ph + ((row + col) % 2) * 0.5) % 1, 0.45);
+      pair(c, seg(x, y, x + 15, y, { rest: 0.95, tag: 'door', gate: g }));
+    }
+  }
+  return a;
+}
+
+// 22. SLALOM -- staggered posts force a weave. The cleanest-looking arena and
+//     the one where a marble most obviously earns its run.
+function buildSlalom(rng, tension) {
+  const a = baseSpec('slalom', 'Slalom', 'Staggered posts force a weave. You can see the run being earned.', rng, tension, {
+    drag: 0.16, mouth: 13.0, keeper: 8.4, launchSpeed: 33, theme: 'lime',
+  });
+  const c = a.colliders;
+  for (let row = 0; row < 6; row++) {
+    const y = 34 + row * 11;
+    for (let i = 0; i < 3; i++) {
+      const x = 18 + i * 32 + (row % 2 ? 16 : 0);
+      if (x > W - 10) continue;
+      pair(c, seg(x, y - 5, x, y + 5, { rest: 0.99, kick: 2, tag: 'post' }));
+    }
+  }
+  solo(c, bumper(CX, CY, 3.0, { kick: 8, tag: 'peg' }));
+  // Two posts guarding each goal. Without them the weave delivers the marble
+  // straight at an open mouth and the arena scores three a game at any drive.
+  pair(c, seg(CX - 6.5, 21, CX - 6.5, 29, { rest: 0.99, kick: 2, tag: 'post' }));
+  pair(c, seg(CX + 6.5, 21, CX + 6.5, 29, { rest: 0.99, kick: 2, tag: 'post' }));
+  return a;
+}
+
+// 23. DRUM -- a wide turning drum with paddles reaching inward. Slow, grinding,
+//     low-scoring: the arena that makes a 1-0 feel earned.
+function buildDrum(rng, tension) {
+  const a = baseSpec('drum', 'The Drum', 'A wide turning drum with paddles. Slow, grinding, and a 1-0 feels earned.', rng, tension, {
+    drag: 0.12, mouth: 15.0, keeper: 6.6, launchSpeed: 30, theme: 'rust',
+  });
+  const c = a.colliders;
+  const R = 40, N = 32, omega = 0.5 + 0.25 * tension;
+  for (let i = 0; i < N; i++) {
+    if (i % 16 < 4) continue;
+    const a0 = (i / N) * TAU, a1 = ((i + 1) / N) * TAU;
+    c.push(seg(CX + R * dcos(a0), CY + R * dsin(a0), CX + R * dcos(a1), CY + R * dsin(a1),
+      { rest: 0.97, tag: 'ring', motion: rot(CX, CY, omega, 0) }));
+  }
+  for (let i = 0; i < 4; i++) {                 // four paddles: own 180-degree twin
+    const ang = (i / 4) * TAU;
+    solo(c, seg(CX + R * dcos(ang), CY + R * dsin(ang), CX + (R - 12) * dcos(ang), CY + (R - 12) * dsin(ang),
+      { rest: 1.0, tag: 'rotor', motion: rot(CX, CY, omega, 0) }));
+  }
+  solo(c, bumper(CX, CY, 4.2, { kick: 10, tag: 'hub' }));
+  return a;
+}
+
+// 24. MINEFIELD -- a scatter of fast-blinking hazards. Losing the floor costs
+//     the attack, never the tie, so this is tense rather than cruel.
+function buildMinefield(rng, tension) {
+  const a = baseSpec('minefield', 'Minefield', 'Hazards blink on and off across the pitch. Lose the floor, lose the attack.', rng, tension, {
+    drag: 0.12, mouth: 15.0, launchSpeed: 33, theme: 'hazard',
+  });
+  const cycle = 3.4 - 0.9 * tension;
+  const spots = [[20, 52], [44, 62], [70, 48], [30, 74], [62, 78], [84, 66]];
+  for (const [x, y] of spots) {
+    const f = { x, y, r: 4.6, cycle, phase: rng.range(0, cycle), openFor: cycle * 0.38, tag: 'tile' };
+    const m = rp(x, y);
+    a.drains.push(f, { ...f, x: m.x, y: m.y });
+  }
+  pair(a.colliders, bumper(12, 66, 2.6, { kick: 8, tag: 'peg' }));
+  solo(a.colliders, bumper(CX, CY, 3.4, { kick: 9, tag: 'peg' }));
+  return a;
+}
+
+// 25. CATAPULT ALLEY -- every rail is a launcher pointed up-pitch. Hit one and
+//     you are fired at goal; the question is which one you hit.
+function buildCatapult(rng, tension) {
+  const a = baseSpec('catapult', 'Catapult Alley', 'Every rail is a launcher. Hit one and you are fired at goal.', rng, tension, {
+    drag: 0.2, mouth: 13.0, keeper: 7.8, launchSpeed: 32, theme: 'sky',
+  });
+  const c = a.colliders;
+  const kick = 20 + 7 * tension;
+  pair(c, seg(6, 74, 30, 60, { rest: 1.0, kick, tag: 'sling' }));
+  pair(c, seg(W - 6, 74, W - 30, 60, { rest: 1.0, kick, tag: 'sling' }));
+  pair(c, seg(34, 96, 58, 84, { rest: 1.0, kick: kick * 0.75, tag: 'sling' }));
+  pair(c, bumper(CX + 14, 52, 3.0, { kick: 9, tag: 'peg' }));
+  solo(c, bumper(CX, CY, 3.6, { kick: 8, tag: 'peg' }));
+  return a;
+}
+
 export const ARENAS = {
   rotor: buildRotor,
   pinball: buildPinball,
@@ -407,20 +729,59 @@ export const ARENAS = {
   magnets: buildMagnets,
   split: buildSplit,
   tide: buildTide,
+  carousel: buildCarousel,
+  hourglass: buildHourglass,
+  spiral: buildSpiral,
+  bounce: buildBounce,
+  crossfire: buildCrossfire,
+  pendulum: buildPendulum,
+  iris: buildIris,
+  conveyor: buildConveyor,
+  forest: buildForest,
+  twinrings: buildTwinRings,
+  wells: buildWells,
+  shutters: buildShutters,
+  slalom: buildSlalom,
+  drum: buildDrum,
+  minefield: buildMinefield,
+  catapult: buildCatapult,
   grand: buildGrand,
 };
 
 export const ARENA_META = {
-  rotor: { name: 'Spin Gate', tier: 1, rule: 'Rotating arms sweep the pitch and fling marbles into new lanes.' },
-  pinball: { name: 'Pinball Stadium', tier: 1, rule: 'Live bumpers and slingshots fire marbles back into the danger zone.' },
-  channels: { name: 'Channel Run', tier: 1, rule: 'Doors open and close across the pitch. Read the gap or get shut out.' },
-  tide: { name: 'Tide Arena', tier: 2, rule: 'Two heavy bars sweep the pitch. Do not get caught on the wrong side.' },
-  crumble: { name: 'Crumble Pitch', tier: 2, rule: 'The surface gives way in patches. Lose the floor, lose the attack.' },
-  split: { name: 'Split Decision', tier: 2, rule: 'One wall, one turning gate. Nobody attacks until they get through it.' },
-  magnets: { name: 'Magnet Drift', tier: 3, rule: 'Invisible fields pulse on and off. Routes bend with nothing touching the marble.' },
-  bowl: { name: 'Knockout Bowl', tier: 3, rule: 'Trapped in a turning ring. Find the gap, then find the goal.' },
-  grand: { name: 'The Grand Arena', tier: 4, rule: 'The final. Every mechanism in the game, turned up.' },
+  // Tier 1 -- learn the rules here. One mechanic each, all of it visible.
+  rotor:     { name: 'Spin Gate',       tier: 1, rule: 'Rotating arms sweep the pitch and fling marbles into new lanes.' },
+  pinball:   { name: 'Pinball Stadium', tier: 1, rule: 'Live bumpers and slingshots fire marbles back into the danger zone.' },
+  channels:  { name: 'Channel Run',     tier: 1, rule: 'Doors open and close across the pitch. Read the gap or get shut out.' },
+  slalom:    { name: 'Slalom',          tier: 1, rule: 'Staggered posts force a weave. You can see the run being earned.' },
+  forest:    { name: 'Bumper Forest',   tier: 1, rule: 'A thicket of small live pegs. No big obstacle, a hundred small ones.' },
+  bounce:    { name: 'Bounce Chamber',  tier: 1, rule: 'Live walls, almost no furniture. Long ricochets, end to end.' },
+  carousel:  { name: 'Carousel',        tier: 1, rule: 'Six bumpers ride a turntable. The middle of the pitch is always moving.' },
+  // Tier 2 -- the pitch starts moving with you.
+  tide:      { name: 'Tide Arena',      tier: 2, rule: 'Two heavy bars sweep the pitch. Do not get caught on the wrong side.' },
+  crumble:   { name: 'Crumble Pitch',   tier: 2, rule: 'The surface gives way in patches. Lose the floor, lose the attack.' },
+  crossfire: { name: 'Crossfire',       tier: 2, rule: 'Four long diagonals and one hole in the middle. Every route is a deflection.' },
+  hourglass: { name: 'Hourglass',       tier: 2, rule: 'The pitch narrows to a neck at halfway. Everything has to come through it.' },
+  shutters:  { name: 'Shutter Grid',    tier: 2, rule: 'A chequerboard of panels blinking open and shut.' },
+  conveyor:  { name: 'Conveyor Lanes',  tier: 2, rule: 'Belts run up one wing and down the other. The lane decides the attack.' },
+  catapult:  { name: 'Catapult Alley',  tier: 2, rule: 'Every rail is a launcher. Hit one and you are fired at goal.' },
+  // Tier 3 -- the pitch starts making decisions for you.
+  split:     { name: 'Split Decision',  tier: 3, rule: 'One wall, one turning gate. Nobody attacks until they get through it.' },
+  spiral:    { name: 'Spiral Vault',    tier: 3, rule: 'Two spiral walls wind out from the centre. What goes in comes out elsewhere.' },
+  iris:      { name: 'Iris Gate',       tier: 3, rule: 'A ring around the centre opens and shuts. Do not be inside when it does.' },
+  twinrings: { name: 'Twin Rings',      tier: 3, rule: 'Two counter-turning rings. Thread the gap, or go the long way.' },
+  pendulum:  { name: 'Pendulum Row',    tier: 3, rule: 'Long arms swing in from the walls. Slow, heavy, and always late.' },
+  minefield: { name: 'Minefield',       tier: 3, rule: 'Hazards blink on and off across the pitch. Lose the floor, lose the attack.' },
+  wells:     { name: 'Gravity Wells',   tier: 3, rule: 'Four attractors. Marbles swing round them and leave on a new heading.' },
+  drum:      { name: 'The Drum',        tier: 3, rule: 'A wide turning drum with paddles. Slow, grinding, and a 1-0 feels earned.' },
+  // Tier 4 -- the last rounds.
+  magnets:   { name: 'Magnet Drift',    tier: 4, rule: 'Fields pulse on and off. Routes bend with nothing touching the marble.' },
+  bowl:      { name: 'Knockout Bowl',   tier: 4, rule: 'Trapped in a turning ring. Find the gap, then find the goal.' },
+  grand:     { name: 'The Grand Arena', tier: 5, rule: 'The final. Every mechanism in the game, turned up.' },
 };
+
+export const ARENA_IDS = Object.keys(ARENA_META);
+const TIER = (n) => ARENA_IDS.filter(id => ARENA_META[id].tier === n);
 
 export function buildArena(id, rng, tension) {
   const fn = ARENAS[id] || ARENAS.rotor;
@@ -429,18 +790,27 @@ export function buildArena(id, rng, tension) {
 
 // Which arenas are allowed at which point in a tournament. Early rounds stay on
 // tier 1 so the rules are learned before the pitch starts misbehaving.
+// Which arenas can turn up when. Early rounds stay on tier 1 so the rules are
+// learned before the pitch starts misbehaving; the final is always the same one.
 export function arenaPoolForStage(stageKind, roundIndex, totalRounds) {
-  if (stageKind === 'group') return ['rotor', 'pinball', 'channels', 'tide'];
+  if (stageKind === 'group') return TIER(1);
   const late = totalRounds > 0 ? roundIndex / totalRounds : 0;
-  if (late >= 0.99) return ['grand'];
-  if (late >= 0.66) return ['bowl', 'magnets', 'split'];
-  if (late >= 0.33) return ['crumble', 'split', 'tide', 'bowl'];
-  return ['rotor', 'channels', 'crumble', 'pinball', 'tide'];
+  if (late >= 0.99) return TIER(5);
+  if (late >= 0.66) return TIER(4).concat(TIER(3));
+  if (late >= 0.33) return TIER(3).concat(TIER(2));
+  return TIER(2).concat(TIER(1));
 }
 
 export function tensionForStage(stageKind, roundIndex, totalRounds) {
   if (stageKind === 'group') return 0.15;
   return totalRounds > 0 ? 0.35 + 0.65 * (roundIndex / totalRounds) : 0.5;
+}
+
+// The tension an arena is designed around, used by the test harness so each
+// arena is measured in the conditions it will actually be played in.
+export function designTension(id) {
+  const t = (ARENA_META[id] || {}).tier || 1;
+  return [0, 0.2, 0.45, 0.75, 0.9, 1][t];
 }
 
 export function drainActive(d, t) {

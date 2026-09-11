@@ -11,15 +11,35 @@ import { drawMarble } from './marble.js';
 import { team } from '../data/teams.js';
 import { TAU } from '../core/dmath.js';
 
+// One palette per arena. Twenty-five arenas that all looked like the same green
+// pitch would read as one arena with the furniture moved, so each gets its own
+// ground, line colour and accent.
 const THEMES = {
-  grass: { deep: '#07130f', pitch: '#103528', line: 'rgba(120,200,170,.20)', accent: '#3fe08c', wall: '#2f6b57' },
-  neon: { deep: '#0b0718', pitch: '#1a1136', line: 'rgba(170,140,255,.20)', accent: '#b48cff', wall: '#5b40a8' },
-  ice: { deep: '#061218', pitch: '#0e2d3a', line: 'rgba(140,220,255,.20)', accent: '#7fd8ff', wall: '#2f6c84' },
-  court: { deep: '#140d07', pitch: '#33210f', line: 'rgba(255,205,140,.18)', accent: '#ffbe6b', wall: '#7a5326' },
-  stone: { deep: '#0a0b0d', pitch: '#22262c', line: 'rgba(200,210,225,.16)', accent: '#aab6c6', wall: '#4d545f' },
-  gold: { deep: '#120d03', pitch: '#2a2008', line: 'rgba(255,220,140,.22)', accent: '#f3c451', wall: '#7d6420' },
-  void: { deep: '#05030d', pitch: '#150e2e', line: 'rgba(190,160,255,.16)', accent: '#c9a6ff', wall: '#4a3583' },
-  frost: { deep: '#050f14', pitch: '#123a44', line: 'rgba(190,240,255,.22)', accent: '#a8e8ff', wall: '#2c7185' },
+  grass:  { deep: '#07130f', pitch: '#103528', line: 'rgba(120,200,170,.20)', accent: '#3fe08c', wall: '#2f6b57' },
+  neon:   { deep: '#0b0718', pitch: '#1a1136', line: 'rgba(170,140,255,.20)', accent: '#b48cff', wall: '#5b40a8' },
+  ice:    { deep: '#061218', pitch: '#0e2d3a', line: 'rgba(140,220,255,.20)', accent: '#7fd8ff', wall: '#2f6c84' },
+  court:  { deep: '#140d07', pitch: '#33210f', line: 'rgba(255,205,140,.18)', accent: '#ffbe6b', wall: '#7a5326' },
+  stone:  { deep: '#0a0b0d', pitch: '#22262c', line: 'rgba(200,210,225,.16)', accent: '#aab6c6', wall: '#4d545f' },
+  gold:   { deep: '#120d03', pitch: '#2a2008', line: 'rgba(255,220,140,.22)', accent: '#f3c451', wall: '#7d6420' },
+  void:   { deep: '#05030d', pitch: '#150e2e', line: 'rgba(190,160,255,.16)', accent: '#c9a6ff', wall: '#4a3583' },
+  frost:  { deep: '#050f14', pitch: '#123a44', line: 'rgba(190,240,255,.22)', accent: '#a8e8ff', wall: '#2c7185' },
+  clay:   { deep: '#160906', pitch: '#40201a', line: 'rgba(255,190,170,.18)', accent: '#ff9c7a', wall: '#8a463a' },
+  candy:  { deep: '#160617', pitch: '#3a1140', line: 'rgba(255,175,235,.20)', accent: '#ff8fdc', wall: '#8d3a90' },
+  sand:   { deep: '#14100a', pitch: '#3a3018', line: 'rgba(255,235,180,.18)', accent: '#f0d489', wall: '#87713a' },
+  deep:   { deep: '#020a0c', pitch: '#07272c', line: 'rgba(120,230,225,.18)', accent: '#63e0d6', wall: '#1f6068' },
+  mono:   { deep: '#0a0a0b', pitch: '#232327', line: 'rgba(255,255,255,.18)', accent: '#e6e6ea', wall: '#5a5a62' },
+  ember:  { deep: '#170604', pitch: '#3d1206', line: 'rgba(255,170,120,.20)', accent: '#ff8a4c', wall: '#93361a' },
+  forest: { deep: '#040d06', pitch: '#0f2a15', line: 'rgba(150,230,150,.18)', accent: '#7ae08a', wall: '#2b6136' },
+  plasma: { deep: '#11021a', pitch: '#330a48', line: 'rgba(255,140,255,.20)', accent: '#ef7bff', wall: '#7e2ba0' },
+  copper: { deep: '#140b05', pitch: '#3c2310', line: 'rgba(255,200,150,.20)', accent: '#ffab6b', wall: '#8f5528' },
+  moss:   { deep: '#070d05', pitch: '#1d2c12', line: 'rgba(200,230,150,.18)', accent: '#bfe06a', wall: '#526b2b' },
+  cobalt: { deep: '#03070f', pitch: '#0d1f43', line: 'rgba(150,190,255,.20)', accent: '#7fa9ff', wall: '#2c4a8e' },
+  nebula: { deep: '#06030f', pitch: '#1b1240', line: 'rgba(190,180,255,.18)', accent: '#a89bff', wall: '#4b3d96' },
+  slate:  { deep: '#080a0c', pitch: '#1d2530', line: 'rgba(190,210,230,.18)', accent: '#9fbcd6', wall: '#42566b' },
+  lime:   { deep: '#09100a', pitch: '#1b3318', line: 'rgba(210,255,140,.20)', accent: '#c7f25e', wall: '#547a2c' },
+  rust:   { deep: '#140804', pitch: '#39190d', line: 'rgba(255,180,140,.18)', accent: '#e0854f', wall: '#7d3f21' },
+  hazard: { deep: '#100c02', pitch: '#2e2606', line: 'rgba(255,225,120,.20)', accent: '#ffd84a', wall: '#7c6414' },
+  sky:    { deep: '#040c16', pitch: '#0f2c48', line: 'rgba(170,215,255,.20)', accent: '#8ccaff', wall: '#2d5f8e' },
 };
 
 export function makeRenderer(canvas) {
@@ -92,6 +112,45 @@ export function makeRenderer(canvas) {
     // force fields, drawn under everything so they read as part of the pitch
     for (const f of m.arena.fields || []) {
       const on = fieldActive(f, t);
+
+      if (f.dirX != null) {
+        // A conveyor belt: a lane with chevrons marching the way it pushes.
+        const x0 = X(f.x - f.w / 2), y0 = Y(f.y - f.h / 2);
+        const bw = S(f.w), bh = S(f.h);
+        ctx.fillStyle = on ? 'rgba(255,190,120,.13)' : 'rgba(255,190,120,.05)';
+        ctx.fillRect(x0, y0, bw, bh);
+        ctx.strokeStyle = 'rgba(255,190,120,.35)';
+        ctx.lineWidth = Math.max(1, S(0.35));
+        ctx.strokeRect(x0, y0, bw, bh);
+        ctx.save();
+        ctx.beginPath(); ctx.rect(x0, y0, bw, bh); ctx.clip();
+        ctx.strokeStyle = `rgba(255,200,140,${on ? 0.55 : 0.2})`;
+        ctx.lineWidth = Math.max(1.4, S(0.7));
+        ctx.lineCap = 'round';
+        const along = Math.abs(f.dirY) > Math.abs(f.dirX) ? 'y' : 'x';
+        const span = along === 'y' ? f.h : f.w;
+        const cross = along === 'y' ? f.w : f.h;
+        const step = 9;
+        const march = ((t * 22) % step) * (along === 'y' ? f.dirY : f.dirX);
+        for (let k = -1; k <= span / step + 1; k++) {
+          const d = -span / 2 + k * step + march;
+          const tipSign = along === 'y' ? f.dirY : f.dirX;
+          ctx.beginPath();
+          if (along === 'y') {
+            ctx.moveTo(X(f.x - cross * 0.32), Y(f.y + d - 2.6 * tipSign));
+            ctx.lineTo(X(f.x), Y(f.y + d + 2.6 * tipSign));
+            ctx.lineTo(X(f.x + cross * 0.32), Y(f.y + d - 2.6 * tipSign));
+          } else {
+            ctx.moveTo(X(f.x + d - 2.6 * tipSign), Y(f.y - cross * 0.32));
+            ctx.lineTo(X(f.x + d + 2.6 * tipSign), Y(f.y));
+            ctx.lineTo(X(f.x + d - 2.6 * tipSign), Y(f.y + cross * 0.32));
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+        continue;
+      }
+
       const pull = f.strength > 0;
       const col = pull ? '90,190,255' : '255,150,90';
       const g = ctx.createRadialGradient(X(f.x), Y(f.y), 0, X(f.x), Y(f.y), S(f.r));
