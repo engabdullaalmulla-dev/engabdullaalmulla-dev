@@ -7,107 +7,115 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #C1402F; } a:hover { color: #97301F; }
-    * { -webkit-tap-highlight-color: transparent; }
-    .tap { cursor: pointer; transition: transform .16s ease; }
-    .tap:active { transform: scale(.985); }
-    @keyframes riseIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+    a { color: #1F4A3A; } a:hover { color: #16382C; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    .card { border-radius: 22px; box-shadow: 0 1px 2px rgba(26,29,26,.05), 0 14px 34px -16px rgba(26,29,26,.26); }
+    .tap { cursor: pointer; transition: transform .5s cubic-bezier(.22,1,.36,1), background .3s ease, color .3s ease, box-shadow .3s ease; }
+    .tap:active { transform: scale(.982); }
+    @keyframes ease-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #F1ECE0; font-family: Archivo, Helvetica, Arial, sans-serif; color: #17140F; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F5F3EF; font-family: Manrope, 'Helvetica Neue', Arial, sans-serif; color: #1A1D1A; display: flex; flex-direction: column; overflow: hidden;">
 
-  <!-- passport head -->
-  <div style="background: #17140F; color: #F1ECE0; padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 16px;">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-      <div style="font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: #A79C84;">Player passport</div>
-      <div style="font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #A79C84;">No. 0417</div>
-    </div>
-
-    <div style="display: flex; align-items: flex-end; gap: 16px;">
-      <div style="width: 84px; height: 84px; border: 2px solid #F1ECE0; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
-        <div style="font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #A79C84;">Tier</div>
-        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 48px; line-height: .84;">4</div>
+  <!-- member card -->
+  <div style="padding: 28px 24px 0;">
+    <div class="card" style="background: #1A1D1A; color: #F5F3EF; padding: 24px; display: flex; flex-direction: column; gap: 22px;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #8A9189;">Member since 2024</div>
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .1em; color: #8A9189; font-variant-numeric: tabular-nums;">No. 0417</div>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1;">
-        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 30px; line-height: .94; text-transform: uppercase;">Abdulla A.</div>
-        <div style="font-size: 12px; font-weight: 600; color: #C6BBA3;">Midfield · right foot · Al Quoz</div>
-        <div style="display: flex; align-items: center; gap: 7px; margin-top: 3px;">
-          <div style="height: 6px; width: 110px; background: #3A342A; overflow: hidden;">
-            <div style="width: 72%; height: 6px; background: #7FD1A6;"></div>
-          </div>
-          <div style="font-size: 11px; font-weight: 700; color: #7FD1A6;">1,284</div>
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+          <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 36px; line-height: 1; letter-spacing: -.015em;">Abdulla A.</div>
+          <div style="font-size: 13px; font-weight: 500; color: #A2A8A0;">Midfield · right foot · Dubai</div>
         </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #A8894F;">Level</div>
+          <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 44px; line-height: .9; color: #C9A661;">4</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="height: 4px; border-radius: 999px; background: #2E3330; flex-grow: 1; overflow: hidden;">
+          <div style="width: 72%; height: 4px; border-radius: 999px; background: #C9A661;"></div>
+        </div>
+        <div style="font-size: 12px; font-weight: 600; color: #A2A8A0; white-space: nowrap;">Level 5 soon</div>
       </div>
     </div>
   </div>
 
-  <!-- key figures -->
-  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5px; background: #C9BFA8; border-bottom: 1.5px solid #C9BFA8;">
+  <!-- figures -->
+  <div style="display: flex; padding: 20px 24px 18px; gap: 10px;">
     <sc-for list="{{figures}}" as="f" hint-placeholder-count="3">
-      <div style="background: #F1ECE0; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px;">
-        <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 27px; line-height: 1; color: {{f.color}};">{{f.value}}</div>
-        <div style="font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #6E6553;">{{f.label}}</div>
+      <div style="flex-grow: 1; background: #FFFFFF; border-radius: 18px; padding: 15px 14px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 28px; line-height: 1; color: {{f.color}};">{{f.value}}</div>
+        <div style="font-size: 11.5px; font-weight: 600; color: #8E938C;">{{f.label}}</div>
       </div>
     </sc-for>
   </div>
 
   <!-- tabs -->
-  <div style="display: flex; gap: 8px; padding: 16px 20px 14px;">
-    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
-      <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}; color: {{t.fg}}; border: 1.5px solid {{t.border}};">
-        <span style="font-size: 11.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase;">{{t.label}}</span>
-      </div>
-    </sc-for>
+  <div style="padding: 0 24px 16px;">
+    <div style="display: flex; gap: 4px; background: #EDEAE4; border-radius: 999px; padding: 4px;">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 13.5px; font-weight: 600;">{{t.label}}</span>
+        </div>
+      </sc-for>
+    </div>
   </div>
 
-  <div style="padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+  <div style="padding: 0 24px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
 
     <sc-if value="{{isForm}}" hint-placeholder-val="{{ true }}">
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #6E6553;">Last six · most recent right</div>
-        <div style="display: flex; gap: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: #8E938C;">Recent form</div>
+          <div style="font-size: 11.5px; font-weight: 500; color: #B4B9B2;">most recent on the right</div>
+        </div>
+        <div style="display: flex; gap: 7px;">
           <sc-for list="{{form}}" as="r" hint-placeholder-count="6">
-            <div style="flex-grow: 1; height: 46px; background: {{r.bg}}; color: {{r.fg}}; display: flex; align-items: center; justify-content: center; font-family: Anton, 'Arial Narrow', sans-serif; font-size: 19px;">{{r.result}}</div>
+            <div style="flex-grow: 1; height: 44px; border-radius: 12px; background: {{r.bg}}; color: {{r.fg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">{{r.result}}</div>
           </sc-for>
         </div>
         <sc-for list="{{recent}}" as="g" hint-placeholder-count="4">
-          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #D8CFB9; animation: riseIn .24s ease both; animation-delay: {{g.delay}};">
-            <div style="font-family: Anton, 'Arial Narrow', sans-serif; font-size: 17px; min-width: 44px; color: {{g.scoreColor}};">{{g.score}}</div>
-            <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
-              <div style="font-size: 13.5px; font-weight: 700;">{{g.venue}}</div>
-              <div style="font-size: 11.5px; color: #6E6553;">{{g.meta}}</div>
+          <div style="display: flex; align-items: center; gap: 14px; padding: 14px 2px; border-bottom: 1px solid #E8E5DE; animation: ease-in-up .3s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 22px; min-width: 52px; color: {{g.scoreColor}};">{{g.score}}</div>
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em;">{{g.venue}}</div>
+              <div style="font-size: 12.5px; font-weight: 500; color: #8E938C;">{{g.meta}}</div>
             </div>
-            <div style="font-size: 12px; font-weight: 800; color: {{g.deltaColor}};">{{g.delta}}</div>
           </div>
         </sc-for>
       </div>
     </sc-if>
 
     <sc-if value="{{isBadges}}" hint-placeholder-val="{{ true }}">
-      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
         <sc-for list="{{badges}}" as="b" hint-placeholder-count="6">
-          <div style="border: 1.5px solid {{b.border}}; background: {{b.bg}}; padding: 14px 12px; display: flex; flex-direction: column; gap: 6px; animation: riseIn .24s ease both; animation-delay: {{b.delay}};">
-            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="{{b.stroke}}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg>
-            <div style="font-size: 12.5px; font-weight: 800; color: {{b.titleColor}};">{{b.title}}</div>
-            <div style="font-family: Newsreader, Georgia, serif; font-size: 11.5px; line-height: 1.35; color: {{b.metaColor}};">{{b.meta}}</div>
+          <div style="background: {{b.bg}}; border: 1.5px solid {{b.border}}; border-radius: 18px; padding: 16px 14px; display: flex; flex-direction: column; gap: 9px; animation: ease-in-up .3s cubic-bezier(.22,1,.36,1) both; animation-delay: {{b.delay}};">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="{{b.stroke}}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: {{b.titleColor}};">{{b.title}}</div>
+            <div style="font-size: 12px; font-weight: 500; line-height: 1.4; color: {{b.metaColor}};">{{b.meta}}</div>
           </div>
         </sc-for>
       </div>
     </sc-if>
 
     <sc-if value="{{isCities}}" hint-placeholder-val="{{ true }}">
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; line-height: 1.45; color: #4A4335;">Your tier and reliability travel with you. Land anywhere we run and you are placed in the right game the same night — no starting again.</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 14.5px; font-weight: 500; line-height: 1.55; color: #5C625B; padding-bottom: 8px;">Your level and your record travel with you. Land in any of these and you are placed in the right game the same night.</div>
         <sc-for list="{{cities}}" as="c" hint-placeholder-count="5">
-          <div style="display: flex; align-items: center; gap: 11px; padding: 12px 0; border-bottom: 1px solid #D8CFB9; animation: riseIn .24s ease both; animation-delay: {{c.delay}};">
-            <div style="width: 8px; height: 8px; border-radius: 50%; background: {{c.dot}}; flex-shrink: 0;"></div>
-            <div style="font-size: 14px; font-weight: 700; flex-grow: 1;">{{c.name}}</div>
-            <div style="font-size: 11.5px; font-weight: 600; color: #6E6553;">{{c.meta}}</div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 15px 2px; border-bottom: 1px solid #E8E5DE; animation: ease-in-up .3s cubic-bezier(.22,1,.36,1) both; animation-delay: {{c.delay}};">
+            <div style="width: 8px; height: 8px; border-radius: 999px; background: {{c.dot}}; flex-shrink: 0;"></div>
+            <div style="font-size: 15.5px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{{c.name}}</div>
+            <div style="font-size: 12.5px; font-weight: 500; color: #8E938C;">{{c.meta}}</div>
           </div>
         </sc-for>
       </div>
@@ -115,10 +123,10 @@
 
   </div>
 
-  <div style="padding: 14px 20px 24px;">
-    <div style="display: flex; align-items: center; gap: 9px; background: #E6DFCF; padding: 13px;">
-      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2E7D57" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-3 8.1-7 9.5-4-1.4-7-5.2-7-9.5V6z"></path><path d="M9.5 12l1.8 1.8 3.4-3.6"></path></svg>
-      <div style="font-family: Newsreader, Georgia, serif; font-size: 13px; color: #4A4335; line-height: 1.35;">Injury cover is active on every game you play this month.</div>
+  <div style="padding: 14px 24px 26px;">
+    <div style="background: #EDEAE4; border-radius: 18px; padding: 15px 17px; display: flex; align-items: center; gap: 12px;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1F4A3A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-3 8.1-7 9.5-4-1.4-7-5.2-7-9.5V6z"></path><path d="M9.5 12l1.8 1.8 3.4-3.6"></path></svg>
+      <div style="font-size: 13.5px; font-weight: 500; color: #3E443D;">Injury cover is active on every game this month.</div>
     </div>
   </div>
 
@@ -137,17 +145,16 @@ class Component extends DCLogic {
 
     const tabDefs = [
       { id: 'form', label: 'Form' },
-      { id: 'badges', label: 'Badges' },
+      { id: 'badges', label: 'Milestones' },
       { id: 'cities', label: 'Cities' },
     ];
-
     const tabs = tabDefs.map((t) => {
       const on = t.id === tab;
       return {
         label: t.label,
-        bg: on ? '#17140F' : 'transparent',
-        fg: on ? '#F1ECE0' : '#4A4335',
-        border: on ? '#17140F' : '#C9BFA8',
+        bg: on ? '#FFFFFF' : 'transparent',
+        fg: on ? '#1A1D1A' : '#8E938C',
+        shadow: on ? '0 1px 3px rgba(26,29,26,.10)' : 'none',
         pick: () => this.setState({ tab: t.id }),
       };
     });
@@ -158,43 +165,41 @@ class Component extends DCLogic {
     ];
     const form = formDefs.map((f) => ({
       result: f.result,
-      bg: f.win === true ? '#2E7D57' : (f.win === false ? '#C1402F' : '#D3C9B2'),
-      fg: f.win === null ? '#17140F' : '#F7F4EC',
+      bg: f.win === true ? '#1F4A3A' : (f.win === false ? '#EDEAE4' : '#DCE5DE'),
+      fg: f.win === true ? '#FFFFFF' : '#5C625B',
     }));
 
     const recentDefs = [
-      { score: '6–5', venue: 'Al Quoz Sports Park', meta: 'Thu · 7-a-side · 2 goals', delta: '+12', win: true },
-      { score: '3–3', venue: 'The Sevens', meta: 'Tue · 5-a-side · 1 goal', delta: '+2', win: null },
-      { score: '4–7', venue: 'Insportz Indoor', meta: 'Sun · 7-a-side', delta: '−6', win: false },
-      { score: '5–2', venue: 'Zabeel Park', meta: 'Fri · 11-a-side · 1 assist', delta: '+9', win: true },
+      { score: '6–5', venue: 'Al Quoz Sports Park', meta: 'Thursday · you scored twice', win: true },
+      { score: '3–3', venue: 'The Sevens', meta: 'Tuesday · one goal', win: null },
+      { score: '4–7', venue: 'Insportz Indoor', meta: 'Sunday', win: false },
+      { score: '5–2', venue: 'Zabeel Park', meta: 'Friday · one assist', win: true },
     ];
     const recent = recentDefs.map((g, i) => ({
       score: g.score,
       venue: g.venue,
       meta: g.meta,
-      delta: g.delta,
-      scoreColor: g.win === true ? '#2E7D57' : (g.win === false ? '#C1402F' : '#6E6553'),
-      deltaColor: g.win === false ? '#C1402F' : '#2E7D57',
+      scoreColor: g.win === true ? '#1F4A3A' : (g.win === false ? '#A8ADA6' : '#5C625B'),
       delay: (i * 0.05) + 's',
     }));
 
     const badgeDefs = [
-      { title: 'Never missed', meta: '20 games, 20 arrivals', earned: true, icon: 'M20 6 9 17l-5-5' },
-      { title: 'Ten in a row', meta: 'Played every Thursday since June', earned: true, icon: 'M13 2 4 14h6l-1 8 9-12h-6z' },
-      { title: 'Good egg', meta: 'Voted well-played 18 times', earned: true, icon: 'M12 20s-7-4.4-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7-.6c0 5-7 12.6-7 12.6z' },
-      { title: 'Host', meta: 'Ran 4 games for others', earned: true, icon: 'M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7' },
-      { title: 'Promoted', meta: 'Reach Tier 5 — 38 points away', earned: false, icon: 'M12 19V5M6 11l6-6 6 6' },
-      { title: 'Travelled', meta: 'Play in 3 cities — 2 so far', earned: false, icon: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3 12h18M12 3c2.5 2.6 2.5 15 0 18' },
+      { title: 'Never missed', meta: 'Twenty games, twenty arrivals', earned: true, icon: 'M20 6 9 17l-5-5' },
+      { title: 'Eleven weeks', meta: 'Every Thursday since June', earned: true, icon: 'M13 2 4 14h6l-1 8 9-12h-6z' },
+      { title: 'Well played', meta: 'Voted up eighteen times', earned: true, icon: 'M12 20s-7-4.4-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7-.6c0 5-7 12.6-7 12.6z' },
+      { title: 'Host', meta: 'Ran four games for others', earned: true, icon: 'M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7' },
+      { title: 'Level 5', meta: 'A few games away', earned: false, icon: 'M12 19V5M6 11l6-6 6 6' },
+      { title: 'Three cities', meta: 'Two so far', earned: false, icon: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3 12h18M12 3c2.5 2.6 2.5 15 0 18' },
     ];
     const badges = badgeDefs.map((b, i) => ({
       title: b.title,
       meta: b.meta,
       icon: b.icon,
-      bg: b.earned ? '#F7F4EC' : 'transparent',
-      border: b.earned ? '#17140F' : '#D8CFB9',
-      stroke: b.earned ? '#C1402F' : '#A79C84',
-      titleColor: b.earned ? '#17140F' : '#8A8069',
-      metaColor: b.earned ? '#6E6553' : '#A79C84',
+      bg: b.earned ? '#FFFFFF' : 'transparent',
+      border: b.earned ? 'transparent' : '#E4E1DA',
+      stroke: b.earned ? '#A8894F' : '#B4B9B2',
+      titleColor: b.earned ? '#1A1D1A' : '#8E938C',
+      metaColor: b.earned ? '#8E938C' : '#B4B9B2',
       delay: (i * 0.045) + 's',
     }));
 
@@ -208,7 +213,7 @@ class Component extends DCLogic {
     const cities = cityDefs.map((c, i) => ({
       name: c.name,
       meta: c.meta,
-      dot: c.live ? '#2E7D57' : '#C9BFA8',
+      dot: c.live ? '#1F4A3A' : '#D6D2C9',
       delay: (i * 0.045) + 's',
     }));
 
@@ -218,9 +223,9 @@ class Component extends DCLogic {
       isBadges: tab === 'badges',
       isCities: tab === 'cities',
       figures: [
-        { value: '41', label: 'Games', color: '#17140F' },
-        { value: '98%', label: 'Reliability', color: '#2E7D57' },
-        { value: '11', label: 'Week streak', color: '#C1402F' },
+        { value: '41', label: 'Games', color: '#1A1D1A' },
+        { value: '98%', label: 'Turned up', color: '#1F4A3A' },
+        { value: '11', label: 'Week streak', color: '#A8894F' },
       ],
       form: form,
       recent: recent,

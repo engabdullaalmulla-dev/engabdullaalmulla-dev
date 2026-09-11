@@ -1,19 +1,19 @@
 {
   "artboards": [
     { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Tonight", "is_interactive": true },
-    { "file": "TeamSheet.dc.html", "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 · Team sheet", "is_interactive": true },
-    { "file": "Resale.dc.html", "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 · Spot resale", "is_interactive": true },
+    { "file": "TeamSheet.dc.html", "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 · The line-up", "is_interactive": true },
+    { "file": "Resale.dc.html", "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 · Releasing a place", "is_interactive": true },
     { "file": "PostMatch.dc.html", "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 · Full time", "is_interactive": true },
-    { "file": "Passport.dc.html", "x": 0, "y": 964, "w": 390, "h": 844, "title": "5 · Player passport", "is_interactive": true },
-    { "file": "Season.dc.html", "x": 470, "y": 964, "w": 390, "h": 844, "title": "6 · Ranked season", "is_interactive": true },
-    { "file": "HostMode.dc.html", "x": 940, "y": 964, "w": 390, "h": 844, "title": "7 · Host mode", "is_interactive": true },
+    { "file": "Passport.dc.html", "x": 0, "y": 964, "w": 390, "h": 844, "title": "5 · Member card", "is_interactive": true },
+    { "file": "Season.dc.html", "x": 470, "y": 964, "w": 390, "h": 844, "title": "6 · Season", "is_interactive": true },
+    { "file": "HostMode.dc.html", "x": 940, "y": 964, "w": 390, "h": 844, "title": "7 · Hosting", "is_interactive": true },
     { "file": "System.dc.html", "x": 0, "y": 1928, "w": 1240, "h": 980, "title": "Design system" }
   ],
   "annotations": [
-    { "id": "brief", "x": 0, "y": -330, "w": 700, "text": "MATCHDAY — a pickup-football app built against the twenty gaps in CeleBreak and Stranger Soccer.\n\nDirection: matchday programme. Warm stock, letterpress weight, one dark chalkboard surface reserved for team sheets and the resale moment. Every screen here is live — tap the filters, the fixtures, the toggles, the votes." },
-    { "id": "flow-note", "x": 1880, "y": 0, "w": 300, "text": "THE CORE LOOP\n\nFind a game → see the balanced sides → release your spot and get cash back → rate the people you played with.\n\nScreen 3 is the one to try first. It is the whole competitive argument in a single interaction: no cut-off, no forfeited credits, and the sides stay even because the seat gets refilled." },
-    { "id": "retention-note", "x": 1410, "y": 964, "w": 300, "text": "THE RETENTION SPINE\n\nNeither incumbent has any of this. The passport makes your standing portable between cities, the season makes next Thursday matter, and host mode turns the organisers they compete with into supply." },
-    { "id": "system-note", "x": 1340, "y": 1928, "w": 320, "text": "WHY THIS DIRECTION\n\nBoth incumbents are accused in their own reviews of being money grabs with no community. A printed-programme language reads as football-club, not marketplace — it buys back the exact ground they lost.\n\nProgramme red is the only action colour: one primary action per screen, never three competing buttons." }
+    { "id": "brief", "x": 0, "y": -330, "w": 700, "text": "QUIET LUXURY, OBVIOUS CONTROLS\n\nThe two ideas are the same idea. Expensive design is restraint — one action per screen, a lot of space around it, a serif reserved for the four numbers that matter. That restraint is also what makes it easy: there is only ever one thing to press.\n\nBone paper, ink, a deep green for anything confirmed, brass for level and milestones. Nothing gold, nothing loud. Every screen here is live." },
+    { "id": "flow-note", "x": 1880, "y": 0, "w": 300, "text": "THE CORE LOOP\n\nFind a game → see who is playing and how even the sides are → release your place and get your money back → say who played well.\n\nStart with screen 3. Tap \"I can't make it\", then \"Offer my place\", and watch what happens. That single interaction is the whole competitive argument." },
+    { "id": "retention-note", "x": 1410, "y": 964, "w": 300, "text": "WHY THESE THREE\n\nNeither CeleBreak nor Stranger Soccer has any of it. The member card makes your standing portable between cities, the season makes next Thursday matter, and hosting turns the organisers they compete with into supply." },
+    { "id": "system-note", "x": 1340, "y": 1928, "w": 320, "text": "THE RULES THAT MAKE IT LUXURIOUS\n\nOne serif, used about four times a screen. One action, 58px, pill, at the bottom. One dark surface, spent on exactly three moments — the scoreline, the member card, the refund.\n\nIf everything is a moment, nothing is. Most of the craft here is in what was left out." }
   ],
   "launch": { "view": "canvas" }
 }
