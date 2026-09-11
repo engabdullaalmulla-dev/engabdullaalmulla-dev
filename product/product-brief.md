@@ -64,7 +64,7 @@ If we take off-peak inventory on revenue share instead of renting it, our downsi
 
 1. **The game running is the product.** Reliability beats features. A cancelled game undoes a month of acquisition.
 2. **Never trap money.** Cash-refundable, always, advertised in as many words. This is a trust position, not a payments detail.
-3. **Levels are earned, never claimed.** Everything downstream — teams, seasons, matchmaking — reads from one honest number.
+3. **Levels are earned, never claimed.** Everything downstream — teams, matchmaking, progression — reads from one honest number.
 4. **Behaviour is managed with standing, not fines.** People respond to status far more than to small penalties.
 5. **Treat organisers as supply, not competition.** Every game we don't have to staff is margin and reach.
 6. **Go deep before wide.** New formats on existing pitches before new districts; new districts before new cities.
@@ -77,13 +77,13 @@ If we take off-peak inventory on revenue share instead of renting it, our downsi
 A booking page, a payment link and a WhatsApp group. Everything else manual.
 - **Goal:** the same weekly game sells out three weeks running.
 - **Exit criterion:** 3 consecutive sell-outs on one fixed slot. Not signups. Not downloads.
-- **Explicitly out:** native app, ratings, seasons, host tools, anything automated.
+- **Explicitly out:** native app, ratings, host tools, anything automated.
 - **Why:** we must know the fill rate before anyone writes app code.
 
 ### R1 — The app you can book on · weeks 4–12
 - **Goal:** three fixed weekly slots at 70%+ fill, refund guarantee live and used.
 - **Ships:** browse and book, card payment, cash-refundable wallet, **spot resale with full refund**, waitlist, check-in, host tools v1, admin console.
-- **Explicitly out:** earned ratings, seasons, highlights, crews, memberships.
+- **Explicitly out:** earned ratings, highlights, crews, memberships.
 
 ### R2 — The loop · weeks 12–20
 - **Goal:** week-12 repeat ≥ 40%, no-show < 8%.
@@ -92,7 +92,7 @@ A booking page, a payment link and a WhatsApp group. Everything else manual.
 
 ### R3 — Reasons to come back · weeks 20–32
 - **Goal:** 2.5+ games per player per month, host-run share ≥ 30%.
-- **Ships:** seasons with promotion/relegation, shareable player card, crews, highlights pilot at two venues, women's / over-35 / beginner formats, membership tiers.
+- **Ships:** shareable player card, crews, highlights pilot at two venues, women's / over-35 / beginner formats, membership tiers.
 
 ### R4 — Platform · weeks 32+
 - **Goal:** host-run share ≥ 50%, second district live, first corporate accounts.
@@ -187,13 +187,10 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | F7 | **Nemesis — the player whose side you can't beat, surfaced before you book** | G11 | P1 | R3 | FREQ |
 | F8 | Status visible on the team sheet — streak, reliability, milestones | G07 | P2 | R3 | NS |
 
-### G · Season & competition
+### G · Progress & occasion
 | ID | Feature | Gap | Pri | Rel | Moves |
 |---|---|---|---|---|---|
-| G1 | Eight-week divisions on top of ordinary games | G11 | P0 | R3 | FREQ |
-| G2 | Promotion and relegation | G11 | P0 | R3 | FREQ |
-| G3 | League table | G11 | P0 | R3 | FREQ |
-| G4 | Your fixtures view | G11 | P1 | R3 | FREQ |
+| G4 | Your upcoming games | — | P1 | R2 | NS |
 | G5 | Man of the match voting | G05 G11 | P0 | R2 | RPT |
 | G6 | Trophies and milestones | G11 | P1 | R3 | RPT |
 | G7 | **Shareable player card** | G10 G11 | P1 | R3 | CAC |
@@ -292,7 +289,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | P3 | Lapse detection — reach out at three missed weeks, not thirteen | G07 | P1 | R3 | RPT |
 | P4 | Win-back offer tuned to why they stopped | G07 | P2 | R4 | RPT |
 
-**Count:** 119 features. The bottom third is cuttable and R1 still ships something coherent.
+**Count:** 116 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 
