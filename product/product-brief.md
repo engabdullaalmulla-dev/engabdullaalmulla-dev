@@ -118,6 +118,8 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | A8 | Standing booking — "every Thursday" | G11 | P1 | R3 | FREQ |
 | A9 | Invite a friend to a specific game | G10 | P1 | R3 | CAC |
 | A10 | Calendar sync | — | P2 | R3 | NS |
+| A11 | **"Three of your crew are in" push when someone you play with books** | G10 | P0 | R2 | FR |
+| A12 | Streak-at-risk nudge — only when they have a live streak | G11 | P2 | R3 | FREQ |
 
 ### B · Money & trust *(the wedge)*
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -134,7 +136,8 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | B7 | Receipts and payment history | — | P1 | R1 | — |
 | B8 | Membership tiers — games/month, off-peak, priority | G01 | P1 | R3 | FREQ |
 | B9 | Public refund policy page, written in plain English | G02 | P1 | R1 | CAC |
-| B10 | Dynamic off-peak pricing | G04 | P2 | R4 | FR |
+| B10 | **Move me to another game this week instead of refunding** | G02 | P1 | R2 | RPT |
+| B11 | Dynamic off-peak pricing | G04 | P2 | R4 | FR |
 
 ### C · Level & matchmaking *(the moat)*
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -180,6 +183,8 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | F4 | Crew chat | G10 | P2 | R3 | RPT |
 | F5 | Follow a player | G10 | P2 | R3 | RPT |
 | F6 | Head-to-head record | G11 | P2 | R3 | FREQ |
+| F7 | **Nemesis — the player whose side you can't beat, surfaced before you book** | G11 | P1 | R3 | FREQ |
+| F8 | Status visible on the team sheet — streak, reliability, milestones | G07 | P2 | R3 | NS |
 
 ### G · Season & competition
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -191,6 +196,9 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | G5 | Man of the match voting | G05 G11 | P0 | R2 | RPT |
 | G6 | Trophies and milestones | G11 | P1 | R3 | RPT |
 | G7 | **Shareable player card** | G10 G11 | P1 | R3 | CAC |
+| G8 | **Unfinished business — the same two sides offered a rematch next week** | G10 G11 | P1 | R3 | FREQ |
+| G9 | Your season in review — shareable wrap at season end | G11 | P1 | R3 | CAC |
+| G10 | Venue leaderboard — top scorer at this pitch this month | G11 | P2 | R3 | FREQ |
 
 ### H · Media
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -200,6 +208,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | H3 | Clip delivery + push within 90 minutes | G09 | P1 | R3 | RPT |
 | H4 | Share to WhatsApp / Instagram | G09 | P1 | R3 | CAC |
 | H5 | Watermark with venue and booking link | G09 | P1 | R3 | CAC |
+| H6 | **Goal of the week — voted from the week's clips** | G09 G11 | P1 | R3 | CAC |
 
 > H1 needs a camera and a venue agreement before a line of code. Start with **one rented camera at two venues** and prove the retention lift before buying anything.
 
@@ -241,6 +250,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | L3 | Over-35 games | G12 | P1 | R3 | FR |
 | L4 | True-beginner games with a different onboarding | G12 | P0 | R3 | RPT |
 | L5 | Format-specific conduct rules and moderation | G12 | P1 | R3 | RPT |
+| L6 | **Keeper programme — play free, priority booking, named on the sheet** | G06 | P0 | R2 | FR RPT |
 
 ### M · Ops & admin
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -259,6 +269,8 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | N3 | App-store and search presence for the category, city by city | G15 | P1 | R1 | CAC |
 | N4 | Newcomer channels — relocation, co-living, universities, gyms | G20 | P1 | R1 | CAC |
 | N5 | Organiser recruitment pipeline (incl. the incumbents' organisers) | G13 G14 | P0 | R1 | HOST |
+| N6 | Guest pass — members bring someone free once a month | G10 | P1 | R3 | CAC |
+| N7 | "Sign a player" — free game once your referral plays their second | G10 | P1 | R2 | CAC |
 
 ### O · Platform
 | ID | Feature | Gap | Pri | Rel | Moves |
@@ -268,8 +280,18 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | O3 | Group accident insurance attached to membership | G19 | P1 | R4 | RPT |
 | O4 | Arabic localisation | — | P1 | R4 | CAC |
 | O5 | Notifications — reminders, waitlist hits, clips, team sheets | G07 | P0 | R1 | NS |
+| O6 | **Team sheet drops in WhatsApp at 18:00 — a fixed ritual** | G10 | P0 | R2 | NS FREQ |
+| O7 | Matchday bot inside an existing WhatsApp group | G13 | P1 | R3 | HOST CAC |
 
-**Count:** 101 features. The bottom third is cuttable and R1 still ships something coherent.
+### P · Staying power *(Dubai-specific)*
+| ID | Feature | Gap | Pri | Rel | Moves |
+|---|---|---|---|---|---|
+| P1 | **Summer mode — indoor and dawn slots, shorter games, May–Sep** | G12 | P0 | R3 | RPT |
+| P2 | Heat and weather-aware rescheduling, with automatic refunds | G02 | P1 | R3 | RPT |
+| P3 | Lapse detection — reach out at three missed weeks, not thirteen | G07 | P1 | R3 | RPT |
+| P4 | Win-back offer tuned to why they stopped | G07 | P2 | R4 | RPT |
+
+**Count:** 118 features. The bottom third is cuttable and R1 still ships something coherent.
 
 ---
 
