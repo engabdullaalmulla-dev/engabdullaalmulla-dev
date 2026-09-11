@@ -1,4 +1,4 @@
-# Marble Nations
+# Marble Ultimate Football
 
 A football tournament simulator where national teams are marbles. You pick the
 nations you care about, pick a competition, watch the draw, and then watch your

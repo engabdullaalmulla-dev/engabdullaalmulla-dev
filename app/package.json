@@ -1,8 +1,8 @@
 {
-  "name": "marble-nations-app",
+  "name": "marble-ultimate-football-app",
   "version": "0.1.0",
   "private": true,
-  "description": "iOS shell for the Marble Nations prototype.",
+  "description": "iOS shell for the Marble Ultimate Football prototype.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build-www.mjs",

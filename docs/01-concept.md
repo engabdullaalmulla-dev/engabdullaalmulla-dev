@@ -22,20 +22,57 @@ Two things have to be true at once, and they pull against each other:
 
 ## Naming
 
-"Marble Nations" is descriptive and works, but it reads as a category rather than
-a product. Shortlist, in order of preference:
+**The name is Marble Ultimate Football.** 24 characters, inside the App Store's
+30-character limit, and it says what the game is on a cold store listing.
 
-| Name | Why | Risk |
-|---|---|---|
-| **Glassball** | One word, owns "glass marble" and "football" at once, says sport without saying soccer, easy to say in any market, likely clearable | Slightly abstract on a cold store listing — needs a strong subtitle |
-| **Roll of Nations** | Plays on "roll of honour", feels like a trophy | Longer; weaker as an icon word |
-| **Marble Nations** | Immediately legible, good search behaviour | Generic; hard to own |
-| **Orbit Cup** | Short, ownable | Says nothing about football |
+Availability was checked against the domain registries over RDAP and against the
+App Store's own name index:
 
-**Recommendation:** ship as **Glassball**, subtitle *Marble Nations Football*.
-The subtitle does the search work; the name does the brand work. Keep "Marble
-Nations" as the working title until a trademark search on Glassball is done in
-the target markets.
+| | Status |
+|---|---|
+| `marbleultimatefootball.com` / `.app` / `.gg` / `.io` | all free |
+| `marbleultimate.com` / `.app` / `.gg` / `.io` | all free |
+| `ultimatemarblefootball.com`, `marbleultimatefc.com` | free |
+| App Store exact name | no collision |
+
+### The two things to know
+
+**The `Marble *` shelf is crowded.** Marble Master, Marble Legend, Marble Woka
+Woka, Marble Blast — the App Store's marble names are dominated by bubble
+shooters and match-three games. A "Marble" name puts us on that shelf, so the
+icon, screenshots and subtitle have to do the work of saying *this is a football
+tournament, not a puzzler*. Lead the screenshots with a group table and a
+scoreboard, not with a marble.
+
+**"Marble Race Ultimate" already exists** (Serhii Nuzhdov) — the same three words
+rearranged. Not a blocker, but expect search bleed in both directions, and it is
+the first thing a trademark search should look at.
+
+### Subtitle candidates
+
+The subtitle is where discoverability is won, and it has its own 30-character
+limit:
+
+- *Nations. Marbles. Real rules.* (29)
+- *Follow your nation to glory* (27)
+- *Real tournaments, marble physics* (32 — needs a trim)
+
+### What is still outstanding
+
+Domain and App Store availability is **not** trademark clearance. A proper search
+— USPTO, EUIPO and the UAE register — has not been done, and it is the one thing
+that can stop the name after money has gone into branding. It belongs with the
+competition-naming review in [10-rights.md](10-rights.md), and both should
+happen before the App Store record is created, because either can change the
+name.
+
+### Names considered and rejected
+
+| Name | Why not |
+|---|---|
+| **Glassball** | Best pure brand word, but `glassball.com` is taken and only `.app` was free |
+| **Glass Nations** | Clean sweep of domains and no collision, but less legible on a cold listing |
+| **Marble Glory**, **Orb Nations**, **Roll Glory** | All available; none said "football" clearly enough |
 
 ## Road to Glory
 

@@ -75,7 +75,7 @@ includes.** Their larger retry allowance is simply there.
 
 ## iOS product model
 
-**One non-consumable** — *Marble Nations Premium*. Permanent, restorable, tied to
+**One non-consumable** — *Marble Ultimate Football Premium*. Permanent, restorable, tied to
 the Apple ID, not depleted by use. Apple distinguishes non-consumables from
 products consumed through use, and the permanent upgrade must be the former.
 

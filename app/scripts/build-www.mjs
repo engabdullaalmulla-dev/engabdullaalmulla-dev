@@ -30,7 +30,7 @@ await writeFile(join(www, 'index.html'), `<meta charset="utf-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#070b0f">
-<title>Marble Nations</title>
+<title>Marble Ultimate Football</title>
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link rel="stylesheet" href="styles.css">
 <div class="app" id="app"></div>

@@ -33,7 +33,7 @@ function check(name, ok, detail) {
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? '  ' + detail : ''}`);
 }
 
-console.log(`\nMarble Nations simulation validation  (${N} matches per arena)\n`);
+console.log(`\nMarble Ultimate Football simulation validation  (${N} matches per arena)\n`);
 
 // 1. Determinism ------------------------------------------------------------
 console.log('Determinism');

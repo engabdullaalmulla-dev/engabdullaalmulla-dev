@@ -1,4 +1,4 @@
-// Marble Nations -- prototype application shell.
+// Marble Ultimate Football -- prototype application shell.
 //
 // Screen structure follows the design doc: Play/setup, Draw ceremony, Tournament
 // journey, Live arena + result, Collection & settings.
@@ -90,7 +90,7 @@ function render() {
   let top, tabs = true;
 
   switch (S.screen) {
-    case 'home': top = topbar('Marble Nations', 'Choose a competition'); homeScreen(body); break;
+    case 'home': top = topbar('Marble Ultimate Football', 'Choose a competition'); homeScreen(body); break;
     case 'setup': top = topbar(compMeta().name, `${compMeta().edition} · ruleset ${compMeta().rulesetVersion}`, () => go('home')); setupScreen(body); break;
     case 'draw': top = topbar('The Draw', S.campaign.name); tabs = false; drawScreen(body); break;
     case 'journey': top = journeyTop(); journeyScreen(body); break;
@@ -1184,7 +1184,7 @@ function cabinetScreen(root) {
   pad.appendChild(h('h3', {}, 'Premium'));
   pad.appendChild(h('div', { class: 'card' },
     h('div', { class: 'row between' },
-      h('div', { class: 'spread' }, h('div', { style: 'font-weight:700' }, 'Marble Nations Premium'),
+      h('div', { class: 'spread' }, h('div', { style: 'font-weight:700' }, 'Marble Ultimate Football Premium'),
         h('div', { class: 'tiny muted' }, 'One-time purchase · non-consumable')),
       h('span', { class: 'pill ' + (S.settings.premium ? 'ok' : '') }, S.settings.premium ? 'Owned' : 'Not owned')),
     h('ul', { class: 'tiny muted', style: 'margin:10px 0 12px;padding-left:18px;line-height:1.7' },

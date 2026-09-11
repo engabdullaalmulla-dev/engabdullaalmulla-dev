@@ -8,6 +8,9 @@
 import { SAVE_VERSION } from './campaign.js';
 import { SIM_VERSION } from '../sim/match.js';
 
+// The `mn.` prefix predates the rename to Marble Ultimate Football and stays:
+// changing a storage key silently discards every campaign anyone has in
+// progress, and a cosmetic prefix is not worth that.
 const K = {
   campaign: 'mn.campaign.v3',
   settings: 'mn.settings.v1',
