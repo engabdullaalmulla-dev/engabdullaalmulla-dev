@@ -1,4 +1,4 @@
-# Matchday
+# Kabatin
 
 Pickup football, built around two numbers: how good you are, and whether you
 turn up. They never touch.

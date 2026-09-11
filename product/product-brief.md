@@ -1,4 +1,4 @@
-# Matchday — Product Brief
+# Kabatin — Product Brief
 
 **Owner:** Product · **Status:** Draft for review · **Last updated:** 11 September 2026
 **Source of truth for strategy:** [`research/celebreak-vs-stranger-soccer.md`](../research/celebreak-vs-stranger-soccer.md) · **Designs:** [`design/`](../design/)
@@ -7,7 +7,7 @@
 
 ## 1. The one-line read
 
-CeleBreak and Stranger Soccer sell *access to a game*, which is a commodity — anyone can rent a pitch and post a link. Matchday sells **a fair game and people worth seeing again**, and gives you your money back when you can't make it. We win one district of Dubai completely, then the next.
+CeleBreak and Stranger Soccer sell *access to a game*, which is a commodity — anyone can rent a pitch and post a link. Kabatin sells **a fair game and people worth seeing again**, and gives you your money back when you can't make it. We win one district of Dubai completely, then the next.
 
 ---
 
@@ -290,7 +290,7 @@ Metrics: **FR** fill rate · **RPT** week-12 repeat · **FREQ** games/player/mon
 | O4 | Arabic localisation | — | P1 | R4 | CAC |
 | O5 | Notifications — reminders, waitlist hits, clips, team sheets | G07 | P0 | R1 | NS |
 | O6 | **Team sheet drops in WhatsApp at 18:00 — a fixed ritual** | G10 | P0 | R2 | NS FREQ |
-| O7 | Matchday bot inside an existing WhatsApp group | G13 | P1 | R3 | HOST CAC |
+| O7 | Kabatin bot inside an existing WhatsApp group | G13 | P1 | R3 | HOST CAC |
 
 ### P · Staying power *(Dubai-specific)*
 | ID | Feature | Gap | Pri | Rel | Moves |

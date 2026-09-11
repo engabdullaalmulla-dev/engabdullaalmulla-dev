@@ -1,8 +1,8 @@
-# Matchday — Unit Economics
+# Kabatin — Unit Economics
 
 **Question:** is the business model sustainable and profitable?
 **Answer:** profitable per game, plausible as a city operator, not venture-scale on the available evidence.
-**Live model:** [Matchday Unit Economics](https://claude.ai/code/artifact/14699702-e825-497f-b16d-55785c1cd47b) · **Strategy:** [competitive teardown](celebreak-vs-stranger-soccer.md)
+**Live model:** [Kabatin Unit Economics](https://claude.ai/code/artifact/14699702-e825-497f-b16d-55785c1cd47b) · **Strategy:** [competitive teardown](celebreak-vs-stranger-soccer.md)
 
 ---
 

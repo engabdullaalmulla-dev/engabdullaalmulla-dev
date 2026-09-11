@@ -1,10 +1,10 @@
-# Matchday — app design canvas
+# Kabatin — app design canvas
 
 Source artboards for the pickup-football app concept in
 `../research/celebreak-vs-stranger-soccer.md`.
 
 Each `.dc.html` file is one artboard; `canvas.json` positions them and
-adds the margin notes. `matchday-app.html` is the assembled canvas —
+adds the margin notes. `kabatin-app.html` is the assembled canvas —
 generated, gitignored, rebuilt from these files.
 
 | Artboard | Screen | Gaps it answers |

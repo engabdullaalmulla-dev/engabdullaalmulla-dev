@@ -1,4 +1,4 @@
--- Matchday — initial schema (Postgres)
+-- Kabatin — initial schema (Postgres)
 --
 -- The first three tables are the R0 spreadsheet's three tabs, promoted. That
 -- continuity is deliberate: the importer in src/import/ reads the sheet

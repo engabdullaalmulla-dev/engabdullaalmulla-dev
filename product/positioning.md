@@ -1,7 +1,7 @@
-# Matchday — Positioning & USPs
+# Kabatin — Positioning & USPs
 
 **Question:** how do I stay profitable and competitive at once, and what actually makes us different?
-**Published version:** [Matchday Positioning](https://claude.ai/code/artifact/d275299a-13c8-4a56-a501-fdc5d5887853)
+**Published version:** [Kabatin Positioning](https://claude.ai/code/artifact/d275299a-13c8-4a56-a501-fdc5d5887853)
 **Depends on:** [competitive teardown](../research/celebreak-vs-stranger-soccer.md) · [unit economics](../research/unit-economics.md)
 
 ---
