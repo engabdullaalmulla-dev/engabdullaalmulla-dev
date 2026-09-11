@@ -7,77 +7,84 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;1,600;1,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
+    a { color: #E5342A; } a:hover { color: #B8241C; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
-    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
-    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
-    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, box-shadow .3s ease; }
-    .tap:active { transform: scale(.982); }
-    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-    @keyframes swell { from { opacity: 0; transform: translateY(18px) scale(.986); } to { opacity: 1; transform: none; } }
-    @keyframes pop { 0% { opacity: 0; transform: scale(.6); } 65% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    .impact { font-family: Kanit, 'Arial Narrow', Impact, sans-serif; font-weight: 800; font-style: italic; letter-spacing: -.02em; }
+    .sub { font-family: Kanit, 'Arial Narrow', sans-serif; font-weight: 600; font-style: italic; letter-spacing: .04em; text-transform: uppercase; }
+    .halftone { background-image: radial-gradient(rgba(20,20,27,.26) 1.3px, transparent 1.4px); background-size: 6px 6px; }
+    .halftone-lt { background-image: radial-gradient(rgba(255,255,255,.30) 1.2px, transparent 1.3px); background-size: 5px 5px; }
+    .speed { background-image: repeating-conic-gradient(from 0deg at 50% 26%, rgba(20,20,27,.12) 0deg 1deg, transparent 1deg 3.2deg); }
+    .ink { border: 3px solid #14141B; }
+    .drop { box-shadow: 5px 5px 0 #14141B; }
+    .drop-sm { box-shadow: 3px 3px 0 #14141B; }
+    .tap { cursor: pointer; transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, background .2s ease; }
+    .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
+    @keyframes zoomIn { 0% { opacity: 0; transform: scale(.86) rotate(-1.6deg); } 65% { transform: scale(1.02) rotate(.4deg); } 100% { opacity: 1; transform: scale(1) rotate(-.5deg); } }
+    @keyframes slam { 0% { opacity: 0; transform: translateY(-14px) scale(1.2); } 60% { transform: translateY(2px) scale(.98); } 100% { opacity: 1; transform: none; } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+    @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F6F2E7; font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif; color: #14141B; display: flex; flex-direction: column; overflow: hidden;">
 
-  <!-- header -->
-  <div style="padding: 30px 20px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
-    <div style="display: flex; flex-direction: column; gap: 6px;">
-      <div class="lbl" style="font-size: 10px; color: #C6FF4A;">Thursday · Al Quoz</div>
-      <div class="disp" style="font-size: 42px; line-height: .94;">TONIGHT</div>
+  <!-- masthead -->
+  <div style="padding: 22px 18px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <div class="sub" style="font-size: 11px; color: #E5342A;">Thursday · Al Quoz</div>
+      <div class="impact" style="font-size: 46px; line-height: .9; text-shadow: 3px 3px 0 #14141B; color: #F6F2E7; -webkit-text-stroke: 2.5px #14141B;">TONIGHT</div>
     </div>
-    <div class="tap" style="width: 44px; height: 44px; border-radius: 999px; background: #152820; border: 1px solid #2C4739; color: #EAF5EE; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;">AA</div>
+    <div class="tap ink drop-sm" style="width: 46px; height: 46px; border-radius: 999px; background: #FFC42E; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0;">AA</div>
   </div>
 
-  <!-- hero -->
-  <div style="padding: 0 20px;">
-    <div style="position: relative; border-radius: 24px; overflow: hidden; border: 1px solid #2A4B39; box-shadow: 0 26px 56px -26px rgba(0,0,0,.95), 0 0 40px -18px rgba(198,255,74,.28); animation: swell .7s cubic-bezier(.22,1,.36,1) both;">
+  <!-- hero panel -->
+  <div style="padding: 0 18px;">
+    <div class="ink drop" style="position: relative; overflow: hidden; background: #7FC4F5; animation: zoomIn .55s cubic-bezier(.34,1.56,.64,1) both;">
+      <div class="speed" style="position: absolute; inset: 0;"></div>
+      <div class="halftone" style="position: absolute; left: 0; right: 0; top: 0; height: 46%; opacity: .5;"></div>
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 42%; background: #1F9E55; border-top: 3px solid #14141B;"></div>
+      <div class="halftone-lt" style="position: absolute; left: 0; right: 0; bottom: 0; height: 42%; opacity: .5;"></div>
 
-      <div style="position: absolute; inset: 0; background-color: #0C3826; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 26px, transparent 26px 52px);"></div>
-      <div style="position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% -18%, rgba(226,255,178,.34) 0%, rgba(198,255,74,.10) 34%, transparent 66%);"></div>
-
-      <div style="position: relative; padding: 20px; display: flex; flex-direction: column; gap: 18px;">
+      <div style="position: relative; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
 
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,61,127,.16); border: 1px solid rgba(255,61,127,.45); border-radius: 999px; padding: 6px 11px;">
-            <div style="width: 6px; height: 6px; border-radius: 999px; background: #FF3D7F; animation: blink 1.5s ease-in-out infinite;"></div>
-            <span class="lbl" style="font-size: 9.5px; color: #FF8FB4;">{{hero.countdown}}</span>
+          <div class="ink sub" style="display: flex; align-items: center; gap: 7px; background: #E5342A; color: #FFFFFF; border-width: 2.5px; padding: 5px 10px; font-size: 10.5px;">
+            <span style="width: 7px; height: 7px; border-radius: 999px; background: #FFC42E; animation: flash 1.2s ease-in-out infinite;"></span>
+            {{hero.countdown}}
           </div>
-          <div class="lbl" style="font-size: 9.5px; color: #9FCF7A; border: 1px solid #3D6B3A; border-radius: 999px; padding: 6px 11px;">{{hero.tier}}</div>
+          <div class="ink sub" style="background: #F6F2E7; border-width: 2.5px; padding: 5px 10px; font-size: 10.5px;">{{hero.tier}}</div>
         </div>
 
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
-          <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
-            <div class="disp" style="font-size: 62px; line-height: .84; color: #FFFFFF;">{{hero.time}}</div>
-            <div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em;">{{hero.venue}}</div>
-            <div style="font-size: 12.5px; font-weight: 500; color: #8DA79A;">{{hero.meta}}</div>
+        <div class="impact" style="font-size: 74px; line-height: .82; color: #FFFFFF; text-shadow: 4px 4px 0 #14141B; animation: slam .5s cubic-bezier(.34,1.56,.64,1) .1s both;">{{hero.time}}</div>
+
+        <div class="ink" style="background: #F6F2E7; border-width: 2.5px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+            <div style="font-size: 15px; font-weight: 900; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{hero.venue}}</div>
+            <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66;">{{hero.meta}}</div>
           </div>
-          <div class="disp" style="font-size: 22px; line-height: 1; color: #C6FF4A; flex-shrink: 0;">{{hero.price}}</div>
+          <div class="impact" style="font-size: 20px; color: #E5342A; flex-shrink: 0;">{{hero.price}}</div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 11px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
           <div style="display: flex;">
             <sc-for list="{{hero.faces}}" as="f" hint-placeholder-count="5">
-              <div style="width: 31px; height: 31px; border-radius: 999px; background: {{f.bg}}; color: {{f.fg}}; border: 2px solid #0C3826; margin-left: {{f.shift}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; animation: pop .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{f.delay}};">{{f.label}}</div>
+              <div class="ink" style="width: 32px; height: 32px; border-radius: 999px; border-width: 2.5px; background: {{f.bg}}; color: {{f.fg}}; margin-left: {{f.shift}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; animation: slam .4s cubic-bezier(.34,1.56,.64,1) both; animation-delay: {{f.delay}};">{{f.label}}</div>
             </sc-for>
           </div>
-          <div style="font-size: 12.5px; font-weight: 600; line-height: 1.35; color: #C3D6CB;">{{hero.crew}}</div>
+          <div style="font-size: 12px; font-weight: 700; color: #FFFFFF; text-shadow: 1.5px 1.5px 0 #14141B; line-height: 1.3;">{{hero.crew}}</div>
         </div>
 
-        <div class="tap" onClick="{{ book }}" style="min-height: 56px; border-radius: 16px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1px solid {{ctaBorder}}; box-shadow: {{ctaGlow}}; display: flex; align-items: center; justify-content: center;">
-          <span class="disp" style="font-size: 16px; letter-spacing: .01em;">{{ctaLabel}}</span>
+        <div class="tap ink drop-sm" onClick="{{ book }}" style="min-height: 56px; background: {{ctaBg}}; color: {{ctaFg}}; display: flex; align-items: center; justify-content: center;">
+          <span class="impact" style="font-size: 20px;">{{ctaLabel}}</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#9FCF7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-          <div style="font-size: 12px; font-weight: 500; color: #9FCF7A;">Can't make it? Money straight back.</div>
+        <div style="display: flex; align-items: center; gap: 7px; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#14141B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+          <div style="font-size: 11.5px; font-weight: 700; color: #14141B;">Can't make it? Money straight back.</div>
         </div>
 
       </div>
@@ -85,30 +92,30 @@
   </div>
 
   <!-- also -->
-  <div style="padding: 22px 20px 10px; display: flex; align-items: center; gap: 12px;">
-    <div class="lbl" style="font-size: 10px; color: #6F8A7C;">Also on tonight</div>
-    <div style="height: 1px; background: #1C3129; flex-grow: 1;"></div>
+  <div style="padding: 18px 18px 8px; display: flex; align-items: center; gap: 10px;">
+    <div class="sub" style="font-size: 11px;">Also on tonight</div>
+    <div style="height: 3px; background: #14141B; flex-grow: 1;"></div>
   </div>
 
-  <div style="padding: 0 20px 12px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 9px;">
+  <div style="padding: 0 18px 12px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 9px;">
     <sc-for list="{{others}}" as="g" hint-placeholder-count="2">
-      <div class="tap panel" onClick="{{ g.pick }}" style="border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 14px; animation: rise .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
-        <div class="disp" style="font-size: 21px; line-height: 1; color: {{g.timeColor}}; min-width: 66px;">{{g.time}}</div>
-        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
-          <div style="font-size: 14px; font-weight: 700; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{g.venue}}</div>
-          <div style="font-size: 12px; font-weight: 600; color: {{g.statusColor}};">{{g.status}}</div>
+      <div class="tap ink drop-sm" onClick="{{ g.pick }}" style="background: #FFFFFF; padding: 11px 12px; display: flex; align-items: center; gap: 12px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
+        <div class="impact ink" style="font-size: 20px; border-width: 2.5px; background: {{g.chipBg}}; color: {{g.chipFg}}; padding: 7px 9px; min-width: 72px; text-align: center;">{{g.time}}</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+          <div style="font-size: 14px; font-weight: 900; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{g.venue}}</div>
+          <div class="sub" style="font-size: 10px; color: {{g.statusColor}};">{{g.status}}</div>
         </div>
-        <div style="font-size: 13px; font-weight: 700; color: #8DA79A; flex-shrink: 0;">{{g.price}}</div>
+        <div class="impact" style="font-size: 15px; color: #5A5A66; flex-shrink: 0;">{{g.price}}</div>
       </div>
     </sc-for>
   </div>
 
   <!-- nav -->
-  <div style="display: flex; padding: 8px 12px 20px; gap: 2px; border-top: 1px solid #1C3129;">
+  <div style="display: flex; padding: 8px 12px 18px; gap: 4px; border-top: 3px solid #14141B; background: #EFE9DA;">
     <sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
-      <div class="tap" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 54px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: {{n.bg}};">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="{{n.color}}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
-        <div class="lbl" style="font-size: 8.5px; color: {{n.color}};">{{n.label}}</div>
+      <div class="tap" onClick="{{ n.pick }}" style="flex-grow: 1; min-height: 52px; border: {{n.border}}; background: {{n.bg}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="{{n.color}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>
+        <div class="sub" style="font-size: 9px; color: {{n.color}};">{{n.label}}</div>
       </div>
     </sc-for>
   </div>
@@ -125,24 +132,24 @@ class Component extends DCLogic {
 
   renderVals() {
     const defs = [
-      { time: '19:00', venue: 'Al Quoz Sports Park', meta: '7-a-side · astro · floodlit', tier: 'Your level', price: 'AED 45', taken: 13, total: 14, countdown: 'Kick-off 5h 42m', crew: 'Three of your crew are playing' },
+      { time: '19:00', venue: 'Al Quoz Sports Park', meta: '7-a-side · astro · floodlit', tier: 'Your level', price: 'AED 45', taken: 13, total: 14, countdown: 'Kick-off 5h 42m', crew: 'Three of your crew are in' },
       { time: '20:30', venue: 'The Sevens', meta: '5-a-side · indoor', tier: 'A level up', price: 'AED 38', taken: 10, total: 10, countdown: 'Kick-off 7h 12m', crew: 'Rami and Marco are in' },
-      { time: '21:00', venue: 'Insportz Indoor', meta: '7-a-side · indoor', tier: 'Your level', price: 'AED 50', taken: 8, total: 14, countdown: 'Kick-off 7h 42m', crew: 'Plenty of room — bring someone' },
+      { time: '21:00', venue: 'Insportz Indoor', meta: '7-a-side · indoor', tier: 'Your level', price: 'AED 50', taken: 8, total: 14, countdown: 'Kick-off 7h 42m', crew: 'Room to spare — bring someone' },
     ];
 
     const say = (d) => {
       const left = d.total - d.taken;
-      if (left <= 0) { return 'Full — waitlist open'; }
-      if (left === 1) { return 'One shirt left'; }
+      if (left <= 0) { return 'Full — waitlist'; }
+      if (left === 1) { return 'One shirt left!'; }
       return left + ' shirts left';
     };
 
     const palette = [
-      { bg: '#C6FF4A', fg: '#07110E' },
-      { bg: '#FFB23D', fg: '#07110E' },
-      { bg: '#FF3D7F', fg: '#FFFFFF' },
-      { bg: '#2F4C3E', fg: '#EAF5EE' },
-      { bg: '#EAF5EE', fg: '#07110E' },
+      { bg: '#E5342A', fg: '#FFFFFF' },
+      { bg: '#FFC42E', fg: '#14141B' },
+      { bg: '#2050E0', fg: '#FFFFFF' },
+      { bg: '#FFFFFF', fg: '#14141B' },
+      { bg: '#1F9E55', fg: '#FFFFFF' },
     ];
     const names = ['RK', 'MA', 'DS', 'JT', 'SH'];
 
@@ -156,11 +163,11 @@ class Component extends DCLogic {
       bg: palette[k].bg,
       fg: palette[k].fg,
       shift: k === 0 ? '0' : '-10px',
-      delay: (0.3 + k * 0.06) + 's',
+      delay: (0.24 + k * 0.06) + 's',
     }));
 
     let ctaLabel = 'TAKE A SHIRT · ' + h.price;
-    if (booked) { ctaLabel = "YOU'RE IN"; }
+    if (booked) { ctaLabel = "YOU'RE IN!"; }
     else if (full) { ctaLabel = 'JOIN THE WAITLIST'; }
 
     const others = [];
@@ -172,8 +179,9 @@ class Component extends DCLogic {
         venue: d.venue,
         price: d.price,
         status: say(d),
-        timeColor: isFull ? '#6F8A7C' : '#EAF5EE',
-        statusColor: isFull ? '#6F8A7C' : '#C6FF4A',
+        chipBg: isFull ? '#EFE9DA' : '#7FC4F5',
+        chipFg: '#14141B',
+        statusColor: isFull ? '#5A5A66' : '#E5342A',
         delay: (others.length * 0.08 + 0.3) + 's',
         pick: () => this.setState({ hero: k, booked: false }),
       });
@@ -190,8 +198,9 @@ class Component extends DCLogic {
       return {
         label: n.label,
         icon: n.icon,
-        color: on ? '#C6FF4A' : '#5E7568',
-        bg: on ? '#132219' : 'transparent',
+        color: on ? '#14141B' : '#8C8C99',
+        bg: on ? '#FFC42E' : 'transparent',
+        border: on ? '2.5px solid #14141B' : '2.5px solid transparent',
         pick: () => {},
       };
     });
@@ -201,10 +210,8 @@ class Component extends DCLogic {
       others: others,
       nav: nav,
       ctaLabel: ctaLabel,
-      ctaBg: booked ? 'rgba(198,255,74,.10)' : '#C6FF4A',
-      ctaFg: booked ? '#C6FF4A' : '#07110E',
-      ctaBorder: booked ? '#4E7A32' : 'transparent',
-      ctaGlow: booked ? 'none' : '0 0 34px -6px rgba(198,255,74,.55)',
+      ctaBg: booked ? '#1F9E55' : '#E5342A',
+      ctaFg: '#FFFFFF',
       book: () => this.setState({ booked: !booked }),
     };
   }

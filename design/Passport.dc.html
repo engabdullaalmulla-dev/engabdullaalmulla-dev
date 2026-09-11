@@ -7,87 +7,87 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;1,600;1,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
+    a { color: #E5342A; } a:hover { color: #B8241C; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
-    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
-    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
-    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease; }
-    .tap:active { transform: scale(.982); }
-    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-    @keyframes swell { from { opacity: 0; transform: translateY(20px) scale(.982); } to { opacity: 1; transform: none; } }
-    @keyframes pop { 0% { opacity: 0; transform: scale(.6); } 65% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+    .impact { font-family: Kanit, 'Arial Narrow', Impact, sans-serif; font-weight: 800; font-style: italic; letter-spacing: -.02em; }
+    .sub { font-family: Kanit, 'Arial Narrow', sans-serif; font-weight: 600; font-style: italic; letter-spacing: .04em; text-transform: uppercase; }
+    .halftone { background-image: radial-gradient(rgba(20,20,27,.24) 1.3px, transparent 1.4px); background-size: 6px 6px; }
+    .ink { border: 3px solid #14141B; }
+    .drop { box-shadow: 5px 5px 0 #14141B; }
+    .drop-sm { box-shadow: 3px 3px 0 #14141B; }
+    .tap { cursor: pointer; transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, background .2s ease, color .2s ease; }
+    .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
+    @keyframes zoomIn { 0% { opacity: 0; transform: scale(.9); } 65% { transform: scale(1.015); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes slam { 0% { opacity: 0; transform: translateY(-16px) scale(1.3); } 62% { transform: translateY(2px) scale(.97); } 100% { opacity: 1; transform: none; } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F6F2E7; font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif; color: #14141B; display: flex; flex-direction: column; overflow: hidden;">
 
-  <!-- player card -->
-  <div style="padding: 24px 20px 0;">
-    <div style="border-radius: 24px; padding: 1.5px; background: linear-gradient(145deg, #C6FF4A 0%, #4E7A32 32%, #22392F 58%, #FF3D7F 100%); box-shadow: 0 28px 60px -28px rgba(0,0,0,.95), 0 0 48px -22px rgba(198,255,74,.5); animation: swell .7s cubic-bezier(.22,1,.36,1) both;">
-      <div style="position: relative; border-radius: 23px; overflow: hidden; background: #0A1A13;">
-        <div style="position: absolute; inset: 0; background: radial-gradient(110% 80% at 88% -10%, rgba(198,255,74,.22), transparent 58%), radial-gradient(80% 60% at 0% 100%, rgba(255,61,127,.14), transparent 60%);"></div>
-        <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(118deg, rgba(255,255,255,.022) 0 12px, transparent 12px 24px);"></div>
+  <!-- character card -->
+  <div style="padding: 20px 18px 0;">
+    <div class="ink drop" style="position: relative; overflow: hidden; background: #E5342A; animation: zoomIn .55s cubic-bezier(.34,1.56,.64,1) both;">
+      <div style="position: absolute; left: 68%; top: 30%; width: 520px; height: 520px; margin: -260px 0 0 -260px; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,.24) 0deg 6deg, transparent 6deg 14deg);"></div>
+      <div class="halftone" style="position: absolute; inset: 0; opacity: .32;"></div>
+      <div class="impact" style="position: absolute; right: -10px; top: -40px; font-size: 190px; line-height: 1; color: rgba(255,255,255,.24);">8</div>
 
-        <div class="disp" style="position: absolute; right: -8px; top: -34px; font-size: 168px; line-height: 1; color: rgba(198,255,74,.09);">8</div>
+      <div style="position: relative; padding: 16px; display: flex; flex-direction: column; gap: 14px;">
 
-        <div style="position: relative; padding: 20px; display: flex; flex-direction: column; gap: 18px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-            <div class="lbl" style="font-size: 9px; color: #07110E; background: #C6FF4A; border-radius: 999px; padding: 5px 11px;">Level 4 · Midfield</div>
-            <div class="lbl" style="font-size: 8.5px; color: #6F8A7C;">Since 2024</div>
-          </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div class="ink sub" style="border-width: 2.5px; background: #FFC42E; padding: 5px 10px; font-size: 10px;">Level 4 · Midfield</div>
+          <div class="sub" style="font-size: 9.5px; color: #FFFFFF;">Since 2024</div>
+        </div>
 
-          <div style="display: flex; align-items: center; gap: 14px;">
-            <div style="width: 62px; height: 62px; border-radius: 999px; background: linear-gradient(140deg, #C6FF4A, #4E7A32); color: #07110E; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; box-shadow: 0 0 26px -6px rgba(198,255,74,.7);">AA</div>
-            <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
-              <div class="disp" style="font-size: 30px; line-height: .96;">ABDULLA</div>
-              <div class="disp" style="font-size: 30px; line-height: .96; color: #C6FF4A;">ALMULLA</div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 7px;">
-            <sc-for list="{{cardStats}}" as="s" hint-placeholder-count="4">
-              <div style="flex-grow: 1; background: rgba(0,0,0,.42); border: 1px solid #1E3529; border-radius: 13px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; animation: pop .5s cubic-bezier(.22,1,.36,1) both; animation-delay: {{s.delay}};">
-                <div class="disp" style="font-size: 22px; line-height: 1; color: {{s.color}};">{{s.value}}</div>
-                <div class="lbl" style="font-size: 7.5px; color: #6F8A7C; text-align: center;">{{s.label}}</div>
-              </div>
-            </sc-for>
+        <div style="display: flex; align-items: center; gap: 13px;">
+          <div class="ink" style="width: 62px; height: 62px; border-radius: 999px; border-width: 3px; background: #FFC42E; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; flex-shrink: 0; box-shadow: 3px 3px 0 #14141B;">AA</div>
+          <div style="display: flex; flex-direction: column; gap: 0; min-width: 0;">
+            <div class="impact" style="font-size: 32px; line-height: .92; color: #FFFFFF; text-shadow: 3px 3px 0 #14141B;">ABDULLA</div>
+            <div class="impact" style="font-size: 32px; line-height: .92; color: #FFFFFF; text-shadow: 3px 3px 0 #14141B;">ALMULLA</div>
           </div>
         </div>
+
+        <div style="display: flex; gap: 7px;">
+          <sc-for list="{{cardStats}}" as="s" hint-placeholder-count="4">
+            <div class="ink" style="flex-grow: 1; border-width: 2.5px; background: {{s.bg}}; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; gap: 1px; animation: slam .45s cubic-bezier(.34,1.56,.64,1) both; animation-delay: {{s.delay}};">
+              <div class="impact" style="font-size: 22px; line-height: 1; color: {{s.color}};">{{s.value}}</div>
+              <div class="sub" style="font-size: 7.5px; color: #5A5A66; text-align: center;">{{s.label}}</div>
+            </div>
+          </sc-for>
+        </div>
+
       </div>
     </div>
   </div>
 
   <!-- tabs -->
-  <div style="padding: 18px 20px 14px;">
-    <div style="display: flex; gap: 3px; background: #0E1C17; border: 1px solid #22392F; border-radius: 999px; padding: 3px;">
-      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
-        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; display: flex; align-items: center; justify-content: center;">
-          <span class="lbl" style="font-size: 9px;">{{t.label}}</span>
-        </div>
-      </sc-for>
-    </div>
+  <div style="padding: 16px 18px 12px; display: flex; gap: 7px;">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+      <div class="tap ink" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
+        <span class="sub" style="font-size: 10.5px;">{{t.label}}</span>
+      </div>
+    </sc-for>
   </div>
 
-  <div style="padding: 0 20px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+  <div style="padding: 0 18px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
 
     <sc-if value="{{isForm}}" hint-placeholder-val="{{ true }}">
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 11px;">
         <div style="display: flex; gap: 6px;">
           <sc-for list="{{form}}" as="r" hint-placeholder-count="6">
-            <div class="disp" style="flex-grow: 1; height: 46px; border-radius: 12px; background: {{r.bg}}; color: {{r.fg}}; border: 1px solid {{r.border}}; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: {{r.glow}};">{{r.result}}</div>
+            <div class="impact ink" style="flex-grow: 1; height: 46px; border-width: 2.5px; background: {{r.bg}}; color: {{r.fg}}; display: flex; align-items: center; justify-content: center; font-size: 19px; box-shadow: 2px 2px 0 #14141B;">{{r.result}}</div>
           </sc-for>
         </div>
         <sc-for list="{{recent}}" as="g" hint-placeholder-count="4">
-          <div class="panel" style="border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 13px; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
-            <div class="disp" style="font-size: 17px; color: {{g.scoreFg}}; background: {{g.scoreBg}}; border: 1px solid {{g.scoreBorder}}; border-radius: 11px; padding: 8px 9px; min-width: 60px; text-align: center;">{{g.score}}</div>
-            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 14px; font-weight: 700; letter-spacing: -.01em;">{{g.venue}}</div>
-              <div style="font-size: 11.5px; font-weight: 500; color: #8DA79A;">{{g.meta}}</div>
+          <div class="ink drop-sm" style="background: #FFFFFF; padding: 10px 12px; display: flex; align-items: center; gap: 12px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{g.delay}};">
+            <div class="impact ink" style="font-size: 18px; border-width: 2.5px; background: {{g.scoreBg}}; color: {{g.scoreFg}}; padding: 7px 8px; min-width: 62px; text-align: center;">{{g.score}}</div>
+            <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+              <div style="font-size: 14px; font-weight: 900; letter-spacing: -.01em;">{{g.venue}}</div>
+              <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66;">{{g.meta}}</div>
             </div>
           </div>
         </sc-for>
@@ -97,10 +97,10 @@
     <sc-if value="{{isBadges}}" hint-placeholder-val="{{ true }}">
       <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
         <sc-for list="{{badges}}" as="b" hint-placeholder-count="6">
-          <div style="background: {{b.bg}}; border: 1px solid {{b.border}}; border-radius: 18px; padding: 15px 13px; display: flex; flex-direction: column; gap: 9px; box-shadow: {{b.glow}}; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{b.delay}};">
-            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="{{b.stroke}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg>
-            <div class="disp" style="font-size: 15px; line-height: 1.08; color: {{b.titleColor}};">{{b.title}}</div>
-            <div style="font-size: 11px; font-weight: 500; line-height: 1.4; color: {{b.metaColor}};">{{b.meta}}</div>
+          <div class="ink" style="background: {{b.bg}}; box-shadow: {{b.shadow}}; padding: 13px 12px; display: flex; flex-direction: column; gap: 7px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{b.delay}};">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="{{b.stroke}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg>
+            <div class="impact" style="font-size: 16px; line-height: 1.05; color: {{b.titleColor}};">{{b.title}}</div>
+            <div style="font-size: 11px; font-weight: 500; line-height: 1.35; color: {{b.metaColor}};">{{b.meta}}</div>
           </div>
         </sc-for>
       </div>
@@ -108,12 +108,12 @@
 
     <sc-if value="{{isCities}}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: 9px;">
-        <div style="font-size: 13.5px; font-weight: 500; line-height: 1.6; color: #8DA79A; padding-bottom: 4px;">Your card travels. Land anywhere we run and you are in the right game that night — no starting again.</div>
+        <div style="font-size: 13px; font-weight: 500; line-height: 1.55; color: #3C3C48;">Your card travels. Land anywhere we run and you are in the right game that night — no starting again.</div>
         <sc-for list="{{cities}}" as="c" hint-placeholder-count="5">
-          <div class="panel" style="border-radius: 16px; padding: 14px 15px; display: flex; align-items: center; gap: 13px; border-color: {{c.border}}; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{c.delay}};">
-            <div style="width: 7px; height: 7px; border-radius: 999px; background: {{c.dot}}; box-shadow: {{c.dotGlow}}; flex-shrink: 0;"></div>
-            <div class="disp" style="font-size: 18px; flex-grow: 1; color: {{c.nameColor}};">{{c.name}}</div>
-            <div style="font-size: 11.5px; font-weight: 600; color: {{c.metaColor}};">{{c.meta}}</div>
+          <div class="ink drop-sm" style="background: {{c.bg}}; padding: 12px 13px; display: flex; align-items: center; gap: 12px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{c.delay}};">
+            <div class="ink" style="width: 12px; height: 12px; border-radius: 999px; border-width: 2.5px; background: {{c.dot}}; flex-shrink: 0;"></div>
+            <div class="impact" style="font-size: 19px; flex-grow: 1; color: {{c.nameColor}};">{{c.name}}</div>
+            <div style="font-size: 11.5px; font-weight: 700; color: {{c.metaColor}};">{{c.meta}}</div>
           </div>
         </sc-for>
       </div>
@@ -121,10 +121,10 @@
 
   </div>
 
-  <div style="padding: 12px 20px 22px;">
-    <div class="tap" style="border-radius: 16px; background: #C6FF4A; color: #07110E; padding: 15px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 0 34px -8px rgba(198,255,74,.6);">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#07110E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4"></path></svg>
-      <span class="disp" style="font-size: 15px; flex-grow: 1;">SHARE YOUR CARD</span>
+  <div style="padding: 12px 18px 20px;">
+    <div class="tap ink drop-sm" style="background: #2050E0; color: #FFFFFF; padding: 14px 16px; display: flex; align-items: center; gap: 11px;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4"></path></svg>
+      <span class="impact" style="font-size: 17px; flex-grow: 1;">SHARE YOUR CARD</span>
     </div>
   </div>
 
@@ -150,8 +150,9 @@ class Component extends DCLogic {
       const on = t.id === tab;
       return {
         label: t.label,
-        bg: on ? '#C6FF4A' : 'transparent',
-        fg: on ? '#07110E' : '#8DA79A',
+        bg: on ? '#14141B' : '#FFFFFF',
+        fg: on ? '#F6F2E7' : '#14141B',
+        shadow: on ? '3px 3px 0 #14141B' : 'none',
         pick: () => this.setState({ tab: t.id }),
       };
     });
@@ -162,25 +163,22 @@ class Component extends DCLogic {
     ];
     const form = formDefs.map((f) => ({
       result: f.result,
-      bg: f.win === true ? '#C6FF4A' : (f.win === false ? '#132219' : 'rgba(255,178,61,.14)'),
-      fg: f.win === true ? '#07110E' : (f.win === false ? '#6F8A7C' : '#FFB23D'),
-      border: f.win === true ? 'transparent' : (f.win === false ? '#22392F' : 'rgba(255,178,61,.4)'),
-      glow: f.win === true ? '0 0 18px -4px rgba(198,255,74,.6)' : 'none',
+      bg: f.win === true ? '#1F9E55' : (f.win === false ? '#EFE9DA' : '#FFC42E'),
+      fg: f.win === true ? '#FFFFFF' : '#14141B',
     }));
 
     const recentDefs = [
-      { score: '6–5', venue: 'Al Quoz Sports Park', meta: 'Thursday · you bagged 2', win: true },
-      { score: '3–3', venue: 'The Sevens', meta: 'Tuesday · one goal', win: null },
-      { score: '4–7', venue: 'Insportz Indoor', meta: 'Sunday · one of those nights', win: false },
-      { score: '5–2', venue: 'Zabeel Park', meta: 'Friday · one assist', win: true },
+      { score: '6-5', venue: 'Al Quoz Sports Park', meta: 'Thursday · you bagged 2', win: true },
+      { score: '3-3', venue: 'The Sevens', meta: 'Tuesday · one goal', win: null },
+      { score: '4-7', venue: 'Insportz Indoor', meta: 'Sunday · one of those nights', win: false },
+      { score: '5-2', venue: 'Zabeel Park', meta: 'Friday · one assist', win: true },
     ];
     const recent = recentDefs.map((g, i) => ({
       score: g.score,
       venue: g.venue,
       meta: g.meta,
-      scoreBg: g.win === true ? 'rgba(198,255,74,.12)' : (g.win === false ? '#132219' : 'rgba(255,178,61,.12)'),
-      scoreFg: g.win === true ? '#C6FF4A' : (g.win === false ? '#6F8A7C' : '#FFB23D'),
-      scoreBorder: g.win === true ? 'rgba(198,255,74,.34)' : (g.win === false ? '#22392F' : 'rgba(255,178,61,.34)'),
+      scoreBg: g.win === true ? '#1F9E55' : (g.win === false ? '#EFE9DA' : '#FFC42E'),
+      scoreFg: g.win === true ? '#FFFFFF' : '#14141B',
       delay: (i * 0.06) + 's',
     }));
 
@@ -196,12 +194,11 @@ class Component extends DCLogic {
       title: b.title,
       meta: b.meta,
       icon: b.icon,
-      bg: b.earned ? 'rgba(198,255,74,.07)' : '#0C1712',
-      border: b.earned ? 'rgba(198,255,74,.34)' : '#1C3129',
-      glow: b.earned ? '0 0 28px -14px rgba(198,255,74,.7)' : 'none',
-      stroke: b.earned ? '#C6FF4A' : '#4C6157',
-      titleColor: b.earned ? '#EAF5EE' : '#5E7568',
-      metaColor: b.earned ? '#8DA79A' : '#4C6157',
+      bg: b.earned ? '#FFFFFF' : '#EFE9DA',
+      shadow: b.earned ? '3px 3px 0 #14141B' : 'none',
+      stroke: b.earned ? '#E5342A' : '#9A9AA6',
+      titleColor: b.earned ? '#14141B' : '#9A9AA6',
+      metaColor: b.earned ? '#5A5A66' : '#9A9AA6',
       delay: (i * 0.055) + 's',
     }));
 
@@ -215,11 +212,10 @@ class Component extends DCLogic {
     const cities = cityDefs.map((c, i) => ({
       name: c.name,
       meta: c.meta,
-      dot: c.live ? '#C6FF4A' : '#33473D',
-      dotGlow: c.live ? '0 0 10px rgba(198,255,74,.9)' : 'none',
-      border: c.live ? '#22392F' : '#182821',
-      nameColor: c.live ? '#EAF5EE' : '#5E7568',
-      metaColor: c.live ? '#8DA79A' : '#4C6157',
+      dot: c.live ? '#1F9E55' : '#CFC8B6',
+      bg: c.live ? '#FFFFFF' : '#EFE9DA',
+      nameColor: c.live ? '#14141B' : '#9A9AA6',
+      metaColor: c.live ? '#5A5A66' : '#9A9AA6',
       delay: (i * 0.055) + 's',
     }));
 
@@ -229,10 +225,10 @@ class Component extends DCLogic {
       isBadges: tab === 'badges',
       isCities: tab === 'cities',
       cardStats: [
-        { value: '41', label: 'Games', color: '#EAF5EE', delay: '.34s' },
-        { value: '23', label: 'Goals', color: '#C6FF4A', delay: '.41s' },
-        { value: '98%', label: 'Turned up', color: '#EAF5EE', delay: '.48s' },
-        { value: '11', label: 'Streak', color: '#FF3D7F', delay: '.55s' },
+        { value: '41', label: 'Games', color: '#14141B', bg: '#FFFFFF', delay: '.3s' },
+        { value: '23', label: 'Goals', color: '#14141B', bg: '#FFC42E', delay: '.37s' },
+        { value: '98%', label: 'Turned up', color: '#14141B', bg: '#FFFFFF', delay: '.44s' },
+        { value: '11', label: 'Streak', color: '#FFFFFF', bg: '#2050E0', delay: '.51s' },
       ],
       form: form,
       recent: recent,

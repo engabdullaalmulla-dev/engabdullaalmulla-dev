@@ -7,79 +7,78 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Sora:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;1,600;1,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
   <style>
     body { margin: 0; }
-    a { color: #C6FF4A; } a:hover { color: #D9FF80; }
+    a { color: #E5342A; } a:hover { color: #B8241C; }
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    .disp { font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-variation-settings: 'wdth' 122, 'wght' 800; letter-spacing: -.02em; }
-    .lbl { font-family: Archivo, sans-serif; font-variation-settings: 'wdth' 108, 'wght' 700; letter-spacing: .16em; text-transform: uppercase; }
-    .panel { background: #0E1C17; border: 1px solid #22392F; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 44px -24px rgba(0,0,0,.9); }
-    .tap { cursor: pointer; transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease; }
-    .tap:active { transform: scale(.982); }
-    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-    @keyframes swell { from { opacity: 0; transform: translateY(16px) scale(.988); } to { opacity: 1; transform: none; } }
-    @keyframes drop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.4); } 70% { transform: translate(-50%,-50%) scale(1.1); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+    .impact { font-family: Kanit, 'Arial Narrow', Impact, sans-serif; font-weight: 800; font-style: italic; letter-spacing: -.02em; }
+    .sub { font-family: Kanit, 'Arial Narrow', sans-serif; font-weight: 600; font-style: italic; letter-spacing: .04em; text-transform: uppercase; }
+    .halftone-lt { background-image: radial-gradient(rgba(255,255,255,.28) 1.2px, transparent 1.3px); background-size: 5px 5px; }
+    .ink { border: 3px solid #14141B; }
+    .drop { box-shadow: 5px 5px 0 #14141B; }
+    .drop-sm { box-shadow: 3px 3px 0 #14141B; }
+    .tap { cursor: pointer; transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, background .2s ease, color .2s ease; }
+    .tap:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141B; }
+    @keyframes zoomIn { 0% { opacity: 0; transform: scale(.9); } 65% { transform: scale(1.015); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes slam { 0% { opacity: 0; transform: translate(-50%,-50%) scale(1.9); } 62% { transform: translate(-50%,-50%) scale(.94); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; background: #07110E; font-family: Sora, 'Helvetica Neue', Arial, sans-serif; color: #EAF5EE; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F6F2E7; font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif; color: #14141B; display: flex; flex-direction: column; overflow: hidden;">
 
-  <!-- header -->
-  <div style="padding: 30px 20px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
-    <div style="display: flex; flex-direction: column; gap: 6px;">
-      <div class="lbl" style="font-size: 10px; color: #C6FF4A;">Thursday 19:00 · Al Quoz</div>
-      <div class="disp" style="font-size: 38px; line-height: .94;">THE TEAMS</div>
+  <!-- masthead -->
+  <div style="padding: 22px 18px 12px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <div class="sub" style="font-size: 11px; color: #E5342A;">Thursday 19:00 · Al Quoz</div>
+      <div class="impact" style="font-size: 40px; line-height: .9; text-shadow: 3px 3px 0 #14141B; color: #F6F2E7; -webkit-text-stroke: 2.5px #14141B;">THE TEAMS</div>
     </div>
-    <div class="lbl" style="font-size: 10px; color: #9FCF7A; border: 1px solid #3D6B3A; border-radius: 999px; padding: 7px 12px; white-space: nowrap;">7 v 7</div>
+    <div class="ink sub drop-sm" style="background: #FFC42E; padding: 6px 11px; font-size: 11px; white-space: nowrap;">7 v 7</div>
   </div>
 
   <!-- toggle -->
-  <div style="padding: 0 20px 16px;">
-    <div style="display: flex; gap: 3px; background: #0E1C17; border: 1px solid #22392F; border-radius: 999px; padding: 3px;">
-      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
-        <div class="tap" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; border-radius: 999px; background: {{t.bg}}; color: {{t.fg}}; display: flex; align-items: center; justify-content: center;">
-          <span class="lbl" style="font-size: 9.5px;">{{t.label}}</span>
-        </div>
-      </sc-for>
-    </div>
+  <div style="padding: 0 18px 14px; display: flex; gap: 8px;">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+      <div class="tap ink" onClick="{{ t.pick }}" style="flex-grow: 1; min-height: 44px; background: {{t.bg}}; color: {{t.fg}}; box-shadow: {{t.shadow}}; display: flex; align-items: center; justify-content: center;">
+        <span class="sub" style="font-size: 11px;">{{t.label}}</span>
+      </div>
+    </sc-for>
   </div>
 
-  <div style="padding: 0 20px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+  <div style="padding: 0 18px; flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
 
     <!-- PITCH -->
     <sc-if value="{{isPitch}}" hint-placeholder-val="{{ true }}">
-      <div style="position: relative; height: 392px; border-radius: 22px; overflow: hidden; border: 1px solid #2A4B39; box-shadow: 0 26px 56px -26px rgba(0,0,0,.95); animation: swell .65s cubic-bezier(.22,1,.36,1) both;">
+      <div class="ink drop" style="position: relative; height: 396px; overflow: hidden; background: #1F9E55; animation: zoomIn .5s cubic-bezier(.34,1.56,.64,1) both;">
+        <div class="halftone-lt" style="position: absolute; inset: 0; opacity: .55;"></div>
+        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.2), transparent 34%, transparent 66%, rgba(20,20,27,.18));"></div>
 
-        <div style="position: absolute; inset: 0; background-color: #0B3526; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 34px, transparent 34px 68px);"></div>
-        <div style="position: absolute; inset: 0; background: radial-gradient(70% 48% at 50% 0%, rgba(232,255,196,.32), transparent 62%), radial-gradient(70% 48% at 50% 100%, rgba(232,255,196,.22), transparent 62%);"></div>
-
-        <div style="position: absolute; left: 10px; right: 10px; top: 10px; bottom: 10px; border: 1.5px solid rgba(234,245,238,.3); border-radius: 10px;"></div>
-        <div style="position: absolute; left: 10px; right: 10px; top: 50%; height: 1.5px; background: rgba(234,245,238,.3);"></div>
-        <div style="position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px; border: 1.5px solid rgba(234,245,238,.3); border-radius: 999px;"></div>
-        <div style="position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 999px; background: rgba(234,245,238,.55);"></div>
-        <div style="position: absolute; left: 50%; top: 10px; width: 132px; height: 50px; margin-left: -66px; border: 1.5px solid rgba(234,245,238,.3); border-top: none; border-radius: 0 0 8px 8px;"></div>
-        <div style="position: absolute; left: 50%; bottom: 10px; width: 132px; height: 50px; margin-left: -66px; border: 1.5px solid rgba(234,245,238,.3); border-bottom: none; border-radius: 8px 8px 0 0;"></div>
+        <div style="position: absolute; left: 9px; right: 9px; top: 9px; bottom: 9px; border: 3px solid #FFFFFF; border-radius: 4px;"></div>
+        <div style="position: absolute; left: 9px; right: 9px; top: 50%; height: 3px; margin-top: -1.5px; background: #FFFFFF;"></div>
+        <div style="position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px; border: 3px solid #FFFFFF; border-radius: 999px;"></div>
+        <div style="position: absolute; left: 50%; top: 9px; width: 134px; height: 50px; margin-left: -67px; border: 3px solid #FFFFFF; border-top: none;"></div>
+        <div style="position: absolute; left: 50%; bottom: 9px; width: 134px; height: 50px; margin-left: -67px; border: 3px solid #FFFFFF; border-bottom: none;"></div>
 
         <sc-for list="{{pitch}}" as="p" hint-placeholder-count="14">
-          <div style="position: absolute; left: {{p.x}}; top: {{p.y}}; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; animation: drop .55s cubic-bezier(.22,1,.36,1) both; animation-delay: {{p.delay}};">
-            <div class="disp" style="width: 34px; height: 34px; border-radius: 999px; background: {{p.bg}}; color: {{p.fg}}; border: 1.5px solid {{p.ring}}; border-style: {{p.style}}; box-shadow: {{p.glow}}; display: flex; align-items: center; justify-content: center; font-size: 14px;">{{p.num}}</div>
-            <div style="font-size: 9px; font-weight: 700; color: #EAF5EE; text-shadow: 0 1px 3px rgba(0,0,0,.85); white-space: nowrap;">{{p.name}}</div>
+          <div style="position: absolute; left: {{p.x}}; top: {{p.y}}; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; animation: slam .45s cubic-bezier(.34,1.56,.64,1) both; animation-delay: {{p.delay}};">
+            <div class="impact ink" style="width: 34px; height: 34px; border-radius: 999px; border-width: 2.5px; border-style: {{p.style}}; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 2px 2px 0 #14141B;">{{p.num}}</div>
+            <div class="sub" style="font-size: 8.5px; color: #FFFFFF; text-shadow: 1.5px 1.5px 0 #14141B; white-space: nowrap;">{{p.name}}</div>
           </div>
         </sc-for>
 
-        <div class="lbl" style="position: absolute; left: 18px; top: 18px; font-size: 9px; color: #07110E; background: #EAF5EE; border-radius: 999px; padding: 5px 10px;">Whites</div>
-        <div class="lbl" style="position: absolute; left: 18px; bottom: 18px; font-size: 9px; color: #07110E; background: #C6FF4A; border-radius: 999px; padding: 5px 10px;">Limes</div>
+        <div class="ink sub" style="position: absolute; left: 16px; top: 16px; border-width: 2.5px; background: #FFFFFF; padding: 4px 9px; font-size: 9.5px;">Whites</div>
+        <div class="ink sub" style="position: absolute; left: 16px; bottom: 16px; border-width: 2.5px; background: #E5342A; color: #FFFFFF; padding: 4px 9px; font-size: 9.5px;">Reds</div>
       </div>
 
-      <div class="panel" style="border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px; animation: rise .5s cubic-bezier(.22,1,.36,1) .25s both;">
-        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(198,255,74,.12); border: 1px solid rgba(198,255,74,.34); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#C6FF4A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+      <div class="ink drop-sm" style="background: #FFFFFF; padding: 13px 14px; display: flex; align-items: center; gap: 13px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) .2s both;">
+        <div class="ink" style="width: 42px; height: 42px; border-width: 2.5px; background: #FFC42E; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#14141B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5M16 12h5M12 4v16"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
-          <div class="disp" style="font-size: 17px; color: #C6FF4A;">DEAD EVEN</div>
-          <div style="font-size: 12px; font-weight: 500; color: #8DA79A; line-height: 1.4;">Sorted from everyone's level. Three goals in it and we swap two at half time.</div>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <div class="impact" style="font-size: 17px;">DEAD EVEN</div>
+          <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66; line-height: 1.4;">Sorted on everyone's level. Three goals in it and we swap two at half time.</div>
         </div>
       </div>
     </sc-if>
@@ -88,19 +87,19 @@
     <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <sc-for list="{{squad}}" as="p" hint-placeholder-count="7">
-          <div class="panel" style="border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 13px; border-color: {{p.rowBorder}}; animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: {{p.delay}};">
-            <div class="disp" style="width: 36px; height: 36px; border-radius: 999px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;">{{p.num}}</div>
-            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
-              <div style="font-size: 14.5px; font-weight: 700; letter-spacing: -.01em; color: {{p.nameColor}};">{{p.name}}</div>
-              <div style="font-size: 11.5px; font-weight: 500; color: #8DA79A;">{{p.meta}}</div>
+          <div class="ink drop-sm" style="background: {{p.rowBg}}; padding: 10px 12px; display: flex; align-items: center; gap: 12px; animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; animation-delay: {{p.delay}};">
+            <div class="impact ink" style="width: 36px; height: 36px; border-radius: 999px; border-width: 2.5px; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;">{{p.num}}</div>
+            <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+              <div style="font-size: 14.5px; font-weight: 900; letter-spacing: -.01em;">{{p.name}}</div>
+              <div style="font-size: 11.5px; font-weight: 500; color: #5A5A66;">{{p.meta}}</div>
             </div>
-            <div class="lbl" style="font-size: 8.5px; color: {{p.teamFg}}; border: 1px solid {{p.teamBorder}}; border-radius: 999px; padding: 5px 9px; white-space: nowrap;">{{p.team}}</div>
+            <div class="ink sub" style="border-width: 2px; background: {{p.teamBg}}; color: {{p.teamFg}}; padding: 4px 8px; font-size: 9px; white-space: nowrap;">{{p.team}}</div>
           </div>
         </sc-for>
-        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 2px;">
-          <div style="height: 1px; background: #1C3129; flex-grow: 1;"></div>
-          <div class="lbl" style="font-size: 9px; color: #6F8A7C;">and six more</div>
-          <div style="height: 1px; background: #1C3129; flex-grow: 1;"></div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 2px;">
+          <div style="height: 3px; background: #14141B; flex-grow: 1;"></div>
+          <div class="sub" style="font-size: 10px; color: #5A5A66;">and six more</div>
+          <div style="height: 3px; background: #14141B; flex-grow: 1;"></div>
         </div>
       </div>
     </sc-if>
@@ -108,13 +107,13 @@
   </div>
 
   <!-- CTA -->
-  <div style="padding: 16px 20px 22px; display: flex; flex-direction: column; gap: 11px;">
-    <div class="tap" onClick="{{ join }}" style="min-height: 56px; border-radius: 16px; background: {{ctaBg}}; color: {{ctaFg}}; border: 1px solid {{ctaBorder}}; box-shadow: {{ctaGlow}}; display: flex; align-items: center; justify-content: center;">
-      <span class="disp" style="font-size: 16px; letter-spacing: .01em;">{{ctaLabel}}</span>
+  <div style="padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 10px;">
+    <div class="tap ink drop-sm" onClick="{{ join }}" style="min-height: 56px; background: {{ctaBg}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+      <span class="impact" style="font-size: 19px;">{{ctaLabel}}</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#9FCF7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-      <div style="font-size: 12px; font-weight: 500; color: #9FCF7A;">Can't make it? Money straight back.</div>
+    <div style="display: flex; align-items: center; gap: 7px; justify-content: center;">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#14141B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+      <div style="font-size: 11.5px; font-weight: 700;">Can't make it? Money straight back.</div>
     </div>
   </div>
 
@@ -140,8 +139,9 @@ class Component extends DCLogic {
       const on = t.id === tab;
       return {
         label: t.label,
-        bg: on ? '#C6FF4A' : 'transparent',
-        fg: on ? '#07110E' : '#8DA79A',
+        bg: on ? '#14141B' : '#F6F2E7',
+        fg: on ? '#F6F2E7' : '#14141B',
+        shadow: on ? '3px 3px 0 #14141B' : 'none',
         pick: () => this.setState({ tab: t.id }),
       };
     });
@@ -154,7 +154,7 @@ class Component extends DCLogic {
       { num: '8', name: 'Deepak', x: 50, y: 33 },
       { num: '7', name: 'Paolo', x: 83, y: 35 },
     ];
-    const limes = [
+    const reds = [
       { num: '1', name: 'Marco', x: 50, y: 92 },
       { num: '2', name: 'Omar', x: 26, y: 79 },
       { num: '3', name: 'Luis', x: 74, y: 79 },
@@ -168,50 +168,46 @@ class Component extends DCLogic {
     whites.forEach((p, i) => {
       pitch.push({
         num: p.num, name: p.name, x: p.x + '%', y: p.y + '%',
-        bg: '#EAF5EE', fg: '#07110E', ring: 'rgba(255,255,255,.7)', style: 'solid',
-        glow: '0 4px 14px rgba(0,0,0,.5)',
-        delay: (0.1 + i * 0.05) + 's',
+        bg: '#FFFFFF', fg: '#14141B', style: 'solid',
+        delay: (0.08 + i * 0.045) + 's',
       });
     });
-    limes.forEach((p, i) => {
+    reds.forEach((p, i) => {
       pitch.push({
         num: p.num, name: p.name, x: p.x + '%', y: p.y + '%',
-        bg: p.me ? '#FF3D7F' : '#C6FF4A',
-        fg: p.me ? '#FFFFFF' : '#07110E',
-        ring: p.me ? 'rgba(255,255,255,.8)' : 'rgba(198,255,74,.8)',
+        bg: p.me ? '#FFC42E' : '#E5342A',
+        fg: p.me ? '#14141B' : '#FFFFFF',
         style: 'solid',
-        glow: p.me ? '0 0 22px rgba(255,61,127,.8)' : '0 0 18px rgba(198,255,74,.5)',
-        delay: (0.16 + i * 0.05) + 's',
+        delay: (0.13 + i * 0.045) + 's',
       });
     });
     pitch.push({
       num: '+', name: 'open', x: '50%', y: '47%',
-      bg: 'rgba(234,245,238,.10)', fg: '#EAF5EE', ring: 'rgba(234,245,238,.7)', style: 'dashed',
-      glow: 'none', delay: '0.6s',
+      bg: 'rgba(255,255,255,.35)', fg: '#14141B', style: 'dashed',
+      delay: '0.55s',
     });
 
     const squadDefs = [
-      { num: '8', name: 'You', meta: 'Never missed a game', team: 'Limes', me: true },
-      { num: '9', name: 'Rami K.', meta: '63 games together', team: 'Limes', me: false },
-      { num: '1', name: 'Marco A.', meta: 'In goal, as always', team: 'Limes', me: false },
+      { num: '8', name: 'You', meta: 'Never missed a game', team: 'Reds', me: true },
+      { num: '9', name: 'Rami K.', meta: '63 games together', team: 'Reds', me: false },
+      { num: '1', name: 'Marco A.', meta: 'In goal, as always', team: 'Reds', me: false },
       { num: '1', name: 'Tariq M.', meta: 'Clean sheet last week', team: 'Whites', me: false },
       { num: '8', name: 'Deepak S.', meta: '12 games this season', team: 'Whites', me: false },
-      { num: '6', name: 'Jonas T.', meta: 'First game — say hello', team: 'Limes', me: false },
+      { num: '6', name: 'Jonas T.', meta: 'First game — say hello', team: 'Reds', me: false },
       { num: '7', name: 'Paolo N.', meta: 'Two goals last Thursday', team: 'Whites', me: false },
     ];
     const squad = squadDefs.map((p, i) => {
-      const lime = p.team === 'Limes';
+      const red = p.team === 'Reds';
       return {
         num: p.num,
         name: p.name,
         meta: p.meta,
         team: p.team,
-        bg: p.me ? '#FF3D7F' : (lime ? '#C6FF4A' : '#EAF5EE'),
-        fg: p.me ? '#FFFFFF' : '#07110E',
-        rowBorder: p.me ? '#5E2440' : '#22392F',
-        nameColor: p.me ? '#FF8FB4' : '#EAF5EE',
-        teamFg: lime ? '#C6FF4A' : '#B8C9BF',
-        teamBorder: lime ? '#4E7A32' : '#3A5248',
+        bg: p.me ? '#FFC42E' : (red ? '#E5342A' : '#FFFFFF'),
+        fg: p.me ? '#14141B' : (red ? '#FFFFFF' : '#14141B'),
+        rowBg: p.me ? '#FFF6DC' : '#FFFFFF',
+        teamBg: red ? '#E5342A' : '#FFFFFF',
+        teamFg: red ? '#FFFFFF' : '#14141B',
         delay: (i * 0.05) + 's',
       };
     });
@@ -223,10 +219,7 @@ class Component extends DCLogic {
       pitch: pitch,
       squad: squad,
       ctaLabel: joined ? "YOU'RE IN · SHIRT 8" : 'TAKE THE LAST SHIRT · AED 45',
-      ctaBg: joined ? 'rgba(198,255,74,.10)' : '#C6FF4A',
-      ctaFg: joined ? '#C6FF4A' : '#07110E',
-      ctaBorder: joined ? '#4E7A32' : 'transparent',
-      ctaGlow: joined ? 'none' : '0 0 34px -6px rgba(198,255,74,.55)',
+      ctaBg: joined ? '#1F9E55' : '#E5342A',
       join: () => this.setState({ joined: !joined }),
     };
   }
