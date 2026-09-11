@@ -7,6 +7,7 @@ import { Button } from '../components/Button';
 import { Flame } from '../components/Flame';
 import type { ErrorCode } from '../../../shared/protocol';
 import { useLanguage } from '../../i18n';
+import { LTR } from '../ltr';
 import { tap } from '../haptics';
 import { DIFFICULTIES } from '../labels';
 import { colors, radius, space, type as typography } from '../theme';
@@ -45,7 +46,9 @@ export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart,
           <View style={styles.codeCard}>
             <Flame size={22} />
             <Text style={styles.codeLabel}>{t.room.roomCode}</Text>
-            <Text style={styles.code}>{room.code}</Text>
+            <Text {...LTR} style={styles.code}>
+              {room.code}
+            </Text>
             <Text style={styles.codeHint}>{t.room.tapToSend}</Text>
           </View>
         </Pressable>
@@ -147,7 +150,9 @@ const styles = StyleSheet.create({
     gap: space(1.5),
   },
   codeLabel: { ...typography.label, fontSize: 9, color: colors.textFaint },
-  code: { fontSize: 40, fontWeight: '800', color: colors.text, letterSpacing: 8 },
+  // A room code is read out and typed in character by character, so it keeps
+  // its own direction whatever language the app is in.
+  code: { fontSize: 40, fontWeight: '800', color: colors.text, letterSpacing: 8, direction: 'ltr' },
   codeHint: { ...typography.small, fontSize: 11, color: colors.textFaint, textAlign: 'center' },
 
   error: { ...typography.small, color: colors.bad },

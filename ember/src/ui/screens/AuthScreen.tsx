@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { useLanguage } from '../../i18n';
+import { LTR } from '../ltr';
 import { api, ApiError, SERVER_URL, type AuthResponse } from '../../net/api';
 import { Button } from '../components/Button';
 import { Wordmark } from '../components/Wordmark';
@@ -110,7 +111,9 @@ export function AuthScreen({ onSignedIn, onBack }: Props) {
         </View>
 
         <Text style={styles.footnote}>{t.auth.privacy}</Text>
-        <Text style={styles.server}>{SERVER_URL}</Text>
+        <Text {...LTR} style={styles.server}>
+          {SERVER_URL}
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -175,5 +178,11 @@ const styles = StyleSheet.create({
   error: { ...typography.small, color: colors.bad, lineHeight: 18 },
   switch: { ...typography.small, color: colors.ember, textAlign: 'center' },
   footnote: { ...typography.small, fontSize: 11, color: colors.textFaint, lineHeight: 17 },
-  server: { ...typography.small, fontSize: 10, color: colors.line, textAlign: 'center' },
+  server: {
+    ...typography.small,
+    fontSize: 10,
+    color: colors.line,
+    textAlign: 'center',
+    direction: 'ltr',
+  },
 });

@@ -12,6 +12,7 @@ import {
 import type { PublicUser } from '../../../shared/protocol';
 import type { ErrorCode } from '../../../shared/protocol';
 import { useLanguage } from '../../i18n';
+import { LTR } from '../ltr';
 import type { ConnectionStatus, QueueState } from '../../net/useOnline';
 import { Button } from '../components/Button';
 import { Wordmark } from '../components/Wordmark';
@@ -94,6 +95,7 @@ export function LobbyScreen({
 
         <View style={styles.joinRow}>
           <TextInput
+            {...LTR}
             value={code}
             onChangeText={(next) => setCode(next.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
             placeholder={t.lobby.code}
@@ -162,6 +164,7 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     textAlign: 'center',
     minHeight: 48,
+    direction: 'ltr',
   },
   joinButton: { minWidth: 96 },
 

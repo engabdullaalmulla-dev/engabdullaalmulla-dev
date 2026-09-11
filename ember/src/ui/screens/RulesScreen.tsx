@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { Power, Rank } from '../../../shared/types';
 import { useLanguage } from '../../i18n';
+import { LTR } from '../ltr';
 import { Button } from '../components/Button';
 import { colors, radius, space, type as typography } from '../theme';
 
@@ -82,7 +83,7 @@ export function RulesScreen({ onBack }: { onBack: () => void }) {
               return (
                 <View key={row.card} style={styles.valueRow}>
                   <View style={styles.chip}>
-                    <Text style={[styles.chipText, row.tint ? { color: row.tint } : null]}>
+                    <Text {...LTR} style={[styles.chipText, row.tint ? { color: row.tint } : null]}>
                       {row.card}
                     </Text>
                     {spoken && spoken !== row.rank ? (
@@ -102,7 +103,9 @@ export function RulesScreen({ onBack }: { onBack: () => void }) {
             {POWERS.map((row) => (
               <View key={row.on} style={styles.powerRow}>
                 <View style={styles.chip}>
-                  <Text style={styles.chipText}>{row.on}</Text>
+                  <Text {...LTR} style={styles.chipText}>
+                    {row.on}
+                  </Text>
                 </View>
                 <View style={styles.powerText}>
                   <Text style={styles.powerName}>{t.powers[row.power].name}</Text>
@@ -168,7 +171,9 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     alignItems: 'center',
   },
-  chipText: { ...typography.small, color: colors.text },
+  // "2 – 10" and "J · Q" are card notation, not prose: they read the same way
+  // round in either language.
+  chipText: { ...typography.small, color: colors.text, direction: 'ltr' },
   chipSpoken: { ...typography.small, fontSize: 10, color: colors.goldFaint, marginTop: 1 },
   points: { ...typography.body, color: colors.text, fontWeight: '800', minWidth: 86 },
   note: { ...typography.small, fontSize: 11, color: colors.textFaint, flexShrink: 1, lineHeight: 16 },
