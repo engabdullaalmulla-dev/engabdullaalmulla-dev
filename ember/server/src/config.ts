@@ -1,5 +1,7 @@
 /** Everything the server reads from its environment, in one place. */
 
+import { SITE_ORIGINS } from '../../shared/site';
+
 function number(name: string, fallback: number): number {
   const raw = process.env[name];
   if (!raw) return fallback;
@@ -29,11 +31,18 @@ export const config = {
   maxRooms: number('MAX_ROOMS', 500),
   /** Trust X-Forwarded-For. Only turn this on behind a proxy you control. */
   trustProxy: process.env.TRUST_PROXY === '1',
-  /** Allowed origins for browser clients. Empty means same-origin only. */
+  /**
+   * Allowed origins for browser clients.
+   *
+   * Defaults to the game's own site so a fresh deploy works without anyone
+   * remembering this variable; set CORS_ORIGINS to replace the list outright,
+   * which is what a staging host or a second front end wants.
+   */
   corsOrigins: (process.env.CORS_ORIGINS ?? '')
     .split(',')
     .map((origin) => origin.trim())
-    .filter(Boolean),
+    .filter(Boolean)
+    .concat(process.env.CORS_ORIGINS ? [] : SITE_ORIGINS),
 } as const;
 
 export type Config = typeof config;

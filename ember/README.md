@@ -342,6 +342,30 @@ Both were also played through for real: two browser sessions at a private table,
 with the WebSocket frames recorded and audited — across 34 table frames, no card
 reached a phone that had no right to it.
 
+## The domain
+
+The game's name is **emberthecardgame.com**, kept in `shared/site.ts` so the
+server's allowed origins, the app's default server and the invite people paste
+into a group chat all read it from the same line.
+
+Two hosts, because the front end is a static file and the tables are not:
+
+| Host | What answers it |
+|---|---|
+| `emberthecardgame.com` | the web build — a single HTML file, so any static host will do |
+| `www.emberthecardgame.com` | a redirect to the above |
+| `api.emberthecardgame.com` | the game server, over TLS, with WebSocket upgrades allowed through |
+
+DNS, once the domain is registered: an `A`/`AAAA` (or `ALIAS`) record on the
+apex pointing at the static host, a `CNAME` on `www`, and a `CNAME` on `api`
+pointing at the server — `your-app.fly.dev` if you deploy it the way below.
+A release build with no `EXPO_PUBLIC_EMBER_SERVER` set talks to `api.` by
+default, so the app ships pointing at the right place without anyone having to
+remember the variable.
+
+Until those records exist and the server is behind them, online play has
+nothing to talk to; the app still plays against bots.
+
 ## Deploying the server
 
 ```bash
@@ -361,6 +385,7 @@ fly deploy --config server/fly.toml
 Then build the app against it:
 
 ```bash
+# Only needed to point somewhere other than api.emberthecardgame.com.
 EXPO_PUBLIC_EMBER_SERVER=https://your-app.fly.dev npx eas build --platform ios
 ```
 
@@ -376,6 +401,10 @@ Worth knowing before you scale it:
 - The container runs as root, which is the norm for a Fly VM but not for a
   shared host. Add a `USER node` and make `/data` writable by that user if your
   platform expects it.
+
+`CORS_ORIGINS` already defaults to the site's own origins, so a browser on
+emberthecardgame.com is allowed through without configuring anything. Set it
+only to replace that list — a staging front end, say.
 
 Settings worth knowing, all environment variables: `PORT`, `DATABASE_PATH`,
 `TURN_SECONDS`, `ROUND_BREAK_SECONDS`, `QUICK_MATCH_WAIT_SECONDS`, `MAX_SEATS`,

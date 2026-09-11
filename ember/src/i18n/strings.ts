@@ -1,4 +1,5 @@
 import type { PhraseId } from '../../shared/expressions';
+import { SITE_HOST } from '../../shared/site';
 import type { AvatarColour, AvatarShape, BadgeId, Tier, TitleId } from '../../shared/progress';
 import type { Difficulty, LogEntry, Power, Rank, Suit } from '../../shared/types';
 
@@ -478,7 +479,9 @@ export const en: Strings = {
     needThree: 'THREE PLAYERS TO START',
     waitingForHost: 'Waiting for the host to deal…',
     remove: (name) => `Remove ${name}`,
-    invite: (code) => `Sit down at my EMBER table. Room code: ${code}`,
+    // The code on its own is no use to somebody who has never heard of the
+    // game, so the invite says where to go as well as what to type.
+    invite: (code) => `Sit down at my EMBER table — ${SITE_HOST}, room code ${code}`,
     youSuffix: ' (you)',
   },
 
@@ -1022,7 +1025,7 @@ export const ar: Strings = {
     needThree: 'نبي ثلاثة لاعبين',
     waitingForHost: 'ننتظر المضيف يوزّع…',
     remove: (name) => `شيل ${name}`,
-    invite: (code) => `اقعد على طاولتي في EMBER. رمز الطاولة: ${code}`,
+    invite: (code) => `اقعد على طاولتي في EMBER — ${SITE_HOST}، ورمز الطاولة ${code}`,
     youSuffix: ' (أنت)',
   },
 

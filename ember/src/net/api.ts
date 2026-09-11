@@ -3,6 +3,7 @@
  * table goes over the socket instead.
  */
 
+import { API_URL } from '../../shared/site';
 import type {
   Board,
   BoardScope,
@@ -21,11 +22,17 @@ const configured = process.env.EXPO_PUBLIC_EMBER_SERVER;
 export const ONLINE_ENABLED = configured !== 'none';
 
 /**
- * Where the server lives. Set EXPO_PUBLIC_EMBER_SERVER when you build, or
- * leave it for a server running on the same machine during development.
+ * Where the server lives.
+ *
+ * Set EXPO_PUBLIC_EMBER_SERVER when you build and that wins. Otherwise a
+ * development build talks to a server on this machine, and a release build
+ * talks to the game's own api host — so shipping without the variable set
+ * produces an app that works rather than one that quietly points at localhost.
  */
+const fallback = __DEV__ ? 'http://localhost:8787' : API_URL;
+
 export const SERVER_URL = (
-  configured && configured !== 'none' ? configured : 'http://localhost:8787'
+  configured && configured !== 'none' ? configured : fallback
 ).replace(/\/$/, '');
 
 export function socketUrl(): string {
