@@ -48,6 +48,20 @@ function pair(list, c) { list.push(c, rotCollider(c)); return list; }
 // A shape that is already its own twin (centred, even-armed) is added once.
 function solo(list, c) { list.push(c); return list; }
 
+// Force fields get the same treatment: the twin sits at the rotated point.
+function fieldPair(list, f) {
+  const m = rp(f.x, f.y);
+  list.push(f, { ...f, x: m.x, y: m.y });
+  return list;
+}
+
+export function fieldActive(f, t) {
+  if (f.cycle == null) return true;
+  let u = (t - f.phase) % f.cycle;
+  if (u < 0) u += f.cycle;
+  return u < f.onFor;
+}
+
 // --- shared furniture -------------------------------------------------------
 
 function perimeter(out) {
@@ -138,10 +152,13 @@ function baseSpec(id, name, blurb, rng, tension, over = {}) {
     colliders,
     goals: [goalSpec(0, mouth), goalSpec(1, mouth)],
     drains: [],
+    // Force fields: pulsing attractors and repulsors. Added in 180-degree pairs
+    // exactly like colliders, so they cannot favour an end.
+    fields: [],
     spawns: SPAWN,
     launch: { speed: over.launchSpeed ?? 30, spread: over.launchSpread ?? 0.55 },
     // Forward drive: how hard each marble pushes towards the end it is attacking.
-    drive: over.drive ?? 6.2,
+    drive: over.drive ?? 20,
     decor: { theme: over.theme || 'grass', tension },
   };
 }
@@ -182,7 +199,7 @@ function buildRotor(rng, tension) {
 //    come thick and fast; expect the loudest, highest-scoring matches.
 function buildPinball(rng, tension) {
   const a = baseSpec('pinball', 'Pinball Stadium', 'Live bumpers and slingshots fire marbles back into the danger zone.', rng, tension, {
-    drag: 0.20, mouth: 13.5, launchSpeed: 34, drive: 7.2, theme: 'neon',
+    drag: 0.20, mouth: 13.5, launchSpeed: 34, drive: 22, theme: 'neon',
   });
   const c = a.colliders;
   const kick = 15 + 5 * tension;
@@ -208,7 +225,7 @@ function buildPinball(rng, tension) {
 //    Nothing here can eliminate a nation; it only costs an attack.
 function buildCrumble(rng, tension) {
   const a = baseSpec('crumble', 'Crumble Pitch', 'The surface gives way in patches. Lose the floor, lose the attack.', rng, tension, {
-    drag: 0.13, mouth: 14.5, drive: 5.6, theme: 'ice',
+    drag: 0.13, mouth: 14.5, drive: 14, theme: 'frost',
   });
   const c = a.colliders;
 
@@ -237,7 +254,7 @@ function buildCrumble(rng, tension) {
 //    on the edge of a closing door while the opponent breaks clear.
 function buildChannels(rng, tension) {
   const a = baseSpec('channels', 'Channel Run', 'Doors open and close across the pitch. Read the gap or get shut out.', rng, tension, {
-    drag: 0.12, launchSpeed: 36, drive: 5.0, theme: 'court',
+    drag: 0.12, launchSpeed: 36, drive: 17, theme: 'court',
   });
   const c = a.colliders;
   const period = 3.6 - 0.9 * tension;
@@ -263,7 +280,7 @@ function buildChannels(rng, tension) {
 //    break out through a moving gap. Constant contact, sudden releases.
 function buildBowl(rng, tension) {
   const a = baseSpec('bowl', 'Knockout Bowl', 'Trapped in a turning ring. Find the gap, then find the goal.', rng, tension, {
-    drag: 0.12, mouth: 15.0, keeper: 6.4, launchSpeed: 30, drive: 3.2, theme: 'stone',
+    drag: 0.12, mouth: 15.0, keeper: 6.4, launchSpeed: 30, drive: 11, theme: 'stone',
   });
   const c = a.colliders;
   const R = 31, N = 36;
@@ -288,7 +305,7 @@ function buildBowl(rng, tension) {
 //    live bumpers and the tightest keepers in the game.
 function buildGrand(rng, tension) {
   const a = baseSpec('grand', 'The Grand Arena', 'The final. Every mechanism in the game, turned up.', rng, 1, {
-    drag: 0.16, mouth: 13.5, keeper: 7.4, period: 2.5, launchSpeed: 35, drive: 7.0, theme: 'gold',
+    drag: 0.16, mouth: 13.5, keeper: 7.4, period: 2.5, launchSpeed: 35, drive: 20, theme: 'gold',
   });
   const c = a.colliders;
   const omega = 2.0;
@@ -307,22 +324,102 @@ function buildGrand(rng, tension) {
   return a;
 }
 
+// 7. MAGNET DRIFT -- pulsing fields bend the marbles' paths. Nothing touches
+//    them and yet their routes curve: the most alien-looking arena, and the one
+//    where a marble can be dragged off a certain goal at the last moment.
+function buildMagnets(rng, tension) {
+  const a = baseSpec('magnets', 'Magnet Drift', 'Invisible fields pulse on and off. Routes bend without anything touching the marble.', rng, tension, {
+    drag: 0.22, mouth: 12.0, keeper: 8.4, launchSpeed: 30, drive: 4, theme: 'void',
+  });
+  const c = a.colliders;
+  const cycle = 4.2 - 1.1 * tension;
+
+  fieldPair(a.fields, { x: 30, y: 56, r: 30, strength: -62 - 20 * tension, cycle, phase: rng.range(0, cycle), onFor: cycle * 0.45, kind: 'push' });
+  fieldPair(a.fields, { x: 74, y: 40, r: 26, strength: 54 + 18 * tension, cycle, phase: rng.range(0, cycle), onFor: cycle * 0.4, kind: 'pull' });
+  a.fields.push({ x: CX, y: CY, r: 34, strength: -72, cycle: cycle * 1.6, phase: rng.range(0, cycle), onFor: cycle * 0.55, kind: 'push' });
+
+  pair(c, bumper(30, 56, 2.4, { kick: 5, tag: 'node' }));
+  pair(c, bumper(74, 40, 2.4, { kick: 5, tag: 'node' }));
+  solo(c, bumper(CX, CY, 3.2, { kick: 7, tag: 'node' }));
+  pair(c, seg(6, 100, 24, 112, { rest: 0.98, tag: 'rail' }));
+  return a;
+}
+
+// 8. SPLIT DECISION -- a wall divides the pitch and the only way across is a
+//    turning three-arm gate in the middle. Both marbles have to queue for it.
+function buildSplit(rng, tension) {
+  const a = baseSpec('split', 'Split Decision', 'One wall, one turning gate. Nobody attacks until they get through it.', rng, tension, {
+    drag: 0.16, mouth: 12.5, keeper: 8.6, launchSpeed: 30, drive: 4, theme: 'court',
+  });
+  const c = a.colliders;
+  const hole = 15;
+  const omega = 1.5 + 0.7 * tension;
+
+  // Divider, with the gate hole in the middle.
+  c.push(seg(0.6, CY, CX - hole, CY, { rest: 0.9, tag: 'divider' }));
+  c.push(seg(CX + hole, CY, W - 0.6, CY, { rest: 0.9, tag: 'divider' }));
+  // Guide rails on both sides, feeding play into the gate.
+  pair(c, seg(14, CY - 26, CX - hole + 2, CY - 3, { rest: 0.95, tag: 'funnel' }));
+  pair(c, seg(W - 14, CY - 26, CX + hole - 2, CY - 3, { rest: 0.95, tag: 'funnel' }));
+  // The turnstile: FOUR arms, not three. An odd-armed rotor on the centre line
+  // is not its own 180-degree twin, so it would quietly favour one end -- which
+  // is exactly what the symmetry test in tools/validate.mjs caught.
+  for (let i = 0; i < 4; i++) {
+    const ang = (i / 4) * TAU;
+    solo(c, seg(CX, CY, CX + (hole - 1.5) * dcos(ang), CY + (hole - 1.5) * dsin(ang), {
+      rest: 0.9, tag: 'rotor', motion: rot(CX, CY, omega, ang),
+    }));
+  }
+  solo(c, bumper(CX, CY, 2.6, { rest: 0.92, kick: 1.5, tag: 'hub' }));
+  pair(c, bumper(20, 44, 3.0, { kick: 8, tag: 'peg' }));
+  pair(c, bumper(78, 66 - 26, 2.8, { kick: 8, tag: 'peg' }));
+  a.spawns = { kickoff: [{ x: CX - 10, y: CY + 22 }, { x: CX + 10, y: CY - 22 }], restart: SPAWN.restart };
+  return a;
+}
+
+// 9. TIDE ARENA -- two heavy bars sweep the length of the pitch like pistons,
+//    compressing play into a shrinking band and then releasing it.
+function buildTide(rng, tension) {
+  const a = baseSpec('tide', 'Tide Arena', 'Two heavy bars sweep the pitch. Get caught on the wrong side of one.', rng, tension, {
+    drag: 0.14, mouth: 15.0, keeper: 5.4, launchSpeed: 31, drive: 36, theme: 'ice',
+  });
+  const c = a.colliders;
+  const period = 5.2 - 1.4 * tension;
+  const ph = rng.range(0, 1);
+
+  pair(c, seg(4, 48, 48, 48, {
+    rest: 0.98, tag: 'blocker', motion: osc(0, 1, 18 + 4 * tension, period, ph),
+  }));
+  pair(c, seg(74, 78, W - 4, 78, {
+    rest: 0.98, tag: 'blocker', motion: osc(0, 1, 14 + 4 * tension, period * 0.8, (ph + 0.5) % 1),
+  }));
+  pair(c, bumper(66, 44, 3.4, { kick: 10, tag: 'bumper' }));
+  solo(c, bumper(CX, CY, 4.4, { kick: 11, tag: 'bumper' }));
+  return a;
+}
+
 export const ARENAS = {
   rotor: buildRotor,
   pinball: buildPinball,
   crumble: buildCrumble,
   channels: buildChannels,
   bowl: buildBowl,
+  magnets: buildMagnets,
+  split: buildSplit,
+  tide: buildTide,
   grand: buildGrand,
 };
 
 export const ARENA_META = {
-  rotor: { name: 'Spin Gate', tier: 1 },
-  pinball: { name: 'Pinball Stadium', tier: 1 },
-  channels: { name: 'Channel Run', tier: 1 },
-  crumble: { name: 'Crumble Pitch', tier: 2 },
-  bowl: { name: 'Knockout Bowl', tier: 2 },
-  grand: { name: 'The Grand Arena', tier: 3 },
+  rotor: { name: 'Spin Gate', tier: 1, rule: 'Rotating arms sweep the pitch and fling marbles into new lanes.' },
+  pinball: { name: 'Pinball Stadium', tier: 1, rule: 'Live bumpers and slingshots fire marbles back into the danger zone.' },
+  channels: { name: 'Channel Run', tier: 1, rule: 'Doors open and close across the pitch. Read the gap or get shut out.' },
+  tide: { name: 'Tide Arena', tier: 2, rule: 'Two heavy bars sweep the pitch. Do not get caught on the wrong side.' },
+  crumble: { name: 'Crumble Pitch', tier: 2, rule: 'The surface gives way in patches. Lose the floor, lose the attack.' },
+  split: { name: 'Split Decision', tier: 2, rule: 'One wall, one turning gate. Nobody attacks until they get through it.' },
+  magnets: { name: 'Magnet Drift', tier: 3, rule: 'Invisible fields pulse on and off. Routes bend with nothing touching the marble.' },
+  bowl: { name: 'Knockout Bowl', tier: 3, rule: 'Trapped in a turning ring. Find the gap, then find the goal.' },
+  grand: { name: 'The Grand Arena', tier: 4, rule: 'The final. Every mechanism in the game, turned up.' },
 };
 
 export function buildArena(id, rng, tension) {
@@ -333,11 +430,12 @@ export function buildArena(id, rng, tension) {
 // Which arenas are allowed at which point in a tournament. Early rounds stay on
 // tier 1 so the rules are learned before the pitch starts misbehaving.
 export function arenaPoolForStage(stageKind, roundIndex, totalRounds) {
-  if (stageKind === 'group') return ['rotor', 'pinball', 'channels'];
+  if (stageKind === 'group') return ['rotor', 'pinball', 'channels', 'tide'];
   const late = totalRounds > 0 ? roundIndex / totalRounds : 0;
   if (late >= 0.99) return ['grand'];
-  if (late >= 0.5) return ['bowl', 'crumble', 'pinball'];
-  return ['rotor', 'channels', 'crumble', 'pinball'];
+  if (late >= 0.66) return ['bowl', 'magnets', 'split'];
+  if (late >= 0.33) return ['crumble', 'split', 'tide', 'bowl'];
+  return ['rotor', 'channels', 'crumble', 'pinball', 'tide'];
 }
 
 export function tensionForStage(stageKind, roundIndex, totalRounds) {

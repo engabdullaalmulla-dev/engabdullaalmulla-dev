@@ -21,13 +21,28 @@ What it deliberately is not: casino styling, gradient-heavy menus, or a
 statistics dashboard. There are no gigantic KPI tiles, because the numbers that
 matter here are a scoreline and a league position.
 
+## Marbles and three-letter codes
+
+Each nation's marble carries its **national flag** under glass, drawn
+procedurally so it stays crisp from a 19px list row to a 60px marble in the
+arena. Because a 3:2 flag cropped to a circle loses its outer thirds, the flag is
+squashed to 1.36:1 first — vertical tricolours and hoist bands stay visible and
+the distortion is small enough not to read as wrong.
+
+Every nation is identified by its **FIFA trigramme**: USA, GER, NED, KSA, CIV,
+COD, PLE. The code is the primary identifier in the UI — a boxed chip in every
+fixture row, group table, bracket tie, nation cell and result — with the full
+name as supporting text. On the scoreboard and on the marble itself only the code
+appears, because at that size a code is legible and a name is not.
+
 ## Following is never signalled by colour alone
 
 Every followed nation carries **three** cues: a green outline ring on the marble,
-a `★` prefix on the name, and priority ordering in every list. In the live arena
-the marble gets an outline ring *and* a labelled code chip. Accessibility
-settings cover sound, haptics and reduced motion; reduced motion removes trails,
-sparks and the goal flash and changes no result.
+a `★` prefix on the name, and priority ordering in every list; its code chip is
+outlined too. In the live arena the marble gets an outline ring *and* a labelled
+code plate. Accessibility settings cover sound, haptics and reduced motion;
+reduced motion removes trails, sparks, ripples and the goal flash, and changes no
+result.
 
 ## The five screens
 
@@ -75,10 +90,27 @@ tabs:
 
 ### 4. Live arena and result
 
+Every match opens with an **arena card**: the arena's number, its name, and its
+one rule ("The surface gives way in patches. Lose the floor, lose the attack.").
+It clears after two and a half seconds. Nine arenas therefore read as nine
+different challenges rather than one pitch redecorated.
+
 Scoreboard, live clock, arena name. The canvas fills the screen in portrait.
 Under it a commentary ticker, then controls: **1× / 2× / 4× / camera / skip**.
-Camera toggles between the whole pitch and a close tracking shot — a pure render
-choice.
+
+The arena is **directly interactive**, and none of it can touch a result:
+
+- **Tap a marble** to lock the camera onto it; tap it again to zoom back out.
+  The camera button shows the code of whoever you are following.
+- **Drag to pan, pinch or scroll to zoom** anywhere on the pitch, up to 4×.
+- **Tap empty pitch to cheer** — a crowd ripple, a swell of noise, a haptic tick.
+- **Tap a goal in the ticker** to see it again: the match rewinds to two seconds
+  before that goal, plays it through, and returns to live. It is re-simulated
+  from the same seed, so it is the same goal, frame for frame.
+
+All of that is camera and decoration. The simulation is stepped by a function
+that never reads any of it, which is why a match watched zoomed in on one marble
+produces exactly the score of a match that was skipped.
 
 A goal produces a white flash in the scoring nation's colour, a two-note cue, a
 haptic pulse and a ticker line. A shoot-out switches to the penalty picture:

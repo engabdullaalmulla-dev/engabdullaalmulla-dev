@@ -6,7 +6,7 @@
 // choices, frame rate and ad breaks cannot affect a result.
 
 import { colliderWorld, gateOpen } from '../core/physics.js';
-import { drainActive, W as AW, H as AH } from '../sim/arenas.js';
+import { drainActive, fieldActive, W as AW, H as AH } from '../sim/arenas.js';
 import { drawMarble } from './marble.js';
 import { team } from '../data/teams.js';
 import { TAU } from '../core/dmath.js';
@@ -18,6 +18,8 @@ const THEMES = {
   court: { deep: '#140d07', pitch: '#33210f', line: 'rgba(255,205,140,.18)', accent: '#ffbe6b', wall: '#7a5326' },
   stone: { deep: '#0a0b0d', pitch: '#22262c', line: 'rgba(200,210,225,.16)', accent: '#aab6c6', wall: '#4d545f' },
   gold: { deep: '#120d03', pitch: '#2a2008', line: 'rgba(255,220,140,.22)', accent: '#f3c451', wall: '#7d6420' },
+  void: { deep: '#05030d', pitch: '#150e2e', line: 'rgba(190,160,255,.16)', accent: '#c9a6ff', wall: '#4a3583' },
+  frost: { deep: '#050f14', pitch: '#123a44', line: 'rgba(190,240,255,.22)', accent: '#a8e8ff', wall: '#2c7185' },
 };
 
 export function makeRenderer(canvas) {
@@ -31,20 +33,35 @@ export function makeRenderer(canvas) {
     canvas.height = Math.max(1, Math.round(r.height * dpr));
   }
 
-  function view(m, camera) {
+  // Camera. Pure presentation: mode, user zoom and pan can never reach the
+  // simulation, which is why interacting with the view cannot change a result.
+  function view(m, cam) {
     const cw = canvas.width, ch = canvas.height;
     const fit = Math.min(cw / AW, ch / AH);
-    if (camera === 'wide' || !m) {
+    const mode = typeof cam === 'string' ? { mode: cam } : (cam || { mode: 'wide' });
+    const userZoom = mode.zoom || 1;
+    if (!m || (mode.mode === 'wide' && userZoom === 1 && !mode.panX && !mode.panY)) {
       return { s: fit, ox: (cw - AW * fit) / 2, oy: (ch - AH * fit) / 2 };
     }
-    // Close camera: zoom on the midpoint of the two marbles, clamped in-bounds.
-    const s = fit * 1.7;
+    const base = mode.mode === 'focus' ? 2.1 : mode.mode === 'close' ? 1.7 : 1;
+    const s = fit * base * userZoom;
     const b = m.world.bodies;
-    const mx = (b[0].x + b[1].x) / 2, my = (b[0].y + b[1].y) / 2;
-    let ox = cw / 2 - mx * s, oy = ch / 2 - my * s;
-    ox = Math.min(0, Math.max(cw - AW * s, ox));
-    oy = Math.min(0, Math.max(ch - AH * s, oy));
+    let mx = AW / 2, my = AH / 2;
+    if (mode.mode === 'focus' && b[mode.focus]) { mx = b[mode.focus].x; my = b[mode.focus].y; }
+    else if (mode.mode === 'close' && b.length === 2) { mx = (b[0].x + b[1].x) / 2; my = (b[0].y + b[1].y) / 2; }
+    let ox = cw / 2 - mx * s + (mode.panX || 0), oy = ch / 2 - my * s + (mode.panY || 0);
+    if (AW * s > cw) ox = Math.min(0, Math.max(cw - AW * s, ox)); else ox = (cw - AW * s) / 2;
+    if (AH * s > ch) oy = Math.min(0, Math.max(ch - AH * s, oy)); else oy = (ch - AH * s) / 2;
     return { s, ox, oy };
+  }
+
+  /** Screen point -> arena coordinates, for hit-testing taps on marbles. */
+  function toWorld(m, cam, px, py) {
+    const { s, ox, oy } = view(m, cam);
+    const r = canvas.getBoundingClientRect();
+    const sx = (px - r.left) * (canvas.width / r.width);
+    const sy = (py - r.top) * (canvas.height / r.height);
+    return { x: (sx - ox) / s, y: (sy - oy) / s };
   }
 
   function draw(m, opts = {}) {
@@ -71,6 +88,28 @@ export function makeRenderer(canvas) {
     ctx.stroke();
 
     const t = m.world.t;
+
+    // force fields, drawn under everything so they read as part of the pitch
+    for (const f of m.arena.fields || []) {
+      const on = fieldActive(f, t);
+      const pull = f.strength > 0;
+      const col = pull ? '90,190,255' : '255,150,90';
+      const g = ctx.createRadialGradient(X(f.x), Y(f.y), 0, X(f.x), Y(f.y), S(f.r));
+      g.addColorStop(0, `rgba(${col},${on ? 0.3 : 0.05})`);
+      g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(X(f.x), Y(f.y), S(f.r), 0, TAU); ctx.fill();
+      // Concentric rings that march inward when pulling, outward when pushing.
+      ctx.strokeStyle = `rgba(${col},${on ? 0.5 : 0.12})`;
+      ctx.lineWidth = Math.max(1, S(0.4));
+      const march = (t * (pull ? -0.35 : 0.35)) % 1;
+      for (let k = 0; k < 3; k++) {
+        const u = ((k / 3 + march) % 1 + 1) % 1;
+        ctx.globalAlpha = on ? 1 - Math.abs(u - 0.5) * 1.2 : 0.4;
+        ctx.beginPath(); ctx.arc(X(f.x), Y(f.y), S(f.r) * (0.25 + u * 0.72), 0, TAU); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
 
     // hazards under everything
     for (const d of m.arena.drains) {
@@ -235,7 +274,7 @@ export function makeRenderer(canvas) {
     });
   }
 
-  return { resize, draw, drawPens, canvas };
+  return { resize, draw, drawPens, toWorld, canvas };
 }
 
 const STYLE = {
@@ -255,5 +294,7 @@ const STYLE = {
   door: { stroke: '#c7d6e0', w: 2.0 },
   ring: { stroke: '#8894a0', w: 2.0 },
   rail: { stroke: '#7d8c98', w: 1.8 },
+  divider: { stroke: 'theme', w: 2.6 },
+  node: { fill: '#2e2a4a', stroke: 'rgba(210,180,255,.6)' },
   default: { stroke: '#55636e', w: 1.6, fill: '#3a4650' },
 };

@@ -39,7 +39,8 @@ is how the test harness plays thousands of matches per run.
 
 **The physics** is a small rigid-circle world: marbles against line segments and
 circular bumpers, each optionally *kinematic* (rotating about a point, or
-oscillating along an axis) or *gated* (solid for part of a cycle). Moving parts
+oscillating along an axis) or *gated* (solid for part of a cycle), plus per-body
+constant acceleration (the forward drive) and pulsing force fields. Moving parts
 carry surface velocity into the collision impulse, which is how a rotor arm
 actually flings a marble. Two relaxation passes per step; a conservative bounding
 circle per collider culls most pairs before any trigonometry runs. Roughly 11 ms
@@ -92,6 +93,13 @@ qualification, and it is cheap enough to run after every match.
 and a screen router. The renderer holds exactly one piece of state the simulation
 does not: marble trails, which are appended by the render loop and are never read
 back.
+
+**Flags** are drawn procedurally. `src/data/flags.js` holds a compact op list per
+nation (`['hb', [...]]`, `['cres', ...]`, `['g', 'maple', ...]`), interpreted by
+`flagdraw.js` over a 3:2 field in unit coordinates. Each flag is rasterised once
+into an offscreen 144×96 canvas and cached; the same bitmap then serves DOM chips
+as a data URL and the arena via `drawImage`. No image assets ship, nothing is
+fetched, and a nation looks identical in a 19px list row and a 60px marble.
 
 Camera mode, speed, reduced motion, sound, haptics and ad breaks all live here,
 and none of them can reach a result.

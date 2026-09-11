@@ -13,6 +13,7 @@ import { listCompetitions, COMPETITIONS } from './data/competitions/index.js';
 import { team, CONFEDERATIONS } from './data/teams.js';
 import { teamChip, marbleBackground } from './ui/marble.js';
 import { makeRenderer } from './ui/render.js';
+import { ARENA_META } from './sim/arenas.js';
 import * as store from './engine/storage.js';
 
 // --- tiny DOM helpers -------------------------------------------------------
@@ -238,6 +239,7 @@ function setupScreen(root) {
       const on = S.setup.followed.includes(code);
       const cell = h('div', { class: 'ncell' + (on ? ' on' : ''), onclick: () => toggle(code) },
         marbleEl(t, 'lg'),
+        h('div', { class: 'code' }, t.code),
         h('div', { class: 'nm' }, t.name),
         h('div', { class: 'cf' }, C.entryStage && C.meta.id === 'afcq2026' ? (C.entryStage(code) === 'r1' ? 'RD 1' : 'RD 2') : t.conf));
       grid.appendChild(cell);
@@ -482,11 +484,14 @@ function fixtureRow(c, f, opts = {}) {
   const row = h('div', { class: 'fx' + (mine ? ' mine' : '') + (opts.next ? ' next' : '') });
   const side = (code, right) => {
     const t = team(code);
+    const fav = c.followed.includes(code);
     const el = h('div', { class: 'side' + (right ? ' r' : '') });
     const mb = marbleEl(t, 'sm');
-    if (c.followed.includes(code)) mb.classList.add('fav');
-    const nm = h('div', { class: 'nm' }, (c.followed.includes(code) ? '★ ' : '') + t.name);
-    if (right) { el.appendChild(nm); el.appendChild(mb); } else { el.appendChild(mb); el.appendChild(nm); }
+    if (fav) mb.classList.add('fav');
+    const cd = h('span', { class: 'codechip' + (fav ? ' fav' : '') }, t.code);
+    const nm = h('div', { class: 'nm' }, (fav ? '★ ' : '') + t.name);
+    if (right) { el.appendChild(nm); el.appendChild(cd); el.appendChild(mb); }
+    else { el.appendChild(mb); el.appendChild(cd); el.appendChild(nm); }
     return el;
   };
   row.appendChild(side(f.teams[0], false));
@@ -563,7 +568,8 @@ function tablesTab(pad, c, r) {
         const mb = marbleEl(team(row.code), 'sm');
         if (c.followed.includes(row.code)) mb.classList.add('fav');
         line.appendChild(mb);
-        line.appendChild(h('span', { class: 'nm', style: 'font-size:13px' }, team(row.code).name));
+        line.appendChild(h('span', { class: 'code' + (c.followed.includes(row.code) ? ' fav' : '') }, team(row.code).code));
+        line.appendChild(h('span', { class: 'nm', style: 'font-size:12.5px;color:var(--muted)' }, team(row.code).name));
         nameCell.appendChild(line);
         return h('tr', { class: cls },
           h('td', { class: 'pos' }, String(i + 1)), nameCell,
@@ -607,7 +613,7 @@ function bracketTab(pad, c) {
         const mb = marbleEl(team(code), 'sm');
         if (c.followed.includes(code)) mb.classList.add('fav');
         row.appendChild(mb);
-        row.appendChild(h('span', { class: 'nm' }, team(code).name));
+        row.appendChild(h('span', { class: 'nm' }, team(code).code + ' · ' + team(code).name));
         const f = r.fixtures.find(x => x.tieId === tie.id && x.result);
         if (f) row.appendChild(h('span', { class: 'mono' }, String(f.result.score[f.teams.indexOf(code)])));
         box.appendChild(row);
@@ -672,7 +678,7 @@ function useRetry() {
 function openLive(fixture) {
   const c = S.campaign;
   const m = createMatch(matchConfigFor(c, fixture));
-  S.live = { fixture, match: m, speed: S.settings.speed || 1, playing: true, acc: 0, replay: false, seenGoals: 0 };
+  S.live = { fixture, match: m, speed: S.settings.speed || 1, playing: true, acc: 0, replay: false, seenGoals: 0, cut: null, cutAcc: 0 };
   go('live');
 }
 
@@ -681,9 +687,14 @@ function liveScreen(app) {
   const c = S.campaign;
   const m = S.live.match;
   const [a, b] = fixture.teams.map(team);
+  S.live.cam = S.live.cam || { mode: S.settings.camera || 'wide', zoom: 1, panX: 0, panY: 0, focus: 0 };
+  const cam = S.live.cam;
 
-  const scoreEl = h('div', { class: 'score mono' }, '0–0');
-  const clockEl = h('div', { class: 'clockline' }, h('span', {}, fixture.label), h('span', {}, '·'), h('span', { class: 'mono', id: 'clock' }, "0'"), h('span', {}, '·'), h('span', {}, arenaName(fixture.arenaId)));
+  const scoreEl = h('div', { class: 'score mono' }, `${m.score[0]}–${m.score[1]}`);
+  const clockEl = h('div', { class: 'clockline' },
+    h('span', {}, fixture.label), h('span', {}, '·'),
+    h('span', { class: 'mono', id: 'clock' }, "0'"), h('span', {}, '·'),
+    h('span', {}, arenaName(fixture.arenaId)));
 
   const sideEl = (t, right) => {
     const el = h('div', { class: 't' + (right ? ' r' : '') });
@@ -695,27 +706,47 @@ function liveScreen(app) {
   };
 
   const board = h('div', {},
-    h('div', { class: 'scoreboard' }, sideEl(a, false), scoreEl, sideEl(b, true)),
-    clockEl);
+    h('div', { class: 'scoreboard' }, sideEl(a, false), scoreEl, sideEl(b, true)), clockEl);
 
   const canvas = h('canvas', { id: 'arena' });
   const flash = h('div', { class: 'bigflash' });
-  const wrap = h('div', { class: 'arena-wrap' }, canvas, flash);
+  const badge = h('div', { class: 'cutbadge', hidden: true }, 'GOAL REPLAY');
+  const wrap = h('div', { class: 'arena-wrap' }, canvas, flash, badge);
+
+  // Arena card: each match announces which challenge it is, so nine arenas read
+  // as nine different games rather than one pitch with the furniture moved.
+  const meta = ARENA_META[fixture.arenaId] || {};
+  const card = h('div', { class: 'arenacard' },
+    h('div', { class: 'k' }, 'ARENA ' + (Object.keys(ARENA_META).indexOf(fixture.arenaId) + 1).toString().padStart(2, '0')),
+    h('div', { class: 'n' }, meta.name || fixture.arenaId),
+    h('div', { class: 'r' }, meta.rule || ''));
+  wrap.appendChild(card);
+  setTimeout(() => card.remove(), 2700);
+
   const ticker = h('div', { class: 'ticker' });
+  const hint = h('div', { class: 'hint' }, 'Tap a marble to follow it · drag to pan · pinch to zoom · tap a goal below to see it again');
 
   const speedBtn = v => h('button', {
-    'aria-pressed': S.live.speed === v, onclick: () => { S.live.speed = v; S.settings.speed = v; store.saveSettings(S.settings); renderControls(); },
+    'aria-pressed': S.live.speed === v,
+    onclick: () => { S.live.speed = v; S.settings.speed = v; store.saveSettings(S.settings); renderControls(); },
   }, v + '×');
   const controls = h('div', { class: 'controls' });
+  function camLabel() {
+    return cam.mode === 'focus' ? team(fixture.teams[cam.focus]).code : cam.mode === 'close' ? 'Close' : 'Wide';
+  }
   function renderControls() {
     controls.innerHTML = '';
     controls.appendChild(speedBtn(1));
     controls.appendChild(speedBtn(2));
     controls.appendChild(speedBtn(4));
     controls.appendChild(h('button', {
-      'aria-pressed': S.settings.camera === 'close',
-      onclick: () => { S.settings.camera = S.settings.camera === 'close' ? 'wide' : 'close'; store.saveSettings(S.settings); renderControls(); },
-    }, S.settings.camera === 'close' ? 'Close' : 'Wide'));
+      'aria-pressed': cam.mode !== 'wide' || cam.zoom !== 1,
+      onclick: () => {
+        cam.mode = cam.mode === 'wide' ? 'close' : 'wide';
+        cam.zoom = 1; cam.panX = 0; cam.panY = 0;
+        S.settings.camera = cam.mode; store.saveSettings(S.settings); renderControls();
+      },
+    }, camLabel()));
     controls.appendChild(h('button', { onclick: skip }, 'Skip ⏭'));
   }
   renderControls();
@@ -723,10 +754,11 @@ function liveScreen(app) {
   app.innerHTML = '';
   app.appendChild(h('div', { class: 'topbar' },
     h('button', { class: 'iconbtn', onclick: () => { stop(); go('journey'); } }, '‹'),
-    h('h1', {}, `${a.name} v ${b.name}`, h('div', { class: 'sub' }, fixture.label + (S.live.replay ? ' · REPLAY' : ''))),
+    h('h1', {}, `${a.code} v ${b.code}`, h('div', { class: 'sub' }, `${a.name} v ${b.name}${S.live.replay ? ' · REPLAY' : ''}`)),
   ));
   app.appendChild(board);
   app.appendChild(wrap);
+  app.appendChild(hint);
   app.appendChild(ticker);
   app.appendChild(controls);
 
@@ -735,6 +767,76 @@ function liveScreen(app) {
   ro.observe(canvas);
   renderer.resize();
 
+  // --- gestures. All of this is camera and decoration; none of it touches the
+  // simulation, so a match watched zoomed in produces the same score. ---------
+  const pointers = new Map();
+  let moved = 0, lastPinch = 0;
+  canvas.addEventListener('pointerdown', e => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    moved = 0; lastPinch = 0;
+  });
+  canvas.addEventListener('pointermove', e => {
+    const p = pointers.get(e.pointerId);
+    if (!p) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    p.x = e.clientX; p.y = e.clientY;
+    moved += Math.abs(dx) + Math.abs(dy);
+    if (pointers.size === 1) {
+      const k = canvas.width / canvas.getBoundingClientRect().width;
+      cam.panX += dx * k; cam.panY += dy * k;
+      if (cam.mode === 'focus') cam.mode = 'close';
+    } else if (pointers.size === 2) {
+      const [p1, p2] = [...pointers.values()];
+      const d = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+      if (lastPinch) cam.zoom = Math.min(4, Math.max(1, cam.zoom * (d / lastPinch)));
+      lastPinch = d;
+    }
+  });
+  const endPointer = e => {
+    const had = pointers.size;
+    pointers.delete(e.pointerId);
+    if (had !== 1 || moved > 10) return;
+    const w = renderer.toWorld(m, cam, e.clientX, e.clientY);
+    const hit = m.world.bodies.findIndex(bd => bd.alive && Math.hypot(bd.x - w.x, bd.y - w.y) < 7);
+    if (hit >= 0) {
+      if (cam.mode === 'focus' && cam.focus === hit) { cam.mode = 'wide'; cam.zoom = 1; }
+      else { cam.mode = 'focus'; cam.focus = hit; cam.panX = 0; cam.panY = 0; }
+      haptic(); beep(700, 0.05, 'triangle', 0.03);
+    } else {
+      cheer(e.clientX, e.clientY);
+    }
+    renderControls();
+  };
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    cam.zoom = Math.min(4, Math.max(1, cam.zoom * (e.deltaY < 0 ? 1.12 : 0.89)));
+  }, { passive: false });
+
+  function cheer(px, py) {
+    if (!S.settings.reducedMotion) {
+      const r = wrap.getBoundingClientRect();
+      const el = h('div', { class: 'ripple', style: `left:${px - r.left}px;top:${py - r.top}px` });
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 600);
+    }
+    haptic();
+    beep(300 + Math.random() * 90, 0.13, 'sawtooth', 0.02);
+  }
+
+  // --- goal replay cutaway ---------------------------------------------------
+  function replayGoal(ev) {
+    const m2 = createMatch(matchConfigFor(c, fixture));
+    const from = Math.max(0, ev.t - 2.4);
+    let guard = 0;
+    while (m2.world.t < from && !m2.finished && guard++ < 120 * 400) stepMatch(m2);
+    S.live.cut = { m: m2, until: ev.t + 1.6 };
+    badge.hidden = false;
+    beep(520, 0.07, 'triangle', 0.04);
+  }
+
   let raf = null, last = performance.now(), stopped = false;
   function stop() { stopped = true; cancelAnimationFrame(raf); ro.disconnect(); }
   S.live.stop = stop;
@@ -742,23 +844,35 @@ function liveScreen(app) {
   function pushEvents() {
     while (S.live.seenGoals < m.events.length) {
       const e = m.events[S.live.seenGoals++];
-      if (['kickoff', 'goal', 'drain', 'halftime', 'fulltime', 'pens', 'pen', 'etbreak', 'result'].includes(e.type)) {
-        const who = e.team != null ? team(fixture.teams[e.team]).name : '';
-        const row = h('div', { class: e.type === 'goal' ? 'goal' : '' },
-          h('span', { class: 't' }, e.clock),
-          h('span', {}, e.type === 'goal' ? h('b', {}, `GOAL — ${who}`) : (who ? `${who} — ${e.text}` : e.text)));
-        ticker.appendChild(row);
-        ticker.scrollTop = ticker.scrollHeight;
-        if (e.type === 'goal') {
-          flash.textContent = 'GOAL';
-          flash.style.color = team(fixture.teams[e.team]).colours[0];
-          flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
-          beep(660, 0.18, 'square', 0.06); setTimeout(() => beep(880, 0.22, 'square', 0.05), 120);
-          haptic('goal');
-        } else if (e.type === 'pen') {
-          beep(e.text.startsWith('Scored') ? 760 : 220, 0.12, 'triangle', 0.05);
-        }
+      if (!['kickoff', 'goal', 'drain', 'halftime', 'fulltime', 'pens', 'pen', 'etbreak', 'result'].includes(e.type)) continue;
+      const who = e.team != null ? team(fixture.teams[e.team]).code : '';
+      const row = h('div', { class: e.type === 'goal' ? 'goal' : '' },
+        h('span', { class: 't' }, e.clock),
+        h('span', {}, e.type === 'goal' ? h('b', {}, `GOAL — ${who}`) : (who ? `${who} — ${e.text}` : e.text)));
+      if (e.type === 'goal') {
+        row.title = 'Watch this goal again';
+        row.addEventListener('click', () => replayGoal(e));
+        row.appendChild(h('span', { class: 'tiny dim', style: 'margin-left:auto' }, '↻'));
       }
+      ticker.appendChild(row);
+      ticker.scrollTop = ticker.scrollHeight;
+      if (e.type === 'goal') {
+        flash.textContent = 'GOAL';
+        flash.style.color = '#ffffff';
+        flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+        beep(660, 0.18, 'square', 0.06); setTimeout(() => beep(880, 0.22, 'square', 0.05), 120);
+        haptic('goal');
+      } else if (e.type === 'pen') {
+        beep(e.text.startsWith('Scored') ? 760 : 220, 0.12, 'triangle', 0.05);
+      }
+    }
+  }
+
+  function trails(match) {
+    for (const bd of match.world.bodies) {
+      if (!bd.alive) { bd.trail.length = 0; continue; }
+      bd.trail.push({ x: bd.x, y: bd.y });
+      if (bd.trail.length > 26) bd.trail.shift();
     }
   }
 
@@ -766,22 +880,32 @@ function liveScreen(app) {
     if (stopped) return;
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
+
+    const cut = S.live.cut;
+    if (cut) {
+      let acc = (S.live.cutAcc || 0) + dt;
+      let guard = 0;
+      while (acc >= STEP && !cut.m.finished && guard++ < 2000) { stepMatch(cut.m); acc -= STEP; }
+      S.live.cutAcc = acc;
+      trails(cut.m);
+      if (cut.m.phase === 'pens') renderer.drawPens(cut.m, { followed: c.followed });
+      else renderer.draw(cut.m, { camera: { mode: 'close' }, followed: c.followed, reducedMotion: S.settings.reducedMotion });
+      if (cut.m.world.t >= cut.until || cut.m.finished) { S.live.cut = null; badge.hidden = true; }
+      raf = requestAnimationFrame(frame);
+      return;
+    }
+
     if (!m.finished) {
       S.live.acc += dt * S.live.speed;
       let guard = 0;
       while (S.live.acc >= STEP && !m.finished && guard++ < 2000) { stepMatch(m); S.live.acc -= STEP; }
-      // trails are presentation-only state
-      for (const bd of m.world.bodies) {
-        if (!bd.alive) { bd.trail.length = 0; continue; }
-        bd.trail.push({ x: bd.x, y: bd.y });
-        if (bd.trail.length > 26) bd.trail.shift();
-      }
+      trails(m);
     }
     scoreEl.textContent = `${m.score[0]}–${m.score[1]}`;
     const ck = $('#clock'); if (ck) ck.textContent = clockText(m);
     pushEvents();
     if (m.phase === 'pens') renderer.drawPens(m, { followed: c.followed });
-    else renderer.draw(m, { camera: S.settings.camera, followed: c.followed, reducedMotion: S.settings.reducedMotion });
+    else renderer.draw(m, { camera: cam, followed: c.followed, reducedMotion: S.settings.reducedMotion });
     if (m.finished) { stop(); setTimeout(finishMatch, 700); return; }
     raf = requestAnimationFrame(frame);
   }
@@ -845,7 +969,7 @@ function resultScreen(root) {
   if (S.live.roundClosed) roundSummary(pad, S.live.roundClosed);
 
   function replay() {
-    S.live = { fixture, match: createMatch(matchConfigFor(c, fixture)), speed: S.live.speed, playing: true, acc: 0, replay: true, seenGoals: 0, roundClosed: S.live.roundClosed };
+    S.live = { fixture, match: createMatch(matchConfigFor(c, fixture)), speed: S.live.speed, playing: true, acc: 0, replay: true, seenGoals: 0, cut: null, cutAcc: 0, roundClosed: S.live.roundClosed };
     go('live');
   }
   function next() {

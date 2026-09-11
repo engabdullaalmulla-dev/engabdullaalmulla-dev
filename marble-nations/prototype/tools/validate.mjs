@@ -9,13 +9,14 @@
 //   football-shaped  -- scorelines must look like football scorelines
 
 import { simulate, createMatch, step as stepMatch, resultOf } from '../src/sim/match.js';
-import { ARENA_META } from '../src/sim/arenas.js';
+import { ARENA_META, buildArena, W as AW, H as AH } from '../src/sim/arenas.js';
+import { makeRng } from '../src/core/rng.js';
 import { STEP } from '../src/core/physics.js';
 
 const N = Number(process.argv[2] || 400);
 const RULES_GROUP = { allowDraw: true, extraTime: false };
 const RULES_KO = { allowDraw: false, extraTime: true, penalties: true };
-const TENSION = { rotor: 0.2, pinball: 0.2, channels: 0.2, crumble: 0.7, bowl: 0.7, grand: 1 };
+const TENSION = { rotor: 0.2, pinball: 0.2, channels: 0.2, tide: 0.4, crumble: 0.5, split: 0.5, magnets: 0.8, bowl: 0.8, grand: 1 };
 
 function pct(x) { return (100 * x).toFixed(1) + '%'; }
 
@@ -51,7 +52,82 @@ console.log('Determinism');
   check('watched result === skipped result', JSON.stringify(watched) === JSON.stringify(skipped));
 }
 
-// 2. Per-arena behaviour -----------------------------------------------------
+// 2. Structural symmetry -----------------------------------------------------
+//
+// The fairness argument is that the map (x,y) -> (W-x, H-y) sends every arena's
+// collider set to itself. This checks that directly, which is far stronger than
+// waiting for a win-rate to drift: an asymmetric arena fails here immediately
+// instead of after ten thousand matches.
+//
+// Per-side PHASES are excluded: keeper phases are drawn i.i.d. by design, and
+// i.i.d. draws preserve exchangeability without preserving instance symmetry.
+console.log('\nStructural symmetry (180-degree rotation about the arena centre)');
+{
+  const rnd = (v) => Math.round(v * 1000) / 1000;
+
+  // Motion canonicalisation. `rot` maps to the same rotation about the image of
+  // its centre. `osc` maps to the negated axis. Keepers are the one exception:
+  // their phases are deliberately i.i.d. per end, and a free uniform phase
+  // absorbs the axis sign (sin and -sin have the same distribution), so for
+  // keepers only the axis is compared without its sign.
+  const motionKey = (c, mirror) => {
+    const m = c.motion;
+    if (!m) return '-';
+    if (m.kind === 'rot') {
+      const cx = mirror ? AW - m.cx : m.cx, cy = mirror ? AH - m.cy : m.cy;
+      return `rot:${rnd(cx)},${rnd(cy)},${rnd(m.omega)}`;
+    }
+    let dx = mirror ? -m.dx : m.dx, dy = mirror ? -m.dy : m.dy;
+    if (c.tag === 'keeper') { dx = Math.abs(dx); dy = Math.abs(dy); }
+    return `osc:${rnd(dx)},${rnd(dy)},${rnd(m.amp)},${rnd(m.period)}`;
+  };
+  const gateKey = (c) => c.gate ? `${rnd(c.gate.period)}:${rnd(c.gate.openFrac)}` : '-';
+  const common = (c) => `${c.tag}|${rnd(c.rest)}|${rnd(c.kick)}|${rnd(c.friction)}`;
+  const key = (c, mirror) => {
+    const only = c.only == null ? 'x' : (mirror ? 1 - c.only : c.only);
+    if (c.type === 'seg') {
+      const pts = mirror
+        ? [[AW - c.ax, AH - c.ay], [AW - c.bx, AH - c.by]]
+        : [[c.ax, c.ay], [c.bx, c.by]];
+      const ends = pts.map(([x, y]) => `${rnd(x)},${rnd(y)}`).sort().join(';');
+      return `S|${ends}|${common(c)}|${only}|${motionKey(c, mirror)}|${gateKey(c)}`;
+    }
+    const x = mirror ? AW - c.x : c.x, y = mirror ? AH - c.y : c.y;
+    return `C|${rnd(x)},${rnd(y)},${rnd(c.r)}|${common(c)}|${only}|${motionKey(c, mirror)}`;
+  };
+
+  for (const id of Object.keys(ARENA_META)) {
+    let worst = null;
+    for (let seed = 1; seed <= 12 && !worst; seed++) {
+      const a = buildArena(id, makeRng(seed * 7919), 0.6);
+      const have = new Map();
+      for (const c of a.colliders) { const k = key(c, false); have.set(k, (have.get(k) || 0) + 1); }
+      for (const c of a.colliders) {
+        const k = key(c, true);
+        if (!have.get(k)) { worst = `${c.tag || c.type} has no 180-degree twin (seed ${seed})`; break; }
+        have.set(k, have.get(k) - 1);
+      }
+      // fields and hazards must pair up too
+      for (const list of [a.fields || [], a.drains || []]) {
+        const fh = new Map();
+        const fk = (f) => `${rnd(f.x)},${rnd(f.y)},${rnd(f.r)},${rnd(f.strength ?? 0)},${rnd(f.cycle ?? 0)},${rnd(f.onFor ?? 0)}`;
+        const fm = (f) => `${rnd(AW - f.x)},${rnd(AH - f.y)},${rnd(f.r)},${rnd(f.strength ?? 0)},${rnd(f.cycle ?? 0)},${rnd(f.onFor ?? 0)}`;
+        for (const f of list) fh.set(fk(f), (fh.get(fk(f)) || 0) + 1);
+        for (const f of list) {
+          if (!fh.get(fm(f))) { worst = `hazard/field at ${rnd(f.x)},${rnd(f.y)} has no twin (seed ${seed})`; break; }
+          fh.set(fm(f), fh.get(fm(f)) - 1);
+        }
+      }
+      // spawns must be images of one another
+      const k = a.spawns.kickoff, rs = a.spawns.restart;
+      if (rnd(k[0].x) !== rnd(AW - k[1].x) || rnd(k[0].y) !== rnd(AH - k[1].y)) worst = 'kick-off spawns are not mirrored';
+      if (rnd(rs[0].x) !== rnd(AW - rs[1].x) || rnd(rs[0].y) !== rnd(AH - rs[1].y)) worst = 'restart spawns are not mirrored';
+    }
+    check(`${ARENA_META[id].name} is 180-degree symmetric`, !worst, worst || '');
+  }
+}
+
+// 3. Per-arena behaviour -----------------------------------------------------
 const rows = [];
 for (const id of Object.keys(ARENA_META)) {
   const tension = TENSION[id];
@@ -78,7 +154,7 @@ for (const id of Object.keys(ARENA_META)) {
   // Real football produces the occasional 7-1. What must not happen is a
   // scoreline that reads as a broken simulation rather than a thrashing.
   check('no absurd scoreline (<= 11 goals)', maxG <= 11, `max ${maxG}`);
-  check('watch time 45-90s at 1x', meanSecs >= 45 && meanSecs <= 90, `${meanSecs.toFixed(1)}s mean, ${Math.max(...secs).toFixed(1)}s max`);
+  check('watch time under 60s at 1x', Math.max(...secs) <= 60, `${meanSecs.toFixed(1)}s mean, ${Math.max(...secs).toFixed(1)}s max`);
   check('every match terminated', g.every(r => r.decidedBy !== 'unresolved'));
 
   // Knockout: every tie must produce a winner.
@@ -91,7 +167,7 @@ for (const id of Object.keys(ARENA_META)) {
   rows.push({ id, goals: goals.toFixed(2), draws: pct(draws / g.length), secs: meanSecs.toFixed(0), z: z.toFixed(2) });
 }
 
-// 3. Scoreline shape across all arenas --------------------------------------
+// 4. Scoreline shape across all arenas --------------------------------------
 console.log('\nScoreline distribution (all arenas pooled)');
 {
   const all = [];
