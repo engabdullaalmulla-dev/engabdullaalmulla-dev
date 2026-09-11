@@ -4,6 +4,8 @@
  * only shows up on someone's table.
  */
 
+import type { ExpressionId } from './expressions';
+import type { Tier } from './progress';
 import type { Difficulty, GameAction } from './types';
 import type { TableView } from './view';
 
@@ -16,6 +18,21 @@ export const ROOM_CODE_LENGTH = 6;
 export interface PublicUser {
   id: string;
   name: string;
+  /** "flame:coral" — the mark beside the name. See shared/progress. */
+  avatar: string;
+}
+
+/** Where somebody stands this season. */
+export interface RankState {
+  season: string;
+  /** When the season's board is wiped and everyone starts again. */
+  endsAt: number;
+  points: number;
+  tier: Tier;
+  matches: number;
+  wins: number;
+  /** Place on the season board, or null while they are below the cut. */
+  place: number | null;
 }
 
 export interface UserStats {
@@ -34,16 +51,33 @@ export interface UserStats {
 }
 
 export interface LeaderboardRow {
+  userId: string;
   name: string;
+  avatar: string;
   matches: number;
   wins: number;
   winRate: number;
   bestRound: number | null;
+  /** Season points and rank. Zero on the all-time board, which is not ranked. */
+  points: number;
+  tier: Tier;
+}
+
+export type BoardScope = 'season' | 'allTime';
+
+export interface Board {
+  scope: BoardScope;
+  season: string;
+  endsAt: number;
+  rows: LeaderboardRow[];
+  /** Your own row, wherever you are on it — pinned so you never have to hunt. */
+  you: (LeaderboardRow & { place: number }) | null;
 }
 
 export interface Seat {
   id: string;
   name: string;
+  avatar: string;
   isBot: boolean;
   connected: boolean;
   difficulty: Difficulty;
@@ -77,6 +111,7 @@ export type ClientMessage =
   | { type: 'start_game' }
   | { type: 'action'; action: GameAction }
   | { type: 'next_round' }
+  | { type: 'express'; id: ExpressionId; targetId?: string }
   | { type: 'ping' };
 
 /* ------------------------------------------------------------------ */
@@ -97,7 +132,14 @@ export type ServerMessage =
       /** When the server will deal the next round on its own. */
       nextRoundAt: number | null;
     }
-  | { type: 'stats'; stats: UserStats }
+  | { type: 'stats'; stats: UserStats; rank: RankState }
+  | {
+      type: 'expression';
+      /** The seat that said it, and the seat it was aimed at, if any. */
+      fromId: string;
+      targetId: string | null;
+      id: ExpressionId;
+    }
   | { type: 'error'; code: ErrorCode; message: string }
   | { type: 'pong' };
 
@@ -113,6 +155,7 @@ export type ErrorCode =
   | 'need_players'
   | 'not_your_move'
   | 'rate_limited'
+  | 'too_chatty'
   | 'server_error';
 
 /** Human-readable wording for anything the server refuses. */
@@ -128,5 +171,6 @@ export const ERROR_TEXT: Record<ErrorCode, string> = {
   need_players: 'You need at least three at the table.',
   not_your_move: 'It is not your move.',
   rate_limited: 'Too many tries. Wait a moment.',
+  too_chatty: 'Give the table a moment.',
   server_error: 'Something went wrong at our end.',
 };

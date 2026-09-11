@@ -6,6 +6,7 @@ import { AnchoredCard } from '../motion/AnchoredCard';
 import { anchorKeys, useAnchor } from '../motion/anchors';
 import { useLanguage } from '../../i18n';
 import { colors, radius, space, type as typography } from '../theme';
+import { Mark } from './Mark';
 import { Score } from './Score';
 import { type CardHighlight } from './PlayingCard';
 
@@ -20,6 +21,8 @@ interface Props {
   inFlight?: (slot: number) => boolean;
   /** Lights their cards as burnable rather than as a target to pick. */
   burning?: boolean;
+  /** The mark they chose, if this table knows it. */
+  avatar?: string;
   cardWidth: number;
 }
 
@@ -31,6 +34,7 @@ export function Opponent({
   onPressSlot,
   inFlight,
   burning,
+  avatar,
   cardWidth,
 }: Props) {
   const { t, n } = useLanguage();
@@ -39,6 +43,7 @@ export function Opponent({
   return (
     <View {...seat} style={[styles.wrap, active && styles.active]}>
       <View style={styles.header}>
+        <Mark avatar={avatar} seed={player.id} size={20} />
         <Text
           style={[styles.name, active && styles.nameActive, !player.connected && styles.away]}
           numberOfLines={1}

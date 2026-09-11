@@ -1,3 +1,5 @@
+import type { PhraseId } from '../../shared/expressions';
+import type { AvatarColour, AvatarShape, BadgeId, Tier, TitleId } from '../../shared/progress';
 import type { Difficulty, LogEntry, Power, Rank, Suit } from '../../shared/types';
 
 /**
@@ -187,6 +189,43 @@ export interface Strings {
     youSuffix: string;
   };
 
+  express: {
+    open: string;
+    title: string;
+    everyone: string;
+    emoji: string;
+    phrases: string;
+    muted: string;
+    mute: string;
+    unmute: string;
+    aimHint: string;
+    tooFast: string;
+    phrase: Record<PhraseId, string>;
+  };
+
+  rank: {
+    title: string;
+    season: string;
+    allTime: string;
+    seasonEnds: (days: string) => string;
+    seasonEndsToday: string;
+    points: (points: string) => string;
+    toNext: (points: string, tier: string) => string;
+    atTheTop: string;
+    unranked: string;
+    unrankedHint: string;
+    place: (place: string) => string;
+    you: string;
+    empty: string;
+    emptyAllTime: string;
+    columnPlayer: string;
+    columnPoints: string;
+    columnWinRate: string;
+    columnPlayed: string;
+    tier: Record<Tier, string>;
+    tierBlurb: Record<Tier, string>;
+  };
+
   profile: {
     matches: string;
     won: string;
@@ -204,6 +243,17 @@ export interface Strings {
     noRecord: string;
     noLeaders: string;
     none: string;
+    yourMark: string;
+    markHint: string;
+    badges: string;
+    badgesEarned: (earned: string, total: string) => string;
+    locked: string;
+    seeRankings: string;
+    title: Record<TitleId, string>;
+    badge: Record<BadgeId, string>;
+    badgeHint: Record<BadgeId, string>;
+    shape: Record<AvatarShape, string>;
+    colour: Record<AvatarColour, string>;
   };
 
   rules: {
@@ -430,6 +480,64 @@ export const en: Strings = {
     youSuffix: ' (you)',
   },
 
+  express: {
+    open: 'SAY SOMETHING',
+    title: 'Say something',
+    everyone: 'Everyone',
+    emoji: 'THROW ONE',
+    phrases: 'SAY IT',
+    muted: 'Reactions are off.',
+    mute: 'TURN OFF',
+    unmute: 'TURN ON',
+    aimHint: 'Pick a seat above to throw it at somebody.',
+    tooFast: 'Give the table a moment.',
+    phrase: {
+      hello: 'Hello!',
+      nice: 'Nice one',
+      wellPlayed: 'Well played',
+      lucky: 'Lucky',
+      close: 'That was close',
+      oops: 'Oops',
+      yourTurn: 'Your turn',
+      goodGame: 'Good game',
+    },
+  },
+
+  rank: {
+    title: 'RANKINGS',
+    season: 'THIS SEASON',
+    allTime: 'ALL TIME',
+    seasonEnds: (days) => `Season ends in ${days} days.`,
+    seasonEndsToday: 'Season ends today.',
+    points: (points) => `${points} pts`,
+    toNext: (points, tier) => `${points} points to ${tier}`,
+    atTheTop: 'Top of the ladder.',
+    unranked: 'Unranked',
+    unrankedHint: 'Finish a match against other people to get on the board.',
+    place: (place) => `#${place}`,
+    you: 'YOU',
+    empty: 'Nobody has scored this season yet. Be first.',
+    emptyAllTime: 'Nobody has finished enough matches yet.',
+    columnPlayer: 'PLAYER',
+    columnPoints: 'POINTS',
+    columnWinRate: 'WIN RATE',
+    columnPlayed: 'PLAYED',
+    tier: {
+      ash: 'Ash',
+      spark: 'Spark',
+      ember: 'Ember',
+      blaze: 'Blaze',
+      inferno: 'Inferno',
+    },
+    tierBlurb: {
+      ash: 'Everyone starts cold.',
+      spark: 'Something caught.',
+      ember: 'Burning steadily.',
+      blaze: 'Hard to sit across from.',
+      inferno: 'The table clears when you sit down.',
+    },
+  },
+
   profile: {
     matches: 'MATCHES',
     won: 'WON',
@@ -444,6 +552,62 @@ export const en: Strings = {
     ashOuts: 'Ash outs',
     pointsTaken: 'Points taken',
     leaderboard: 'LEADERBOARD',
+    yourMark: 'YOUR MARK',
+    markHint: 'What everyone sees beside your name.',
+    badges: 'BADGES',
+    badgesEarned: (earned, total) => `${earned} of ${total}`,
+    locked: 'Not yet',
+    seeRankings: 'SEE THE RANKINGS',
+    title: {
+      newcomer: 'Newcomer',
+      arsonist: 'The Arsonist',
+      coldHands: 'Cold Hands',
+      lightFingers: 'Light Fingers',
+      tableRunner: 'Table Runner',
+      sparkThrower: 'Spark Thrower',
+      vanisher: 'The Vanisher',
+      steadyHand: 'Steady Hand',
+    },
+    badge: {
+      firstMatch: 'Sat Down',
+      regular: 'Regular',
+      fiveWins: 'Five Times Over',
+      arsonist: 'Arsonist',
+      pyromaniac: 'Pyromaniac',
+      coldKnocks: 'Cold Caller',
+      ashOut: 'Ash Out',
+      emptyHanded: 'Empty Handed',
+      century: 'Century',
+      lightFingers: 'Light Fingers',
+    },
+    badgeHint: {
+      firstMatch: 'Finish a match.',
+      regular: 'Finish 25 matches.',
+      fiveWins: 'Win five matches.',
+      arsonist: 'Burn 10 cards.',
+      pyromaniac: 'Burn 100 cards.',
+      coldKnocks: 'Knock and make it stick 10 times.',
+      ashOut: 'Burn your last card away.',
+      emptyHanded: 'Take a round to the showdown with nothing left.',
+      century: 'Play 100 rounds.',
+      lightFingers: 'Finish a round on 3 points or fewer.',
+    },
+    shape: {
+      spade: 'Spade',
+      heart: 'Heart',
+      diamond: 'Diamond',
+      club: 'Club',
+      flame: 'Flame',
+      star: 'Star',
+    },
+    colour: {
+      coral: 'Coral',
+      sage: 'Sage',
+      navy: 'Navy',
+      gold: 'Gold',
+      plum: 'Plum',
+      teal: 'Teal',
+    },
     noRecord: 'No record yet. Play a match online.',
     noLeaders: 'Nobody has finished enough matches yet.',
     none: '—',
@@ -593,11 +757,16 @@ export const en: Strings = {
 /* العربية                                                             */
 /* ------------------------------------------------------------------ */
 
-const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-
-/** Western digits into Arabic-Indic ones, leaving everything else alone. */
+/**
+ * Numbers stay in Western digits in both languages.
+ *
+ * Arabic-Indic digits are correct and they are what a book would print, but
+ * the numbers here are read against the cards themselves — a 7 on the table,
+ * a score beside a name — and the cards are printed 7. Two numbering systems
+ * on one screen is one more than anybody wants to read mid-game.
+ */
 function arabicDigits(value: number | string): string {
-  return String(value).replace(/[0-9]/g, (digit) => ARABIC_DIGITS[Number(digit)]);
+  return String(value);
 }
 
 /**
@@ -609,15 +778,15 @@ function arabicDigits(value: number | string): string {
  */
 const AR_RANK: Record<Rank, string> = {
   A: 'آس',
-  '2': '٢',
-  '3': '٣',
-  '4': '٤',
-  '5': '٥',
-  '6': '٦',
-  '7': '٧',
-  '8': '٨',
-  '9': '٩',
-  '10': '١٠',
+  '2': '2',
+  '3': '3',
+  '4': '4',
+  '5': '5',
+  '6': '6',
+  '7': '7',
+  '8': '8',
+  '9': '9',
+  '10': '10',
   J: 'ولد',
   Q: 'بنت',
   K: 'شايب',
@@ -830,6 +999,64 @@ export const ar: Strings = {
     youSuffix: ' (أنت)',
   },
 
+  express: {
+    open: 'قل شي',
+    title: 'قل شي',
+    everyone: 'الكل',
+    emoji: 'ارمها عليه',
+    phrases: 'قلها',
+    muted: 'التفاعلات مقفلة.',
+    mute: 'أقفلها',
+    unmute: 'افتحها',
+    aimHint: 'اختر مقعد فوق عشان ترميها على أحد.',
+    tooFast: 'عطِ الطاولة لحظة.',
+    phrase: {
+      hello: 'هلا!',
+      nice: 'يا سلام',
+      wellPlayed: 'لعب صح',
+      lucky: 'حظك حلو',
+      close: 'قرّبت',
+      oops: 'أوبس',
+      yourTurn: 'دورك',
+      goodGame: 'لعبة حلوة',
+    },
+  },
+
+  rank: {
+    title: 'الترتيب',
+    season: 'هذا الموسم',
+    allTime: 'كل الأوقات',
+    seasonEnds: (days) => `الموسم ينتهي بعد ${days} يوم.`,
+    seasonEndsToday: 'الموسم ينتهي اليوم.',
+    points: (points) => `${points} نقطة`,
+    toNext: (points, tier) => `${points} نقطة وتوصل ${tier}`,
+    atTheTop: 'أعلى السلم.',
+    unranked: 'بدون ترتيب',
+    unrankedHint: 'خلّص مباراة ضد لاعبين حقيقيين عشان تدخل اللوحة.',
+    place: (place) => `#${place}`,
+    you: 'أنت',
+    empty: 'ما أحد سجّل هذا الموسم. كن أول واحد.',
+    emptyAllTime: 'ما أحد خلّص مباريات كافية بعد.',
+    columnPlayer: 'اللاعب',
+    columnPoints: 'النقاط',
+    columnWinRate: 'نسبة الفوز',
+    columnPlayed: 'لعب',
+    tier: {
+      ash: 'رماد',
+      spark: 'شرارة',
+      ember: 'جمرة',
+      blaze: 'لهب',
+      inferno: 'حريق',
+    },
+    tierBlurb: {
+      ash: 'الكل يبدأ بارد.',
+      spark: 'شبّت.',
+      ember: 'تحترق بثبات.',
+      blaze: 'صعب أحد يقعد قبالك.',
+      inferno: 'الطاولة تفضى لين تقعد.',
+    },
+  },
+
   profile: {
     matches: 'المباريات',
     won: 'الفوز',
@@ -844,6 +1071,62 @@ export const ar: Strings = {
     ashOuts: 'حرق كامل',
     pointsTaken: 'النقاط المحصّلة',
     leaderboard: 'لوحة الصدارة',
+    yourMark: 'علامتك',
+    markHint: 'اللي يشوفه الكل جنب اسمك.',
+    badges: 'الأوسمة',
+    badgesEarned: (earned, total) => `${earned} من ${total}`,
+    locked: 'لسه',
+    seeRankings: 'شوف الترتيب',
+    title: {
+      newcomer: 'جديد',
+      arsonist: 'الحرّاق',
+      coldHands: 'يد باردة',
+      lightFingers: 'خفيف اليد',
+      tableRunner: 'سيد الطاولة',
+      sparkThrower: 'رامي الشرر',
+      vanisher: 'المختفي',
+      steadyHand: 'يد ثابتة',
+    },
+    badge: {
+      firstMatch: 'قعدت',
+      regular: 'وجه معروف',
+      fiveWins: 'خمس مرات',
+      arsonist: 'حرّاق',
+      pyromaniac: 'مهووس حريق',
+      coldKnocks: 'طرقة باردة',
+      ashOut: 'صار رماد',
+      emptyHanded: 'إيدك فاضية',
+      century: 'مية جولة',
+      lightFingers: 'خفيف اليد',
+    },
+    badgeHint: {
+      firstMatch: 'خلّص مباراة.',
+      regular: 'خلّص ٢٥ مباراة.',
+      fiveWins: 'افز بخمس مباريات.',
+      arsonist: 'احرق ١٠ أوراق.',
+      pyromaniac: 'احرق ١٠٠ ورقة.',
+      coldKnocks: 'اطرق وتثبت طرقتك ١٠ مرات.',
+      ashOut: 'احرق آخر ورقة عندك.',
+      emptyHanded: 'وصّل جولة للكشف وما عندك ولا ورقة.',
+      century: 'العب ١٠٠ جولة.',
+      lightFingers: 'خلّص جولة بـ ٣ نقاط أو أقل.',
+    },
+    shape: {
+      spade: 'بستوني',
+      heart: 'كبة',
+      diamond: 'ديناري',
+      club: 'شيريا',
+      flame: 'شعلة',
+      star: 'نجمة',
+    },
+    colour: {
+      coral: 'مرجاني',
+      sage: 'أخضر',
+      navy: 'كحلي',
+      gold: 'ذهبي',
+      plum: 'برقوقي',
+      teal: 'فيروزي',
+    },
     noRecord: 'لا سجلّ بعد. العب مباراة على الإنترنت.',
     noLeaders: 'لم يُكمل أحد ما يكفي من المباريات بعد.',
     none: '—',

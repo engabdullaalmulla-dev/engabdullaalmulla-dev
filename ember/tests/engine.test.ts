@@ -18,6 +18,21 @@ import {
   topDiscard,
 } from '../shared/engine';
 import { decide, decideBurn, observeTransition, seedMemory, type BotMemory } from '../shared/ai';
+import { EXPRESSIONS, canAim, expression, isExpressionId } from '../shared/expressions';
+import {
+  avatarFromSeed,
+  badges,
+  badgesEarned,
+  formatAvatar,
+  matchPoints,
+  parseAvatar,
+  seasonEndsAt,
+  seasonOf,
+  standing,
+  tierFor,
+  titleFor,
+} from '../shared/progress';
+import type { UserStats } from '../shared/protocol';
 import type { GameAction, GameState } from '../shared/types';
 
 let passed = 0;
@@ -479,6 +494,69 @@ equal(
   'a bot learns nothing from your peek',
   Object.keys(afterTurn).every((k) => k.startsWith('bot1:')),
   true,
+);
+
+/* what people can say to each other ---------------------------------- */
+equal('there are sixteen things anyone can say', EXPRESSIONS.length, 16);
+check('and every one of them is known by id', EXPRESSIONS.every((entry) => isExpressionId(entry.id)));
+check('anything else is not', !isExpressionId('drop table users'));
+check('an emoji has something to draw', EXPRESSIONS.filter((e) => e.kind === 'emoji').every((e) => !!e.glyph));
+equal('an emoji can be thrown at somebody', canAim('fire'), true);
+equal('a phrase is said to the table', canAim('goodGame'), false);
+equal('and an unknown id is nothing at all', expression('nope'), null);
+
+/* ranks, seasons and what a match is worth ---------------------------- */
+equal('everyone starts in the ash', tierFor(0), 'ash');
+equal('a hundred points lights a spark', tierFor(100), 'spark');
+equal('and the ladder tops out', tierFor(1_000_000), 'inferno');
+equal('winning pays the same at any size of table', matchPoints(1, 2), matchPoints(1, 5));
+equal('the middle of a five-hander is thin', matchPoints(3, 5), 12);
+equal('and last place costs a little', matchPoints(5, 5), -8);
+equal('a rank knows how far the next one is', standing(120).toGo, 180);
+equal('and how far through it you are', Math.round(standing(200).fraction * 100), 50);
+equal('the top of the ladder has nothing above it', standing(5000).next, null);
+equal('a season is a quarter', seasonOf(Date.UTC(2026, 0, 1)), '2026-Q1');
+equal('and rolls over on the hour it ends', seasonEndsAt(Date.UTC(2026, 0, 1)), Date.UTC(2026, 3, 1));
+
+/* titles and badges --------------------------------------------------- */
+const blankRecord: UserStats = {
+  matches: 0, wins: 0, rounds: 0, roundWins: 0, knocks: 0, knocksStuck: 0,
+  burns: 0, misfires: 0, ashOuts: 0, bestRound: null, totalPoints: 0,
+};
+equal('a new player is a newcomer', titleFor(blankRecord), 'newcomer');
+equal(
+  'somebody who burns everything is the arsonist',
+  titleFor({ ...blankRecord, matches: 10, rounds: 50, burns: 30 }),
+  'arsonist',
+);
+equal(
+  'somebody whose knocks stick has cold hands',
+  titleFor({ ...blankRecord, matches: 10, knocks: 10, knocksStuck: 9 }),
+  'coldHands',
+);
+equal('and everyone else has a steady hand', titleFor({ ...blankRecord, matches: 10 }), 'steadyHand');
+equal('a blank record has earned nothing', badgesEarned(blankRecord), 0);
+equal('finishing one match earns one', badgesEarned({ ...blankRecord, matches: 1 }), 1);
+check(
+  'a locked badge still shows how far off it is',
+  badges({ ...blankRecord, burns: 4 }).some((b) => b.id === 'arsonist' && !b.earned && b.have === 4),
+);
+check(
+  'and a badge never counts past its own target',
+  badges({ ...blankRecord, burns: 500 }).every((badge) => badge.have <= badge.need),
+);
+
+/* the mark beside a name ---------------------------------------------- */
+equal('a stored mark is read back', parseAvatar('flame:teal').shape, 'flame');
+equal('nonsense falls back to one of ours', parseAvatar('x:y', 'abdulla').shape !== undefined, true);
+equal(
+  'and the fallback is the same every time',
+  formatAvatar(avatarFromSeed('abdulla')),
+  formatAvatar(avatarFromSeed('abdulla')),
+);
+check(
+  'two different people get different marks',
+  formatAvatar(avatarFromSeed('rashid')) !== formatAvatar(avatarFromSeed('noura')),
 );
 
 /* ------------------------------------------------------------------ */

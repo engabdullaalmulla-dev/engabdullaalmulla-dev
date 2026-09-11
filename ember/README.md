@@ -116,6 +116,54 @@ had actually been shown. Lose signal and your seat is covered the same way until
 you come back to it — the app reconnects on its own, with the seat marked *away*
 in the meantime.
 
+## Saying something
+
+There is no chat box and there is not going to be one. Instead there are eight
+faces and eight fixed lines, and that is the whole vocabulary. Tap a seat and an
+emoji flies across the table and lands on them; tap a phrase and it appears in a
+bubble over your own cards.
+
+What crosses the wire is an id out of a fixed list — never text — so a phrase
+sent from an Arabic phone arrives in English on an English one, and a table with
+both at it works without either player reading the other's alphabet. It also
+means there is nothing to moderate: the list is the list. The server checks the
+id, ignores any claim about who is sending it, and holds everyone to five things
+in twelve seconds with a breath between them.
+
+Bots at an offline table use the same vocabulary. They react to what just
+happened rather than to a timer, a beat late, and each one keeps quiet for a
+while after speaking.
+
+## Ranks, seasons and the board
+
+Finishing a match against **other people** earns season points — first place
+pays the same at a two-handed table as at a five, the places between slide
+evenly across, and last place costs a little. A table of one person and four
+bots is a fine way to spend an evening and earns nothing, which is what stops
+the board being farmed.
+
+Points make a rank: **Ash → Spark → Ember → Blaze → Inferno**. Seasons run a
+quarter each, so a board is never so old that the people on it stopped playing,
+and never so short that it resets before anyone has climbed it.
+
+The rankings screen has two boards — this season, ranked on points, and all
+time, ranked on win rate with enough matches behind it to mean something. Your
+own row is pinned wherever you are on it.
+
+## Your profile
+
+A **mark** beside your name: one of six shapes in one of six colours, chosen on
+the profile screen and shown at the table, in the room and on the board. Anyone
+who has not picked one gets a mark derived from who they are, so no seat is ever
+a blank circle — the bots included.
+
+A **title** underneath it, taken from how you actually play rather than how
+much: burn most of what you touch and you are *The Arsonist*; knock and make it
+stick and you have *Cold Hands*.
+
+And ten **badges**, each a count against a target, so a locked one still shows
+how close it is.
+
 ## Arabic
 
 The whole app is in Arabic as well as English — the table, the rules, sign-in,
@@ -126,9 +174,9 @@ overrides that and is remembered.
 Arabic lays the app out right to left, which is a layout change rather than a
 mirror image: rows, alignment and the back arrow all turn round, while the
 playing cards stay exactly as they are, because a card reads the same in any
-language. Numbers are written in Arabic-Indic digits where they are prose —
-scores, counts, round numbers — and stay Western on the faces of the cards,
-which is how a deck sold in the Gulf is printed.
+language. Numbers are written in Western digits in both languages: they are read
+against the cards themselves — a 7 on the table, a score beside a name — and the
+cards are printed 7.
 
 The card names are the ones used at a table in the Gulf rather than the ones
 in a dictionary: a King is **الشايب**, a Queen is **البنت**, a Jack is
@@ -147,7 +195,7 @@ Two details worth knowing about how it is built:
   the same match can be read in Arabic by one player and English by another at
   the same table.
 - **Arabic conjugates for who is speaking and who is spoken about**, so your
-  own moves read in the second person («رميتَ ٧ بستوني») and everyone else's in
+  own moves read in the second person («رميتَ 7 بستوني») and everyone else's in
   the third, with the verb agreeing with them — «نورة بدّلت» and «راشد بدّل».
   A player online could be anyone, so an unfamiliar name takes the masculine,
   which is the ordinary fallback.
@@ -235,14 +283,17 @@ and per name.
 
 ## Testing
 
-`npm test` at the root runs 87 checks over the deck, every power, knock scoring,
+`npm test` at the root runs 131 checks over the deck, every power, knock scoring,
 burning, ash-outs, and sixty complete bot-versus-bot matches — asserting that no
-card is ever lost or duplicated and that a seed always replays exactly.
+card is ever lost or duplicated and that a seed always replays exactly — plus the
+expression list, the rank ladder, what a match is worth, seasons, titles, badges
+and the marks beside people's names.
 
-`cd server && npm test` runs 85 more: password and session handling, rate
-limiting, stats, room and host rules, quick match filling with bots, and a full
-three-player match during which **every broadcast** is checked for whether a seat
-was shown a card it had no right to.
+`cd server && npm test` runs 112 more: password and session handling, rate
+limiting, stats, season points and the board, expression relay and its cooldown,
+room and host rules, quick match filling with bots, and a full three-player match
+during which **every broadcast** is checked for whether a seat was shown a card
+it had no right to.
 
 Both were also played through for real: two browser sessions at a private table,
 with the WebSocket frames recorded and audited — across 34 table frames, no card

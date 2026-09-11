@@ -15,16 +15,18 @@ import { HomeScreen, type Settings } from './src/ui/screens/HomeScreen';
 import { LobbyScreen } from './src/ui/screens/LobbyScreen';
 import { OnlineTable } from './src/ui/screens/OnlineTable';
 import { ProfileScreen } from './src/ui/screens/ProfileScreen';
+import { RankingsScreen } from './src/ui/screens/RankingsScreen';
 import { RoomScreen } from './src/ui/screens/RoomScreen';
 import { RoundOverlay } from './src/ui/screens/RoundOverlay';
 import { RulesScreen } from './src/ui/screens/RulesScreen';
 import { TableSurface } from './src/ui/components/TableSurface';
 import { asDir, directionStyle } from './src/ui/ltr';
 import { setSoundEnabled } from './src/ui/sound';
+import { useBotChatter, useTalk } from './src/ui/talk';
 import { colors, space } from './src/ui/theme';
 import { useEmber } from './src/ui/useEmber';
 
-type Screen = 'home' | 'rules' | 'auth' | 'lobby' | 'profile' | 'offline';
+type Screen = 'home' | 'rules' | 'auth' | 'lobby' | 'profile' | 'rankings' | 'offline';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -108,6 +110,26 @@ export default function App() {
     setScreen('home');
   }, [session]);
 
+  /**
+   * Saves a new mark. The server is the one that keeps it, so the screen
+   * follows what comes back rather than what was tapped.
+   */
+  const chooseMark = useCallback(
+    (shape: string, colour: string) => {
+      if (!session) return;
+      void api
+        .setAvatar(session.token, shape, colour)
+        .then((result) => {
+          const stored = { token: session.token, user: result.user };
+          void saveSession(stored);
+          setSession(stored);
+          online.setUser(result.user);
+        })
+        .catch(() => undefined);
+    },
+    [session, online],
+  );
+
   const playOffline = useCallback(() => {
     setMatchId((id) => id + 1);
     setScreen('offline');
@@ -141,12 +163,15 @@ export default function App() {
           table={online.table}
           status={online.status}
           user={online.user}
+          room={online.room}
           error={online.error}
           assist={settings.assist}
           yourMemory={online.yourMemory}
+          said={online.said}
           onPlay={online.play}
           onNextRound={online.nextRound}
           onLeave={leaveTable}
+          onExpress={online.express}
         />
       );
     }
@@ -191,7 +216,19 @@ export default function App() {
           <ProfileScreen
             user={online.user ?? session?.user ?? null}
             stats={online.stats}
+            rank={online.rank}
             onBack={() => setScreen('lobby')}
+            onRankings={() => setScreen('rankings')}
+            onChooseMark={chooseMark}
+          />
+        );
+
+      case 'rankings':
+        return (
+          <RankingsScreen
+            userId={online.user?.id ?? session?.user.id ?? null}
+            token={session?.token ?? null}
+            onBack={() => setScreen('profile')}
           />
         );
 
@@ -290,6 +327,11 @@ function OfflineTable({
     bots: t.bots.slice(0, rivals).map((name) => ({ name, difficulty })),
   });
 
+  // The bots talk to you too. They react to the table rather than to a timer,
+  // so an empty room still feels like people sitting round one.
+  const { said, say } = useTalk();
+  useBotChatter({ view, say });
+
   const finished = view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER';
 
   return (
@@ -300,6 +342,8 @@ function OfflineTable({
         yourMemory={yourMemory as Record<string, unknown>}
         assist={assist}
         onQuit={onHome}
+        said={said}
+        onExpress={(id, targetId) => say(view.youId, id, targetId)}
       />
       {finished ? (
         <RoundOverlay

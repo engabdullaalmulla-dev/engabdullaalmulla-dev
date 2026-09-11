@@ -9,15 +9,18 @@
 import { observeTransition, seedMemory, type BotMemory } from '../../shared/ai';
 import { Autoplay } from '../../shared/autoplay';
 import { createMatch, currentPlayer, playerById, reduce } from '../../shared/engine';
+import { EXPRESSION_LIMIT, isExpressionId, type ExpressionId } from '../../shared/expressions';
+import { avatarFromSeed, formatAvatar } from '../../shared/progress';
 import type { ErrorCode, RoomStatus, RoomView, Seat, ServerMessage } from '../../shared/protocol';
 import type { Difficulty, GameAction, GameState } from '../../shared/types';
 import { canAct, viewFor } from '../../shared/view';
 import { config } from './config';
-import { recordMatch, recordRound, statsFor, type RoundDelta } from './stats';
+import { rankFor, recordMatch, recordRound, statsFor, type RoundDelta } from './stats';
 
 export interface Connection {
   userId: string;
   name: string;
+  avatar: string;
   send(message: ServerMessage): void;
 }
 
@@ -43,6 +46,8 @@ export class Room {
   private nextRoundAt: number | null = null;
   private roundDeltas: Record<string, RoundDelta> = {};
   private botSeq = 0;
+  /** When each seat last said something, for the rate limit. */
+  private chatter = new Map<string, number[]>();
 
   /** Set while a public room is waiting for more people to turn up. */
   quickMatchStartsAt: number | null = null;
@@ -83,6 +88,7 @@ export class Room {
       // Somebody coming back to a seat they already hold.
       existing.connected = true;
       existing.name = connection.name;
+      existing.avatar = connection.avatar;
       this.connections.set(connection.userId, connection);
       this.touch();
       this.schedule();
@@ -96,6 +102,7 @@ export class Room {
     this.seats.push({
       id: connection.userId,
       name: connection.name,
+      avatar: connection.avatar,
       isBot: false,
       connected: true,
       difficulty: 'normal',
@@ -146,6 +153,7 @@ export class Room {
         this.seats.push({
           id: userId,
           name: player.name,
+          avatar: formatAvatar(avatarFromSeed(userId)),
           isBot: true,
           connected: true,
           difficulty: 'normal',
@@ -179,9 +187,11 @@ export class Room {
 
     const taken = new Set(this.seats.map((seat) => seat.name));
     const name = BOT_NAMES.find((candidate) => !taken.has(candidate)) ?? `Bot ${this.botSeq + 1}`;
+    const id = `bot:${this.code}:${this.botSeq++}`;
     this.seats.push({
-      id: `bot:${this.code}:${this.botSeq++}`,
+      id,
       name,
+      avatar: formatAvatar(avatarFromSeed(id)),
       isBot: true,
       connected: true,
       difficulty,
@@ -256,6 +266,37 @@ export class Room {
     // A move the rules will not take is worth saying so about, rather than
     // leaving a phone waiting for a table that already moved on.
     if (!this.apply(action)) throw new RoomError('not_your_move');
+  }
+
+  /**
+   * Something said at the table.
+   *
+   * The sender is whoever is holding the socket — never a seat they name —
+   * so nobody can put words in somebody else's mouth. The id is checked
+   * against the fixed list, which is the whole reason there is a fixed list.
+   */
+  express(userId: string, id: ExpressionId, targetId?: string): void {
+    if (!this.has(userId)) throw new RoomError('not_in_room');
+    if (!isExpressionId(id)) throw new RoomError('bad_message');
+    if (!this.canSpeak(userId)) throw new RoomError('too_chatty');
+
+    const target = targetId && targetId !== userId && this.has(targetId) ? targetId : null;
+    const message: ServerMessage = { type: 'expression', fromId: userId, targetId: target, id };
+    for (const connection of this.connections.values()) connection.send(message);
+    this.touch();
+  }
+
+  /** A gap between anything, and a ceiling on how much of it in a while. */
+  private canSpeak(userId: string, now = Date.now()): boolean {
+    const said = (this.chatter.get(userId) ?? []).filter(
+      (at) => now - at < EXPRESSION_LIMIT.windowMs,
+    );
+    const last = said[said.length - 1];
+    if (last != null && now - last < EXPRESSION_LIMIT.gapMs) return false;
+    if (said.length >= EXPRESSION_LIMIT.perWindow) return false;
+    said.push(now);
+    this.chatter.set(userId, said);
+    return true;
   }
 
   /** Any player may hurry the table along once a round is scored. */
@@ -447,9 +488,14 @@ export class Room {
           })),
           state.matchWinnerId,
           this.seats.length,
+          // A rank means something only when somebody else was across the
+          // table. One human and a row of bots plays for the fun of it.
+          humans.length >= 2,
         );
         for (const seat of humans) {
-          this.connections.get(seat.id)?.send({ type: 'stats', stats: statsFor(seat.id) });
+          this.connections
+            .get(seat.id)
+            ?.send({ type: 'stats', stats: statsFor(seat.id), rank: rankFor(seat.id) });
         }
       } catch {
         // As above: records are secondary to the game itself.

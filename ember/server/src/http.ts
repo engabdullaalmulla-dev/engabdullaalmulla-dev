@@ -2,9 +2,17 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { AuthError, RateLimiter, login, register, revokeSession, userForToken } from './auth';
+import {
+  AuthError,
+  RateLimiter,
+  login,
+  register,
+  revokeSession,
+  setAvatar,
+  userForToken,
+} from './auth';
 import { config } from './config';
-import { leaderboard, statsFor } from './stats';
+import { board, rankFor, statsFor } from './stats';
 
 const signUps = new RateLimiter(5, 60 * 60_000);
 const signIns = new RateLimiter(10, 15 * 60_000);
@@ -132,13 +140,29 @@ export async function handleRequest(
           send(response, 401, { error: 'unauthorised', message: 'Sign in again.' });
           return;
         }
-        send(response, 200, { user, stats: statsFor(user.id) });
+        send(response, 200, { user, stats: statsFor(user.id), rank: rankFor(user.id) });
         return;
       }
 
-      case 'GET /api/leaderboard': {
-        const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit') ?? 25) || 25));
-        send(response, 200, { rows: leaderboard(limit) });
+      case 'POST /api/avatar': {
+        const user = userForToken(bearer(request));
+        if (!user) {
+          send(response, 401, { error: 'unauthorised', message: 'Sign in again.' });
+          return;
+        }
+        const body = await readJson(request);
+        const avatar = setAvatar(user.id, body.shape, body.colour);
+        send(response, 200, { user: { ...user, avatar } });
+        return;
+      }
+
+      case 'GET /api/rankings': {
+        // Signed in or not, anyone may look at the board; your own row only
+        // appears on it if the server knows who is asking.
+        const user = userForToken(bearer(request));
+        const scope = url.searchParams.get('scope') === 'allTime' ? 'allTime' : 'season';
+        const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit') ?? 50) || 50));
+        send(response, 200, board(scope, user?.id ?? null, limit));
         return;
       }
 

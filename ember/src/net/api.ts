@@ -3,7 +3,13 @@
  * table goes over the socket instead.
  */
 
-import type { LeaderboardRow, PublicUser, UserStats } from '../../shared/protocol';
+import type {
+  Board,
+  BoardScope,
+  PublicUser,
+  RankState,
+  UserStats,
+} from '../../shared/protocol';
 
 const configured = process.env.EXPO_PUBLIC_EMBER_SERVER;
 
@@ -83,7 +89,16 @@ export const api = {
 
   logout: (token: string) => request<{ ok: boolean }>('/api/logout', { method: 'POST', token }),
 
-  me: (token: string) => request<{ user: PublicUser; stats: UserStats }>('/api/me', { token }),
+  me: (token: string) =>
+    request<{ user: PublicUser; stats: UserStats; rank: RankState }>('/api/me', { token }),
 
-  leaderboard: () => request<{ rows: LeaderboardRow[] }>('/api/leaderboard'),
+  setAvatar: (token: string, shape: string, colour: string) =>
+    request<{ user: PublicUser }>('/api/avatar', {
+      method: 'POST',
+      token,
+      body: { shape, colour },
+    }),
+
+  rankings: (scope: BoardScope, token?: string | null) =>
+    request<Board>(`/api/rankings?scope=${scope}`, { token }),
 };

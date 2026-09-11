@@ -9,11 +9,14 @@ import {
   View,
 } from 'react-native';
 
+import type { ExpressionId } from '../../../shared/expressions';
 import type { GameAction } from '../../../shared/types';
 import { useLanguage, type Language } from '../../i18n';
 import { actingPlayer, faceOf, type PlayerView, type TableView } from '../../../shared/view';
 import { BurnMeter } from '../components/BurnMeter';
 import { Button } from '../components/Button';
+import { ExpressionTray } from '../components/ExpressionTray';
+import { TalkLayer } from '../components/TalkLayer';
 import { TableSurface } from '../components/TableSurface';
 import { Say } from '../components/Say';
 import { Score } from '../components/Score';
@@ -26,6 +29,7 @@ import { anchorKeys, AnchorProvider, useAnchor } from '../motion/anchors';
 import { MotionLayer, useFlights } from '../motion/MotionLayer';
 import { useTableMotion, type MotionHints, type TableEvent } from '../motion/useTableMotion';
 import { play, primeSound } from '../sound';
+import type { Said } from '../talk';
 import { colors, radius, space, type as typography } from '../theme';
 
 interface Props {
@@ -39,6 +43,11 @@ interface Props {
   banner?: { text: string; tone: 'info' | 'bad' } | null;
   /** Online only: seconds left on your turn clock. */
   clock?: number | null;
+  /** What everyone has just said, and how to say something back. */
+  said?: Said[];
+  onExpress?: (id: ExpressionId, targetId: string | null) => void;
+  /** The mark each seat chose, where the table knows it. */
+  avatars?: Record<string, string>;
 }
 
 /** What each thing that happens on the table sounds and feels like. */
@@ -94,7 +103,18 @@ export function GameScreen(props: Props) {
   );
 }
 
-function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Props) {
+function Table({
+  view,
+  dispatch,
+  yourMemory,
+  assist,
+  onQuit,
+  banner,
+  clock,
+  said = [],
+  onExpress,
+  avatars = {},
+}: Props) {
   const language = useLanguage();
   const { t, n, line } = language;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
@@ -152,6 +172,8 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
     return () => clearTimeout(timer);
   }, [burnWindow]);
 
+  // Your own end of the table, so a thing said to you has somewhere to land.
+  const yourSeat = useAnchor(anchorKeys.seat(view.youId));
   const flights = useFlights();
   const hints = useRef<MotionHints>({});
   const motion = useTableMotion({ view, controller: flights, hints, onEvent: announce });
@@ -301,6 +323,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
               player={player}
               active={seat.id === player.id && !showdown}
               knocked={view.knockerId === player.id}
+              avatar={avatars[player.id]}
               cardWidth={rivalCardWidth}
               targetable={rivalsTargetable ? liveSlots(player) : []}
               burning={view.phase === 'BURN_WINDOW'}
@@ -338,7 +361,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
         </View>
         </View>
 
-        <View style={styles.youWrap}>
+        <View {...yourSeat} style={styles.youWrap}>
           <View style={[styles.youHeader, { width: handWidth }]}>
             <Text style={[styles.youName, yourTurn && !showdown && styles.youNameActive]}>
               {you.name.toUpperCase()}
@@ -376,13 +399,27 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
         </View>
 
         <View style={styles.controls}>
-          <Controls
-            view={view}
-            dispatch={dispatch}
-            yourTurn={yourTurn}
-            revealIsYours={revealIsYours}
-            language={language}
-          />
+          <View style={styles.controlsRow}>
+            <View style={styles.controlsMain}>
+              <Controls
+                view={view}
+                dispatch={dispatch}
+                yourTurn={yourTurn}
+                revealIsYours={revealIsYours}
+                language={language}
+              />
+            </View>
+            {onExpress ? (
+              <ExpressionTray
+                seats={rivals.map((player) => ({
+                  id: player.id,
+                  name: player.name,
+                  avatar: avatars[player.id],
+                }))}
+                onSend={onExpress}
+              />
+            ) : null}
+          </View>
         </View>
 
         <Text numberOfLines={1} style={[styles.feed, logTone(lastLog?.kind)]}>
@@ -391,6 +428,7 @@ function Table({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Pr
       </View>
 
       <MotionLayer controller={flights} onLand={(flight) => onLand(flight.toKey)} />
+      <TalkLayer said={said} youId={youId} />
     </TableSurface>
   );
 }
@@ -673,6 +711,8 @@ const styles = StyleSheet.create({
   hand: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
 
   controls: { minHeight: 54, justifyContent: 'center' },
+  controlsRow: { flexDirection: 'row', alignItems: 'center', gap: space(2) },
+  controlsMain: { flex: 1 },
   controlRow: { flexDirection: 'row', gap: space(2) },
   controlButton: { flex: 1 },
   controlSpacer: { height: 48 },

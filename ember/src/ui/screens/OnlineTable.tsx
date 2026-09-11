@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import type { ErrorCode, PublicUser } from '../../../shared/protocol';
+import type { ExpressionId } from '../../../shared/expressions';
+import type { ErrorCode, PublicUser, RoomView } from '../../../shared/protocol';
 import type { ConnectionStatus, TableState } from '../../net/useOnline';
 import type { GameAction } from '../../../shared/types';
 import { useLanguage } from '../../i18n';
+import type { Said } from '../talk';
 import { GameScreen } from './GameScreen';
 import { RoundOverlay } from './RoundOverlay';
 
@@ -12,12 +14,15 @@ interface Props {
   table: TableState;
   status: ConnectionStatus;
   user: PublicUser | null;
+  room: RoomView | null;
   error: ErrorCode | null;
   assist: boolean;
   yourMemory: Record<string, unknown>;
+  said: Said[];
   onPlay: (action: GameAction) => void;
   onNextRound: () => void;
   onLeave: () => void;
+  onExpress: (id: ExpressionId, targetId: string | null) => void;
 }
 
 /** Ticks once a second so a deadline can be shown as a countdown. */
@@ -42,12 +47,15 @@ export function OnlineTable({
   table,
   status,
   user,
+  room,
   error,
   assist,
   yourMemory,
+  said,
   onPlay,
   onNextRound,
   onLeave,
+  onExpress,
 }: Props) {
   const { t, n } = useLanguage();
   const { view, clock, nextRoundAt } = table;
@@ -56,6 +64,9 @@ export function OnlineTable({
   const untilNextRound = useSecondsUntil(nextRoundAt);
 
   const finished = view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER';
+
+  // The room knows what mark everyone picked; the redacted table view does not.
+  const avatars = Object.fromEntries((room?.seats ?? []).map((seat) => [seat.id, seat.avatar]));
 
   const banner =
     status === 'reconnecting' || status === 'connecting'
@@ -76,6 +87,9 @@ export function OnlineTable({
         onQuit={onLeave}
         banner={banner}
         clock={secondsLeft}
+        said={said}
+        onExpress={onExpress}
+        avatars={avatars}
       />
       {finished ? (
         <RoundOverlay

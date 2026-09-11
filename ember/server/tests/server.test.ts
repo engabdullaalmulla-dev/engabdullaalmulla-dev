@@ -2,6 +2,14 @@ import './env';
 
 import Database from 'better-sqlite3';
 
+import { EXPRESSION_LIMIT } from '../../shared/expressions';
+import {
+  matchPoints,
+  seasonEndsAt,
+  seasonOf,
+  standing,
+  tierFor,
+} from '../../shared/progress';
 import type { ServerMessage } from '../../shared/protocol';
 import type { GameAction } from '../../shared/types';
 import type { TableView } from '../../shared/view';
@@ -19,7 +27,7 @@ import {
 import { useDatabase } from '../src/db';
 import { Hub } from '../src/hub';
 import { Room, RoomError, type Connection } from '../src/room';
-import { leaderboard, recordMatch, recordRound, statsFor } from '../src/stats';
+import { board, rankFor, recordMatch, recordRound, statsFor } from '../src/stats';
 
 useDatabase(new Database(':memory:'));
 
@@ -142,16 +150,51 @@ async function main() {
     seats.map((id, index) => ({ userId: id, score: [12, 40, 60][index] })),
     seats[0],
     3,
+    true,
   );
   equal('a match is counted', statsFor(seats[0]).matches, 1);
   equal('winning it is counted', statsFor(seats[0]).wins, 1);
   equal('losing it is counted too', statsFor(seats[1]).matches, 1);
   equal('but not as a win', statsFor(seats[1]).wins, 0);
 
-  const board = leaderboard(10, 1);
-  equal('the leaderboard ranks the winner first', board[0]?.name, 'Abdulla');
-  equal('and shows a win rate', board[0]?.winRate, 1);
-  check('players below the match threshold are left out', leaderboard(10, 5).length === 0);
+  const allTime = board('allTime', null, 10, 1);
+  equal('the all-time board ranks the winner first', allTime.rows[0]?.name, 'Abdulla');
+  equal('and shows a win rate', allTime.rows[0]?.winRate, 1);
+  check(
+    'players below the match threshold are left out',
+    board('allTime', null, 10, 5).rows.length === 0,
+  );
+
+  /* ---- ranks and the season ---------------------------------------- */
+
+  const champion = rankFor(seats[0]);
+  equal('winning a ranked match pays the full purse', champion.points, matchPoints(1, 3));
+  equal('which is enough to stay in the first rank', champion.tier, 'ash');
+  equal('and puts you first on the season board', champion.place, 1);
+  equal('coming last earns nothing, and never goes below nothing', rankFor(seats[2]).points, 0);
+  check('so the board does not list you at all', rankFor(seats[2]).place === null);
+
+  const seasonBoard = board('season', seats[1], 10);
+  equal('the season board is ranked on points', seasonBoard.rows[0]?.name, 'Abdulla');
+  equal('and pins your own row wherever it is', seasonBoard.you?.name, 'Noura');
+  equal('the season has an end', seasonBoard.season, seasonOf());
+
+  recordMatch([{ userId: seats[2], score: 10 }], seats[2], 3, false);
+  equal('an unranked match leaves the season alone', rankFor(seats[2]).points, 0);
+  equal('though it still counts as a match played', statsFor(seats[2]).matches, 2);
+
+  /* ---- the ladder itself ------------------------------------------- */
+
+  equal('points below the first step are Ash', tierFor(0), 'ash');
+  equal('a hundred lights a Spark', tierFor(100), 'spark');
+  equal('and fifteen hundred is an Inferno', tierFor(9999), 'inferno');
+  equal('a rank knows what is left to the next', standing(120).toGo, 180);
+  equal('and the top of the ladder has nothing above it', standing(2000).next, null);
+  equal('winning a two-handed match is worth the same as a five', matchPoints(1, 2), matchPoints(1, 5));
+  equal('coming last is a small price', matchPoints(3, 3), -8);
+  equal('a season is a quarter of a year', seasonOf(Date.UTC(2026, 7, 3)), '2026-Q3');
+  equal('and ends when the next one starts', seasonEndsAt(Date.UTC(2026, 7, 3)), Date.UTC(2026, 9, 1));
+  equal('even across a year boundary', seasonEndsAt(Date.UTC(2026, 11, 20)), Date.UTC(2027, 0, 1));
 
   /* ---------------------------------------------------------------- */
   /* rooms                                                             */
@@ -166,6 +209,7 @@ async function main() {
     const connection: Fake = {
       userId: id,
       name,
+      avatar: '',
       messages: [],
       tables: [],
       send(message) {
@@ -208,6 +252,37 @@ async function main() {
   room.start(host.userId);
   equal('the room is playing', room.status, 'playing');
   await throws('a started room turns newcomers away', () => hub.join(fake('nobody', 'Nobody'), room.code), 'room_in_play');
+
+  /* -------- what people say to each other -------------------------- */
+
+  const said = (who: Fake) => who.messages.filter((message) => message.type === 'expression');
+  const beforeChat = said(third).length;
+  room.express(host.userId, 'laugh', guest.userId);
+  equal('an expression reaches the whole table', said(third).length, beforeChat + 1);
+  const heard = said(third)[beforeChat] as Extract<ServerMessage, { type: 'expression' }>;
+  equal('and says who said it', heard.fromId, host.userId);
+  equal('and who it was aimed at', heard.targetId, guest.userId);
+
+  await throws(
+    'but not twice in the same breath',
+    () => room.express(host.userId, 'clap'),
+    'too_chatty',
+  );
+  await sleep(EXPRESSION_LIMIT.gapMs + 40);
+  room.express(host.userId, 'clap', 'nobody-at-this-table');
+  const aimless = said(third).pop() as Extract<ServerMessage, { type: 'expression' }>;
+  check('an aim at somebody who is not here is dropped', aimless.targetId === null);
+
+  await throws(
+    'and a made-up expression is refused',
+    () => room.express(host.userId, 'shout' as never),
+    'bad_message',
+  );
+  await throws(
+    'somebody who is not at the table cannot say anything',
+    () => room.express('nobody', 'laugh'),
+    'not_in_room',
+  );
 
   /* -------- the whole point: nobody sees anyone else's cards -------- */
 

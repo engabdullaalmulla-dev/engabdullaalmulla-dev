@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-nati
 import type { PublicUser, RoomView } from '../../../shared/protocol';
 import type { Difficulty } from '../../../shared/types';
 import { Button } from '../components/Button';
+import { Mark } from '../components/Mark';
 import { Flame } from '../components/Flame';
 import type { ErrorCode } from '../../../shared/protocol';
 import { useLanguage } from '../../i18n';
@@ -70,6 +71,7 @@ export function RoomScreen({ room, user, error, onAddBot, onRemoveSeat, onStart,
         {room.seats.map((seat) => (
           <View key={seat.id} style={styles.seat}>
             <View style={[styles.seatDot, seat.isBot && styles.seatDotBot, !seat.connected && styles.seatDotAway]} />
+            <Mark avatar={seat.avatar} seed={seat.id} size={24} />
             <Text style={styles.seatName} numberOfLines={1}>
               {seat.name}
               {seat.id === user?.id ? t.room.youSuffix : ''}

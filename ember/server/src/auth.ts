@@ -12,6 +12,13 @@ import { promisify } from 'node:util';
 
 import { config } from './config';
 import { db } from './db';
+import {
+  AVATAR_COLOURS,
+  AVATAR_SHAPES,
+  formatAvatar,
+  type AvatarColour,
+  type AvatarShape,
+} from '../../shared/progress';
 import type { PublicUser } from '../../shared/protocol';
 
 const scryptAsync = promisify(scrypt) as (
@@ -122,11 +129,14 @@ export function userForToken(token: string): PublicUser | null {
   if (!token) return null;
   const row = db()
     .prepare(
-      `SELECT users.id AS id, users.name AS name, sessions.expires_at AS expires_at
+      `SELECT users.id AS id, users.name AS name, users.avatar AS avatar,
+              sessions.expires_at AS expires_at
        FROM sessions JOIN users ON users.id = sessions.user_id
        WHERE sessions.token_hash = ?`,
     )
-    .get(hashToken(token)) as { id: string; name: string; expires_at: number } | undefined;
+    .get(hashToken(token)) as
+    | { id: string; name: string; avatar: string; expires_at: number }
+    | undefined;
 
   if (!row) return null;
   if (row.expires_at < Date.now()) {
@@ -134,7 +144,25 @@ export function userForToken(token: string): PublicUser | null {
     return null;
   }
   db().prepare('UPDATE users SET last_seen_at = ? WHERE id = ?').run(Date.now(), row.id);
-  return { id: row.id, name: row.name };
+  return { id: row.id, name: row.name, avatar: row.avatar ?? '' };
+}
+
+/**
+ * Changes the mark beside somebody's name.
+ *
+ * Anything that is not one of the shapes and colours we draw is refused
+ * rather than stored, so a seat can never carry a string nobody can render.
+ */
+export function setAvatar(userId: string, shape: unknown, colour: unknown): string {
+  if (
+    !AVATAR_SHAPES.includes(shape as AvatarShape) ||
+    !AVATAR_COLOURS.includes(colour as AvatarColour)
+  ) {
+    throw new AuthError(400, 'bad_request', 'That is not one of the marks.');
+  }
+  const avatar = formatAvatar({ shape: shape as AvatarShape, colour: colour as AvatarColour });
+  db().prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatar, userId);
+  return avatar;
 }
 
 export function revokeSession(token: string): void {
@@ -170,14 +198,16 @@ export async function register(name: string, password: string): Promise<AuthResu
   }
   db().prepare('INSERT INTO stats (user_id, updated_at) VALUES (?, ?)').run(id, now);
 
-  return { token: issueSession(id), user: { id, name: trimmed } };
+  return { token: issueSession(id), user: { id, name: trimmed, avatar: '' } };
 }
 
 export async function login(name: string, password: string): Promise<AuthResult> {
   const folded = foldName(name ?? '');
   const row = db()
-    .prepare('SELECT id, name, password_hash FROM users WHERE name_folded = ?')
-    .get(folded) as { id: string; name: string; password_hash: string } | undefined;
+    .prepare('SELECT id, name, avatar, password_hash FROM users WHERE name_folded = ?')
+    .get(folded) as
+    | { id: string; name: string; avatar: string; password_hash: string }
+    | undefined;
 
   // The same wording and roughly the same work either way, so a stranger
   // cannot use the sign-in form to find out who has an account.
@@ -187,7 +217,10 @@ export async function login(name: string, password: string): Promise<AuthResult>
   const ok = await verifyPassword(password ?? '', stored);
 
   if (!row || !ok) throw new AuthError(401, 'bad_credentials', 'Wrong name or password.');
-  return { token: issueSession(row.id), user: { id: row.id, name: row.name } };
+  return {
+    token: issueSession(row.id),
+    user: { id: row.id, name: row.name, avatar: row.avatar ?? '' },
+  };
 }
 
 /* ------------------------------------------------------------------ */

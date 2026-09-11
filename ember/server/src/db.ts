@@ -67,6 +67,16 @@ export function migrate(handle: Db): void {
       updated_at   INTEGER NOT NULL DEFAULT 0
     );
 
+    CREATE TABLE IF NOT EXISTS season_stats (
+      user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      season    TEXT NOT NULL,
+      points    INTEGER NOT NULL DEFAULT 0,
+      matches   INTEGER NOT NULL DEFAULT 0,
+      wins      INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, season)
+    );
+    CREATE INDEX IF NOT EXISTS season_board ON season_stats(season, points DESC);
+
     CREATE TABLE IF NOT EXISTS match_history (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -77,6 +87,17 @@ export function migrate(handle: Db): void {
     );
     CREATE INDEX IF NOT EXISTS history_user ON match_history(user_id, finished_at DESC);
   `);
+
+  // Added after the first accounts existed, so it arrives as an alteration
+  // rather than part of the table above.
+  addColumn(handle, 'users', 'avatar', "TEXT NOT NULL DEFAULT ''");
+}
+
+/** Adds a column if this database has not got it yet. */
+function addColumn(handle: Db, table: string, column: string, definition: string): void {
+  const columns = handle.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  if (columns.some((entry) => entry.name === column)) return;
+  handle.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
 }
 
 /** Sessions expire on their own; this clears the rows they leave behind. */

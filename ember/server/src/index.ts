@@ -20,7 +20,7 @@ import { db, sweepExpiredSessions } from './db';
 import { bearer, handleRequest } from './http';
 import { Hub } from './hub';
 import { RoomError, type Connection } from './room';
-import { statsFor } from './stats';
+import { rankFor, statsFor } from './stats';
 
 db();
 
@@ -113,6 +113,7 @@ wss.on('connection', (socket, request) => {
         connection: {
           userId: user.id,
           name: user.name,
+          avatar: user.avatar,
           send: (out) => send(socket, out),
         },
         alive: true,
@@ -122,7 +123,7 @@ wss.on('connection', (socket, request) => {
       sessions.set(user.id, session);
 
       send(socket, { type: 'welcome', user, version: PROTOCOL_VERSION });
-      send(socket, { type: 'stats', stats: statsFor(user.id) });
+      send(socket, { type: 'stats', stats: statsFor(user.id), rank: rankFor(user.id) });
 
       // Straight back to the table if they were at one.
       const room = hub.roomFor(user.id);
@@ -218,6 +219,14 @@ function handle(session: Session, message: ClientMessage): void {
 
       case 'next_round':
         requireRoom(connection.userId).requestNextRound(connection.userId);
+        return;
+
+      case 'express':
+        requireRoom(connection.userId).express(
+          connection.userId,
+          message.id,
+          message.targetId ? String(message.targetId) : undefined,
+        );
         return;
 
       default:

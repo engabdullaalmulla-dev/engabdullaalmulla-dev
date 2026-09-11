@@ -8,17 +8,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { ExpressionId } from '../../shared/expressions';
 import {
   PROTOCOL_VERSION,
   type ClientMessage,
   type ErrorCode,
   type PublicUser,
+  type RankState,
   type RoomView,
   type ServerMessage,
   type UserStats,
 } from '../../shared/protocol';
 import type { GameAction } from '../../shared/types';
 import type { TableView } from '../../shared/view';
+import { useTalk } from '../ui/talk';
 import { socketUrl } from './api';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'online' | 'reconnecting' | 'failed';
@@ -42,6 +45,9 @@ export function useOnline(token: string | null) {
   const [room, setRoom] = useState<RoomView | null>(null);
   const [table, setTable] = useState<TableState | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [rank, setRank] = useState<RankState | null>(null);
+  const talk = useTalk();
+  const { say, hush } = talk;
   const [queue, setQueue] = useState<QueueState | null>(null);
   // Kept as the code the server sent, so the wording can be in any language.
   const [error, setError] = useState<ErrorCode | null>(null);
@@ -91,12 +97,17 @@ export function useOnline(token: string | null) {
         setRoom(null);
         setTable(null);
         setQueue(null);
+        hush();
         break;
       case 'queued':
         setQueue({ waiting: message.waiting, startsInMs: message.startsInMs });
         break;
       case 'stats':
         setStats(message.stats);
+        setRank(message.rank);
+        break;
+      case 'expression':
+        say(message.fromId, message.id, message.targetId);
         break;
       case 'error':
         setError(message.code);
@@ -104,7 +115,7 @@ export function useOnline(token: string | null) {
       case 'pong':
         break;
     }
-  }, []);
+  }, [say, hush]);
 
   /* ---------------------------------------------------------------- */
   /* the connection                                                    */
@@ -204,6 +215,8 @@ export function useOnline(token: string | null) {
       startGame: () => send({ type: 'start_game' }),
       nextRound: () => send({ type: 'next_round' }),
       play: (action: GameAction) => send({ type: 'action', action }),
+      express: (id: ExpressionId, targetId?: string | null) =>
+        send({ type: 'express', id, targetId: targetId ?? undefined }),
     }),
     [send],
   );
@@ -211,9 +224,12 @@ export function useOnline(token: string | null) {
   return {
     status,
     user,
+    setUser,
     room,
     table,
     stats,
+    rank,
+    said: talk.said,
     queue,
     error,
     clearError: useCallback(() => setError(null), []),
