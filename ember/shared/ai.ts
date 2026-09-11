@@ -86,8 +86,8 @@ export function observeTransition(
   const updated: BotMemory = { ...memory };
 
   // Anything shown face-up to everyone, or to this bot in particular.
-  const reveal = next.reveal;
-  if (reveal && (reveal.viewerId === botId || reveal.viewerId === '*')) {
+  for (const reveal of next.reveals) {
+    if (reveal.viewerId !== botId && reveal.viewerId !== '*') continue;
     for (const target of reveal.targets) {
       const player = playerById(next, target.playerId);
       const card = player?.slots[target.slot];

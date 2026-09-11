@@ -1,42 +1,53 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { HUMAN_ID, playerById } from '../../game/engine';
-import type { GameState } from '../../game/types';
+import type { TableView } from '../../../shared/view';
 import { Button } from '../components/Button';
 import { colors, radius, shadow, space, type as typography } from '../theme';
 
 interface Props {
-  state: GameState;
+  view: TableView;
   onNextRound: () => void;
   onPlayAgain: () => void;
   onHome: () => void;
+  /** Online: the server advances on its own, so the button only hurries it. */
+  waitingOn?: string | null;
+  canAdvance?: boolean;
 }
 
-export function RoundOverlay({ state, onNextRound, onPlayAgain, onHome }: Props) {
-  const result = state.result;
+export function RoundOverlay({
+  view,
+  onNextRound,
+  onPlayAgain,
+  onHome,
+  waitingOn,
+  canAdvance = true,
+}: Props) {
+  const result = view.result;
   if (!result) return null;
-  const matchOver = state.phase === 'MATCH_OVER';
-  const winner = playerById(state, result.winnerId);
+  const matchOver = view.phase === 'MATCH_OVER';
+  const named = (id: string | null | undefined) =>
+    view.players.find((player) => player.id === id)?.name ?? '';
+  const winner = view.players.find((player) => player.id === result.winnerId);
 
   const headline = matchOver
-    ? state.matchWinnerId === HUMAN_ID
+    ? view.matchWinnerId === view.youId
       ? 'You win the match.'
-      : `${playerById(state, state.matchWinnerId ?? '')?.name} wins the match.`
+      : `${named(view.matchWinnerId)} wins the match.`
     : result.ashOutId
-      ? `${playerById(state, result.ashOutId)?.name} burned out the whole pile.`
+      ? `${named(result.ashOutId)} burned out the whole pile.`
       : result.knockerId
         ? result.knockSucceeded
-          ? `${playerById(state, result.knockerId)?.name} knocked and made it stick.`
-          : `${playerById(state, result.knockerId)?.name} knocked and paid for it.`
+          ? `${named(result.knockerId)} knocked and made it stick.`
+          : `${named(result.knockerId)} knocked and paid for it.`
         : `${winner?.name} takes the round.`;
 
-  const ordered = [...state.players].sort((a, b) => a.matchScore - b.matchScore);
+  const ordered = [...view.players].sort((a, b) => a.matchScore - b.matchScore);
 
   return (
     <View style={styles.backdrop}>
       <View style={styles.sheet}>
-        <Text style={styles.eyebrow}>{matchOver ? 'MATCH OVER' : `ROUND ${state.round}`}</Text>
+        <Text style={styles.eyebrow}>{matchOver ? 'MATCH OVER' : `ROUND ${view.round}`}</Text>
         <Text style={styles.headline}>{headline}</Text>
 
         <View style={styles.table}>
@@ -49,7 +60,7 @@ export function RoundOverlay({ state, onNextRound, onPlayAgain, onHome }: Props)
 
           {ordered.map((player) => {
             const scored = result.scored[player.id];
-            const isYou = player.id === HUMAN_ID;
+            const isYou = player.id === view.youId;
             return (
               <View key={player.id} style={styles.row}>
                 <Text style={[styles.cellName, isYou && styles.you]} numberOfLines={1}>
@@ -72,9 +83,11 @@ export function RoundOverlay({ state, onNextRound, onPlayAgain, onHome }: Props)
         </View>
 
         <Text style={styles.footnote}>
-          {matchOver
-            ? 'Lowest total wins.'
-            : `First to ${state.config.targetScore} ends the match — and the lowest score wins it.`}
+          {waitingOn
+            ? waitingOn
+            : matchOver
+              ? 'Lowest total wins.'
+              : `First to ${view.config.targetScore} ends the match — and the lowest score wins it.`}
         </Text>
 
         {matchOver ? (
@@ -83,7 +96,7 @@ export function RoundOverlay({ state, onNextRound, onPlayAgain, onHome }: Props)
             <Button label="HOME" tone="ghost" onPress={onHome} style={styles.button} />
           </View>
         ) : (
-          <Button label="NEXT ROUND" onPress={onNextRound} />
+          <Button label="NEXT ROUND" onPress={onNextRound} disabled={!canAdvance} />
         )}
       </View>
     </View>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Card } from '../../game/types';
+import type { Card } from '../../../shared/types';
 import { colors, radius, space, type as typography } from '../theme';
 import { tap } from '../haptics';
 import { PlayingCard } from './PlayingCard';

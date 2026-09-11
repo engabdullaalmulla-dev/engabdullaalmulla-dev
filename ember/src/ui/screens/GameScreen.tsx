@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { cardName, POWER_HINT, POWER_LABEL, spokenRank } from '../../game/cards';
-import { currentPlayer, HUMAN_ID, playerById, topDiscard } from '../../game/engine';
-import type { GameAction, GameState, Player } from '../../game/types';
+import { cardName, POWER_HINT, POWER_LABEL, spokenRank } from '../../../shared/cards';
+import type { GameAction } from '../../../shared/types';
+import { actingPlayer, faceOf, type PlayerView, type TableView } from '../../../shared/view';
 import { BurnMeter } from '../components/BurnMeter';
 import { Button } from '../components/Button';
 import { Opponent } from '../components/Opponent';
@@ -13,24 +13,29 @@ import { slam, thud } from '../haptics';
 import { colors, radius, space, type as typography } from '../theme';
 
 interface Props {
-  state: GameState;
+  view: TableView;
   dispatch: (action: GameAction) => void;
   /** Cards you have been shown this round, for Assist mode's markers. */
   yourMemory: Record<string, unknown>;
   assist: boolean;
   onQuit: () => void;
+  /** Online only: a line about the connection, shown above the table. */
+  banner?: { text: string; tone: 'info' | 'bad' } | null;
+  /** Online only: seconds left on your turn clock. */
+  clock?: number | null;
 }
 
-export function GameScreen({ state, dispatch, yourMemory, assist, onQuit }: Props) {
+export function GameScreen({ view, dispatch, yourMemory, assist, onQuit, banner, clock }: Props) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const you = playerById(state, HUMAN_ID) as Player;
-  const rivals = state.players.filter((player) => player.id !== HUMAN_ID);
-  const seat = currentPlayer(state);
-  const yourTurn = seat.id === HUMAN_ID;
-  const showdown = state.phase === 'ROUND_OVER' || state.phase === 'MATCH_OVER';
+  const youId = view.youId;
+  const you = view.players.find((player) => player.id === youId) as PlayerView;
+  const rivals = view.players.filter((player) => player.id !== youId);
+  const seat = actingPlayer(view);
+  const yourTurn = seat.id === youId;
+  const showdown = view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER';
 
-  const reveal = state.reveal;
-  const revealIsYours = !!reveal && (reveal.viewerId === HUMAN_ID || reveal.viewerId === '*');
+  const reveal = view.reveal;
+  const revealIsYours = !!reveal && (reveal.viewerId === youId || reveal.viewerId === '*');
 
   const short = screenHeight < 760;
   const tiny = screenHeight < 660;
@@ -48,8 +53,9 @@ export function GameScreen({ state, dispatch, yourMemory, assist, onQuit }: Prop
 
   // Rivals' piles grow when they take penalty cards, so their cards shrink to
   // match rather than wrapping onto a second row.
-  const widestPile = Math.max(4, ...state.players.map((player) => player.slots.length));
-  const panelWidth = (screenWidth - space(8) - space(2) * (rivals.length - 1)) / rivals.length;
+  const widestPile = Math.max(4, ...view.players.map((player) => player.slots.length));
+  const perRow = rivals.length > 2 ? 2 : rivals.length;
+  const panelWidth = (screenWidth - space(8) - space(2) * (perRow - 1)) / perRow;
   const rivalCardWidth = Math.max(
     16,
     Math.floor(
@@ -63,157 +69,149 @@ export function GameScreen({ state, dispatch, yourMemory, assist, onQuit }: Prop
   /* what can be tapped right now                                      */
   /* ---------------------------------------------------------------- */
 
+  const liveSlots = (player: PlayerView) =>
+    player.slots.map((slot, index) => (slot.kind === 'burned' ? -1 : index)).filter((i) => i >= 0);
+
   const yourTargets = useMemo(() => {
     if (showdown) return [];
-    if (state.phase === 'OPENING_PEEK') {
+    if (view.phase === 'OPENING_PEEK') {
       // You keep picking while looks remain, so both cards can be up at once.
-      const left = state.openingPeeksLeft[HUMAN_ID] ?? 0;
-      if (left <= 0) return [];
-      const shown = reveal?.targets.map((t) => t.slot) ?? [];
-      return you.slots
-        .map((card, slot) => (card && !shown.includes(slot) ? slot : -1))
-        .filter((s) => s >= 0);
+      if (view.openingPeeksLeft <= 0) return [];
+      const shown = reveal?.targets.map((target) => target.slot) ?? [];
+      return liveSlots(you).filter((slot) => !shown.includes(slot));
     }
-    if (state.phase === 'BURN_WINDOW' && !state.burn?.attempted.includes(HUMAN_ID) && !reveal) {
-      return you.slots.map((card, slot) => (card ? slot : -1)).filter((s) => s >= 0);
+    if (view.phase === 'BURN_WINDOW' && !view.burn?.attempted.includes(youId) && !reveal) {
+      return liveSlots(you);
     }
     if (!yourTurn || reveal) return [];
-    if (state.phase === 'HOLDING') {
-      return you.slots.map((card, slot) => (card ? slot : -1)).filter((s) => s >= 0);
-    }
-    if (state.phase === 'POWER' && state.power) {
-      const { kind, picked } = state.power;
-      const own = you.slots.map((card, slot) => (card ? slot : -1)).filter((s) => s >= 0);
-      if (kind === 'PEEK') return own;
-      if (kind === 'SWAP' && picked.length === 0) return own;
-      if (kind === 'LOOK_SWAP' && picked.length === 1) return own;
+    if (view.phase === 'HOLDING') return liveSlots(you);
+    if (view.phase === 'POWER' && view.power) {
+      const { kind, picked } = view.power;
+      if (kind === 'PEEK') return liveSlots(you);
+      if (kind === 'SWAP' && picked.length === 0) return liveSlots(you);
+      if (kind === 'LOOK_SWAP' && picked.length === 1) return liveSlots(you);
     }
     return [];
-  }, [state, you, yourTurn, reveal, showdown]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, you, yourTurn, reveal, showdown, youId]);
 
-  const rivalTargets = useMemo(() => {
-    if (!yourTurn || reveal || state.phase !== 'POWER' || !state.power) return [];
-    const { kind, picked } = state.power;
-    if (kind === 'SPY' || kind === 'EMBER') return ['all'];
-    if (kind === 'SWAP' && picked.length === 1) return ['all'];
-    if (kind === 'LOOK_SWAP' && picked.length === 0) return ['all'];
-    return [];
-  }, [state, yourTurn, reveal]);
+  const rivalsTargetable = useMemo(() => {
+    if (!yourTurn || reveal || view.phase !== 'POWER' || !view.power) return false;
+    const { kind, picked } = view.power;
+    if (kind === 'SPY' || kind === 'EMBER') return true;
+    if (kind === 'SWAP' && picked.length === 1) return true;
+    if (kind === 'LOOK_SWAP' && picked.length === 0) return true;
+    return false;
+  }, [view, yourTurn, reveal]);
 
-  const revealedSlots = (playerId: string): number[] => {
-    if (showdown) return state.players.find((p) => p.id === playerId)?.slots.map((_, i) => i) ?? [];
-    if (!reveal || !revealIsYours) return [];
-    return reveal.targets.filter((t) => t.playerId === playerId).map((t) => t.slot);
-  };
-
-  const seenSlot = (slot: number) => assist && !!yourMemory[`${HUMAN_ID}:${slot}`];
+  const seenSlot = (slot: number) => assist && !!yourMemory[`${youId}:${slot}`];
 
   /* ---------------------------------------------------------------- */
   /* actions                                                           */
   /* ---------------------------------------------------------------- */
 
   const pressYourCard = (slot: number) => {
-    if (state.phase === 'OPENING_PEEK') {
-      dispatch({ type: 'OPENING_PEEK', playerId: HUMAN_ID, slot });
+    if (view.phase === 'OPENING_PEEK') {
+      dispatch({ type: 'OPENING_PEEK', playerId: youId, slot });
       return;
     }
-    if (state.phase === 'BURN_WINDOW') {
+    if (view.phase === 'BURN_WINDOW') {
       slam();
-      dispatch({ type: 'BURN', playerId: HUMAN_ID, slot });
+      dispatch({ type: 'BURN', playerId: youId, slot });
       return;
     }
-    if (state.phase === 'HOLDING') {
+    if (view.phase === 'HOLDING') {
       thud();
       dispatch({ type: 'PLACE', slot });
       return;
     }
-    if (state.phase === 'POWER') {
-      dispatch({ type: 'POWER_TARGET', playerId: HUMAN_ID, slot });
-    }
+    if (view.phase === 'POWER') dispatch({ type: 'POWER_TARGET', playerId: youId, slot });
   };
 
   const pressRivalCard = (playerId: string, slot: number) => {
-    if (state.phase === 'POWER') dispatch({ type: 'POWER_TARGET', playerId, slot });
+    if (view.phase === 'POWER') dispatch({ type: 'POWER_TARGET', playerId, slot });
   };
 
   /* ---------------------------------------------------------------- */
-  /* words                                                             */
-  /* ---------------------------------------------------------------- */
 
-  const prompt = buildPrompt(state, yourTurn, revealIsYours);
-  const held = state.held;
-  // During the opening look the cards are already face-up in your own grid,
-  // so the tray would only be showing you the same card twice.
+  const prompt = buildPrompt(view, yourTurn, revealIsYours);
   const trayCard =
+    // During the opening look the cards are already face-up in your own grid,
+    // so the tray would only be showing you the same card twice.
     revealIsYours && reveal && reveal.reason !== 'opening'
-      ? playerById(state, reveal.targets[0].playerId)?.slots[reveal.targets[0].slot] ?? null
-      : yourTurn && held
-        ? held
+      ? faceOf(
+          view.players.find((player) => player.id === reveal.targets[0].playerId)?.slots[
+            reveal.targets[0].slot
+          ],
+        )
+      : yourTurn
+        ? faceOf(view.held)
         : null;
 
-  const lastLog = state.log.length ? state.log[state.log.length - 1] : null;
+  const lastLog = view.log.length ? view.log[view.log.length - 1] : null;
 
   return (
     <View style={styles.screen}>
-      {/* header */}
       <View style={styles.header}>
         <Pressable accessibilityRole="button" accessibilityLabel="Leave game" onPress={onQuit} hitSlop={12}>
           <Text style={styles.quit}>← LEAVE</Text>
         </Pressable>
-        <Text style={styles.round}>ROUND {state.round}</Text>
-        <Text style={styles.target}>TO {state.config.targetScore}</Text>
+        <Text style={styles.round}>ROUND {view.round}</Text>
+        <Text style={styles.target}>
+          {clock != null && yourTurn ? `${clock}s` : `TO ${view.config.targetScore}`}
+        </Text>
       </View>
 
-      {/* rivals */}
+      {banner ? (
+        <View style={[styles.banner, banner.tone === 'bad' && styles.bannerBad]}>
+          <Text style={styles.bannerText} numberOfLines={1}>
+            {banner.text}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.rivals}>
         {rivals.map((player) => (
           <Opponent
             key={player.id}
             player={player}
             active={seat.id === player.id && !showdown}
-            knocked={state.knockerId === player.id}
+            knocked={view.knockerId === player.id}
             cardWidth={rivalCardWidth}
-            targetable={
-              rivalTargets.includes('all') ? player.slots.map((card, i) => (card ? i : -1)).filter((i) => i >= 0) : []
-            }
-            revealed={revealedSlots(player.id)}
+            targetable={rivalsTargetable ? liveSlots(player) : []}
             onPressSlot={(slot) => pressRivalCard(player.id, slot)}
           />
         ))}
       </View>
 
-      {/* table */}
       <View style={styles.table}>
         <View style={styles.tray}>
           {trayCard ? (
             <View style={styles.trayCard}>
               <PlayingCard card={trayCard} faceUp width={pileWidth} />
-              <Text style={styles.trayLabel}>
-                {revealIsYours ? 'MEMORISE' : 'IN HAND'}
-              </Text>
+              <Text style={styles.trayLabel}>{revealIsYours ? 'MEMORISE' : 'IN HAND'}</Text>
             </View>
           ) : null}
 
           <View style={[styles.trayText, !trayCard && styles.trayTextAlone]}>
             <Text style={[styles.prompt, short && styles.promptShort]}>{prompt.title}</Text>
             {prompt.detail ? <Text style={styles.promptDetail}>{prompt.detail}</Text> : null}
-            {state.phase === 'BURN_WINDOW' && state.burn ? (
-              <BurnMeter closesAt={state.burn.closesAt} totalMs={state.config.burnWindowMs} />
+            {view.phase === 'BURN_WINDOW' && view.burn ? (
+              <BurnMeter closesAt={view.burn.closesAt} totalMs={view.config.burnWindowMs} />
             ) : null}
           </View>
         </View>
 
         <Piles
-          stockCount={state.stock.length}
-          discardTop={topDiscard(state)}
+          stockCount={view.stockCount}
+          discardTop={view.discardTop}
           width={pileWidth}
-          live={yourTurn && state.phase === 'TURN_START' && !reveal ? 'both' : 'none'}
+          live={yourTurn && view.phase === 'TURN_START' && !reveal ? 'both' : 'none'}
           onDrawStock={() => dispatch({ type: 'DRAW_STOCK' })}
           onDrawDiscard={() => dispatch({ type: 'DRAW_DISCARD' })}
         />
       </View>
 
-      {/* feed */}
       <View style={styles.feed}>
         <Text
           numberOfLines={1}
@@ -228,43 +226,41 @@ export function GameScreen({ state, dispatch, yourMemory, assist, onQuit }: Prop
         </Text>
       </View>
 
-      {/* your pile */}
       <View style={styles.youWrap}>
         <View style={styles.youHeader}>
           <Text style={[styles.youName, yourTurn && !showdown && { color: colors.ember }]}>
             {you.name.toUpperCase()}
           </Text>
-          {state.knockerId === HUMAN_ID ? <Text style={styles.knockBadge}>KNOCKED</Text> : null}
+          {view.knockerId === youId ? <Text style={styles.knockBadge}>KNOCKED</Text> : null}
           <Text style={styles.youScore}>{you.matchScore} pts</Text>
         </View>
 
         <View style={[styles.grid, { width: gridWidth }]}>
-          {you.slots.map((card, slot) => {
-            const targetable = yourTargets.includes(slot);
+          {you.slots.map((slot, index) => {
+            const targetable = yourTargets.includes(index);
             const highlight: CardHighlight = targetable
-              ? state.phase === 'BURN_WINDOW'
+              ? view.phase === 'BURN_WINDOW'
                 ? 'burn'
                 : 'target'
               : 'none';
             return (
               <PlayingCard
-                key={`you-${slot}`}
-                card={card}
-                burned={!card}
-                faceUp={revealedSlots(HUMAN_ID).includes(slot)}
-                seen={seenSlot(slot)}
+                key={`you-${index}`}
+                card={slot.kind === 'face' ? slot.card : null}
+                burned={slot.kind === 'burned'}
+                faceUp={slot.kind === 'face'}
+                seen={seenSlot(index)}
                 width={yourCardWidth}
                 highlight={highlight}
-                onPress={targetable ? () => pressYourCard(slot) : undefined}
+                onPress={targetable ? () => pressYourCard(index) : undefined}
               />
             );
           })}
         </View>
       </View>
 
-      {/* controls */}
       <View style={styles.controls}>
-        <Controls state={state} dispatch={dispatch} yourTurn={yourTurn} revealIsYours={revealIsYours} />
+        <Controls view={view} dispatch={dispatch} yourTurn={yourTurn} revealIsYours={revealIsYours} />
       </View>
     </View>
   );
@@ -273,37 +269,37 @@ export function GameScreen({ state, dispatch, yourMemory, assist, onQuit }: Prop
 /* ------------------------------------------------------------------ */
 
 function Controls({
-  state,
+  view,
   dispatch,
   yourTurn,
   revealIsYours,
 }: {
-  state: GameState;
+  view: TableView;
   dispatch: (action: GameAction) => void;
   yourTurn: boolean;
   revealIsYours: boolean;
 }) {
-  if (revealIsYours && state.reveal?.viewerId === HUMAN_ID) {
-    const looksLeft = state.phase === 'OPENING_PEEK' ? state.openingPeeksLeft[HUMAN_ID] ?? 0 : 0;
+  if (revealIsYours && view.reveal?.viewerId === view.youId) {
+    const looksLeft = view.phase === 'OPENING_PEEK' ? view.openingPeeksLeft : 0;
     return (
       <Button
         label={looksLeft > 0 ? `DONE — ${looksLeft} LOOK LEFT` : 'GOT IT'}
         tone={looksLeft > 0 ? 'ghost' : 'ember'}
-        onPress={() => dispatch({ type: 'ACK_REVEAL' })}
+        onPress={() => dispatch({ type: 'ACK_REVEAL', playerId: view.youId })}
       />
     );
   }
 
-  if (!yourTurn || state.phase === 'ROUND_OVER' || state.phase === 'MATCH_OVER') {
+  if (!yourTurn || view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER') {
     return <View style={styles.controlSpacer} />;
   }
 
-  if (state.phase === 'TURN_START') {
+  if (view.phase === 'TURN_START') {
     return (
       <Button
-        label={state.knockerId ? 'ALREADY KNOCKED' : 'KNOCK'}
-        tone={state.knockerId ? 'quiet' : 'ghost'}
-        disabled={!!state.knockerId}
+        label={view.knockerId ? 'ALREADY KNOCKED' : 'KNOCK'}
+        tone={view.knockerId ? 'quiet' : 'ghost'}
+        disabled={!!view.knockerId}
         onPress={() => {
           slam();
           dispatch({ type: 'KNOCK' });
@@ -312,8 +308,9 @@ function Controls({
     );
   }
 
-  if (state.phase === 'HOLDING' && state.held && !state.heldFromDiscard) {
-    const power = state.held.power;
+  const held = faceOf(view.held);
+  if (view.phase === 'HOLDING' && held && !view.heldFromDiscard) {
+    const power = held.power;
     return (
       <View style={styles.controlRow}>
         {power ? (
@@ -342,7 +339,7 @@ function Controls({
     );
   }
 
-  if (state.phase === 'POWER' && state.power?.kind === 'LOOK_SWAP' && state.power.picked.length === 1) {
+  if (view.phase === 'POWER' && view.power?.kind === 'LOOK_SWAP' && view.power.picked.length === 1) {
     return <Button label="LEAVE IT" tone="ghost" onPress={() => dispatch({ type: 'POWER_DECLINE' })} />;
   }
 
@@ -352,40 +349,41 @@ function Controls({
 /* ------------------------------------------------------------------ */
 
 function buildPrompt(
-  state: GameState,
+  view: TableView,
   yourTurn: boolean,
   revealIsYours: boolean,
 ): { title: string; detail?: string } {
-  const seat = currentPlayer(state);
+  const seat = actingPlayer(view);
 
-  if (state.phase === 'ROUND_OVER' || state.phase === 'MATCH_OVER') {
-    const yours = state.result?.totals[HUMAN_ID];
+  if (view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER') {
+    const yours = view.result?.totals[view.youId];
     return { title: 'Cards on the table.', detail: yours != null ? `Your pile: ${yours}.` : undefined };
   }
 
-  if (state.phase === 'OPENING_PEEK') {
-    if (revealIsYours) return { title: 'Remember these two.', detail: 'You will not see them again.' };
-    const left = state.openingPeeksLeft[HUMAN_ID] ?? 0;
-    if (revealIsYours && left > 0) {
-      return { title: 'One more look.', detail: 'Tap another card, or stop here.' };
+  if (view.phase === 'OPENING_PEEK') {
+    const left = view.openingPeeksLeft;
+    if (left <= 0) {
+      return revealIsYours
+        ? { title: 'Remember these two.', detail: 'You will not see them again.' }
+        : { title: 'Waiting for the table…', detail: 'Everyone is memorising their cards.' };
     }
+    if (revealIsYours) return { title: 'One more look.', detail: 'Tap another card, or stop here.' };
     return { title: `Choose ${left} card${left === 1 ? '' : 's'} to look at.`, detail: 'Tap your own cards.' };
   }
 
-  if (revealIsYours && state.reveal?.viewerId === '*') {
+  if (revealIsYours && view.reveal?.viewerId === '*') {
     return { title: 'Misfire — everyone saw that.' };
   }
 
-  if (state.phase === 'BURN_WINDOW') {
-    const top = topDiscard(state);
+  if (view.phase === 'BURN_WINDOW') {
     return {
-      title: top ? `Burn ${spokenRank(top.rank)}?` : 'Burn?',
+      title: view.discardTop ? `Burn ${spokenRank(view.discardTop.rank)}?` : 'Burn?',
       detail: 'Tap a matching card of yours. Wrong guess costs you one.',
     };
   }
 
-  if (state.phase === 'POWER' && state.power) {
-    const { kind, picked } = state.power;
+  if (view.phase === 'POWER' && view.power) {
+    const { kind, picked } = view.power;
     if (!yourTurn) return { title: `${seat.name} is using ${POWER_LABEL[kind]}.` };
     if (kind === 'SWAP') {
       return picked.length === 0
@@ -401,21 +399,22 @@ function buildPrompt(
   }
 
   if (!yourTurn) {
-    if (state.phase === 'HOLDING') return { title: `${seat.name} is deciding…` };
+    if (view.phase === 'HOLDING') return { title: `${seat.name} is deciding…` };
     return { title: `${seat.name} is thinking…` };
   }
 
-  if (state.phase === 'TURN_START') {
+  if (view.phase === 'TURN_START') {
     return {
       title: 'Your move.',
-      detail: state.knockerId ? 'Last turn before the reveal.' : 'Draw from the stock or take the discard.',
+      detail: view.knockerId ? 'Last turn before the reveal.' : 'Draw from the stock or take the discard.',
     };
   }
 
-  if (state.phase === 'HOLDING' && state.held) {
-    return state.heldFromDiscard
-      ? { title: `You took ${cardName(state.held)}.`, detail: 'Tap one of your cards to replace it.' }
-      : { title: `You drew ${cardName(state.held)}.`, detail: 'Tap a card to swap it in, or throw it.' };
+  const held = faceOf(view.held);
+  if (view.phase === 'HOLDING' && held) {
+    return view.heldFromDiscard
+      ? { title: `You took ${cardName(held)}.`, detail: 'Tap one of your cards to replace it.' }
+      : { title: `You drew ${cardName(held)}.`, detail: 'Tap a card to swap it in, or throw it.' };
   }
 
   return { title: ' ' };
@@ -430,7 +429,16 @@ const styles = StyleSheet.create({
   round: { ...typography.label, fontSize: 11, color: colors.textMuted },
   target: { ...typography.label, fontSize: 10, color: colors.textFaint },
 
-  rivals: { flexDirection: 'row', gap: space(2) },
+  banner: {
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.sm,
+    paddingVertical: space(1.5),
+    paddingHorizontal: space(3),
+  },
+  bannerBad: { backgroundColor: colors.bad },
+  bannerText: { ...typography.small, fontSize: 11, color: colors.text, textAlign: 'center' },
+
+  rivals: { flexDirection: 'row', flexWrap: 'wrap', gap: space(2) },
 
   table: {
     flex: 1,
@@ -471,12 +479,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: space(3),
-    justifyContent: 'center',
-  },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space(3), justifyContent: 'center' },
 
   controls: { minHeight: 56, justifyContent: 'center', paddingBottom: space(1) },
   controlRow: { flexDirection: 'row', gap: space(2) },

@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-import type { Difficulty } from './src/game/types';
+import type { Difficulty } from './shared/types';
 import { GameScreen } from './src/ui/screens/GameScreen';
 import { HomeScreen, type Settings } from './src/ui/screens/HomeScreen';
 import { RoundOverlay } from './src/ui/screens/RoundOverlay';
@@ -75,16 +75,16 @@ function Table({
   onHome: () => void;
   onPlayAgain: () => void;
 }) {
-  const { state, dispatch, yourMemory } = useEmber({
+  const { view, dispatch, yourMemory } = useEmber({
     bots: BOT_NAMES.slice(0, rivals).map((name) => ({ name, difficulty })),
   });
 
-  const finished = state.phase === 'ROUND_OVER' || state.phase === 'MATCH_OVER';
+  const finished = view.phase === 'ROUND_OVER' || view.phase === 'MATCH_OVER';
 
   return (
     <View style={styles.table}>
       <GameScreen
-        state={state}
+        view={view}
         dispatch={dispatch}
         yourMemory={yourMemory as Record<string, unknown>}
         assist={assist}
@@ -92,7 +92,7 @@ function Table({
       />
       {finished ? (
         <RoundOverlay
-          state={state}
+          view={view}
           onNextRound={() => dispatch({ type: 'NEXT_ROUND' })}
           onPlayAgain={onPlayAgain}
           onHome={onHome}

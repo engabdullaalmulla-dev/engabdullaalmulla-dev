@@ -57,7 +57,12 @@ export type Phase =
   | 'ROUND_OVER'
   | 'MATCH_OVER';
 
-/** A card that is face-up for exactly one player, until they acknowledge it. */
+/**
+ * A card that is face-up for exactly one player, until they put it away.
+ * `viewerId` is '*' for a card the whole table saw, such as a misfired burn.
+ * Several can be open at once — at an online table everyone takes their
+ * opening look at the same time.
+ */
 export interface Reveal {
   viewerId: string;
   targets: Array<{ playerId: string; slot: number }>;
@@ -110,7 +115,8 @@ export interface GameState {
   /** True when `held` came off the discard pile (its power cannot be used). */
   heldFromDiscard: boolean;
   power: PowerState | null;
-  reveal: Reveal | null;
+  /** At most one entry per viewer. */
+  reveals: Reveal[];
   burn: BurnWindow | null;
   knockerId: string | null;
   /** Turns already taken since the knock. The round ends at players-1. */
@@ -141,7 +147,7 @@ export interface GameConfig {
 
 export type GameAction =
   | { type: 'OPENING_PEEK'; playerId: string; slot: number }
-  | { type: 'ACK_REVEAL' }
+  | { type: 'ACK_REVEAL'; playerId: string }
   | { type: 'KNOCK' }
   | { type: 'DRAW_STOCK' }
   | { type: 'DRAW_DISCARD' }

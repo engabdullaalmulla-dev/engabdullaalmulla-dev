@@ -1,8 +1,8 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { POWER_HINT, POWER_LABEL } from '../../game/cards';
-import type { Power } from '../../game/types';
+import { POWER_HINT, POWER_LABEL } from '../../../shared/cards';
+import type { Power } from '../../../shared/types';
 import { colors, radius, space, type as typography } from '../theme';
 import { Button } from '../components/Button';
 

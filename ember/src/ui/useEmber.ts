@@ -1,15 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  decide,
-  decideBurn,
-  observeTransition,
-  seedMemory,
-  thinkingTime,
-  type BotMemory,
-} from '../game/ai';
-import { createMatch, currentPlayer, HUMAN_ID, reduce, type MatchOptions } from '../game/engine';
-import type { GameAction, GameState } from '../game/types';
+import { observeTransition, seedMemory, type BotMemory } from '../../shared/ai';
+import { Autoplay } from '../../shared/autoplay';
+import { createMatch, HUMAN_ID, reduce, type MatchOptions } from '../../shared/engine';
+import type { GameAction, GameState } from '../../shared/types';
+import { viewFor, type TableView } from '../../shared/view';
 
 /**
  * Wires the pure engine to React: holds the state, gives the bots their
@@ -21,10 +16,7 @@ export function useEmber(options: MatchOptions) {
   const stateRef = useRef(state);
   const memories = useRef<Record<string, BotMemory>>({});
   const timers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
-  const burnPlan = useRef<{ window: number; moves: Array<{ botId: string; slot: number; at: number }> }>({
-    window: -1,
-    moves: [],
-  });
+  const autoplay = useRef(new Autoplay());
 
   const seedAll = useCallback((game: GameState) => {
     for (const player of game.players) {
@@ -84,7 +76,7 @@ export function useEmber(options: MatchOptions) {
       clearTimers();
       const game = createMatch(next);
       seedAll(game);
-      burnPlan.current = { window: -1, moves: [] };
+      autoplay.current = new Autoplay();
       stateRef.current = game;
       setState(game);
     },
@@ -93,65 +85,23 @@ export function useEmber(options: MatchOptions) {
 
   useEffect(() => {
     clearTimers();
-    const game = state;
-
-    if (game.phase === 'ROUND_OVER' || game.phase === 'MATCH_OVER') return clearTimers;
-
-    // Something is face-up. Cards shown to you wait for a tap; everything
-    // else clears itself.
-    if (game.reveal) {
-      if (game.reveal.viewerId === '*') {
-        later(() => dispatch({ type: 'ACK_REVEAL' }), 1900);
-      } else if (game.reveal.viewerId !== HUMAN_ID) {
-        later(() => dispatch({ type: 'ACK_REVEAL' }), 850);
-      }
-      return clearTimers;
+    // The bots, the reveal timers and the burn clock all come from the same
+    // place the server uses, so an offline table behaves like an online one.
+    for (const move of autoplay.current.movesFor(state, memories.current, [HUMAN_ID])) {
+      later(() => dispatch(move.action), move.delayMs);
     }
-
-    if (game.phase === 'BURN_WINDOW' && game.burn) {
-      // Each bot decides once per window, so it cannot re-roll its nerve.
-      if (burnPlan.current.window !== game.burn.closesAt) {
-        const moves: Array<{ botId: string; slot: number; at: number }> = [];
-        for (const player of game.players) {
-          if (!player.isBot) continue;
-          const move = decideBurn(game, player.id, memories.current[player.id] ?? {});
-          if (move && move.type === 'BURN') {
-            const quickness = player.difficulty === 'sharp' ? 900 : 1500;
-            moves.push({
-              botId: player.id,
-              slot: move.slot,
-              at: Date.now() + 500 + Math.random() * quickness,
-            });
-          }
-        }
-        burnPlan.current = { window: game.burn.closesAt, moves };
-      }
-
-      for (const move of burnPlan.current.moves) {
-        if (game.burn.attempted.includes(move.botId)) continue;
-        later(
-          () => dispatch({ type: 'BURN', playerId: move.botId, slot: move.slot }),
-          move.at - Date.now(),
-        );
-      }
-
-      later(() => dispatch({ type: 'CLOSE_BURN', now: Date.now() }), game.burn.closesAt - Date.now());
-      return clearTimers;
-    }
-
-    const seat = currentPlayer(game);
-    if (seat.isBot && (game.phase === 'TURN_START' || game.phase === 'HOLDING' || game.phase === 'POWER')) {
-      const move = decide(game, seat.id, memories.current[seat.id] ?? {});
-      if (move) later(() => dispatch(move), thinkingTime(game, seat.difficulty));
-    }
-
     return clearTimers;
   }, [state, dispatch, clearTimers, later]);
 
   useEffect(() => clearTimers, [clearTimers]);
 
+  // The local table renders through the same redaction the server uses, so
+  // the UI never holds a card it has no business drawing.
+  const view: TableView = useMemo(() => viewFor(state, HUMAN_ID), [state]);
+
   return {
     state,
+    view,
     dispatch,
     newMatch,
     /** Everything you have personally been shown this round. */

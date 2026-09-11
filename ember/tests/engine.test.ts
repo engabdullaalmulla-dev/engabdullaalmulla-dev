@@ -3,7 +3,7 @@
  * Run with `npm test`.
  */
 
-import { buildDeck, powerOf, valueOf } from '../src/game/cards';
+import { buildDeck, powerOf, valueOf } from '../shared/cards';
 import {
   burnExpired,
   cardsLeft,
@@ -12,11 +12,13 @@ import {
   handTotal,
   HUMAN_ID,
   playerById,
+  publicReveal,
   reduce,
+  revealFor,
   topDiscard,
-} from '../src/game/engine';
-import { decide, decideBurn, observeTransition, seedMemory, type BotMemory } from '../src/game/ai';
-import type { GameAction, GameState } from '../src/game/types';
+} from '../shared/engine';
+import { decide, decideBurn, observeTransition, seedMemory, type BotMemory } from '../shared/ai';
+import type { GameAction, GameState } from '../shared/types';
 
 let passed = 0;
 const failures: string[] = [];
@@ -78,10 +80,10 @@ equal('only the human chooses peeks', Object.keys(fresh.openingPeeksLeft).length
 
 let peeked = reduce(fresh, { type: 'OPENING_PEEK', playerId: HUMAN_ID, slot: 0 });
 peeked = reduce(peeked, { type: 'OPENING_PEEK', playerId: HUMAN_ID, slot: 1 });
-equal('both peeks show at once', peeked.reveal?.targets.length, 2);
+equal('both peeks show at once', revealFor(peeked, HUMAN_ID)?.targets.length, 2);
 peeked = reduce(peeked, { type: 'OPENING_PEEK', playerId: HUMAN_ID, slot: 2 });
-equal('a third peek is refused', peeked.reveal?.targets.length, 2);
-const playing = reduce(peeked, { type: 'ACK_REVEAL' });
+equal('a third peek is refused', revealFor(peeked, HUMAN_ID)?.targets.length, 2);
+const playing = reduce(peeked, { type: 'ACK_REVEAL', playerId: HUMAN_ID });
 equal('play begins after the peek', playing.phase, 'TURN_START');
 
 /* ------------------------------------------------------------------ */
@@ -132,9 +134,9 @@ let misfire = stack(placed, burner, 3, wrongRank.id);
 const beforeMisfire = cardsLeft(playerById(misfire, burner)!);
 misfire = reduce(misfire, { type: 'BURN', playerId: burner, slot: 3 });
 equal('a misfire costs you a card', cardsLeft(playerById(misfire, burner)!), beforeMisfire + 1);
-equal('a misfire is shown to everyone', misfire.reveal?.viewerId, '*');
+equal('a misfire is shown to everyone', publicReveal(misfire)?.viewerId, '*');
 equal('the window will not close mid-misfire', reduce(misfire, { type: 'CLOSE_BURN', now: 0 }).phase, 'BURN_WINDOW');
-const cleared = reduce(misfire, { type: 'ACK_REVEAL' });
+const cleared = reduce(misfire, { type: 'ACK_REVEAL', playerId: '*' });
 equal('the window reopens after the misfire is seen', cleared.phase, 'BURN_WINDOW');
 
 /* the burn window's clock ------------------------------------------ */
@@ -202,8 +204,9 @@ peek = reduce(peek, { type: 'THROW', usePower: true });
 equal('a seven starts a peek', peek.power?.kind, 'PEEK');
 equal('peek cannot target a rival', reduce(peek, { type: 'POWER_TARGET', playerId: rival.id, slot: 0 }).phase, 'POWER');
 peek = reduce(peek, { type: 'POWER_TARGET', playerId: actor.id, slot: 0 });
-equal('peek shows the card to you alone', peek.reveal?.viewerId, actor.id);
-peek = reduce(peek, { type: 'ACK_REVEAL' });
+equal('peek shows the card to you alone', revealFor(peek, actor.id)?.viewerId, actor.id);
+equal('and to nobody else', revealFor(peek, rival.id), undefined);
+peek = reduce(peek, { type: 'ACK_REVEAL', playerId: actor.id });
 equal('the turn continues after a peek', peek.phase, 'BURN_WINDOW');
 
 // Spy shows a rival's card, and only a rival's.
@@ -211,7 +214,8 @@ let spy = holdingCard(playing, '9S-1');
 spy = reduce(spy, { type: 'THROW', usePower: true });
 equal('spy cannot target yourself', reduce(spy, { type: 'POWER_TARGET', playerId: actor.id, slot: 0 }).phase, 'POWER');
 spy = reduce(spy, { type: 'POWER_TARGET', playerId: rival.id, slot: 1 });
-equal('spy shows a rival card to you', spy.reveal?.targets[0].playerId, rival.id);
+equal('spy shows a rival card to you', revealFor(spy, actor.id)?.targets[0].playerId, rival.id);
+equal('and the rival is not told', revealFor(spy, rival.id), undefined);
 
 // A jack swaps blind, in the order yours-then-theirs.
 let swap = holdingCard(playing, 'JD-1');
@@ -223,7 +227,7 @@ swap = reduce(swap, { type: 'POWER_TARGET', playerId: actor.id, slot: 0 });
 swap = reduce(swap, { type: 'POWER_TARGET', playerId: rival.id, slot: 2 });
 equal('a swap moves your card across', playerById(swap, rival.id)!.slots[2]!.id, mineBefore);
 equal('a swap brings theirs back', playerById(swap, actor.id)!.slots[0]!.id, theirsBefore);
-equal('a swap shows nobody anything', swap.reveal, null);
+equal('a swap shows nobody anything', swap.reveals.length, 0);
 equal('the turn continues after a swap', swap.phase, 'BURN_WINDOW');
 
 // A black king looks first and may then decline.
@@ -231,8 +235,8 @@ let king = holdingCard(playing, 'KS-1');
 king = reduce(king, { type: 'THROW', usePower: true });
 equal('a black king looks and swaps', king.power?.kind, 'LOOK_SWAP');
 king = reduce(king, { type: 'POWER_TARGET', playerId: rival.id, slot: 3 });
-equal('the king looks at a rival first', king.reveal?.reason, 'look_swap');
-king = reduce(king, { type: 'ACK_REVEAL' });
+equal('the king looks at a rival first', revealFor(king, actor.id)?.reason, 'look_swap');
+king = reduce(king, { type: 'ACK_REVEAL', playerId: actor.id });
 equal('the king then waits for your choice', king.phase, 'POWER');
 const declined = reduce(king, { type: 'POWER_DECLINE' });
 equal('you may leave it where it is', declined.phase, 'BURN_WINDOW');
@@ -317,13 +321,13 @@ function playMatch(seed: number): { state: GameState; steps: number; invariant: 
           const [playerId, left] = pending;
           apply({ type: 'OPENING_PEEK', playerId, slot: state.config.openingPeeks - left });
         } else {
-          apply({ type: 'ACK_REVEAL' });
+          apply({ type: 'ACK_REVEAL', playerId: HUMAN_ID });
         }
         break;
       }
       case 'BURN_WINDOW': {
-        if (state.reveal) {
-          apply({ type: 'ACK_REVEAL' });
+        if (state.reveals.length) {
+          apply({ type: 'ACK_REVEAL', playerId: state.reveals[0].viewerId });
           break;
         }
         const attempt = state.players
@@ -337,8 +341,8 @@ function playMatch(seed: number): { state: GameState; steps: number; invariant: 
         apply({ type: 'NEXT_ROUND' });
         break;
       default: {
-        if (state.reveal) {
-          apply({ type: 'ACK_REVEAL' });
+        if (state.reveals.length) {
+          apply({ type: 'ACK_REVEAL', playerId: state.reveals[0].viewerId });
           break;
         }
         const seat = currentPlayer(state);
@@ -398,7 +402,7 @@ equal(
   Object.keys(blindMemory).every((k) => k.startsWith('bot1:')),
   true,
 );
-const afterTurn = observeTransition(blindMemory, blind, reduce(reduce(blind, { type: 'OPENING_PEEK', playerId: HUMAN_ID, slot: 0 }), { type: 'ACK_REVEAL' }), 'bot1', () => 0);
+const afterTurn = observeTransition(blindMemory, blind, reduce(reduce(blind, { type: 'OPENING_PEEK', playerId: HUMAN_ID, slot: 0 }), { type: 'ACK_REVEAL', playerId: HUMAN_ID }), 'bot1', () => 0);
 equal(
   'a bot learns nothing from your peek',
   Object.keys(afterTurn).every((k) => k.startsWith('bot1:')),

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
-import { isRed, SUIT_SYMBOL } from '../../game/cards';
-import type { Card } from '../../game/types';
+import { isRed, SUIT_SYMBOL } from '../../../shared/cards';
+import type { Card } from '../../../shared/types';
 import { colors, radius, shadow } from '../theme';
 import { Flame } from './Flame';
 
@@ -73,6 +73,8 @@ export function PlayingCard({
   if (burned) {
     return (
       <View
+        accessible
+        accessibilityLabel="burned away, empty space"
         style={[
           styles.burned,
           { width, height, borderRadius: width * 0.14 },
@@ -104,11 +106,13 @@ export function PlayingCard({
   const ring =
     highlight === 'burn' ? colors.bad : highlight === 'chosen' ? colors.gold : colors.ember;
 
-  const label = card
-    ? faceUp
+  // A hidden card arrives here with no card attached at all — that is the
+  // point of the redaction — so it must still announce itself as face down
+  // rather than as an empty space.
+  const label =
+    card && faceUp
       ? `${card.rank === 'JOKER' ? 'Joker' : card.rank} ${card.suit ? SUIT_SYMBOL[card.suit] : ''}, ${card.value} points`
-      : 'face down card'
-    : 'empty';
+      : 'face down card';
 
   const body = (
     <View style={{ width, height }}>

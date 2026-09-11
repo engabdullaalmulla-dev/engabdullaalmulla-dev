@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
-import type { Difficulty } from '../../game/types';
+import type { Difficulty } from '../../../shared/types';
 import { Button } from '../components/Button';
 import { Wordmark } from '../components/Wordmark';
 import { tap } from '../haptics';

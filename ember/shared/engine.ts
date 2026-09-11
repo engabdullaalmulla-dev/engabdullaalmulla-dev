@@ -7,6 +7,7 @@ import type {
   GameConfig,
   GameState,
   Player,
+  Reveal,
   RoundResult,
 } from './types';
 
@@ -26,6 +27,11 @@ export interface MatchOptions {
   playerName?: string;
   /** Bots to deal in. Three players is the minimum the box calls for. */
   bots?: Array<{ name: string; difficulty: Difficulty }>;
+  /**
+   * An explicit seating, used online where every seat is a real account and
+   * there is no single "you". Takes precedence over playerName and bots.
+   */
+  seats?: Array<{ id: string; name: string; isBot: boolean; difficulty?: Difficulty }>;
   config?: Partial<GameConfig>;
 }
 
@@ -48,6 +54,29 @@ export function currentPlayer(state: GameState): Player {
 
 export function playerById(state: GameState, id: string): Player | undefined {
   return state.players.find((p) => p.id === id);
+}
+
+/** The card, if any, currently face up for this viewer. */
+export function revealFor(state: GameState, viewerId: string): Reveal | undefined {
+  return state.reveals.find(
+    (reveal) => reveal.viewerId === viewerId || reveal.viewerId === '*',
+  );
+}
+
+/** A card the whole table is looking at, which holds up the burn window. */
+export function publicReveal(state: GameState): Reveal | undefined {
+  return state.reveals.find((reveal) => reveal.viewerId === '*');
+}
+
+function dropReveal(state: GameState, viewerId: string): Reveal | undefined {
+  const index = state.reveals.findIndex((reveal) => reveal.viewerId === viewerId);
+  if (index < 0) return undefined;
+  return state.reveals.splice(index, 1)[0];
+}
+
+function setReveal(state: GameState, reveal: Reveal): void {
+  dropReveal(state, reveal.viewerId);
+  state.reveals.push(reveal);
 }
 
 export function topDiscard(state: GameState): Card | null {
@@ -93,7 +122,16 @@ export function createMatch(options: MatchOptions = {}): GameState {
   const config = { ...DEFAULT_CONFIG, ...(options.config ?? {}) };
   const bots = options.bots ?? DEFAULT_BOTS;
 
-  const players: Player[] = [
+  const players: Player[] = options.seats
+    ? options.seats.map((seat) => ({
+        id: seat.id,
+        name: seat.name,
+        isBot: seat.isBot,
+        difficulty: seat.difficulty ?? 'normal',
+        slots: [],
+        matchScore: 0,
+      }))
+    : [
     {
       id: HUMAN_ID,
       name: options.playerName ?? 'You',
@@ -121,7 +159,7 @@ export function createMatch(options: MatchOptions = {}): GameState {
     held: null,
     heldFromDiscard: false,
     power: null,
-    reveal: null,
+    reveals: [],
     burn: null,
     knockerId: null,
     turnsSinceKnock: 0,
@@ -159,7 +197,7 @@ export function dealRound(previous: GameState): GameState {
   state.held = null;
   state.heldFromDiscard = false;
   state.power = null;
-  state.reveal = null;
+  state.reveals = [];
   state.burn = null;
   state.knockerId = null;
   state.turnsSinceKnock = 0;
@@ -263,7 +301,7 @@ function endRound(state: GameState, ashOutId: string | null = null): void {
   state.held = null;
   state.power = null;
   state.burn = null;
-  state.reveal = null;
+  state.reveals = [];
 
   if (knockerId) {
     const knocker = playerById(state, knockerId) as Player;
@@ -363,43 +401,46 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       const player = playerById(state, action.playerId);
       if (!player || !player.slots[action.slot]) return previous;
 
-      const already = state.reveal?.targets ?? [];
+      const mine = state.reveals.find((reveal) => reveal.viewerId === action.playerId);
+      const already = mine?.targets ?? [];
       if (already.some((t) => t.playerId === action.playerId && t.slot === action.slot)) {
         return previous;
       }
 
       state.openingPeeksLeft[action.playerId] = left - 1;
-      state.reveal = {
+      setReveal(state, {
         viewerId: action.playerId,
         reason: 'opening',
         targets: [...already, { playerId: action.playerId, slot: action.slot }],
-      };
+      });
       return state;
     }
 
     /* ------------------------------------------------------- reveals */
     case 'ACK_REVEAL': {
-      if (!state.reveal) return previous;
-      const reason = state.reveal.reason;
-      state.reveal = null;
+      const done = dropReveal(state, action.playerId);
+      if (!done) return previous;
 
-      if (reason === 'opening') {
-        const pending = Object.values(state.openingPeeksLeft).some((n) => n > 0);
-        if (!pending) {
+      if (done.reason === 'opening') {
+        // Play starts once everyone has taken their look and put it away.
+        const stillChoosing = Object.values(state.openingPeeksLeft).some((n) => n > 0);
+        const stillLooking = state.reveals.some((reveal) => reveal.reason === 'opening');
+        if (!stillChoosing && !stillLooking) {
           state.phase = 'TURN_START';
-          const opener = currentPlayer(state);
-          log(state, opener.isBot ? `${opener.name} opens the round.` : 'You open the round.', 'info');
+          // Kept neutral: at an online table this line is read by everyone.
+          log(state, `Round ${state.round} is under way.`, 'info');
         }
         return state;
       }
 
-      if (reason === 'failed_burn') {
+      if (done.reason === 'failed_burn') {
         // The window keeps running; other players may still burn.
         state.phase = state.burn ? 'BURN_WINDOW' : state.phase;
         return state;
       }
 
-      // A peek, a spy, or the look half of a black king.
+      // A peek, a spy, or the look half of a black king. Only the player
+      // taking the turn can have one of these open.
       if (state.power && powerNeedsMore(state)) {
         state.phase = 'POWER';
         return state;
@@ -520,11 +561,11 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       power.picked.push({ playerId: action.playerId, slot: action.slot });
 
       if (power.kind === 'PEEK' || power.kind === 'SPY' || (power.kind === 'LOOK_SWAP' && step === 0)) {
-        state.reveal = {
+        setReveal(state, {
           viewerId: actor.id,
           reason: power.kind === 'PEEK' ? 'peek' : power.kind === 'SPY' ? 'spy' : 'look_swap',
           targets: [{ playerId: action.playerId, slot: action.slot }],
-        };
+        });
         if (power.kind !== 'LOOK_SWAP') {
           log(state, `${actor.name} looked at a card.`, 'info');
         }
@@ -568,11 +609,11 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
       }
 
       log(state, `${player.name} misfired on ${cardName(card)} — penalty card.`, 'bad');
-      state.reveal = {
+      setReveal(state, {
         viewerId: '*',
         reason: 'failed_burn',
         targets: [{ playerId: action.playerId, slot: action.slot }],
-      };
+      });
       const penalty = drawCard(state);
       if (penalty) player.slots.push(penalty);
       return state;
@@ -580,7 +621,7 @@ export function reduce(previous: GameState, action: GameAction, now = Date.now()
 
     case 'CLOSE_BURN': {
       if (state.phase !== 'BURN_WINDOW') return previous;
-      if (state.reveal) return previous; // a misfire is still on show
+      if (publicReveal(state)) return previous; // a misfire is still on show
       finishTurn(state);
       return state;
     }
