@@ -1,0 +1,4 @@
+game_id,date,venue,format,places,booked,checked_in,score_a,score_b,score_confirmed,teams_felt,notes
+2026-09-17-alquoz-2000,2026-09-17,Al Quoz,7-a-side,14,14,14,6,5,y,even,
+2026-09-24-alquoz-2000,2026-09-24,Al Quoz,7-a-side,14,14,13,8,3,y,lopsided,"Tariq didn't show"
+2026-10-01-alquoz-2000,2026-10-01,Al Quoz,7-a-side,14,14,14,4,4,y,even,

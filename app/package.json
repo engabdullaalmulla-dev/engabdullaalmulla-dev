@@ -1,0 +1,16 @@
+{
+  "name": "matchday",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.6" },
+  "scripts": {
+    "test": "node --experimental-strip-types --test 'src/**/*.test.ts'",
+    "test:watch": "node --experimental-strip-types --test --watch 'src/**/*.test.ts'",
+    "replay": "node --experimental-strip-types src/import/r0-replay.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
