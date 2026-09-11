@@ -118,10 +118,16 @@ in the meantime.
 
 ## Saying something
 
-There is no chat box and there is not going to be one. Instead there are eight
-faces and eight fixed lines, and that is the whole vocabulary. Tap a seat and an
-emoji flies across the table and lands on them; tap a phrase and it appears in a
-bubble over your own cards.
+There is no chat box and there is not going to be one. Instead there are fifteen
+faces and sixteen fixed lines, and that is the whole vocabulary. Tap a seat and
+an emoji flies across the table and lands on them; tap a phrase and it appears in
+a bubble over your own cards.
+
+The lines come in two halves. *Nicely* is what you send when you mean it —
+“Well played”, “لعب صح”. *Not so nicely* is the half people actually use:
+“Any day now”, “I'll put the kettle on”, “Nobody is that lucky”, and in Arabic
+«متى بتلعب؟»، «نمت ولا شفيك؟»، «بسوّي شاي لين تخلّص». Both halves are jokes,
+which is the other reason there is no way to write your own.
 
 What crosses the wire is an id out of a fixed list — never text — so a phrase
 sent from an Arabic phone arrives in English on an English one, and a table with
@@ -132,7 +138,9 @@ in twelve seconds with a breath between them.
 
 Bots at an offline table use the same vocabulary. They react to what just
 happened rather than to a timer, a beat late, and each one keeps quiet for a
-while after speaking.
+while after speaking — a clap for a knock that stuck, a clown for one that
+missed. Sit on your own turn for fifteen seconds and one of them will ask
+whether you fell asleep.
 
 ## Ranks, seasons and the board
 

@@ -108,6 +108,9 @@ function Bubble({ id, from }: { id: string; from: Rect }) {
   }, [grow]);
 
   const text = (t.express.phrase as Record<string, string>)[id] ?? '';
+  // A seat near the top has no room above it, so the bubble hangs underneath
+  // instead of climbing into the line of text along the header.
+  const below = from.y < 80;
 
   return (
     <Animated.View
@@ -115,18 +118,19 @@ function Bubble({ id, from }: { id: string; from: Rect }) {
         styles.bubbleWrap,
         {
           left: from.x + from.width / 2,
-          top: from.y - 12,
+          top: below ? from.y + from.height + 2 : from.y - 12,
           opacity: grow,
           transform: [{ scale: grow.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }],
         },
       ]}
     >
+      {below ? <View style={[styles.tail, styles.tailUp]} /> : null}
       <View style={styles.bubble}>
         <Text style={styles.bubbleText} numberOfLines={1}>
           {text}
         </Text>
       </View>
-      <View style={styles.tail} />
+      {below ? null : <View style={styles.tail} />}
     </Animated.View>
   );
 }
@@ -161,5 +165,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: colors.line,
     transform: [{ rotate: '45deg' }],
+  },
+  tailUp: {
+    marginTop: 0,
+    marginBottom: -5,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    borderLeftWidth: 1,
+    borderTopWidth: 1,
   },
 });

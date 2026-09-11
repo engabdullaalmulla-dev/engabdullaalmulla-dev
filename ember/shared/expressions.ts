@@ -10,28 +10,55 @@
 
 export const EMOJI = [
   { id: 'laugh', glyph: '😂' },
-  { id: 'wow', glyph: '😮' },
-  { id: 'fire', glyph: '🔥' },
-  { id: 'clap', glyph: '👏' },
   { id: 'cry', glyph: '😭' },
+  { id: 'wow', glyph: '😮' },
   { id: 'think', glyph: '🤔' },
   { id: 'cool', glyph: '😎' },
+  { id: 'fire', glyph: '🔥' },
+  { id: 'clap', glyph: '👏' },
   { id: 'heart', glyph: '❤️' },
+  { id: 'skull', glyph: '💀' },
+  { id: 'clown', glyph: '🤡' },
+  { id: 'eyes', glyph: '👀' },
+  { id: 'brain', glyph: '🧠' },
+  { id: 'sleep', glyph: '😴' },
+  { id: 'salute', glyph: '🫡' },
+  { id: 'goat', glyph: '🐐' },
 ] as const;
 
-export const PHRASES = [
+/**
+ * The lines, in two halves: the ones you send when you mean them, and the ones
+ * you send to wind somebody up. Both are meant to be read as a joke, which is
+ * why there is no way to write your own.
+ */
+export const KIND_PHRASES = [
   'hello',
   'nice',
   'wellPlayed',
+  'goodGame',
   'lucky',
   'close',
   'oops',
-  'yourTurn',
-  'goodGame',
+  'thanks',
 ] as const;
 
+export const CHEEKY_PHRASES = [
+  'yourTurn',
+  'sleeping',
+  'teaTime',
+  'memory',
+  'forgot',
+  'didntSee',
+  'notThatLucky',
+  'watchThis',
+] as const;
+
+export const PHRASES = [...KIND_PHRASES, ...CHEEKY_PHRASES] as const;
+
 export type EmojiId = (typeof EMOJI)[number]['id'];
-export type PhraseId = (typeof PHRASES)[number];
+export type KindPhraseId = (typeof KIND_PHRASES)[number];
+export type CheekyPhraseId = (typeof CHEEKY_PHRASES)[number];
+export type PhraseId = KindPhraseId | CheekyPhraseId;
 export type ExpressionId = EmojiId | PhraseId;
 
 export interface Expression {

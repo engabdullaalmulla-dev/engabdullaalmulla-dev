@@ -18,7 +18,14 @@ import {
   topDiscard,
 } from '../shared/engine';
 import { decide, decideBurn, observeTransition, seedMemory, type BotMemory } from '../shared/ai';
-import { EXPRESSIONS, canAim, expression, isExpressionId } from '../shared/expressions';
+import {
+  CHEEKY_PHRASES,
+  EXPRESSIONS,
+  KIND_PHRASES,
+  canAim,
+  expression,
+  isExpressionId,
+} from '../shared/expressions';
 import {
   avatarFromSeed,
   badges,
@@ -497,7 +504,10 @@ equal(
 );
 
 /* what people can say to each other ---------------------------------- */
-equal('there are sixteen things anyone can say', EXPRESSIONS.length, 16);
+equal('there are thirty-one things anyone can say', EXPRESSIONS.length, 31);
+equal('half of them are faces', EXPRESSIONS.filter((e) => e.kind === 'emoji').length, 15);
+equal('and the lines split evenly between kind and cheeky', KIND_PHRASES.length, CHEEKY_PHRASES.length);
+check('with no id used twice', new Set(EXPRESSIONS.map((e) => e.id)).size === EXPRESSIONS.length);
 check('and every one of them is known by id', EXPRESSIONS.every((entry) => isExpressionId(entry.id)));
 check('anything else is not', !isExpressionId('drop table users'));
 check('an emoji has something to draw', EXPRESSIONS.filter((e) => e.kind === 'emoji').every((e) => !!e.glyph));

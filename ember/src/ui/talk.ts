@@ -62,16 +62,24 @@ export function useTalk() {
 
 /** What a bot might come out with when a particular thing happens. */
 const REACTIONS: Partial<Record<LogEntry['key'], ExpressionId[]>> = {
-  knocked: ['wow', 'think'],
-  knock_stuck: ['clap', 'wellPlayed'],
-  knock_missed: ['laugh', 'oops'],
-  burned: ['fire', 'nice'],
-  burned_theirs: ['fire', 'cool'],
-  misfire: ['laugh', 'oops'],
-  misfire_theirs: ['laugh'],
-  ash_out: ['wow', 'clap'],
-  ember: ['cool', 'fire'],
+  knocked: ['wow', 'think', 'notThatLucky'],
+  knock_stuck: ['clap', 'wellPlayed', 'goat', 'salute'],
+  knock_missed: ['laugh', 'clown', 'notThatLucky', 'skull'],
+  burned: ['fire', 'nice', 'brain'],
+  burned_theirs: ['fire', 'cool', 'eyes', 'watchThis'],
+  misfire: ['laugh', 'skull', 'oops'],
+  misfire_theirs: ['laugh', 'clown'],
+  ash_out: ['wow', 'clap', 'goat'],
+  ember: ['cool', 'fire', 'eyes'],
+  looked: ['eyes', 'didntSee'],
+  blind_swap: ['think', 'didntSee', 'memory'],
 };
+
+/** What they say when you have been staring at your cards for a while. */
+const NUDGES: ExpressionId[] = ['sleep', 'yourTurn', 'sleeping', 'teaTime'];
+
+/** How long you may think before somebody mentions it. */
+const PATIENCE_MS = 14_000;
 
 /**
  * Gives the bots at an offline table something to say.
@@ -93,6 +101,7 @@ export function useBotChatter({
   const lastLogId = useRef<number>(-1);
   const spokeAt = useRef<Record<string, number>>({});
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  const nudged = useRef<string>('');
 
   useEffect(() => {
     const held = timers.current;
@@ -135,4 +144,34 @@ export function useBotChatter({
     timers.current.add(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view.log, enabled]);
+
+  /* ---------------- somebody is waiting on you ---------------- */
+
+  const yourMove =
+    view.players[view.turn]?.id === view.youId &&
+    (view.phase === 'TURN_START' || view.phase === 'HOLDING' || view.phase === 'POWER');
+
+  useEffect(() => {
+    if (!enabled || !yourMove) return;
+    // One nudge per turn, however long you take over it.
+    const turnKey = `${view.round}:${view.log.length}`;
+    if (nudged.current === turnKey) return;
+
+    const rivals = view.players.filter((player) => player.id !== view.youId);
+    if (rivals.length === 0) return;
+
+    const timer = setTimeout(() => {
+      timers.current.delete(timer);
+      nudged.current = turnKey;
+      const speaker = rivals[Math.floor(Math.random() * rivals.length)];
+      say(speaker.id, NUDGES[Math.floor(Math.random() * NUDGES.length)], view.youId);
+    }, PATIENCE_MS + Math.random() * 4000);
+    timers.current.add(timer);
+
+    return () => {
+      clearTimeout(timer);
+      timers.current.delete(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yourMove, view.round, view.log.length, enabled]);
 }

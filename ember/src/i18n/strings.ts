@@ -195,6 +195,8 @@ export interface Strings {
     everyone: string;
     emoji: string;
     phrases: string;
+    kind: string;
+    cheeky: string;
     muted: string;
     mute: string;
     unmute: string;
@@ -486,6 +488,8 @@ export const en: Strings = {
     everyone: 'Everyone',
     emoji: 'THROW ONE',
     phrases: 'SAY IT',
+    kind: 'NICELY',
+    cheeky: 'NOT SO NICELY',
     muted: 'Reactions are off.',
     mute: 'TURN OFF',
     unmute: 'TURN ON',
@@ -495,11 +499,19 @@ export const en: Strings = {
       hello: 'Hello!',
       nice: 'Nice one',
       wellPlayed: 'Well played',
+      goodGame: 'Good game',
       lucky: 'Lucky',
       close: 'That was close',
       oops: 'Oops',
-      yourTurn: 'Your turn',
-      goodGame: 'Good game',
+      thanks: 'Much appreciated',
+      yourTurn: 'Any day now',
+      sleeping: 'Did you fall asleep?',
+      teaTime: "I'll put the kettle on",
+      memory: 'I remember everything',
+      forgot: 'I forgot my own cards',
+      didntSee: 'I saw nothing',
+      notThatLucky: 'Nobody is that lucky',
+      watchThis: 'Watch this',
     },
   },
 
@@ -1005,20 +1017,30 @@ export const ar: Strings = {
     everyone: 'الكل',
     emoji: 'ارمها عليه',
     phrases: 'قلها',
+    kind: 'بطيبة',
+    cheeky: 'بمزح',
     muted: 'التفاعلات مقفلة.',
     mute: 'أقفلها',
     unmute: 'افتحها',
     aimHint: 'اختر مقعد فوق عشان ترميها على أحد.',
     tooFast: 'عطِ الطاولة لحظة.',
     phrase: {
-      hello: 'هلا!',
-      nice: 'يا سلام',
+      hello: 'هلا والله!',
+      nice: 'يا سلام عليك',
       wellPlayed: 'لعب صح',
+      goodGame: 'لعبة حلوة',
       lucky: 'حظك حلو',
       close: 'قرّبت',
       oops: 'أوبس',
-      yourTurn: 'دورك',
-      goodGame: 'لعبة حلوة',
+      thanks: 'مشكور والله',
+      yourTurn: 'متى بتلعب؟',
+      sleeping: 'نمت ولا شفيك؟',
+      teaTime: 'بسوّي شاي لين تخلّص',
+      memory: 'أنا حافظ كل شي',
+      forgot: 'نسيت أوراقي أنا',
+      didntSee: 'ما شفت شي',
+      notThatLucky: 'ما أحد حظه جذي',
+      watchThis: 'شوف هالحركة',
     },
   },
 

@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { EMOJI, PHRASES, type ExpressionId } from '../../../shared/expressions';
+import {
+  CHEEKY_PHRASES,
+  EMOJI,
+  KIND_PHRASES,
+  type ExpressionId,
+  type PhraseId,
+} from '../../../shared/expressions';
 import { useLanguage } from '../../i18n';
 import { tap } from '../haptics';
 import { asDir } from '../ltr';
@@ -64,6 +70,10 @@ export function ExpressionTray({
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           {/* Stops a tap inside the sheet from closing it. */}
           <Pressable {...asDir(rtl)} style={styles.sheet} onPress={() => {}}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.sheetBody}
+            >
             <Text style={styles.title}>{t.express.title}</Text>
 
             {seats.length > 0 ? (
@@ -106,23 +116,48 @@ export function ExpressionTray({
               ))}
             </View>
 
-            <Text style={styles.section}>{t.express.phrases}</Text>
-            <View style={styles.phrases}>
-              {PHRASES.map((id) => (
-                <Pressable
-                  key={id}
-                  accessibilityRole="button"
-                  onPress={() => send(id)}
-                  style={({ pressed }) => [styles.phrase, pressed && styles.pressed]}
-                >
-                  <Text style={styles.phraseText}>{t.express.phrase[id]}</Text>
-                </Pressable>
-              ))}
-            </View>
+            <Text style={styles.section}>{t.express.kind}</Text>
+            <Phrases ids={KIND_PHRASES} onSend={send} />
+
+            <Text style={styles.section}>{t.express.cheeky}</Text>
+            <Phrases ids={CHEEKY_PHRASES} onSend={send} cheeky />
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
     </>
+  );
+}
+
+function Phrases({
+  ids,
+  onSend,
+  cheeky,
+}: {
+  ids: readonly PhraseId[];
+  onSend: (id: ExpressionId) => void;
+  cheeky?: boolean;
+}) {
+  const { t } = useLanguage();
+  return (
+    <View style={styles.phrases}>
+      {ids.map((id) => (
+        <Pressable
+          key={id}
+          accessibilityRole="button"
+          onPress={() => onSend(id)}
+          style={({ pressed }) => [
+            styles.phrase,
+            cheeky && styles.phraseCheeky,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text style={[styles.phraseText, cheeky && styles.phraseTextCheeky]}>
+            {t.express.phrase[id]}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
   );
 }
 
@@ -177,13 +212,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
-    padding: space(4),
-    gap: space(2),
     maxWidth: 480,
     width: '100%',
+    maxHeight: '82%',
     alignSelf: 'center',
     ...shadow.card,
   },
+  sheetBody: { padding: space(4), gap: space(2) },
   title: { ...typography.heading, fontSize: 17, color: colors.text },
   section: { ...typography.label, fontSize: 9, color: colors.textFaint, marginTop: space(1) },
   hint: { ...typography.small, fontSize: 11, color: colors.textFaint, marginTop: -space(1) },
@@ -227,5 +262,7 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     backgroundColor: colors.paperLight,
   },
+  phraseCheeky: { borderColor: colors.coralSoft, backgroundColor: colors.coralWash },
   phraseText: { ...typography.small, fontSize: 13, color: colors.text },
+  phraseTextCheeky: { color: colors.coralDeep },
 });
