@@ -1,0 +1,842 @@
+<title>Little Street Café</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F2EFE6; --card:#FBF9F3; --sunk:#EAE6D9;
+  --board:#2C3A33; --board-2:#36463D; --chalk:#E4E2D4; --chalk-dim:#9FACA2;
+  --ink:#1E2420; --ink-2:#5C655D; --ink-3:#8A9189;
+  --line:#DBD5C5; --line-2:#C9C2AF;
+  --brass:#B07622; --brass-soft:#EFE2C6;
+  --sage:#46756A;
+  --pos:#376E4E; --neg:#A2452A;
+  --shadow:0 1px 0 rgba(30,36,32,.06);
+  --d:#F2EFE6;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#141714; --card:#1C201B; --sunk:#181C18;
+  --board:#212823; --board-2:#2A322B; --chalk:#E4E2D4; --chalk-dim:#8B968C;
+  --ink:#E8E5D9; --ink-2:#9CA69C; --ink-3:#778176;
+  --line:#2C322B; --line-2:#3A4139;
+  --brass:#D2A052; --brass-soft:#3A3122;
+  --sage:#77A99D;
+  --pos:#67A97E; --neg:#D0795A;
+  --shadow:0 1px 0 rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --paper:#141714; --card:#1C201B; --sunk:#181C18;
+  --board:#212823; --board-2:#2A322B; --chalk:#E4E2D4; --chalk-dim:#8B968C;
+  --ink:#E8E5D9; --ink-2:#9CA69C; --ink-3:#778176;
+  --line:#2C322B; --line-2:#3A4139;
+  --brass:#D2A052; --brass-soft:#3A3122;
+  --sage:#77A99D;
+  --pos:#67A97E; --neg:#D0795A;
+  --shadow:0 1px 0 rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.5;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3{font-family:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.mono{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+#app{display:flex;flex-direction:column;height:100%;max-width:560px;margin:0 auto;background:var(--paper)}
+
+/* ---------- HUD ---------- */
+.hud{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  display:flex; align-items:center; gap:14px;
+  padding:10px 16px; background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.hud .day{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:15px;letter-spacing:-.02em}
+.hud .stat{display:flex;flex-direction:column;line-height:1.1}
+.hud .stat b{font-family:"DM Mono",monospace;font-variant-numeric:tabular-nums;font-size:14px;font-weight:500}
+.hud .stat span{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.hud .spacer{flex:1}
+.ghost{
+  background:none;border:1px solid var(--line-2);border-radius:5px;
+  padding:5px 9px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+}
+.ghost:hover{border-color:var(--brass);color:var(--brass)}
+
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.view{padding:20px 16px 40px;display:flex;flex-direction:column;gap:20px}
+
+.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-family:"DM Mono",monospace}
+.lede{color:var(--ink-2);font-size:14px;max-width:60ch;margin:0}
+
+/* ---------- chalkboard ---------- */
+.board{
+  background:var(--board); color:var(--chalk); border-radius:3px;
+  padding:18px 16px 16px; border:1px solid var(--board-2);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.22);
+}
+.board h2{font-size:21px;font-weight:800;color:var(--chalk)}
+.board .sub{font-size:12px;color:var(--chalk-dim);font-family:"DM Mono",monospace;margin-top:3px}
+.slots{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.slot{
+  flex:1 1 60px;min-width:60px;height:34px;border:1px dashed var(--chalk-dim);border-radius:2px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--chalk-dim);
+  font-family:"DM Mono",monospace;padding:0 6px;text-align:center;
+}
+.slot.filled{border-style:solid;border-color:var(--chalk);color:var(--chalk);font-size:12px}
+
+/* ---------- recipe list ---------- */
+.reclist{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.rec{
+  display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:center;
+  padding:11px 2px;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;
+  text-align:left;width:100%;
+}
+.rec:disabled{opacity:.42;cursor:not-allowed}
+.tick{
+  width:20px;height:20px;border:1.5px solid var(--line-2);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;flex:none;
+}
+.rec[aria-pressed="true"] .tick{background:var(--sage);border-color:var(--sage);color:#fff}
+.rec .nm{font-weight:600;font-size:14px;display:block}
+.rec .steps{display:block;font-family:"DM Mono",monospace;font-size:10.5px;color:var(--ink-3);letter-spacing:.02em;margin-top:2px}
+.rec .fav{display:block;color:var(--brass);font-size:10.5px;font-family:"DM Mono",monospace;margin-top:2px}
+.money{font-family:"DM Mono",monospace;font-variant-numeric:tabular-nums;font-size:13px;text-align:right;line-height:1.25}
+.money b{font-weight:500;display:block}
+.money span{font-size:10px;color:var(--ink-3)}
+
+/* ---------- primary action ---------- */
+.go{
+  width:100%;padding:15px;border:0;border-radius:3px;background:var(--brass);color:#fff;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:16px;letter-spacing:-.01em;
+}
+.go:disabled{background:var(--line-2);color:var(--ink-3);cursor:not-allowed}
+.go.quiet{background:none;border:1px solid var(--line-2);color:var(--ink)}
+
+/* ---------- shift ---------- */
+.queue{display:flex;align-items:center;gap:7px;font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-3)}
+.pips{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+.pip{width:100%;max-width:13px;height:4px;border-radius:2px;background:var(--line-2);flex:1 1 6px}
+.pip.done{background:var(--sage)}
+.pip.now{background:var(--brass)}
+.pip.lost{background:var(--neg)}
+
+.cust{display:flex;gap:12px;align-items:flex-start}
+.face{
+  width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:17px;color:#fff;
+}
+.cust .who{font-weight:600;font-size:15px}
+.cust .tag{font-size:11px;color:var(--ink-3);font-family:"DM Mono",monospace}
+.say{
+  margin-top:7px;font-size:14.5px;line-height:1.45;color:var(--ink);
+  border-left:2px solid var(--brass);padding-left:11px;
+}
+
+.ticket{
+  background:var(--card);border:1px solid var(--line);border-radius:2px;padding:13px 14px;
+  box-shadow:var(--shadow);
+}
+.ticket .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  border-bottom:1px dashed var(--line-2);padding-bottom:8px;margin-bottom:9px}
+.ticket .hd b{font-family:"Bricolage Grotesque",sans-serif;font-size:17px;font-weight:700}
+.ticket .hd .pr{font-family:"DM Mono",monospace;font-size:13px;color:var(--ink-2)}
+.recipe-steps{display:flex;flex-direction:column;gap:5px;font-family:"DM Mono",monospace;font-size:12px}
+.recipe-steps div{display:flex;gap:8px;color:var(--ink-2)}
+.recipe-steps div.ok{color:var(--pos)}
+.recipe-steps .n{color:var(--ink-3);width:14px}
+.hidden-steps{font-family:"DM Mono",monospace;font-size:12px;color:var(--ink-3)}
+
+.patience{height:3px;background:var(--line-2);border-radius:2px;overflow:hidden;margin-top:10px}
+.patience i{display:block;height:100%;background:var(--sage);transition:width .1s linear}
+.patience.low i{background:var(--neg)}
+
+.build{
+  display:flex;gap:6px;align-items:center;min-height:38px;padding:7px 10px;
+  background:var(--sunk);border:1px solid var(--line);border-radius:2px;flex-wrap:wrap;
+  font-family:"DM Mono",monospace;font-size:11.5px;
+}
+.build .ph{color:var(--ink-3)}
+.build .chip{background:var(--card);border:1px solid var(--line-2);border-radius:2px;padding:3px 7px}
+.build .chip.bad{border-color:var(--neg);color:var(--neg)}
+
+.stations{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.st{
+  background:var(--board);color:var(--chalk);border:1px solid var(--board-2);border-radius:3px;
+  padding:13px 6px 11px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:66px;
+  justify-content:center;
+}
+.st .ic{font-size:19px;line-height:1}
+.st .lb{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.04em;color:var(--chalk-dim);text-align:center}
+.st:active{background:var(--board-2)}
+.st:disabled{opacity:.4}
+
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+.flash{
+  font-family:"DM Mono",monospace;font-size:12px;padding:9px 12px;border-radius:2px;
+  background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:2px solid var(--brass);
+}
+.flash.bad{border-left-color:var(--neg)}
+.flash.good{border-left-color:var(--pos)}
+
+/* ---------- ledger ---------- */
+.ledger{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:4px 14px 10px}
+.lrow{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);
+  font-family:"DM Mono",monospace;font-size:13px}
+.lrow:last-child{border-bottom:0}
+.lrow .lb{color:var(--ink-2);font-family:"Instrument Sans",sans-serif;font-size:13.5px}
+.lrow.total{font-weight:500;border-top:2px solid var(--ink);border-bottom:0;margin-top:2px;padding-top:9px}
+.lrow.total .lb{color:var(--ink);font-weight:600}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+
+.shop{display:flex;flex-direction:column;gap:8px}
+.buy{
+  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:2px;padding:11px 13px;width:100%;
+}
+.buy:disabled{opacity:.45;cursor:not-allowed}
+.buy .nm{font-weight:600;font-size:14px;display:block}
+.buy .ds{font-size:12px;color:var(--ink-2);display:block;margin-top:1px}
+.buy .pc{font-family:"DM Mono",monospace;font-size:13px;color:var(--brass)}
+
+.regs{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 14px 4px}
+.reg{display:grid;grid-template-columns:8px 1fr;gap:11px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line)}
+.reg:last-child{border-bottom:0}
+.reg .dot{width:8px;height:8px;border-radius:50%;background:var(--pos);display:block}
+.reg.off .dot{background:var(--neg)}
+.reg .rn{font-weight:600;font-size:14px;display:block}
+.reg .rw{font-family:"DM Mono",monospace;font-size:11.5px;color:var(--ink-3);display:block;margin-top:1px}
+.reg.off .rw{color:var(--neg)}
+.beat{border-left:2px solid var(--sage);padding:2px 0 2px 11px;font-size:13.5px;color:var(--ink-2)}
+.beat b{color:var(--ink);font-weight:600}
+
+.qbox{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:14px}
+.qbox ol{margin:9px 0 0;padding-left:19px;display:flex;flex-direction:column;gap:7px;font-size:14px;color:var(--ink-2)}
+.qbox li b{color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="app">
+  <header class="hud">
+    <div class="day mono" id="hud-day">Day 1</div>
+    <div class="stat"><b id="hud-cash">300</b><span>AED</span></div>
+    <div class="stat"><b id="hud-rep">3</b><span>Regard</span></div>
+    <div class="spacer"></div>
+    <button class="ghost" id="btn-reset" type="button">Restart</button>
+  </header>
+
+  <main>
+    <section class="view" id="view-plan" hidden></section>
+    <section class="view" id="view-shift" hidden></section>
+    <section class="view" id="view-books" hidden></section>
+    <section class="view" id="view-end" hidden></section>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ============================ content ============================ */
+
+const STATIONS = {
+  GRIND:  {ic:"⚙", lb:"Grinder"},
+  KETTLE: {ic:"♨", lb:"Kettle"},
+  BREW:   {ic:"◉", lb:"Espresso"},
+  STEAM:  {ic:"≋", lb:"Steamer"},
+  OVEN:   {ic:"▣", lb:"Oven"},
+  PREP:   {ic:"▤", lb:"Prep bench"}
+};
+
+const RECIPES = {
+  espresso:{nm:"Espresso",       price:12, cost:3,   appeal:3, steps:["GRIND","BREW"]},
+  flatwhite:{nm:"Flat white",    price:20, cost:5.5, appeal:5, steps:["GRIND","BREW","STEAM"]},
+  karak:{nm:"Karak chai",        price:8,  cost:1.5, appeal:7, steps:["KETTLE","STEAM"]},
+  filter:{nm:"Filter coffee",    price:15, cost:3,   appeal:4, steps:["GRIND","KETTLE"]},
+  mint:{nm:"Fresh mint tea",     price:9,  cost:1.5, appeal:4, steps:["KETTLE","PREP"]},
+  datecake:{nm:"Date cake",      price:14, cost:4,   appeal:5, steps:["PREP","OVEN"]},
+  halloumi:{nm:"Halloumi toastie",price:24,cost:9,   appeal:4, steps:["PREP","OVEN","PREP"]},
+  shakerato:{nm:"Iced shakerato",price:22, cost:5,   appeal:3, steps:["GRIND","BREW","PREP"]},
+  umcake:{nm:"Um Faisal's date cake",price:26,cost:5,appeal:8, steps:["PREP","OVEN","PREP"], locked:true}
+};
+
+const REGULARS = {
+  layla:{
+    nm:"Layla", tag:"engineering student", hue:"#6C6FA8", fav:"karak",
+    beats:[
+      "Karak, please. I have a structures exam at eight and I did not sleep.",
+      "Same again. I passed, by the way. Barely, but I passed.",
+      "Final year project. Can I take the corner table for a few hours? I'll keep buying."
+    ],
+    turn:"Oh — no karak today? ... It's fine. I'll find somewhere.",
+    done:"Layla studies here most days now. Her classmates have started following her in.",
+    reward:"+2 customers a day"
+  },
+  hisham:{
+    nm:"Hisham", tag:"plays guitar, mostly at home", hue:"#8A6A3E", fav:"filter",
+    beats:[
+      "Filter, black. ... Do you ever have music in here? Just asking.",
+      "I brought the guitar. I won't plug anything in, I promise.",
+      "Thursday. Eight o'clock. Will you put a sign in the window for me?"
+    ],
+    turn:"No filter? Then just water, thank you. I'll come back another day.",
+    done:"Thursday sets are a fixture. People walk past, hear him, and come in.",
+    reward:"+2 regard, permanently"
+  },
+  umfaisal:{
+    nm:"Um Faisal", tag:"lived on this street for forty years", hue:"#7A4B4B", fav:"datecake",
+    beats:[
+      "Date cake and a glass of water, habibti. It is not like my mother's. But it is close.",
+      "I wrote it down for you. The recipe. And do not use the cheap dates, I will know.",
+      "My grandson is coming on Friday. Make him try it. He thinks this street is finished."
+    ],
+    turn:"No date cake? A shame. I'll sit a while anyway, if you don't mind.",
+    done:"Um Faisal's recipe is on the menu now — and it outsells everything you had before.",
+    reward:"unlocks Um Faisal's date cake"
+  }
+};
+
+const WALKINS = [
+  ["Rami","works at the print shop"], ["Noor","between shifts at the clinic"],
+  ["Samir","waiting for the bus"], ["Dana","first time in here"],
+  ["Khalid","reads the paper by the window"], ["Aisha","walks the dog past every morning"],
+  ["Tarek","runs the key-cutting kiosk"], ["Mona","picking up for the office"],
+  ["Yusuf","new to the neighbourhood"], ["Salma","always in a hurry"]
+];
+
+const UPGRADES = {
+  slot:{nm:"Second chalkboard", ds:"One more thing on the menu each day.", price:400},
+  bench:{nm:"Corner bench & lamp", ds:"People stay longer. Two more customers a day.", price:350},
+  dates:{nm:"Better dates supplier", ds:"Date cake ingredients cost 4.00 → 2.00.", price:300},
+  awning:{nm:"Awning & window boxes", ds:"The street notices you. +2 regard.", price:250}
+};
+
+const RENT = 60;
+const LAST_DAY = 7;
+
+/* ============================ state ============================ */
+
+const START = () => ({
+  day:1, cash:300, rep:3, slots:4, mode:"relaxed",
+  menu:["karak","filter","datecake","espresso"],
+  unlocked:["espresso","flatwhite","karak","filter","mint","datecake","halloumi","shakerato"],
+  bought:{}, story:{layla:0,hisham:0,umfaisal:0}, decor:0,
+  history:[]
+});
+
+let S = START();
+let shift = null;
+let tick = null;
+
+const $ = id => document.getElementById(id);
+const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n; };
+const aed = n => n.toFixed(2);
+
+function save(){ try{ localStorage.setItem("lsc_save", JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const raw = localStorage.getItem("lsc_save");
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    return (p && typeof p.day === "number") ? p : null;
+  }catch(e){ return null; }
+}
+
+/* derived */
+const customerCount = () => 7 + Math.floor(S.rep*0.7) + (S.bought.bench?2:0) + (S.story.layla>=3?2:0);
+const costOf = id => (id==="datecake" && S.bought.dates) ? 2 : RECIPES[id].cost;
+
+/* ============================ views ============================ */
+
+function show(name){
+  ["plan","shift","books","end"].forEach(v => { $("view-"+v).hidden = (v!==name); });
+  document.querySelector("main").scrollTop = 0;
+}
+function hud(){
+  $("hud-day").textContent = "Day " + S.day;
+  $("hud-cash").textContent = Math.round(S.cash);
+  $("hud-rep").textContent = S.rep;
+}
+
+/* ---------------------- plan ---------------------- */
+
+function renderPlan(){
+  const v = $("view-plan"); v.textContent = "";
+
+  const board = el("div","board");
+  board.appendChild(el("h2",null,"Today's menu"));
+  const sub = el("div","sub", S.menu.length + " of " + S.slots + " spaces used");
+  board.appendChild(sub);
+  const slots = el("div","slots");
+  for(let i=0;i<S.slots;i++){
+    const s = el("div","slot" + (S.menu[i]?" filled":""), S.menu[i] ? RECIPES[S.menu[i]].nm : "empty");
+    slots.appendChild(s);
+  }
+  board.appendChild(slots);
+  v.appendChild(board);
+
+  const regs = Object.keys(REGULARS).filter(k => S.story[k] < 3);
+  if(regs.length){
+    const box = el("div","regs");
+    box.appendChild(el("div","eyebrow","Who is coming in today"));
+    regs.forEach(k => {
+      const R = REGULARS[k], has = S.menu.includes(R.fav);
+      const row = el("div","reg" + (has ? "" : " off"));
+      row.appendChild(el("span","dot"));
+      const t = el("div");
+      t.appendChild(el("span","rn", R.nm));
+      t.appendChild(el("span","rw", has ? RECIPES[R.fav].nm
+        : RECIPES[R.fav].nm + " — not on the menu"));
+      row.appendChild(t);
+      box.appendChild(row);
+    });
+    v.appendChild(box);
+  }
+
+  const head = el("div");
+  head.appendChild(el("div","eyebrow","What you can make"));
+  head.appendChild(el("p","lede","Cheap and quick moves more cups. Slower items earn more per customer but you get through fewer of them. Your regulars only come for one thing each."));
+  v.appendChild(head);
+
+  const list = el("div","reclist");
+  S.unlocked.forEach(id => {
+    const r = RECIPES[id];
+    const on = S.menu.includes(id);
+    const b = el("button","rec"); b.type="button";
+    b.setAttribute("aria-pressed", on ? "true":"false");
+    b.disabled = !on && S.menu.length >= S.slots;
+
+    b.appendChild(el("div","tick","✓"));
+    const mid = el("div");
+    mid.appendChild(el("span","nm", r.nm));
+    const favOf = Object.keys(REGULARS).find(k => REGULARS[k].fav===id && S.story[k]<3);
+    mid.appendChild(el("span","steps", r.steps.map(s=>STATIONS[s].lb).join(" → ")));
+    if(favOf) mid.appendChild(el("span","fav", REGULARS[favOf].nm + " orders this"));
+    b.appendChild(mid);
+
+    const m = el("div","money");
+    m.appendChild(el("b", null, aed(r.price)));
+    m.appendChild(el("span","costs " + aed(costOf(id))));
+    b.appendChild(m);
+
+    b.addEventListener("click", () => {
+      if(on) S.menu = S.menu.filter(x=>x!==id);
+      else if(S.menu.length < S.slots) S.menu.push(id);
+      save(); renderPlan();
+    });
+    list.appendChild(b);
+  });
+  v.appendChild(list);
+
+  const modeRow = el("div","row");
+  [["relaxed","Relaxed shift"],["busy","Busy shift"]].forEach(([m,label]) => {
+    const b = el("button","go quiet", label); b.type="button";
+    if(S.mode===m){ b.style.borderColor="var(--brass)"; b.style.color="var(--brass)"; }
+    b.addEventListener("click", ()=>{ S.mode=m; save(); renderPlan(); });
+    modeRow.appendChild(b);
+  });
+  v.appendChild(modeRow);
+  v.appendChild(el("p","lede", S.mode==="relaxed"
+    ? "Relaxed: the ticket lists every step, nobody is counting the seconds, and a mistake costs you nothing but the time to redo it."
+    : "Busy: the ticket gives you the name only — you have to remember how it's made — and people will leave if you take too long."));
+
+  const go = el("button","go","Open the café"); go.type="button";
+  go.disabled = S.menu.length === 0;
+  go.addEventListener("click", startShift);
+  v.appendChild(go);
+
+  hud(); show("plan");
+}
+
+/* ---------------------- shift ---------------------- */
+
+function buildQueue(){
+  const q = [];
+  for(const k in REGULARS){
+    const R = REGULARS[k];
+    if(S.story[k] >= 3) continue;
+    if(S.menu.includes(R.fav)){
+      q.push({key:k, nm:R.nm, tag:R.tag, hue:R.hue, item:R.fav, say:R.beats[S.story[k]], regular:true});
+    }else{
+      q.push({key:k, nm:R.nm, tag:R.tag, hue:R.hue, item:null, say:R.turn, regular:true, turned:true});
+    }
+  }
+  const pool = WALKINS.slice();
+  const n = customerCount();
+  const weights = S.menu.map(id => RECIPES[id].appeal);
+  const total = weights.reduce((a,b)=>a+b,0);
+  for(let i=0;i<n;i++){
+    const p = pool.length ? pool.splice(Math.floor(Math.random()*pool.length),1)[0] : ["Someone","passing through"];
+    let r = Math.random()*total, pick = S.menu[0];
+    for(let j=0;j<S.menu.length;j++){ r -= weights[j]; if(r<=0){ pick = S.menu[j]; break; } }
+    q.push({nm:p[0], tag:p[1], hue:"#4E6B62", item:pick,
+            say: i===0 ? "Morning. " + RECIPES[pick].nm + ", please." : RECIPES[pick].nm + ", please."});
+  }
+  /* regulars interleaved rather than all first */
+  for(let i=q.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [q[i],q[j]]=[q[j],q[i]]; }
+  return q;
+}
+
+function startShift(){
+  shift = {q:buildQueue(), i:0, built:[], revenue:0, cost:0, served:0,
+           remakes:0, walkouts:0, turned:0, beats:[], flash:null, patience:1, done:false};
+  renderShift();
+  if(S.mode==="busy") startTimer();
+}
+
+function startTimer(){
+  stopTimer();
+  tick = setInterval(() => {
+    if(!shift || shift.done) return;
+    const c = shift.q[shift.i];
+    if(!c || c.turned) return;
+    const span = 16000 * (1 + RECIPES[c.item].steps.length*0.15);
+    shift.patience -= 100/span;
+    if(shift.patience <= 0){
+      shift.patience = 1;
+      shift.walkouts++;
+      shift.flash = {t:"bad", s:c.nm + " waited, then left."};
+      nextCustomer();
+    }else{
+      const bar = $("pat-bar");
+      if(bar){ bar.style.width = Math.max(0,shift.patience*100) + "%";
+               bar.parentNode.classList.toggle("low", shift.patience < 0.3); }
+    }
+  }, 100);
+}
+function stopTimer(){ if(tick){ clearInterval(tick); tick=null; } }
+
+function nextCustomer(){
+  shift.i++; shift.built = []; shift.patience = 1;
+  if(shift.i >= shift.q.length){ endShift(); return; }
+  renderShift();
+}
+
+function renderShift(){
+  const v = $("view-shift"); v.textContent = "";
+  const c = shift.q[shift.i];
+
+  /* progress */
+  const qr = el("div","queue");
+  const pips = el("div","pips");
+  shift.q.forEach((_,i) => {
+    const p = el("div","pip" + (i<shift.i ? " done" : i===shift.i ? " now" : ""));
+    pips.appendChild(p);
+  });
+  qr.appendChild(pips);
+  qr.appendChild(el("span",null,(shift.i+1) + "/" + shift.q.length));
+  v.appendChild(qr);
+
+  if(shift.flash){
+    v.appendChild(el("div","flash " + shift.flash.t, shift.flash.s));
+    shift.flash = null;
+  }
+
+  /* customer */
+  const cust = el("div","cust");
+  const face = el("div","face", c.nm[0]); face.style.background = c.hue;
+  cust.appendChild(face);
+  const info = el("div");
+  info.appendChild(el("div","who", c.nm));
+  info.appendChild(el("div","tag", c.tag + (c.regular ? " · regular" : "")));
+  info.appendChild(el("div","say", c.say));
+  cust.appendChild(info);
+  v.appendChild(cust);
+
+  if(c.turned){
+    const t = el("div","ticket");
+    const hd = el("div","hd");
+    hd.appendChild(el("b", null, "Not on the menu"));
+    hd.appendChild(el("span","pr","—"));
+    t.appendChild(hd);
+    t.appendChild(el("div","hidden-steps","You could have offered " + RECIPES[REGULARS[c.key].fav].nm.toLowerCase() + " today."));
+    v.appendChild(t);
+    const b = el("button","go quiet","Apologise"); b.type="button";
+    b.addEventListener("click", () => {
+      shift.turned++;
+      S.rep = Math.max(1, S.rep-1);
+      shift.flash = {t:"bad", s:c.nm + " left without ordering. Regard −1."};
+      hud(); nextCustomer();
+    });
+    v.appendChild(b);
+    show("shift"); return;
+  }
+
+  /* ticket */
+  const r = RECIPES[c.item];
+  const t = el("div","ticket");
+  const hd = el("div","hd");
+  hd.appendChild(el("b", null, r.nm));
+  hd.appendChild(el("span","pr", aed(r.price)));
+  t.appendChild(hd);
+
+  if(S.mode==="relaxed"){
+    const ss = el("div","recipe-steps");
+    r.steps.forEach((s,i) => {
+      const row = el("div", shift.built[i]===s ? "ok" : "");
+      row.appendChild(el("span","n", (i+1)+"."));
+      row.appendChild(el("span",null, STATIONS[s].lb));
+      ss.appendChild(row);
+    });
+    t.appendChild(ss);
+  }else{
+    t.appendChild(el("div","hidden-steps", r.steps.length + " steps — from memory."));
+    const p = el("div","patience");
+    const i2 = el("i"); i2.id = "pat-bar"; i2.style.width = (shift.patience*100)+"%";
+    p.appendChild(i2); t.appendChild(p);
+  }
+  v.appendChild(t);
+
+  /* build strip */
+  const strip = el("div","build");
+  if(shift.built.length === 0) strip.appendChild(el("span","ph","Nothing on the counter yet."));
+  shift.built.forEach((s,i) => {
+    const wrong = r.steps[i] !== s;
+    strip.appendChild(el("span","chip" + (S.mode==="relaxed" && wrong ? " bad":""), STATIONS[s].lb));
+  });
+  v.appendChild(strip);
+
+  /* stations */
+  const grid = el("div","stations");
+  Object.keys(STATIONS).forEach(k => {
+    const b = el("button","st"); b.type="button";
+    b.appendChild(el("div","ic", STATIONS[k].ic));
+    b.appendChild(el("div","lb", STATIONS[k].lb));
+    b.addEventListener("click", () => {
+      if(shift.built.length >= 6) return;
+      shift.built.push(k); renderShift();
+    });
+    grid.appendChild(b);
+  });
+  v.appendChild(grid);
+
+  const match = shift.built.length===r.steps.length && shift.built.every((s,i)=>s===r.steps[i]);
+  const row = el("div","row");
+
+  const clear = el("button","go quiet","Start over"); clear.type="button";
+  clear.disabled = shift.built.length===0;
+  clear.addEventListener("click", () => {
+    if(shift.built.length) shift.remakes++;
+    shift.built = []; renderShift();
+  });
+
+  const serve = el("button","go","Serve"); serve.type="button";
+  serve.disabled = (S.mode==="relaxed") ? !match : shift.built.length===0;
+  serve.addEventListener("click", () => {
+    if(S.mode==="busy" && !match){
+      shift.remakes++; S.rep = Math.max(1,S.rep-1);
+      shift.built = [];
+      shift.flash = {t:"bad", s:"That wasn't a " + r.nm.toLowerCase() + ". Regard −1."};
+      hud(); renderShift(); return;
+    }
+    shift.revenue += r.price; shift.cost += costOf(c.item); shift.served++;
+    if(c.regular && S.story[c.key] < 3){
+      S.story[c.key]++;
+      shift.beats.push({k:c.key, n:S.story[c.key]});
+      shift.flash = {t:"good", s:c.nm + " leaves happy."};
+    }
+    nextCustomer();
+  });
+
+  row.appendChild(clear); row.appendChild(serve);
+  v.appendChild(row);
+
+  show("shift");
+}
+
+/* ---------------------- books ---------------------- */
+
+function endShift(){
+  shift.done = true; stopTimer();
+
+  const profit = shift.revenue - shift.cost - RENT;
+  S.cash += profit;
+
+  
+  if(shift.remakes===0 && shift.walkouts===0 && shift.turned===0 && shift.served>0){
+    S.rep = Math.min(10, S.rep+1);
+  }
+  shift.beats.forEach(b => {
+    if(b.n>=3){
+      const R = REGULARS[b.k];
+      if(b.k==="hisham"){ S.rep = Math.min(10, S.rep+2); }
+      if(b.k==="umfaisal" && !S.unlocked.includes("umcake")) S.unlocked.push("umcake");
+    }
+  });
+
+  S.history.push({day:S.day, profit:profit, served:shift.served, rep:S.rep});
+  save();
+  renderBooks(profit);
+}
+
+function renderBooks(profit){
+  const v = $("view-books"); v.textContent = "";
+
+  v.appendChild(el("div","eyebrow","Closing up · Day " + S.day));
+  v.appendChild(el("h2",null, shift.served===0 ? "Nobody was served today."
+    : shift.served + (shift.served===1 ? " order" : " orders") + " went out."));
+
+  const L = el("div","ledger");
+  const row = (lb, val, cls) => {
+    const r = el("div","lrow" + (cls==="total"?" total":""));
+    r.appendChild(el("div","lb", lb));
+    const n = el("div","mono" + (cls==="pos"?" pos":cls==="neg"?" neg":""), val);
+    r.appendChild(n); L.appendChild(r);
+  };
+  row("Takings", aed(shift.revenue));
+  row("Ingredients", "−" + aed(shift.cost));
+  row("Rent", "−" + aed(RENT));
+  row(profit>=0 ? "Profit" : "Loss", (profit<0?"−":"") + aed(Math.abs(profit)), "total");
+  v.appendChild(L);
+
+  const notes = [];
+  if(shift.turned) notes.push(shift.turned + (shift.turned===1?" regular":" regulars") + " came in for something you weren't serving.");
+  if(shift.walkouts) notes.push(shift.walkouts + (shift.walkouts===1?" person":" people") + " gave up waiting.");
+  if(shift.remakes) notes.push(shift.remakes + (shift.remakes===1?" drink was":" drinks were") + " remade.");
+  if(!notes.length && shift.served) notes.push("No remakes, no walkouts, nobody turned away.");
+  notes.forEach(n => v.appendChild(el("div","flash" + (n.indexOf("No remakes")===0?" good":" bad"), n)));
+
+  if(shift.beats.length){
+    v.appendChild(el("div","eyebrow","Today on the street"));
+    shift.beats.forEach(b => {
+      const R = REGULARS[b.k];
+      const d = el("div","beat");
+      d.appendChild(el("b", null, R.nm + " · "));
+      d.appendChild(document.createTextNode(b.n>=3 ? R.done + " (" + R.reward + ")" : "Story moved on. Two more visits to go."));
+      v.appendChild(d);
+    });
+  }
+
+  /* shop */
+  v.appendChild(el("div","eyebrow","Put the money back in"));
+  const shop = el("div","shop");
+
+  Object.keys(UPGRADES).forEach(k => {
+    if(S.bought[k]) return;
+    if(k==="slot" && S.slots>=6) return;
+    const u = UPGRADES[k];
+    const b = el("button","buy"); b.type="button";
+    const left = el("div");
+    left.appendChild(el("span","nm", u.nm));
+    left.appendChild(el("span","ds", u.ds));
+    b.appendChild(left);
+    b.appendChild(el("div","pc", aed(u.price)));
+    b.disabled = S.cash < u.price;
+    b.addEventListener("click", () => {
+      S.cash -= u.price; S.bought[k] = true;
+      if(k==="slot") S.slots++;
+      if(k==="awning") S.rep = Math.min(10, S.rep+2);
+      save(); hud(); renderBooks(profit);
+    });
+    shop.appendChild(b);
+  });
+
+  const dprice = 200 + S.decor*100;
+  const d = el("button","buy"); d.type="button";
+  const dl = el("div");
+  dl.appendChild(el("span","nm","A small thing for the room"));
+  dl.appendChild(el("span","ds","A print, a plant, better cups. +1 regard."));
+  d.appendChild(dl);
+  d.appendChild(el("div","pc", aed(dprice)));
+  d.disabled = S.cash < dprice || S.rep >= 10;
+  d.addEventListener("click", () => {
+    S.cash -= dprice; S.decor++; S.rep = Math.min(10, S.rep+1);
+    save(); hud(); renderBooks(profit);
+  });
+  shop.appendChild(d);
+  v.appendChild(shop);
+
+  const go = el("button","go", S.day>=LAST_DAY ? "See how the week went" : "Open tomorrow");
+  go.type="button";
+  go.addEventListener("click", () => {
+    if(S.day>=LAST_DAY){ renderEnd(); return; }
+    S.day++; save(); renderPlan();
+  });
+  v.appendChild(go);
+
+  hud(); show("books");
+}
+
+/* ---------------------- end ---------------------- */
+
+function renderEnd(){
+  const v = $("view-end"); v.textContent = "";
+  const total = S.history.reduce((a,d)=>a+d.profit,0);
+  const orders = S.history.reduce((a,d)=>a+d.served,0);
+  const arcs = Object.keys(S.story).filter(k=>S.story[k]>=3);
+
+  v.appendChild(el("div","eyebrow","Seven days on the street"));
+  v.appendChild(el("h2",null,"The week, in the books"));
+
+  const L = el("div","ledger");
+  const row = (lb,val,cls) => {
+    const r = el("div","lrow" + (cls==="total"?" total":""));
+    r.appendChild(el("div","lb",lb));
+    r.appendChild(el("div","mono" + (cls==="pos"?" pos":cls==="neg"?" neg":""), val));
+    L.appendChild(r);
+  };
+  row("Orders served", String(orders));
+  row("Regard", S.rep + " / 10");
+  row("Stories finished", arcs.length + " of 3");
+  row("Cash in hand", aed(S.cash), "total");
+  v.appendChild(L);
+
+  arcs.forEach(k => {
+    const d = el("div","beat");
+    d.appendChild(el("b", null, REGULARS[k].nm + " · "));
+    d.appendChild(document.createTextNode(REGULARS[k].done));
+    v.appendChild(d);
+  });
+
+  const q = el("div","qbox");
+  q.appendChild(el("div","eyebrow","What this build is actually testing"));
+  q.appendChild(el("p","lede","This is a grey-box: no art, no audio, no polish. It exists to answer three questions before a dirham goes into decoration assets. Ask a tester these, in this order, and write down the exact words they use."));
+  const ol = document.createElement("ol");
+  [["Did choosing the menu feel like a decision?","If they picked the same four items every morning without thinking, the business layer is not carrying its weight yet."],
+   ["What happened when a regular was turned away?","This is the whole differentiator. If nobody flinched, the regulars need to matter more before anything else gets built."],
+   ["Would you have played an eighth day?","Not \"was it fun\" — would they have kept going. That is the repetition risk answered honestly."]].forEach(([a,b2]) => {
+    const li = document.createElement("li");
+    li.appendChild(el("b",null,a));
+    li.appendChild(document.createTextNode(" " + b2));
+    ol.appendChild(li);
+  });
+  q.appendChild(ol);
+  v.appendChild(q);
+
+  const again = el("button","go","Play the week again"); again.type="button";
+  again.addEventListener("click", () => { S = START(); save(); renderPlan(); });
+  v.appendChild(again);
+
+  hud(); show("end");
+}
+
+/* ============================ boot ============================ */
+
+$("btn-reset").addEventListener("click", () => {
+  stopTimer(); S = START(); save(); renderPlan();
+});
+
+function start(snap){
+  const prior = (snap && snap.S) || load();
+  if(prior){
+    S = Object.assign(START(), prior);
+    if(!Array.isArray(S.menu) || !S.menu.length) S.menu = ["karak","filter","datecake","espresso"];
+  }
+  renderPlan();
+}
+
+try{
+  window.claude && window.claude.hot && window.claude.hot.snapshot &&
+    window.claude.hot.snapshot(() => ({S:S}));
+}catch(e){}
+
+if(window.claude && window.claude.hot && window.claude.hot.ready){
+  window.claude.hot.ready(start);
+}else{
+  start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+}
+</script>
