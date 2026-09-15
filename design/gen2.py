@@ -30,7 +30,7 @@ def seg(options, active):
 S["Settings"] = wrap(
     '<div class="scr"><div class="st"></div>'
     + title_block("Caf&eacute; Rush", "Settings")
-    + '<div class="col pad" style="gap:0;margin-top:14px;flex:1;overflow:hidden">'
+    + '<div class="col pad" style="gap:0;margin-top:14px;flex:1;overflow-y:auto">'
     + srow("Sound effects", "Taps, pours, the till", toggle(True))
     + srow("Music", "One loop, quiet", toggle(False))
     + srow("Haptics", "A tap on collect, a thump on serve", toggle(True))
@@ -44,8 +44,8 @@ S["Settings"] = wrap(
       '<div class="btn2">Restore purchase</div>'
       '<div class="row" style="gap:10px">'
       '<div class="btn2" style="flex:1">Credits</div>'
-      '<div class="btn2" style="flex:1;color:%s;border-color:%s">Reset save</div></div>'
-      '<div class="btn">Done</div></div>' % (TERRA, TERRA)
+      '<div class="btn2" style="flex:1">Reset save</div></div>'
+      '<div class="btn">Done</div></div>'
     + '<div class="sb"></div></div>')
 
 # ---------------- S-14 STORE ----------------
@@ -62,7 +62,7 @@ S["Store"] = wrap(
               '<path d="M4 12.5l5 5L20 6.5"/></svg>'
               '<span style="font-size:13.5px;line-height:1.45;color:%s">%s</span></div>' % (OK, CREAM, t)
               for t in ["All 30 days, across five chapters",
-                        "Twelve drinks and eight machines",
+                        "Twelve recipes and eight machines",
                         "Endless rush, with every machine in play",
                         "No adverts, ever",
                         "No gems, no energy, no waiting",
@@ -100,7 +100,7 @@ S["Recipes"] = wrap(
     '<div class="scr"><div class="st"></div>'
     + title_block("Reference", "Recipes",
                   "Cook times are per ingredient, at level one. The bin fills; the plate is instant.")
-    + '<div class="col pad" style="gap:0;margin-top:14px;flex:1;overflow:hidden">'
+    + '<div class="col pad" style="gap:0;margin-top:14px;flex:1;overflow-y:auto">'
     + rrow(["shot"], "Espresso", "12", "1", ["2.2s"])
     + rrow(["tea", "syrup"], "Mint tea", "10", "1", ["2.6s", "1.0s"])
     + rrow(["shot", "milk"], "Latte", "20", "2", ["2.2s", "2.0s"])
@@ -112,7 +112,7 @@ S["Recipes"] = wrap(
       'align-items:center;justify-content:center">'
       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="%s" stroke-width="2" '
       'stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>'
-      '</div><span style="flex:1;font-size:13px;color:%s">Six more unlock in chapters two and three</span></div>'
+      '</div><span style="flex:1;font-size:13px;color:%s">More unlock as the chapters open</span></div>'
       '</div>' % (INK6, CREAM6, CREAM6)
     + '<div class="col pad" style="padding-bottom:14px"><div class="btn2">Close</div></div>'
     + '<div class="sb"></div></div>')
@@ -144,7 +144,7 @@ S["PurchaseError"] = wrap(
     'This is usually the connection rather than your account &mdash; try again in a moment.</span></div>'
     '<div class="col" style="width:100%%;gap:10px">'
     '<div class="btn">Try again</div><div class="btn2">Not now</div></div></div></div>'
-    % (TERRA, TERRA, TERRA, CREAM4))
+    % (AMB5, AMB5, AMB5, CREAM4))
 
 # ---------------- S-18 ONBOARDING (coach step over gameplay) ----------------
 S["Onboarding"] = wrap(
@@ -178,7 +178,7 @@ S["Onboarding"] = wrap(
               '<span style="font-size:10px;color:%s">%s</span></div>' % (sprite(n, 34), CREAM4, l)
               for n, l in [("tea", "Tea"), ("syrup", "Syrup"), ("milk", "Milk"), ("pastry", "Pastry"), ("ice", "Ice")])
     + '</div>'
-    + '<div class="col" style="position:absolute;left:20px;right:20px;bottom:266px;gap:10px;'
+    + ('<div class="col" style="position:absolute;left:20px;right:20px;bottom:284px;gap:10px;'
       'padding:16px 18px;border-radius:14px;background:%s;border:1px solid %s">'
       '<span class="lbl" style="color:%s">Step 1 of 4</span>'
       '<span style="font-size:15px;line-height:1.45">Tap <b style="color:%s">+</b> to start a shot. '
@@ -186,7 +186,7 @@ S["Onboarding"] = wrap(
       '<div class="row" style="gap:6px;margin-top:2px">'
       + ''.join('<div style="width:%dpx;height:4px;border-radius:2px;background:%s"></div>'
                 % (22 if i == 0 else 10, AMB5 if i == 0 else INK6) for i in range(4))
-      + '</div></div>' % ()
+      + '</div>') % (INK8, INK6, AMB5, AMB5)
     + '<div class="sb"></div></div>')
 
 # ---------------- S-19 LANGUAGE ----------------

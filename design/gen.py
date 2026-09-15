@@ -65,7 +65,7 @@ def hud(day, earned, target, streak=None, pause=True):
               % (INK7, AMB5, streak))
     pb = ''
     if pause:
-        pb = ('<div style="width:40px;height:40px;border-radius:10px;background:%s;border:1px solid %s;'
+        pb = ('<div style="width:48px;height:48px;border-radius:12px;background:%s;border:1px solid %s;'
               'display:flex;align-items:center;justify-content:center;gap:3px">'
               '<div style="width:3px;height:13px;background:%s;border-radius:1px"></div>'
               '<div style="width:3px;height:13px;background:%s;border-radius:1px"></div></div>'
@@ -85,22 +85,35 @@ def meters(goal_pct, clock_pct):
             '<div style="width:%d%%;height:100%%;background:%s;border-radius:3px"></div></div></div>'
             % (INK7, goal_pct, OK, INK7, clock_pct, AMB5))
 
-def ticket(who, dish, needs, pct, col, secs):
+def ticket(who, dish, needs, pct, col, secs, letter=""):
+    urgent = pct < 25
     chips = ''.join(
         '<div style="width:34px;height:34px;border-radius:8px;background:%s;border:1px solid %s;'
         'display:flex;align-items:center;justify-content:center">%s</div>'
         % (INK7, INK6, sprite(n, 26)) for n in needs)
-    return ('<div class="col panel" style="flex:1;padding:8px 6px;gap:6px;align-items:center;min-width:0">'
-            '<div style="width:100%%;height:6px;border-radius:3px;background:%s;overflow:hidden">'
-            '<div style="width:%d%%;height:100%%;background:%s;border-radius:3px"></div></div>'
-            '<span class="mono" style="font-size:10px;color:%s">%ss</span>'
+    # Hue is never the only signal: the urgent bar also grows 6 -> 8px, gains diagonal
+    # stripes, and the card takes a 2px edge. The seconds badge turns colour under 25%.
+    bar = 8 if urgent else 6
+    stripe = (';background-image:repeating-linear-gradient(115deg,rgba(23,19,16,.5) 0 3px,'
+              'transparent 3px 7px)') if urgent else ''
+    edge = ('border-color:%s;border-width:2px;' % col) if urgent else ''
+    init = ('<div style="position:absolute;left:5px;top:5px;width:19px;height:19px;border-radius:10px;'
+            'background:%s;color:%s;font-size:11px;display:flex;align-items:center;'
+            'justify-content:center">%s</div>' % (INK7, CREAM4, letter)) if letter else ''
+    return ('<div class="col panel" style="flex:1;padding:8px 6px;gap:6px;align-items:center;'
+            'min-width:0;position:relative;%s">%s'
+            '<div style="width:100%%;height:%dpx;border-radius:4px;background:%s;overflow:hidden">'
+            '<div style="width:%d%%;height:100%%;background:%s;border-radius:4px%s"></div></div>'
+            '<span class="mono" style="font-size:11px;color:%s">%ss</span>'
             '%s'
-            '<span style="font-size:10px;color:%s;text-align:center;line-height:1.15">%s</span>'
+            '<span style="font-size:11px;color:%s;text-align:center;line-height:1.15">%s</span>'
             '<div class="row" style="gap:4px">%s</div></div>'
-            % (INK7, pct, col, col, secs, sprite(who, 40), CREAM4, dish, chips))
+            % (edge, init, bar, INK7, pct, col, stripe, col if urgent else CREAM6, secs,
+               sprite(who, 40), CREAM4, dish, chips))
 
-def cafe_band(h=216):
-    return ('<div style="height:%dpx;flex:none;position:relative;overflow:hidden;background:%s">'
+def cafe_band(h=216, grow=False):
+    box = ("flex:1 1 %dpx;min-height:150px" % h) if grow else ("height:%dpx;flex:none" % h)
+    return ('<div style="%s;position:relative;overflow:hidden;background:%s">'
             # window onto the street
             '<div style="position:absolute;left:24px;top:22px;width:150px;height:96px;border-radius:10px;'
             'background:%s;border:3px solid %s"></div>'
@@ -116,7 +129,7 @@ def cafe_band(h=216):
             '<div style="position:absolute;left:0;right:0;bottom:0;height:52px;background:%s"></div>'
             '<div style="position:absolute;left:0;right:0;bottom:44px;height:8px;background:%s"></div>'
             '</div>'
-            % (h, TILE, STREET, INK6, SUN, "#2A3A46", WOOD2,
+            % (box, TILE, STREET, INK6, SUN, TILE, WOOD2,
                sprite("syrup", 30), sprite("milk", 28), sprite("p1", 96), WOOD, WOOD2))
 
 def plate_strip(items, label, ready):
@@ -148,10 +161,10 @@ def bins(data):
         bar = ('<div style="width:100%%;height:4px;border-radius:2px;background:%s;overflow:hidden">'
                '<div style="width:%d%%;height:100%%;background:%s"></div></div>' % (INK6, prog, CALM))
         cells += ('<div class="col panel" style="align-items:center;gap:4px;padding:8px 4px 7px;position:relative">'
-                  '<div style="position:absolute;top:0;right:0;width:44px;height:44px;border-radius:0 14px 0 14px;'
+                  '<div style="position:absolute;top:0;right:0;width:48px;height:48px;border-radius:0 14px 0 14px;'
                   'background:%s;display:flex;align-items:center;justify-content:center;color:%s;'
                   'font-family:\'Bricolage Grotesque\',sans-serif;font-weight:800;font-size:20px">+</div>'
-                  '%s<span style="font-size:10px;color:%s">%s</span>'
+                  '%s<span style="font-size:11px;color:%s">%s</span>'
                   '<div class="row" style="gap:4px;height:8px">%s</div>%s</div>'
                   % (INK7, AMB5, sprite(name, 34), CREAM4, label, pips, bar))
     return ('<div class="pad" style="height:225px;flex:none;display:grid;'
@@ -175,15 +188,15 @@ SCREENS = {}
 # ---------------- S-04 GAMEPLAY (entry artboard) ----------------
 SCREENS["Main"] = wrap(
     '<div class="scr"><div class="st"></div>'
-    + hud("5", "430", "870", streak="7")
-    + meters(49, 62)
+    + hud("5", "430", "620", streak="7")
+    + meters(69, 62)
     + '<div class="col pad" style="height:160px;flex:none;justify-content:center">'
       '<div class="row" style="gap:8px;align-items:stretch;height:148px">'
-    + ticket("p1", "Latte", ["shot", "milk"], 78, CALM, "14")
-    + ticket("p2", "Karak chai", ["tea", "milk", "syrup"], 44, SOON, "8")
-    + ticket("p1", "Almond croissant", ["pastry", "syrup"], 15, URGENT, "3")
+    + ticket("p1", "Latte", ["shot", "milk"], 78, CALM, "14", "S")
+    + ticket("p2", "Karak chai", ["tea", "milk", "syrup"], 44, SOON, "8", "N")
+    + ticket("p1", "Almond croissant", ["pastry", "syrup"], 15, URGENT, "3", "T")
     + '</div></div>'
-    + cafe_band()
+    + cafe_band(216, grow=True)
     + plate_strip(["shot", "milk"], "Latte", True)
     + bins([("shot", "Shot", 2, 3, 0), ("tea", "Tea", 3, 3, 0), ("syrup", "Syrup", 1, 3, 62),
             ("milk", "Milk", 2, 3, 0), ("pastry", "Pastry", 0, 3, 34), ("ice", "Ice", 2, 3, 0)])
@@ -195,9 +208,9 @@ SCREENS["Splash"] = wrap(
     '<div style="position:absolute;left:0;right:0;bottom:0;height:150px;background:%s"></div>'
     '<div style="position:absolute;left:0;right:0;bottom:142px;height:8px;background:%s"></div>'
     '<div class="col" style="align-items:center;gap:10px;z-index:1">'
-    '<div class="row" style="gap:-10px;align-items:flex-end">%s%s%s</div>'
+    '<div class="row" style="gap:6px;align-items:flex-end">%s%s%s</div>'
     '<h1 class="dsp" style="font-size:44px;text-align:center;line-height:0.98">Caf&eacute;<br>Rush</h1>'
-    '<span class="lbl" style="letter-spacing:.3em">A shift a day</span></div>'
+    '<span class="lbl" style="letter-spacing:.3em">Open when you like</span></div>'
     '<div style="position:absolute;bottom:60px;width:120px;height:4px;border-radius:2px;background:%s;overflow:hidden">'
     '<div style="width:64%%;height:100%%;background:%s"></div></div>'
     '</div>' % (WOOD, WOOD2, sprite("espresso", 62), sprite("karak", 74), sprite("almond", 62), INK7, AMB5))
@@ -207,7 +220,7 @@ SCREENS["Home"] = wrap(
     '<div class="scr"><div class="st"></div>'
     '<div class="row pad" style="height:56px;gap:14px;flex:none;align-items:center">'
     '<div class="col" style="gap:2px"><span class="lbl">Banked</span>'
-    '<span class="dsp mono" style="font-size:22px;color:%s">1,240</span></div>'
+    '<span class="dsp mono" style="font-size:22px;color:%s">712</span></div>'
     '<div style="flex:1"></div>'
     '<div style="width:44px;height:44px;border-radius:11px;background:%s;border:1px solid %s;display:flex;'
     'align-items:center;justify-content:center">'
@@ -224,7 +237,7 @@ SCREENS["Home"] = wrap(
       '<div class="col panel" style="flex:1;padding:12px 14px;gap:3px">'
       '<span class="lbl">Next shift</span><span class="dsp" style="font-size:20px">Day 6</span></div>'
       '<div class="col panel" style="flex:1;padding:12px 14px;gap:3px">'
-      '<span class="lbl">Best endless</span><span class="dsp mono" style="font-size:20px">2,347</span></div>'
+      '<span class="lbl">Best endless</span><span class="dsp mono" style="font-size:20px">1,940</span></div>'
       '</div>'
       '<div class="btn">Open the caf&eacute;</div>'
       '<div class="row" style="gap:10px">'
@@ -252,7 +265,7 @@ SCREENS["Briefing"] = wrap(
     + title_block("Day 6", "Another rush")
     + '<div class="col pad" style="gap:12px;margin-top:18px;flex:1;overflow:hidden">'
       '<div class="panel" style="padding:4px 16px">'
-    + stat("Take by closing", "1,000 AED", BRASS, True)
+    + stat("Take by closing", "650 AED", BRASS, True)
     + stat("Shift length", "90 seconds")
     + stat("Seats", "4")
     + stat("Orders per customer", "up to 2")
@@ -263,7 +276,8 @@ SCREENS["Briefing"] = wrap(
     + recipe_line(["tea", "syrup"], "Mint tea", "10")
     + recipe_line(["shot", "milk"], "Latte", "20")
     + recipe_line(["tea", "milk", "syrup"], "Karak chai", "16")
-    + recipe_line(["pastry", "syrup"], "Almond croissant", "18", True)
+    + recipe_line(["pastry", "syrup"], "Almond croissant", "18")
+    + recipe_line(["shot", "milk", "ice"], "Iced latte", "26")
     + '</div></div>'
       '<div class="col pad" style="gap:10px;padding-bottom:14px">'
       '<div class="btn">Start shift</div><div class="btn2">Back to the caf&eacute;</div></div>'
@@ -273,7 +287,7 @@ SCREENS["Briefing"] = wrap(
 SCREENS["Pause"] = wrap(
     '<div class="scr">'
     '<div style="position:absolute;inset:0;background:%s;opacity:.55"></div>'
-    '<div style="position:absolute;inset:0;background:rgba(23,19,16,.82)"></div>'
+    '<div style="position:absolute;inset:0;background:rgba(14,11,9,.72)"></div>'
     '<div class="col" style="position:absolute;inset:0;justify-content:center;align-items:center;gap:26px;padding:0 20px">'
     '<div class="col" style="align-items:center;gap:8px">'
     '<span class="lbl">Paused &middot; day 5</span>'
@@ -291,7 +305,7 @@ SCREENS["Pause"] = wrap(
 SCREENS["Countdown"] = wrap(
     '<div class="scr">'
     '<div style="position:absolute;inset:0;background:%s;opacity:.5"></div>'
-    '<div style="position:absolute;inset:0;background:rgba(23,19,16,.7)"></div>'
+    '<div style="position:absolute;inset:0;background:rgba(14,11,9,.72)"></div>'
     '<div class="col" style="position:absolute;inset:0;justify-content:center;align-items:center;gap:14px">'
     '<div style="width:140px;height:140px;border-radius:70px;border:3px solid %s;display:flex;'
     'align-items:center;justify-content:center">'
@@ -306,19 +320,19 @@ SCREENS["ResultPass"] = wrap(
       '<div class="row" style="gap:10px;align-items:center;justify-content:center;padding:6px 0">%s%s%s</div>'
       '<div class="panel" style="padding:4px 16px">'
       % (sprite("latte", 62), sprite("karak", 70), sprite("almond", 62))
-    + stat("Taken", "1,262 AED", OK, True)
-    + stat("Target", "870 AED")
-    + stat("Served", "32")
+    + stat("Taken", "712 AED", OK, True)
+    + stat("Target", "620 AED")
+    + stat("Served", "24")
     + stat("Walked out", "0")
     + stat("Scraped", "2", TERRA)
-    + stat("Best streak", "x18", BRASS)
+    + stat("Best streak", "x14", BRASS)
     + '</div>'
       '<div class="row panel" style="gap:10px;padding:12px 14px;align-items:center;border-color:%s">'
       '<div style="width:8px;height:8px;border-radius:4px;background:%s;flex:none"></div>'
       '<span style="font-size:12.5px;color:%s;line-height:1.45">A clean shift. Nobody left waiting.</span></div>'
       '</div>' % (INK6, OK, CREAM4)
     + '<div class="col pad" style="gap:10px;padding-bottom:14px">'
-      '<div class="btn">Bank 1,262 AED</div></div>'
+      '<div class="btn">Bank 712 AED</div></div>'
     + '<div class="sb"></div></div>')
 
 # ---------------- S-08 RESULT FAIL ----------------
@@ -327,18 +341,18 @@ SCREENS["ResultFail"] = wrap(
     + title_block("Day 7 &middot; closed", "Short of target")
     + '<div class="col pad" style="gap:14px;margin-top:20px;flex:1">'
       '<div class="panel" style="padding:4px 16px">'
-    + stat("Taken", "980 AED", TERRA, True)
-    + stat("Target", "1,140 AED")
-    + stat("Served", "21")
-    + stat("Walked out", "6", TERRA)
-    + stat("Scraped", "4", TERRA)
-    + stat("Best streak", "x7")
+    + stat("Taken", "610 AED", URGENT, True)
+    + stat("Target", "690 AED")
+    + stat("Served", "19")
+    + stat("Walked out", "5", URGENT)
+    + stat("Scraped", "3", URGENT)
+    + stat("Best streak", "x6")
     + '</div>'
       '<div class="col panel" style="gap:8px;padding:14px;border-color:%s">'
       '<span class="lbl" style="color:%s">What went wrong</span>'
-      '<span style="font-size:13px;color:%s;line-height:1.5">Six people left waiting. Pastry takes four '
+      '<span style="font-size:13px;color:%s;line-height:1.5">Five people left waiting. Pastry takes four '
       'seconds &mdash; starting it when the order arrives is already too late. Keep a bin stocked before '
-      'the rush.</span></div></div>' % (TERRA, TERRA, CREAM4)
+      'the rush.</span></div></div>' % (URGENT, URGENT, CREAM4)
     + '<div class="col pad" style="gap:10px;padding-bottom:14px">'
       '<div class="btn">Try day 7 again</div><div class="btn2">Back to the caf&eacute;</div></div>'
     + '<div class="sb"></div></div>')
@@ -346,7 +360,7 @@ SCREENS["ResultFail"] = wrap(
 # ---------------- S-09 UNLOCK CARD ----------------
 SCREENS["UnlockCard"] = wrap(
     '<div class="scr">'
-    '<div style="position:absolute;inset:0;background:rgba(23,19,16,.9)"></div>'
+    '<div style="position:absolute;inset:0;background:rgba(14,11,9,.86)"></div>'
     '<div class="col" style="position:absolute;inset:0;justify-content:center;align-items:center;padding:0 24px;gap:22px">'
     '<div class="col panel" style="width:100%%;align-items:center;gap:14px;padding:30px 22px;border-color:%s">'
     '<span class="lbl" style="color:%s">New on the menu</span>'
@@ -371,8 +385,9 @@ SCREENS["UnlockCard"] = wrap(
 
 # ---------------- S-10 SHOP ----------------
 def urow(spr, name, desc, price, maxed=False):
-    btn = ('<div class="mono" style="font-size:11px;color:%s;border:1px solid %s;border-radius:8px;padding:8px 11px">MAX</div>' % (OK, INK6)) if maxed else \
-          ('<div class="mono" style="font-size:11px;color:%s;border:1px solid %s;border-radius:8px;padding:8px 11px">%s</div>' % (AMB5, INK6, price))
+    btn = ('<div class="mono" style="font-size:11px;color:%s;border:1px solid %s;border-radius:9px;'
+           'height:44px;min-width:78px;display:flex;align-items:center;justify-content:center">%s</div>'
+           % (OK if maxed else AMB5, INK6, "MAX" if maxed else price))
     return ('<div class="row panel" style="gap:11px;padding:10px 12px;align-items:center">'
             '<div style="width:40px;height:40px;border-radius:9px;background:%s;display:flex;'
             'align-items:center;justify-content:center;flex:none">%s</div>'
@@ -383,15 +398,15 @@ def urow(spr, name, desc, price, maxed=False):
 
 SCREENS["Shop"] = wrap(
     '<div class="scr"><div class="st"></div>'
-    + title_block("Between shifts", "1,262 AED",
+    + title_block("Between shifts", "712 AED",
                   "Faster machines refill sooner. More slots cook several at once. Bigger bins let you stockpile before a rush.")
     + '<div class="col pad" style="gap:8px;margin-top:16px;flex:1;overflow:hidden">'
     + urow("shot", "Shot &mdash; speed", "2.2s &rarr; 1.8s", "90 AED")
     + urow("shot", "Shot &mdash; slots", "1 at a time &rarr; 2", "150 AED")
     + urow("milk", "Milk &mdash; speed", "1.6s &rarr; 1.3s", "180 AED")
     + urow("pastry", "Pastry &mdash; slots", "2 at a time &rarr; 3", "300 AED")
-    + urow("ice", "Ice &mdash; speed", "Ready in 0.6s", "", True)
-    + urow("karak", "Another seat", "4 seats &rarr; 5", "520 AED")
+    + urow("ice", "Ice &mdash; speed", "Ready in 0.33s &mdash; fully tuned", "", True)
+    + urow("karak", "Another seat", "3 seats &rarr; 4", "260 AED")
     + '</div>'
       '<div class="col pad" style="gap:10px;padding-bottom:14px">'
       '<div class="btn">Open day 6</div><div class="btn2">Back to the caf&eacute;</div></div>'
@@ -405,7 +420,7 @@ SCREENS["EndlessIntro"] = wrap(
     + '<div class="col pad" style="gap:14px;margin-top:22px;flex:1">'
       '<div class="col panel" style="align-items:center;gap:6px;padding:26px 20px;border-color:%s">'
       '<span class="lbl">Your best</span>'
-      '<span class="dsp mono" style="font-size:44px;color:%s">2,347</span>'
+      '<span class="dsp mono" style="font-size:44px;color:%s">1,940</span>'
       '<span class="mono" style="font-size:12px;color:%s">wave 7 &middot; lasted 2:46</span></div>'
       '<div class="panel" style="padding:4px 16px">' % (AMB5, BRASS, CREAM4)
     + stat("Lives", "3 walkouts")
@@ -422,13 +437,13 @@ SCREENS["EndlessResult"] = wrap(
     + title_block("Endless rush", "New best")
     + '<div class="col pad" style="gap:14px;margin-top:20px;flex:1">'
       '<div class="col panel" style="align-items:center;gap:4px;padding:22px;border-color:%s">'
-      '<span class="dsp mono" style="font-size:50px;color:%s">2,612</span>'
-      '<span class="mono" style="font-size:12px;color:%s">previous best 2,347</span></div>'
+      '<span class="dsp mono" style="font-size:50px;color:%s">2,180</span>'
+      '<span class="mono" style="font-size:12px;color:%s">previous best 1,940</span></div>'
       '<div class="panel" style="padding:4px 16px">' % (AMB5, BRASS, CREAM4)
     + stat("Lasted", "3:04")
     + stat("Reached wave", "8", OK)
-    + stat("Served", "71")
-    + stat("Best streak", "x24", BRASS)
+    + stat("Served", "54")
+    + stat("Best streak", "x19", BRASS)
     + '</div></div>'
       '<div class="col pad" style="gap:10px;padding-bottom:14px">'
       '<div class="btn">Go again</div><div class="btn2">Back to the caf&eacute;</div></div>'

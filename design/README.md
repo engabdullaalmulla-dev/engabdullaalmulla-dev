@@ -1,7 +1,13 @@
 # Screen designs
 
-All 21 screens of Café Rush at 390×844, drawn to `../docs/design-spec.md` — its zone
-heights, colour tokens and type ramp are lifted exactly, not approximated.
+All 21 screens of Café Rush at 390×844, drawn to `../docs/design-spec.md`.
+
+Its **zone heights and colour tokens are lifted exactly**. The **type scale is close but
+not identical** — these mockups run a slightly larger display ramp than the spec's
+(HUD 19 against 17, screen titles 32 against 29), which is a deliberate legibility choice
+at mockup scale and should be reconciled one way or the other before build. The in-play
+11 pt floor from spec §2.4 *is* honoured: nothing the player reads while the clock runs
+is smaller.
 
 The food and customers are the baked 3D sprites from `../art/kit3d.html`, exported to
 `../art/sprites/` so the mockups show the real art at real size.
