@@ -1,0 +1,487 @@
+<title>Café Rush Art Kit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --sheet:#EFEFEB; --card:#FFFFFF; --ink:#1B1C19; --ink-2:#5F625C; --ink-3:#8E918A;
+  --rule:#DCDCD5; --dark:#171310; --dark-2:#231C18; --dark-edge:#3B302A; --dark-ink:#F7EFE3;
+  --accent:#B0621F;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --sheet:#141513; --card:#1C1E1A; --ink:#EDEDE6; --ink-2:#A0A39B; --ink-3:#787B73;
+  --rule:#2B2E29; --accent:#D89149;
+}}
+:root[data-theme="dark"]{
+  --sheet:#141513; --card:#1C1E1A; --ink:#EDEDE6; --ink-2:#A0A39B; --ink-3:#787B73;
+  --rule:#2B2E29; --accent:#D89149;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--sheet);color:var(--ink);
+  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px;line-height:1.55;
+}
+.wrap{max-width:820px;margin:0 auto;padding-block:36px 64px;padding-left:16px;padding-right:16px}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(28px,7vw,42px);
+   letter-spacing:-.03em;margin:0;text-wrap:balance}
+h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:19px;
+   letter-spacing:-.02em;margin:0}
+.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.lede{color:var(--ink-2);max-width:62ch;margin:10px 0 0}
+section{margin-top:44px}
+.head{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+
+/* rules list */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.rule{background:var(--card);padding:13px 14px}
+.rule b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:13px;margin-bottom:3px}
+.rule span{color:var(--ink-2);font-size:11.5px;line-height:1.5}
+
+/* palette */
+.pal{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.sw{border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--card)}
+.sw i{display:block;height:46px}
+.sw div{padding:6px 8px;font-size:10px;line-height:1.35}
+.sw div b{display:block;font-weight:500;color:var(--ink)}
+.sw div span{color:var(--ink-3);text-transform:uppercase}
+
+/* asset grids */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:8px}
+.cell{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:12px 8px 9px;
+  display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center}
+.cell .art{width:68px;height:68px}
+.cell .nm{font-size:11px;color:var(--ink);line-height:1.2}
+.cell .mini{display:flex;align-items:flex-end;gap:7px;padding-top:5px;border-top:1px solid var(--rule);width:100%;
+  justify-content:center}
+.cell .mini svg{display:block}
+.cell .cap{font-size:9px;color:var(--ink-3);letter-spacing:.06em}
+
+.onboth{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.onboth > div{border-radius:4px;padding:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.onboth .lite{background:#FFFFFF;border:1px solid var(--rule)}
+.onboth .drk{background:var(--dark);border:1px solid var(--dark-edge)}
+
+/* in-situ mock */
+.mock{background:var(--dark);border:1px solid var(--dark-edge);border-radius:12px;padding:14px;color:var(--dark-ink)}
+.mock .lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#6F6058;margin-bottom:7px}
+.rail{display:flex;gap:7px;margin-bottom:14px}
+.tick{flex:1;background:var(--dark-2);border:1px solid var(--dark-edge);border-radius:10px;padding:7px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:5px}
+.bar{width:100%;height:4px;border-radius:3px;background:#3A2F29;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
+.chips{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.chip{width:22px;height:22px;border-radius:5px;background:#2E2521;border:1px solid var(--dark-edge);
+  display:flex;align-items:center;justify-content:center}
+.dishnm{font-size:8.5px;color:#A8988A}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.bin{background:var(--dark-2);border:1px solid var(--dark-edge);border-radius:11px;padding:7px 4px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.bin .bn{font-size:8.5px;color:#A8988A}
+.pips{display:flex;gap:3px}
+.pip{width:7px;height:7px;border-radius:50%;background:#3A2F29}
+.pip.on{background:#F2A03D}
+.plus{position:absolute;top:0;right:0;width:26px;height:26px;border-radius:0 11px 0 11px;
+  background:#2E2521;color:#F2A03D;font-size:14px;display:flex;align-items:center;justify-content:center}
+.note{font-size:11.5px;color:var(--ink-2);margin-top:12px;max-width:62ch}
+.note b{color:var(--ink)}
+@media (max-width:520px){ .onboth{grid-template-columns:1fr} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <clipPath id="clip-istikana" clipPathUnits="userSpaceOnUse">
+    <path d="M21.5 17 C21.5 17 25 28 25 33 C25 39 22.5 47 22.5 47 h19 C41.5 47 39 39 39 33 C39 28 42.5 17 42.5 17 Z"/>
+  </clipPath>
+  <clipPath id="clip-tallglass" clipPathUnits="userSpaceOnUse">
+    <path d="M21 15 h22 l-3 30 a5 5 0 0 1 -5 4.5 h-6 a5 5 0 0 1 -5 -4.5 z"/>
+  </clipPath>
+
+  <!-- ============ INGREDIENTS ============ -->
+  <symbol id="i-shot" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="52" rx="17" ry="4" fill="#000" opacity=".14"/>
+    <ellipse cx="32" cy="48" rx="19" ry="5" fill="#DCD2BE"/>
+    <ellipse cx="32" cy="46.5" rx="19" ry="5" fill="#FFFBF2"/>
+    <path d="M43 29 a8 8 0 0 1 0 13" fill="none" stroke="#FFFBF2" stroke-width="4" stroke-linecap="round"/>
+    <path d="M19 24 h26 l-2.6 17 a6 6 0 0 1 -6 5 h-8.8 a6 6 0 0 1 -6 -5 z" fill="#FFFBF2"/>
+    <path d="M39.6 24 h5.4 l-2.6 17 a6 6 0 0 1 -6 5 h-2.4 a6 6 0 0 0 5.6 -5 z" fill="#DCD2BE"/>
+    <ellipse cx="32" cy="25" rx="12.2" ry="3.4" fill="#3A2419"/>
+    <ellipse cx="32" cy="24.6" rx="9.4" ry="2.4" fill="#C4884E"/>
+  </symbol>
+
+  <symbol id="i-tea" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="51" rx="13" ry="3.5" fill="#000" opacity=".14"/>
+    <g clip-path="url(#clip-istikana)">
+      <rect x="16" y="14" width="32" height="40" fill="#FFFFFF" opacity=".14"/>
+      <rect x="16" y="24" width="32" height="30" fill="#C86B2A"/>
+      <rect x="16" y="24" width="32" height="2.6" fill="#E09A4D"/>
+      <rect x="35" y="12" width="14" height="44" fill="#000" opacity=".12"/>
+    </g>
+    <path d="M21.5 17 C21.5 17 25 28 25 33 C25 39 22.5 47 22.5 47 h19 C41.5 47 39 39 39 33 C39 28 42.5 17 42.5 17 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".6"/>
+    <path d="M25 21 C25.5 26 27 30 27 34" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="i-syrup" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="52" rx="13" ry="3.5" fill="#000" opacity=".14"/>
+    <rect x="28.5" y="13" width="7" height="9" rx="2" fill="#B47D18"/>
+    <rect x="27" y="9" width="10" height="5.5" rx="2.4" fill="#8A5E10"/>
+    <path d="M22 27 a10 10 0 0 1 20 0 v17 a5 5 0 0 1 -5 5 h-10 a5 5 0 0 1 -5 -5 z" fill="#E0A32B"/>
+    <path d="M34 20.6 a10 10 0 0 1 8 6.4 v17 a5 5 0 0 1 -5 5 h-4.6 a5 5 0 0 0 4.6 -5 z" fill="#B47D18"/>
+    <rect x="25.5" y="30" width="3.6" height="12" rx="1.8" fill="#FFFFFF" opacity=".5"/>
+  </symbol>
+
+  <symbol id="i-milk" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="52" rx="15" ry="4" fill="#000" opacity=".14"/>
+    <path d="M41 22 l8 -4 -3.5 8 z" fill="#DCD2BE"/>
+    <path d="M20 26 a8.5 8.5 0 0 0 0 13" fill="none" stroke="#DCD2BE" stroke-width="3.6" stroke-linecap="round"/>
+    <path d="M20 21 h22 l-3 23 a5 5 0 0 1 -5 4.6 h-6 a5 5 0 0 1 -5 -4.6 z" fill="#FBF3E4"/>
+    <path d="M36.5 21 h5.5 l-3 23 a5 5 0 0 1 -5 4.6 h-2.9 a5 5 0 0 0 5 -4.6 z" fill="#E6D9C2"/>
+    <ellipse cx="31" cy="21.5" rx="11" ry="2.8" fill="#FFFFFF"/>
+  </symbol>
+
+  <symbol id="i-pastry" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="49" rx="20" ry="4" fill="#000" opacity=".14"/>
+    <path d="M14 44 C10 40 11 31 16.5 29 L22.5 38 Z" fill="#C08640"/>
+    <path d="M50 44 C54 40 53 31 47.5 29 L41.5 38 Z" fill="#C08640"/>
+    <ellipse cx="32" cy="36" rx="17" ry="10.5" fill="#E0A860"/>
+    <ellipse cx="32" cy="33.4" rx="14" ry="7" fill="#F0CC96"/>
+    <path d="M24 28.5 C22 33 22 39 24 43.5" stroke="#C08640" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M40 28.5 C42 33 42 39 40 43.5" stroke="#C08640" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="i-ice" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="50" rx="16" ry="4" fill="#000" opacity=".14"/>
+    <rect x="14" y="30" width="19" height="19" rx="4.5" fill="#7FC2DA" transform="rotate(-9 23.5 39.5)"/>
+    <rect x="31" y="28" width="19" height="19" rx="4.5" fill="#A9DCEF" transform="rotate(11 40.5 37.5)"/>
+    <rect x="22" y="13" width="20" height="20" rx="5" fill="#C9EBF7"/>
+    <rect x="25.6" y="16.6" width="7" height="7" rx="2.6" fill="#FFFFFF" opacity=".8"/>
+  </symbol>
+
+  <!-- ============ DISHES ============ -->
+  <symbol id="d-espresso" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="53" rx="19" ry="4" fill="#000" opacity=".14"/>
+    <ellipse cx="32" cy="49" rx="21" ry="5.4" fill="#DCD2BE"/>
+    <ellipse cx="32" cy="47.4" rx="21" ry="5.4" fill="#FFFBF2"/>
+    <path d="M43.5 26 a8.5 8.5 0 0 1 0 14" fill="none" stroke="#FFFBF2" stroke-width="4.2" stroke-linecap="round"/>
+    <path d="M18 21 h28 l-2.8 19 a6.5 6.5 0 0 1 -6.4 5.4 h-9.6 a6.5 6.5 0 0 1 -6.4 -5.4 z" fill="#FFFBF2"/>
+    <path d="M40 21 h6 l-2.8 19 a6.5 6.5 0 0 1 -6.4 5.4 h-2.6 a6.5 6.5 0 0 0 6 -5.4 z" fill="#DCD2BE"/>
+    <ellipse cx="32" cy="22" rx="13.2" ry="3.7" fill="#3A2419"/>
+    <ellipse cx="32" cy="21.6" rx="10.2" ry="2.6" fill="#C4884E"/>
+    <ellipse cx="28.5" cy="21" rx="3.4" ry="1.2" fill="#E0B489" opacity=".8"/>
+  </symbol>
+
+  <symbol id="d-mint" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="51" rx="13" ry="3.5" fill="#000" opacity=".14"/>
+    <g clip-path="url(#clip-istikana)">
+      <rect x="16" y="14" width="32" height="40" fill="#FFFFFF" opacity=".14"/>
+      <rect x="16" y="23" width="32" height="31" fill="#D98A33"/>
+      <rect x="16" y="23" width="32" height="2.6" fill="#EDB05C"/>
+      <rect x="35" y="12" width="14" height="44" fill="#000" opacity=".12"/>
+    </g>
+    <path d="M32 21 C32 14 27 10 21 11 C20 18 25 22 32 21 Z" fill="#3F8A70"/>
+    <path d="M32 21 C32 13.5 37.5 9.5 44 11 C45 18.5 39 22.5 32 21 Z" fill="#5FB78A"/>
+    <path d="M21 11 C26 13 30 17 32 21" stroke="#2F6E5A" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path d="M44 11 C39 13.5 34.5 17 32 21" stroke="#2F6E5A" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path d="M21.5 17 C21.5 17 25 28 25 33 C25 39 22.5 47 22.5 47 h19 C41.5 47 39 39 39 33 C39 28 42.5 17 42.5 17 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".6"/>
+  </symbol>
+
+  <symbol id="d-latte" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="53" rx="19" ry="4" fill="#000" opacity=".14"/>
+    <ellipse cx="32" cy="49" rx="21" ry="5.4" fill="#DCD2BE"/>
+    <ellipse cx="32" cy="47.4" rx="21" ry="5.4" fill="#FFFBF2"/>
+    <path d="M44 25 a9 9 0 0 1 0 15" fill="none" stroke="#FFFBF2" stroke-width="4.2" stroke-linecap="round"/>
+    <path d="M17 19 h30 l-3 21 a6.5 6.5 0 0 1 -6.5 5.4 h-11 a6.5 6.5 0 0 1 -6.5 -5.4 z" fill="#FFFBF2"/>
+    <path d="M40.5 19 h6.5 l-3 21 a6.5 6.5 0 0 1 -6.5 5.4 h-2.6 a6.5 6.5 0 0 0 6.1 -5.4 z" fill="#DCD2BE"/>
+    <ellipse cx="32" cy="20" rx="14.2" ry="4" fill="#C08B57"/>
+    <path d="M32 17.6 c2.6 -2.2 6 -0.4 6 1.8 c0 2 -3.2 3.6 -6 5.2 c-2.8 -1.6 -6 -3.2 -6 -5.2 c0 -2.2 3.4 -4 6 -1.8 z"
+          fill="#FFFBF2"/>
+  </symbol>
+
+  <symbol id="d-karak" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="51" rx="13" ry="3.5" fill="#000" opacity=".14"/>
+    <g clip-path="url(#clip-istikana)">
+      <rect x="16" y="14" width="32" height="40" fill="#FFFFFF" opacity=".14"/>
+      <rect x="16" y="23" width="32" height="31" fill="#D2A171"/>
+      <rect x="16" y="23" width="32" height="3" fill="#E8C49A"/>
+      <rect x="35" y="12" width="14" height="44" fill="#000" opacity=".12"/>
+    </g>
+    <ellipse cx="29" cy="24.5" rx="3" ry="1.9" fill="#8C9B5A" transform="rotate(-18 29 24.5)"/>
+    <ellipse cx="35.5" cy="25.5" rx="2.6" ry="1.6" fill="#A3B26A" transform="rotate(14 35.5 25.5)"/>
+    <path d="M21.5 17 C21.5 17 25 28 25 33 C25 39 22.5 47 22.5 47 h19 C41.5 47 39 39 39 33 C39 28 42.5 17 42.5 17 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".6"/>
+    <path d="M25 21 C25.5 26 27 30 27 34" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="d-almond" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="50" rx="21" ry="4.2" fill="#000" opacity=".14"/>
+    <ellipse cx="32" cy="47" rx="22" ry="5" fill="#FFFBF2"/>
+    <path d="M10 43 C6 39 7 29 13 27 L20 36.5 Z" fill="#C08640"/>
+    <path d="M54 43 C58 39 57 29 51 27 L44 36.5 Z" fill="#C08640"/>
+    <ellipse cx="32" cy="34" rx="16" ry="10" fill="#E0A860"/>
+    <ellipse cx="32" cy="31.4" rx="13" ry="6.6" fill="#F0CC96"/>
+    <path d="M23 27.5 l3.5 8.5" stroke="#FFFBF2" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+    <path d="M30.5 26 l3.5 8.5" stroke="#FFFBF2" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+    <path d="M38 27 l3.5 8.5" stroke="#FFFBF2" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+    <ellipse cx="26" cy="39" rx="3.2" ry="1.5" fill="#E8D9B8" transform="rotate(-18 26 39)"/>
+    <ellipse cx="38" cy="39.5" rx="3.2" ry="1.5" fill="#E8D9B8" transform="rotate(14 38 39.5)"/>
+  </symbol>
+
+  <symbol id="d-iced" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="53" rx="14" ry="3.6" fill="#000" opacity=".14"/>
+    <rect x="36" y="6" width="4" height="14" rx="2" fill="#E0605C" transform="rotate(13 38 13)"/>
+    <g clip-path="url(#clip-tallglass)">
+      <rect x="16" y="12" width="32" height="42" fill="#FBF3E4"/>
+      <rect x="16" y="12" width="32" height="18" fill="#C4884E"/>
+      <rect x="16" y="28" width="32" height="4" fill="#D9A97B"/>
+      <rect x="18" y="14" width="11" height="11" rx="3" fill="#FFFFFF" opacity=".55" transform="rotate(-12 23.5 19.5)"/>
+      <rect x="30" y="17" width="10" height="10" rx="3" fill="#FFFFFF" opacity=".45" transform="rotate(14 35 22)"/>
+      <rect x="35" y="10" width="14" height="46" fill="#000" opacity=".10"/>
+    </g>
+    <path d="M21 15 h22 l-3 30 a5 5 0 0 1 -5 4.5 h-6 a5 5 0 0 1 -5 -4.5 z" fill="none" stroke="#FFFFFF"
+          stroke-width="2" opacity=".55"/>
+    <path d="M24.5 19 C24.5 26 26 34 26.5 40" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- ============ CHARACTERS ============ -->
+  <symbol id="p-1" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#E8C57A"/>
+    <path d="M9 64 a23 20 0 0 1 46 0 z" fill="#4E9E86"/>
+    <rect x="28" y="36" width="8" height="9" fill="#D9A273"/>
+    <circle cx="32" cy="28" r="12.5" fill="#F0C49B"/>
+    <path d="M19.5 28 a12.5 12.5 0 0 1 25 0 c1 -9 -5 -14 -12.5 -14 s-13.5 5 -12.5 14 z" fill="#2E2119"/>
+    <circle cx="27.6" cy="29" r="1.7" fill="#2E2119"/><circle cx="36.4" cy="29" r="1.7" fill="#2E2119"/>
+    <path d="M29 33.6 a3.6 3.6 0 0 0 6 0" stroke="#2E2119" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="p-2" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#9FC4E8"/>
+    <path d="M9 64 a23 20 0 0 1 46 0 z" fill="#D95F43"/>
+    <rect x="28" y="36" width="8" height="9" fill="#A9765A"/>
+    <circle cx="32" cy="28" r="12.5" fill="#C1885F"/>
+    <path d="M19 30 c-2 -12 6 -17 13 -17 s15 5 13 17 c2 -14 -4 -20 -13 -20 s-15 6 -13 20 z" fill="#1F1B18"/>
+    <path d="M19.5 27 a12.5 12.5 0 0 1 25 0 c1 -9 -5 -13 -12.5 -13 s-13.5 4 -12.5 13 z" fill="#1F1B18"/>
+    <circle cx="27.6" cy="29" r="1.7" fill="#241C16"/><circle cx="36.4" cy="29" r="1.7" fill="#241C16"/>
+    <path d="M29 33.6 a3.6 3.6 0 0 0 6 0" stroke="#241C16" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="p-3" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#E8A9B4"/>
+    <path d="M9 64 a23 20 0 0 1 46 0 z" fill="#3F5C8C"/>
+    <path d="M16 44 c-1 -10 3 -18 16 -18 s17 8 16 18 c-3 2 -7 -1 -8 -6 h-16 c-1 5 -5 8 -8 6 z" fill="#5A3A22"/>
+    <rect x="28" y="36" width="8" height="9" fill="#E0A97F"/>
+    <circle cx="32" cy="28" r="12.5" fill="#F2C9A3"/>
+    <path d="M19.5 27.5 a12.5 12.5 0 0 1 25 0 c1.5 -10 -5 -14.5 -12.5 -14.5 s-14 4.5 -12.5 14.5 z" fill="#5A3A22"/>
+    <circle cx="27.6" cy="29" r="1.7" fill="#3A2718"/><circle cx="36.4" cy="29" r="1.7" fill="#3A2718"/>
+    <path d="M29 33.6 a3.6 3.6 0 0 0 6 0" stroke="#3A2718" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="p-4" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#8FD1C4"/>
+    <path d="M9 64 a23 20 0 0 1 46 0 z" fill="#6E4C82"/>
+    <path d="M13 64 c0 -18 6 -30 19 -30 s19 12 19 30 z" fill="#C9A227"/>
+    <circle cx="32" cy="28" r="12.5" fill="#EFC098"/>
+    <path d="M32 11 c-11 0 -16 8 -16 18 c0 5 1 8 2 10 c-4 -2 -5 -8 -5 -13 c0 -12 7 -19 19 -19 s19 7 19 19
+             c0 5 -1 11 -5 13 c1 -2 2 -5 2 -10 c0 -10 -5 -18 -16 -18 z" fill="#C9A227"/>
+    <circle cx="27.6" cy="29" r="1.7" fill="#3A2718"/><circle cx="36.4" cy="29" r="1.7" fill="#3A2718"/>
+    <path d="M29 33.6 a3.6 3.6 0 0 0 6 0" stroke="#3A2718" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- ============ UI ============ -->
+  <symbol id="u-coin" viewBox="0 0 64 64">
+    <circle cx="32" cy="34" r="21" fill="#B47D18"/>
+    <circle cx="32" cy="31" r="21" fill="#E8B93C"/>
+    <circle cx="32" cy="31" r="15.5" fill="#F7D368"/>
+    <path d="M32 21.5 v19 M27 25.5 h8 a4.5 4.5 0 0 1 0 9 h-7 a4.5 4.5 0 0 0 0 9 h9"
+          stroke="#B47D18" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="u-streak" viewBox="0 0 64 64">
+    <path d="M32 8 c10 12 18 17 18 28 a18 18 0 0 1 -36 0 c0 -8 6 -12 10 -20 c2 6 4 8 6 9 c2 -6 1 -12 2 -17 z" fill="#E2622E"/>
+    <path d="M32 27 c5 7 9 9 9 15 a9 9 0 0 1 -18 0 c0 -6 6 -9 9 -15 z" fill="#F2B03D"/>
+  </symbol>
+  <symbol id="u-clock" viewBox="0 0 64 64">
+    <circle cx="32" cy="33" r="21" fill="#4B6E7E"/>
+    <circle cx="32" cy="31" r="21" fill="#7FA9BC"/>
+    <circle cx="32" cy="31" r="16" fill="#EAF3F7"/>
+    <path d="M32 20 v11 l7 5" stroke="#3C5A68" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="u-heart" viewBox="0 0 64 64">
+    <path d="M32 50 C16 39 9 32 9 24 A12 12 0 0 1 32 18 A12 12 0 0 1 55 24 C55 32 48 39 32 50 Z" fill="#D44A3C"/>
+    <path d="M32 44 C21 36 15 31 15 25 a8 8 0 0 1 8 -8 c3 0 6 2 9 6 c-4 6 -6 13 0 21 z" fill="#E8756A" opacity=".85"/>
+  </symbol>
+</defs></svg>
+
+<div class="wrap">
+  <div class="eyebrow">Café Rush · art kit v1</div>
+  <h1>Every asset is code</h1>
+  <p class="lede">No illustrator, no stock packs, no raster files. Each asset below is hand-written SVG
+  built from circles, rounded rectangles and short curves, on one 64×64 grid with one light source.
+  That is what makes twenty assets look like they came from the same hand — the rules are literally
+  enforced in the source.</p>
+
+  <section>
+    <div class="head"><h2>The rules</h2>
+      <div class="lede">Six constraints. Every asset obeys all six, which is the whole trick.</div></div>
+    <div class="rules">
+      <div class="rule"><b>64 × 64 grid</b><span>One viewBox for everything. Objects sit within a 6-unit
+        margin so nothing clips when scaled down.</span></div>
+      <div class="rule"><b>Light from top-left</b><span>Every form gets one lighter face and one darker
+        face, always on the same sides. Never a gradient.</span></div>
+      <div class="rule"><b>No outlines</b><span>Shapes read by fill contrast alone, so assets sit on the
+        dark counter and on white UI without a second version.</span></div>
+      <div class="rule"><b>Contact shadow</b><span>One ellipse at 14% black beneath every object. It is
+        what stops icons floating.</span></div>
+      <div class="rule"><b>Silhouette first</b><span>Each item is identifiable in solid black at 20px.
+        Detail is added only after the outline reads.</span></div>
+      <div class="rule"><b>Radius 4–5</b><span>Corners share one radius language. Glass is the only
+        exception and it is always straight-sided.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Palette</h2>
+      <div class="lede">Fourteen values. Every asset is drawn from this list — no one-off colours.</div></div>
+    <div class="pal">
+      <div class="sw"><i style="background:#3A2419"></i><div><b>Espresso</b><span>#3A2419</span></div></div>
+      <div class="sw"><i style="background:#6B4630"></i><div><b>Roast</b><span>#6B4630</span></div></div>
+      <div class="sw"><i style="background:#C4884E"></i><div><b>Crema</b><span>#C4884E</span></div></div>
+      <div class="sw"><i style="background:#C86B2A"></i><div><b>Steeped tea</b><span>#C86B2A</span></div></div>
+      <div class="sw"><i style="background:#D2A171"></i><div><b>Karak</b><span>#D2A171</span></div></div>
+      <div class="sw"><i style="background:#E0A32B"></i><div><b>Syrup</b><span>#E0A32B</span></div></div>
+      <div class="sw"><i style="background:#E0A860"></i><div><b>Pastry</b><span>#E0A860</span></div></div>
+      <div class="sw"><i style="background:#F0CC96"></i><div><b>Pastry light</b><span>#F0CC96</span></div></div>
+      <div class="sw"><i style="background:#FBF3E4"></i><div><b>Milk</b><span>#FBF3E4</span></div></div>
+      <div class="sw"><i style="background:#DCD2BE"></i><div><b>Porcelain shade</b><span>#DCD2BE</span></div></div>
+      <div class="sw"><i style="background:#A9DCEF"></i><div><b>Ice</b><span>#A9DCEF</span></div></div>
+      <div class="sw"><i style="background:#5FB78A"></i><div><b>Mint</b><span>#5FB78A</span></div></div>
+      <div class="sw"><i style="background:#E8B93C"></i><div><b>Coin</b><span>#E8B93C</span></div></div>
+      <div class="sw"><i style="background:#E2622E"></i><div><b>Streak</b><span>#E2622E</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Ingredients</h2>
+      <div class="lede">What the machines produce into the bins. Shown at 68px, then at the two sizes the
+      game actually uses: 26px in a bin, 20px in an order chip.</div></div>
+    <div class="grid">
+      <div class="cell"><svg class="art"><use href="#i-shot"/></svg><div class="nm">Shot</div>
+        <div class="mini"><svg width="26" height="26"><use href="#i-shot"/></svg><svg width="20" height="20"><use href="#i-shot"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#i-tea"/></svg><div class="nm">Tea</div>
+        <div class="mini"><svg width="26" height="26"><use href="#i-tea"/></svg><svg width="20" height="20"><use href="#i-tea"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#i-syrup"/></svg><div class="nm">Syrup</div>
+        <div class="mini"><svg width="26" height="26"><use href="#i-syrup"/></svg><svg width="20" height="20"><use href="#i-syrup"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#i-milk"/></svg><div class="nm">Milk</div>
+        <div class="mini"><svg width="26" height="26"><use href="#i-milk"/></svg><svg width="20" height="20"><use href="#i-milk"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#i-pastry"/></svg><div class="nm">Pastry</div>
+        <div class="mini"><svg width="26" height="26"><use href="#i-pastry"/></svg><svg width="20" height="20"><use href="#i-pastry"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#i-ice"/></svg><div class="nm">Ice</div>
+        <div class="mini"><svg width="26" height="26"><use href="#i-ice"/></svg><svg width="20" height="20"><use href="#i-ice"/></svg><span class="cap">26 / 20</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Dishes</h2>
+      <div class="lede">What the customer orders. Each one is visibly built from its ingredients — the
+      karak is the tea glass gone milky, the almond croissant is the pastry with drizzle.</div></div>
+    <div class="grid">
+      <div class="cell"><svg class="art"><use href="#d-espresso"/></svg><div class="nm">Espresso</div>
+        <div class="mini"><svg width="26" height="26"><use href="#d-espresso"/></svg><svg width="20" height="20"><use href="#d-espresso"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#d-mint"/></svg><div class="nm">Mint tea</div>
+        <div class="mini"><svg width="26" height="26"><use href="#d-mint"/></svg><svg width="20" height="20"><use href="#d-mint"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#d-latte"/></svg><div class="nm">Latte</div>
+        <div class="mini"><svg width="26" height="26"><use href="#d-latte"/></svg><svg width="20" height="20"><use href="#d-latte"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#d-karak"/></svg><div class="nm">Karak chai</div>
+        <div class="mini"><svg width="26" height="26"><use href="#d-karak"/></svg><svg width="20" height="20"><use href="#d-karak"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#d-almond"/></svg><div class="nm">Almond croissant</div>
+        <div class="mini"><svg width="26" height="26"><use href="#d-almond"/></svg><svg width="20" height="20"><use href="#d-almond"/></svg><span class="cap">26 / 20</span></div></div>
+      <div class="cell"><svg class="art"><use href="#d-iced"/></svg><div class="nm">Iced latte</div>
+        <div class="mini"><svg width="26" height="26"><use href="#d-iced"/></svg><svg width="20" height="20"><use href="#d-iced"/></svg><span class="cap">26 / 20</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Customers</h2>
+      <div class="lede">Flat shapes, not portraits — head, hair silhouette, shoulders, dot eyes. Swapping
+      hair, skin and clothing colour from the palette gives dozens of recognisable regulars from four
+      base shapes.</div></div>
+    <div class="grid">
+      <div class="cell"><svg class="art"><use href="#p-1"/></svg><div class="nm">Short hair</div>
+        <div class="mini"><svg width="30" height="30"><use href="#p-1"/></svg><span class="cap">seat 30</span></div></div>
+      <div class="cell"><svg class="art"><use href="#p-2"/></svg><div class="nm">Curls</div>
+        <div class="mini"><svg width="30" height="30"><use href="#p-2"/></svg><span class="cap">seat 30</span></div></div>
+      <div class="cell"><svg class="art"><use href="#p-3"/></svg><div class="nm">Long hair</div>
+        <div class="mini"><svg width="30" height="30"><use href="#p-3"/></svg><span class="cap">seat 30</span></div></div>
+      <div class="cell"><svg class="art"><use href="#p-4"/></svg><div class="nm">Headscarf</div>
+        <div class="mini"><svg width="30" height="30"><use href="#p-4"/></svg><span class="cap">seat 30</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Interface</h2>
+      <div class="lede">Same rules, same palette, so the UI furniture belongs to the food.</div></div>
+    <div class="grid">
+      <div class="cell"><svg class="art"><use href="#u-coin"/></svg><div class="nm">Takings</div></div>
+      <div class="cell"><svg class="art"><use href="#u-streak"/></svg><div class="nm">Streak</div></div>
+      <div class="cell"><svg class="art"><use href="#u-clock"/></svg><div class="nm">Closing time</div></div>
+      <div class="cell"><svg class="art"><use href="#u-heart"/></svg><div class="nm">Life</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>On both grounds</h2>
+      <div class="lede">The no-outline rule earns its keep here: one set of files works on the dark
+      gameplay counter and on a white settings sheet. No light and dark variants to maintain.</div></div>
+    <div class="onboth">
+      <div class="lite">
+        <svg width="46" height="46"><use href="#d-latte"/></svg>
+        <svg width="46" height="46"><use href="#i-pastry"/></svg>
+        <svg width="46" height="46"><use href="#d-karak"/></svg>
+        <svg width="46" height="46"><use href="#u-coin"/></svg>
+      </div>
+      <div class="drk">
+        <svg width="46" height="46"><use href="#d-latte"/></svg>
+        <svg width="46" height="46"><use href="#i-pastry"/></svg>
+        <svg width="46" height="46"><use href="#d-karak"/></svg>
+        <svg width="46" height="46"><use href="#u-coin"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>In the game</h2>
+      <div class="lede">The same assets dropped into the real gameplay layout, at real size. This is the
+      only test that counts.</div></div>
+    <div class="mock">
+      <div class="lbl">Orders</div>
+      <div class="rail">
+        <div class="tick">
+          <div class="bar"><i style="width:78%;background:#4FBF7B"></i></div>
+          <svg width="30" height="30"><use href="#p-1"/></svg>
+          <div class="dishnm">Latte</div>
+          <div class="chips"><span class="chip"><svg width="20" height="20"><use href="#i-shot"/></svg></span><span class="chip"><svg width="20" height="20"><use href="#i-milk"/></svg></span></div>
+        </div>
+        <div class="tick">
+          <div class="bar"><i style="width:44%;background:#F2A03D"></i></div>
+          <svg width="30" height="30"><use href="#p-4"/></svg>
+          <div class="dishnm">Karak chai</div>
+          <div class="chips"><span class="chip"><svg width="20" height="20"><use href="#i-tea"/></svg></span><span class="chip"><svg width="20" height="20"><use href="#i-milk"/></svg></span><span class="chip"><svg width="20" height="20"><use href="#i-syrup"/></svg></span></div>
+        </div>
+        <div class="tick">
+          <div class="bar"><i style="width:15%;background:#E24B2E"></i></div>
+          <svg width="30" height="30"><use href="#p-2"/></svg>
+          <div class="dishnm">Almond croissant</div>
+          <div class="chips"><span class="chip"><svg width="20" height="20"><use href="#i-pastry"/></svg></span><span class="chip"><svg width="20" height="20"><use href="#i-syrup"/></svg></span></div>
+        </div>
+      </div>
+      <div class="lbl">Machines</div>
+      <div class="bins">
+        <div class="bin"><div class="plus">+</div><svg width="26" height="26"><use href="#i-shot"/></svg><div class="bn">Shot</div><div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip"></span></div></div>
+        <div class="bin"><div class="plus">+</div><svg width="26" height="26"><use href="#i-tea"/></svg><div class="bn">Tea</div><div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip on"></span></div></div>
+        <div class="bin"><div class="plus">+</div><svg width="26" height="26"><use href="#i-syrup"/></svg><div class="bn">Syrup</div><div class="pips"><span class="pip on"></span><span class="pip"></span><span class="pip"></span></div></div>
+        <div class="bin"><div class="plus">+</div><svg width="26" height="26"><use href="#i-milk"/></svg><div class="bn">Milk</div><div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip"></span></div></div>
+        <div class="bin"><div class="plus">+</div><svg width="26" height="26"><use href="#i-pastry"/></svg><div class="bn">Pastry</div><div class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div></div>
+        <div class="bin"><div class="plus">+</div><svg width="26" height="26"><use href="#i-ice"/></svg><div class="bn">Ice</div><div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip"></span></div></div>
+      </div>
+    </div>
+    <p class="note">What this costs to change: <b>nothing but a text edit.</b> Recolouring the whole game
+    for a night shift is fourteen hex values. Adding a new drink is one symbol. A complete restyle is a
+    find-and-replace, not a re-commission — which is the real reason to author art as code when there is
+    no illustrator.</p>
+  </section>
+</div>
