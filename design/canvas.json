@@ -1,0 +1,241 @@
+{
+ "artboards": [
+  {
+   "file": "Splash.dc.html",
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-01 Splash"
+  },
+  {
+   "file": "Home.dc.html",
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-02 Home"
+  },
+  {
+   "file": "Briefing.dc.html",
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-03 Day briefing"
+  },
+  {
+   "file": "Main.dc.html",
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-04 Gameplay"
+  },
+  {
+   "file": "Pause.dc.html",
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-05 Pause"
+  },
+  {
+   "file": "Countdown.dc.html",
+   "x": 0,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-06 Resume"
+  },
+  {
+   "file": "ResultPass.dc.html",
+   "x": 470,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-07 Day result - pass"
+  },
+  {
+   "file": "ResultFail.dc.html",
+   "x": 940,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-08 Day result - fail"
+  },
+  {
+   "file": "UnlockCard.dc.html",
+   "x": 1410,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-09 Unlock card"
+  },
+  {
+   "file": "Shop.dc.html",
+   "x": 1880,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-10 Upgrade shop"
+  },
+  {
+   "file": "EndlessIntro.dc.html",
+   "x": 0,
+   "y": 1968,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-11 Endless intro"
+  },
+  {
+   "file": "EndlessResult.dc.html",
+   "x": 470,
+   "y": 1968,
+   "w": 390,
+   "h": 844,
+   "page": "page-1",
+   "title": "S-12 Endless result"
+  },
+  {
+   "file": "Onboarding.dc.html",
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-18 Onboarding"
+  },
+  {
+   "file": "Language.dc.html",
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-19 Language"
+  },
+  {
+   "file": "Recipes.dc.html",
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-15 Recipes"
+  },
+  {
+   "file": "Settings.dc.html",
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-13 Settings"
+  },
+  {
+   "file": "Store.dc.html",
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-14 Store"
+  },
+  {
+   "file": "PurchaseSuccess.dc.html",
+   "x": 0,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-16 Purchase success"
+  },
+  {
+   "file": "PurchaseError.dc.html",
+   "x": 470,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-17 Purchase error"
+  },
+  {
+   "file": "Credits.dc.html",
+   "x": 940,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-20 Credits"
+  },
+  {
+   "file": "SaveError.dc.html",
+   "x": 1410,
+   "y": 984,
+   "w": 390,
+   "h": 844,
+   "page": "page-2",
+   "title": "S-21 Save error"
+  }
+ ],
+ "pages": [
+  {
+   "id": "page-1",
+   "name": "The loop"
+  },
+  {
+   "id": "page-2",
+   "name": "Support and first run"
+  }
+ ],
+ "annotations": [
+  {
+   "id": "zones",
+   "x": 1410,
+   "y": -150,
+   "w": 390,
+   "page": "page-1",
+   "text": "S-04 is the money screen. Zones top to bottom, summing to 844:\n47 safe area / 56 HUD / 14 meters / 160 order rail / 216 cafe band / 92 plate / 225 bins / 34 safe area.\nBins and plate are pinned to the bottom so controls never move between devices."
+  },
+  {
+   "id": "cb",
+   "x": 470,
+   "y": 1830,
+   "w": 390,
+   "page": "page-1",
+   "text": "Patience runs blue to amber to red, never through green. Green is reserved for money only. That is the one colour axis that survives both deutan and protan colour blindness, and every state also carries a number or a length so hue is never the only signal."
+  },
+  {
+   "id": "art",
+   "x": 0,
+   "y": -150,
+   "w": 390,
+   "page": "page-1",
+   "text": "Every drink, ingredient and customer here is a 3D model built in code, rendered once through one fixed camera and baked to a sprite. The phone never runs a 3D scene."
+  },
+  {
+   "id": "ob",
+   "x": 0,
+   "y": -130,
+   "w": 390,
+   "page": "page-2",
+   "text": "Onboarding is four gated coach steps layered over the live game on day one, not a wall of text before it. Everything except the step in play is dimmed."
+  }
+ ],
+ "launch": {
+  "view": "canvas",
+  "page": "page-1"
+ }
+}
