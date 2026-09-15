@@ -1,0 +1,676 @@
+<title>Café Rush</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#171310; --panel:#231C18; --panel-2:#2E2521; --edge:#3B302A;
+  --cream:#F7EFE3; --dim:#A8988A; --dimmer:#6F6058;
+  --amber:#F2A03D; --amber-d:#C97C22;
+  --red:#E24B2E; --green:#4FBF7B; --blue:#5B9DD9;
+  --ok:#4FBF7B;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--cream);
+  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:14px;line-height:1.4;
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+h1,h2,h3,.dsp{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;letter-spacing:-.02em}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+#app{display:flex;flex-direction:column;height:100%;max-width:520px;margin:0 auto;position:relative}
+.screen{flex:1;display:flex;flex-direction:column;min-height:0}
+.pad{padding:0 16px}
+
+/* ---------- HUD ---------- */
+.hud{display:flex;align-items:center;gap:12px;padding:10px 16px 8px;background:var(--bg)}
+.hud .blk{display:flex;flex-direction:column;line-height:1.05}
+.hud .blk span{font-size:9px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
+.hud .blk b{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+.hud .grow{flex:1}
+#combo{color:var(--amber);opacity:0;transition:opacity .2s}
+#combo.on{opacity:1}
+
+.clock{height:5px;background:var(--panel-2);border-radius:3px;margin:0 16px 10px;overflow:hidden}
+.clock i{display:block;height:100%;width:100%;background:var(--amber);border-radius:3px}
+.clock.low i{background:var(--red)}
+
+.goalbar{height:5px;background:var(--panel-2);border-radius:3px;margin:0 16px 12px;overflow:hidden}
+.goalbar i{display:block;height:100%;width:0;background:var(--green);border-radius:3px;transition:width .18s}
+
+/* ---------- seats ---------- */
+.seats{display:flex;gap:7px;padding:0 16px 12px;align-items:center;flex:1;min-height:0}
+.seat{
+  flex:1 1 0;min-width:0;background:var(--panel);border:1px solid var(--edge);border-radius:10px;
+  padding:8px 5px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-height:108px;position:relative;
+}
+.seat.empty{background:none;border-style:dashed;border-color:#2A221E}
+.seat.empty .inner{display:none}
+.seat .inner{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%}
+.face{
+  width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:13px;color:#1A1512;flex:none;
+}
+.pat{width:100%;height:4px;background:#3A2F29;border-radius:3px;overflow:hidden}
+.pat i{display:block;height:100%;width:100%;background:var(--green)}
+.pat.mid i{background:var(--amber)}
+.pat.low i{background:var(--red)}
+.ord{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+.oi{
+  width:24px;height:24px;border-radius:6px;background:var(--panel-2);border:1px solid var(--edge);
+  display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;
+}
+.oi.got{background:#1E3A2A;border-color:var(--green);opacity:.55}
+.seat.serveable{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.seat.go{animation:pop .22s ease-out}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.055)}100%{transform:scale(1)}}
+
+.float{
+  position:absolute;left:50%;top:6px;transform:translateX(-50%);pointer-events:none;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:16px;white-space:nowrap;
+  animation:rise .85s ease-out forwards;z-index:5;
+}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,4px)}18%{opacity:1}100%{opacity:0;transform:translate(-50%,-30px)}}
+
+/* ---------- tray ---------- */
+.traywrap{padding:0 16px 12px}
+.lbl{font-size:9px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase;margin-bottom:5px}
+.tray{display:flex;gap:6px}
+.ts{
+  flex:1 1 0;height:42px;border-radius:9px;background:#1E1815;border:1px dashed #33291F;
+  display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;
+}
+.ts.has{background:var(--panel-2);border:1px solid var(--amber);border-style:solid}
+
+/* ---------- stations ---------- */
+.stwrap{padding:0 16px 16px}
+.stations{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.st{
+  background:var(--panel);border:1px solid var(--edge);border-radius:11px;
+  padding:9px 6px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:88px;
+  position:relative;overflow:hidden;
+}
+.st .si{font-size:22px;line-height:1}
+.st .sn{font-size:9.5px;color:var(--dim);letter-spacing:.02em;text-align:center;line-height:1.15}
+.st .slots{display:flex;gap:3px;width:100%;padding:0 2px}
+.sl{flex:1 1 0;height:5px;border-radius:3px;background:#3A2F29;overflow:hidden}
+.sl i{display:block;height:100%;width:0;background:var(--blue)}
+.sl.ready i{width:100%;background:var(--green)}
+.sl.burnt i{width:100%;background:var(--red)}
+.st.ready{border-color:var(--green);background:#1D2C22}
+.st.ready .sn{color:var(--green)}
+.st.locked{opacity:.32}
+.st.tap{animation:tap .18s ease-out}
+@keyframes tap{0%{transform:scale(1)}50%{transform:scale(.94)}100%{transform:scale(1)}}
+.st .badge{
+  position:absolute;top:5px;right:6px;font-size:10px;font-weight:500;color:var(--green);
+}
+
+/* ---------- cards / screens ---------- */
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:16px}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:24px 16px}
+.big{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:30px;line-height:1.05}
+.sub{color:var(--dim);font-size:13px;line-height:1.5}
+.btn{
+  width:100%;padding:15px;border-radius:10px;background:var(--amber);color:#1A1512;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
+}
+.btn:active{background:var(--amber-d)}
+.btn.sec{background:none;border:1px solid var(--edge);color:var(--cream)}
+.btn:disabled{background:var(--panel-2);color:var(--dimmer)}
+
+.stat{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--edge);font-size:13px}
+.stat:last-child{border-bottom:0}
+.stat .k{color:var(--dim)}
+.stat .v{font-variant-numeric:tabular-nums}
+.v.good{color:var(--green)} .v.bad{color:var(--red)}
+
+.rows{display:flex;flex-direction:column;gap:7px}
+.urow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:9px 11px}
+.urow .ui{font-size:18px;line-height:1}
+.urow .un{font-size:12.5px}
+.urow .ud{font-size:10.5px;color:var(--dim)}
+.ubtn{padding:7px 10px;border-radius:7px;background:var(--panel-2);border:1px solid var(--edge);
+  font-size:11px;color:var(--amber);white-space:nowrap}
+.ubtn:disabled{color:var(--dimmer);border-color:#2A221E}
+.ubtn.max{color:var(--green)}
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;flex:1}
+.hint{font-size:11.5px;color:var(--dimmer);line-height:1.5}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="app">
+  <section class="screen" id="s-intro" hidden></section>
+  <section class="screen" id="s-play" hidden>
+    <div class="hud">
+      <div class="blk"><span>Day</span><b class="num" id="h-day">1</b></div>
+      <div class="blk"><span>Earned</span><b class="num" id="h-money">0</b></div>
+      <div class="blk"><span>Target</span><b class="num" id="h-target">0</b></div>
+      <div class="grow"></div>
+      <div class="blk" id="combo"><span>Streak</span><b class="num" id="h-combo">0</b></div>
+    </div>
+    <div class="goalbar"><i id="h-goal"></i></div>
+    <div class="clock" id="h-clockwrap"><i id="h-clock"></i></div>
+    <div class="seats" id="seats"></div>
+    <div class="traywrap">
+      <div class="lbl">Counter · tap to bin</div>
+      <div class="tray" id="tray"></div>
+    </div>
+    <div class="stwrap">
+      <div class="stations" id="stations"></div>
+    </div>
+  </section>
+  <section class="screen" id="s-result" hidden></section>
+  <section class="screen" id="s-shop" hidden></section>
+</div>
+
+<script>
+"use strict";
+
+/* ===================== content ===================== */
+
+const ITEMS = {
+  espresso:{nm:"Espresso",  ic:"☕", price:12, time:2.0, day:1},
+  karak:   {nm:"Karak",     ic:"🫖", price:8,  time:2.6, day:1},
+  juice:   {nm:"Juice",     ic:"🍊", price:10, time:2.4, day:1},
+  latte:   {nm:"Latte",     ic:"🥛", price:20, time:3.4, day:2},
+  croissant:{nm:"Croissant",ic:"🥐", price:14, time:4.2, day:3},
+  cake:    {nm:"Date cake", ic:"🍰", price:16, time:3.6, day:4}
+};
+const IDS = Object.keys(ITEMS);
+
+const NAMES = ["Rami","Noor","Dana","Samir","Aisha","Khalid","Mona","Yusuf","Salma","Tarek","Hana","Omar"];
+const HUES = ["#E8B86D","#C9A0DC","#7FC8A9","#F09B8C","#9BB8E8","#D9C06B","#E8A0B4","#8FD1C4"];
+
+const BURN = 7.0;      /* seconds a finished item survives before it spoils */
+const CLEAN = 2.5;     /* seconds the slot is blocked after spoiling */
+const DAYLEN = 90;
+
+const SPEED_COST = [90,180,320];
+const CAP_COST   = [150,300];
+const SEAT_COST  = [260,520];
+const CHAIR_COST = [220,440];
+const TRAY_COST  = [160,320];
+
+function dayCfg(d){
+  const spawn = Math.max(1.5, 3.5 - (d-1)*0.22);
+  const maxItems = d < 2 ? 1 : d < 4 ? 2 : 3;
+  /* Target is derived from what the day can actually produce, not a flat curve:
+     how many customers can walk in, how big their orders are, what they pay.
+     Otherwise the difficulty flattens out the moment upgrades start landing. */
+  const pool = IDS.filter(id => ITEMS[id].day <= d);
+  const avgPrice = pool.reduce((a,id) => a + ITEMS[id].price, 0) / pool.length;
+  const ceiling = (DAYLEN/spawn) * ((1+maxItems)/2) * avgPrice * 1.5;
+  const share = Math.min(0.72, 0.50 + (d-1)*0.04);
+  return {
+    target: Math.round(ceiling*share/10)*10,
+    spawn: spawn,
+    maxItems: maxItems,
+    patience: Math.max(10, 18 - (d-1)*0.7)
+  };
+}
+
+/* ===================== state ===================== */
+
+const NEWSTATE = () => {
+  const up = {};
+  IDS.forEach(id => up[id] = {sp:0, cap:1});
+  return {day:1, cash:0, seats:3, tray:4, chairs:0, up:up, bestCombo:0, seen:false};
+};
+
+let S = NEWSTATE();
+let R = null;
+let raf = null;
+const D = {};                 /* cached DOM handles for the play screen */
+
+const $ = id => document.getElementById(id);
+const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+function save(){ try{ localStorage.setItem("rush_save", JSON.stringify(S)); }catch(e){} }
+function loadSave(){
+  try{
+    const raw = localStorage.getItem("rush_save"); if(!raw) return null;
+    const p = JSON.parse(raw);
+    if(!p || typeof p.day !== "number") return null;
+    const base = NEWSTATE();
+    IDS.forEach(id => { if(p.up && p.up[id]) base.up[id] = {sp:p.up[id].sp|0, cap:p.up[id].cap|1}; });
+    return Object.assign(base, p, {up:base.up});
+  }catch(e){ return null; }
+}
+
+const unlocked = id => ITEMS[id].day <= S.day;
+const cookTime = id => ITEMS[id].time * Math.pow(0.82, S.up[id].sp);
+const patMul   = () => 1 + S.chairs*0.15;
+
+function show(n){ ["intro","play","result","shop"].forEach(v => { $("s-"+v).hidden = (v!==n); }); }
+
+/* ===================== screens ===================== */
+
+function screenIntro(){
+  const v = $("s-intro"); v.textContent = "";
+  const cfg = dayCfg(S.day);
+  const wrap = el("div","mid");
+
+  wrap.appendChild(el("div","lbl","Day " + S.day));
+  wrap.appendChild(el("div","big", S.day===1 ? "Open the café" : "Another rush"));
+
+  const card = el("div","card");
+  const row = (k,val) => { const r=el("div","stat"); r.appendChild(el("div","k",k)); r.appendChild(el("div","v num",val)); card.appendChild(r); };
+  row("Take by closing", cfg.target + " AED");
+  row("Shift length", DAYLEN + " seconds");
+  row("Seats", String(S.seats));
+  row("Order size", cfg.maxItems === 1 ? "1 item" : "up to " + cfg.maxItems + " items");
+  wrap.appendChild(card);
+
+  const fresh = IDS.filter(id => ITEMS[id].day === S.day);
+  if(fresh.length){
+    const c2 = el("div","card");
+    c2.appendChild(el("div","lbl","New on the menu"));
+    fresh.forEach(id => {
+      const r = el("div","stat");
+      r.appendChild(el("div","k", ITEMS[id].ic + "  " + ITEMS[id].nm));
+      r.appendChild(el("div","v num", ITEMS[id].price + " AED · " + ITEMS[id].time.toFixed(1) + "s"));
+      c2.appendChild(r);
+    });
+    wrap.appendChild(c2);
+  }
+
+  if(!S.seen){
+    const h = el("div","card");
+    h.appendChild(el("div","lbl","How it works"));
+    const p = el("div","hint");
+    p.innerHTML = "Tap a machine to start it. It keeps cooking while you do other things — "
+      + "tap it again when it turns <b style='color:var(--green)'>green</b> to move the food to your counter. "
+      + "Tap a customer to hand over anything on the counter they ordered.<br><br>"
+      + "Food left sitting spoils. Customers left waiting walk out and break your streak.";
+    h.appendChild(p);
+    wrap.appendChild(h);
+  }
+
+  const go = el("button","btn", S.seen ? "Start shift" : "Let's go");
+  go.type = "button";
+  go.addEventListener("click", () => { S.seen = true; save(); startShift(); });
+  wrap.appendChild(go);
+
+  v.appendChild(wrap);
+  show("intro");
+}
+
+/* ---------------------- the shift ---------------------- */
+
+function buildPlayDOM(){
+  D.seats = []; D.tray = []; D.st = [];
+
+  const seats = $("seats"); seats.textContent = "";
+  for(let i=0;i<S.seats;i++){
+    const s = el("div","seat empty");
+    const inner = el("div","inner");
+    const pat = el("div","pat"); const pi = el("i"); pat.appendChild(pi);
+    const face = el("div","face");
+    const ord = el("div","ord");
+    inner.appendChild(pat); inner.appendChild(face); inner.appendChild(ord);
+    s.appendChild(inner);
+    s.addEventListener("pointerdown", e => { e.preventDefault(); serveSeat(i); });
+    seats.appendChild(s);
+    D.seats.push({root:s, pat:pat, pi:pi, face:face, ord:ord, chips:[]});
+  }
+
+  const tray = $("tray"); tray.textContent = "";
+  for(let i=0;i<S.tray;i++){
+    const t = el("button","ts"); t.type="button";
+    t.addEventListener("pointerdown", e => { e.preventDefault(); binSlot(i); });
+    tray.appendChild(t);
+    D.tray.push(t);
+  }
+
+  const st = $("stations"); st.textContent = "";
+  IDS.forEach((id,i) => {
+    const b = el("button","st"); b.type="button";
+    const on = unlocked(id);
+    if(!on) b.classList.add("locked");
+    b.appendChild(el("div","si", on ? ITEMS[id].ic : "🔒"));
+    b.appendChild(el("div","sn", on ? ITEMS[id].nm : "Day " + ITEMS[id].day));
+    const slots = el("div","slots");
+    const pips = [];
+    for(let k=0;k<S.up[id].cap;k++){
+      const sl = el("div","sl"); const ii = el("i"); sl.appendChild(ii);
+      slots.appendChild(sl); pips.push({box:sl, fill:ii});
+    }
+    b.appendChild(slots);
+    const badge = el("div","badge"); b.appendChild(badge);
+    if(on) b.addEventListener("pointerdown", e => { e.preventDefault(); tapStation(id, b); });
+    st.appendChild(b);
+    D.st.push({id:id, root:b, pips:pips, badge:badge, on:on});
+  });
+}
+
+function startShift(){
+  const cfg = dayCfg(S.day);
+  R = {cfg:cfg, t:0, money:0, combo:0, best:0, served:0, lost:0, spoiled:0,
+       seats:new Array(S.seats).fill(null), stations:{}, tray:[], spawnT:0.6, over:false};
+  IDS.forEach(id => {
+    R.stations[id] = [];
+    for(let k=0;k<S.up[id].cap;k++) R.stations[id].push({st:"idle", t:0});
+  });
+  buildPlayDOM();
+  show("play");
+  paint();
+  let last = performance.now();
+  cancelAnimationFrame(raf);
+  const frame = now => {
+    const dt = Math.min(0.05, (now-last)/1000); last = now;
+    if(R && !R.over){ update(dt); paint(); raf = requestAnimationFrame(frame); }
+  };
+  raf = requestAnimationFrame(frame);
+}
+
+function spawn(){
+  const free = [];
+  R.seats.forEach((s,i) => { if(!s) free.push(i); });
+  if(!free.length) return;
+  const i = pick(free);
+  const pool = IDS.filter(unlocked);
+  const n = 1 + Math.floor(Math.random()*R.cfg.maxItems);
+  const order = [];
+  for(let k=0;k<n;k++) order.push(pick(pool));
+  const pm = R.cfg.patience * patMul() * (1 + (n-1)*0.55);
+  R.seats[i] = {nm:pick(NAMES), hue:pick(HUES), order:order,
+                got:order.map(()=>false), pat:pm, patMax:pm};
+  R.spawnT = R.cfg.spawn * (0.75 + Math.random()*0.5);
+}
+
+function update(dt){
+  R.t += dt;
+  if(R.t >= DAYLEN){ endShift(); return; }
+
+  R.spawnT -= dt;
+  if(R.spawnT <= 0) spawn();
+
+  for(let i=0;i<R.seats.length;i++){
+    const c = R.seats[i]; if(!c) continue;
+    c.pat -= dt;
+    if(c.pat <= 0){
+      R.seats[i] = null; R.lost++; R.combo = 0;
+      floaty(i, "walked out", "var(--red)");
+    }
+  }
+
+  IDS.forEach(id => {
+    const ct = cookTime(id);
+    R.stations[id].forEach(sl => {
+      if(sl.st === "cook"){ sl.t += dt; if(sl.t >= ct){ sl.st = "ready"; sl.t = 0; } }
+      else if(sl.st === "ready"){ sl.t += dt; if(sl.t >= BURN){ sl.st = "burnt"; sl.t = 0; R.spoiled++; } }
+      else if(sl.st === "burnt"){ sl.t += dt; if(sl.t >= CLEAN){ sl.st = "idle"; sl.t = 0; } }
+    });
+  });
+}
+
+function tapStation(id, node){
+  if(!R || R.over) return;
+  node.classList.remove("tap"); void node.offsetWidth; node.classList.add("tap");
+  const slots = R.stations[id];
+  const ready = slots.filter(s => s.st === "ready");
+  if(ready.length){
+    let moved = 0;
+    for(const s of ready){
+      if(R.tray.length >= S.tray) break;
+      R.tray.push(id); s.st = "idle"; s.t = 0; moved++;
+    }
+    if(!moved) flashTray();
+    paint(); return;
+  }
+  const idle = slots.find(s => s.st === "idle");
+  if(idle){ idle.st = "cook"; idle.t = 0; paint(); }
+}
+
+function binSlot(i){
+  if(!R || R.over) return;
+  if(i < R.tray.length){ R.tray.splice(i,1); paint(); }
+}
+
+function flashTray(){
+  D.tray.forEach(t => { t.style.borderColor = "var(--red)"; setTimeout(()=>{ t.style.borderColor=""; }, 220); });
+}
+
+function serveSeat(i){
+  if(!R || R.over) return;
+  const c = R.seats[i]; if(!c) return;
+  let handed = 0;
+  for(let k=0;k<c.order.length;k++){
+    if(c.got[k]) continue;
+    const ti = R.tray.indexOf(c.order[k]);
+    if(ti >= 0){ R.tray.splice(ti,1); c.got[k] = true; handed++; }
+  }
+  if(!handed) return;
+  const node = D.seats[i].root;
+  node.classList.remove("go"); void node.offsetWidth; node.classList.add("go");
+
+  if(c.got.every(Boolean)){
+    const pay = c.order.reduce((a,id)=>a+ITEMS[id].price, 0);
+    const frac = Math.max(0, c.pat / c.patMax);
+    R.combo++;
+    if(R.combo > R.best) R.best = R.combo;
+    const tip = pay * (0.10 + 0.40*frac) * (1 + Math.min(R.combo,10)*0.05);
+    const total = Math.round(pay + tip);
+    R.money += total; R.served++;
+    R.seats[i] = null;
+    floaty(i, "+" + total, frac > 0.5 ? "var(--green)" : "var(--amber)");
+  }
+  paint();
+}
+
+function floaty(i, text, color){
+  const host = D.seats[i] && D.seats[i].root; if(!host) return;
+  const f = el("div","float", text);
+  f.style.color = color;
+  host.appendChild(f);
+  setTimeout(() => { if(f.parentNode) f.parentNode.removeChild(f); }, 900);
+}
+
+function paint(){
+  if(!R) return;
+  $("h-day").textContent = S.day;
+  $("h-money").textContent = R.money;
+  $("h-target").textContent = R.cfg.target;
+  $("h-combo").textContent = R.combo;
+  $("combo").classList.toggle("on", R.combo >= 2);
+  $("h-goal").style.width = Math.min(100, (R.money / R.cfg.target)*100) + "%";
+
+  const left = Math.max(0, 1 - R.t/DAYLEN);
+  $("h-clock").style.width = (left*100) + "%";
+  $("h-clockwrap").classList.toggle("low", left < 0.2);
+
+  for(let i=0;i<R.seats.length;i++){
+    const c = R.seats[i], d = D.seats[i];
+    if(!c){ d.root.className = "seat empty"; d.chips = []; d.ord.textContent = ""; continue; }
+    const frac = Math.max(0, c.pat/c.patMax);
+    const canServe = c.order.some((id,k) => !c.got[k] && R.tray.indexOf(id) >= 0);
+    d.root.className = "seat" + (canServe ? " serveable" : "");
+    d.face.textContent = c.nm[0];
+    d.face.style.background = c.hue;
+    d.pi.style.width = (frac*100) + "%";
+    d.pat.className = "pat" + (frac < 0.25 ? " low" : frac < 0.55 ? " mid" : "");
+    if(d.chips.length !== c.order.length){
+      d.ord.textContent = ""; d.chips = [];
+      c.order.forEach(id => { const o = el("div","oi", ITEMS[id].ic); d.ord.appendChild(o); d.chips.push(o); });
+    }
+    c.got.forEach((g,k) => { d.chips[k].className = "oi" + (g ? " got" : ""); });
+  }
+
+  for(let i=0;i<S.tray;i++){
+    const id = R.tray[i];
+    D.tray[i].textContent = id ? ITEMS[id].ic : "";
+    D.tray[i].className = "ts" + (id ? " has" : "");
+  }
+
+  D.st.forEach(s => {
+    if(!s.on) return;
+    const slots = R.stations[s.id], ct = cookTime(s.id);
+    let ready = 0;
+    slots.forEach((sl,k) => {
+      const p = s.pips[k]; if(!p) return;
+      p.box.className = "sl" + (sl.st === "ready" ? " ready" : sl.st === "burnt" ? " burnt" : "");
+      p.fill.style.width = sl.st === "cook" ? Math.min(100,(sl.t/ct)*100) + "%"
+                         : (sl.st === "ready" || sl.st === "burnt") ? "100%" : "0%";
+      if(sl.st === "ready") ready++;
+    });
+    s.root.classList.toggle("ready", ready > 0);
+    s.badge.textContent = ready > 1 ? "×" + ready : "";
+  });
+}
+
+/* ---------------------- result ---------------------- */
+
+function endShift(){
+  R.over = true;
+  cancelAnimationFrame(raf);
+  const won = R.money >= R.cfg.target;
+  if(won) S.cash += R.money;
+  if(R.best > S.bestCombo) S.bestCombo = R.best;
+  save();
+
+  const v = $("s-result"); v.textContent = "";
+  const wrap = el("div","mid");
+  wrap.appendChild(el("div","lbl", "Day " + S.day + " · closed"));
+  wrap.appendChild(el("div","big", won ? "You made it" : "Short of target"));
+
+  const card = el("div","card");
+  const row = (k, val, cls) => {
+    const r = el("div","stat");
+    r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v num" + (cls ? " "+cls : ""), val));
+    card.appendChild(r);
+  };
+  row("Taken", R.money + " AED", won ? "good" : "bad");
+  row("Target", R.cfg.target + " AED");
+  row("Served", String(R.served), "good");
+  row("Walked out", String(R.lost), R.lost ? "bad" : "");
+  row("Spoiled", String(R.spoiled), R.spoiled ? "bad" : "");
+  row("Best streak", "×" + R.best);
+  wrap.appendChild(card);
+
+  if(!won){
+    const h = el("div","hint");
+    h.textContent = R.lost > R.served*0.3
+      ? "Too many people left waiting. Start the slow machines before you need them — croissants and lattes should already be cooking when the order lands."
+      : "Keep every machine busy. An idle machine is money you are not making.";
+    wrap.appendChild(h);
+  }
+
+  const go = el("button","btn", won ? "Bank " + R.money + " AED" : "Try day " + S.day + " again");
+  go.type = "button";
+  go.addEventListener("click", () => { if(won) screenShop(); else screenIntro(); });
+  wrap.appendChild(go);
+
+  v.appendChild(wrap);
+  show("result");
+}
+
+/* ---------------------- shop ---------------------- */
+
+function screenShop(){
+  const v = $("s-shop"); v.textContent = "";
+
+  const head = el("div","pad");
+  head.style.paddingTop = "18px";
+  head.appendChild(el("div","lbl","Between shifts"));
+  head.appendChild(el("div","big", S.cash + " AED"));
+  head.appendChild(el("div","hint","Spend it before tomorrow. Faster machines mean more orders out; more slots mean more cooking at once."));
+  v.appendChild(head);
+
+  const scroll = el("div","scroll pad");
+  scroll.style.paddingTop = "14px";
+  const rows = el("div","rows");
+
+  const buy = (icon, name, desc, cost, maxed, apply) => {
+    const r = el("div","urow");
+    r.appendChild(el("div","ui", icon));
+    const mid = el("div");
+    mid.appendChild(el("div","un", name));
+    mid.appendChild(el("div","ud", desc));
+    r.appendChild(mid);
+    const b = el("button","ubtn" + (maxed ? " max" : ""), maxed ? "MAX" : cost + " AED");
+    b.type = "button";
+    b.disabled = maxed || S.cash < cost;
+    b.addEventListener("click", () => { S.cash -= cost; apply(); save(); screenShop(); });
+    r.appendChild(b);
+    rows.appendChild(r);
+  };
+
+  IDS.filter(unlocked).forEach(id => {
+    const u = S.up[id];
+    buy(ITEMS[id].ic, ITEMS[id].nm + " — speed",
+        u.sp >= 3 ? "Cooks in " + cookTime(id).toFixed(1) + "s"
+                  : cookTime(id).toFixed(1) + "s → " + (cookTime(id)*0.82).toFixed(1) + "s",
+        SPEED_COST[u.sp], u.sp >= 3, () => { u.sp++; });
+    buy(ITEMS[id].ic, ITEMS[id].nm + " — slots",
+        u.cap >= 3 ? "3 at a time" : u.cap + " at a time → " + (u.cap+1),
+        CAP_COST[u.cap-1], u.cap >= 3, () => { u.cap++; });
+  });
+
+  buy("🪑","Another seat", S.seats >= 5 ? "5 seats" : S.seats + " seats → " + (S.seats+1),
+      SEAT_COST[S.seats-3], S.seats >= 5, () => { S.seats++; });
+  buy("🛋","Comfier chairs", S.chairs >= 2 ? "People wait 30% longer" : "People wait 15% longer",
+      CHAIR_COST[S.chairs], S.chairs >= 2, () => { S.chairs++; });
+  buy("🍽","Longer counter", S.tray >= 6 ? "6 spaces" : S.tray + " spaces → " + (S.tray+1),
+      TRAY_COST[S.tray-4], S.tray >= 6, () => { S.tray++; });
+
+  scroll.appendChild(rows);
+  v.appendChild(scroll);
+
+  const foot = el("div","pad");
+  foot.style.padding = "12px 16px 20px";
+  const go = el("button","btn","Open day " + (S.day+1));
+  go.type = "button";
+  go.addEventListener("click", () => { S.day++; save(); screenIntro(); });
+  foot.appendChild(go);
+
+  const rs = el("button","btn sec","Start over");
+  rs.type = "button";
+  rs.style.marginTop = "8px";
+  rs.addEventListener("click", () => { S = NEWSTATE(); save(); screenIntro(); });
+  foot.appendChild(rs);
+
+  v.appendChild(foot);
+  show("shop");
+}
+
+/* ===================== boot ===================== */
+
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden && R && !R.over){ cancelAnimationFrame(raf); R.paused = true; }
+  else if(R && R.paused && !R.over){
+    R.paused = false;
+    let last = performance.now();
+    const frame = now => {
+      const dt = Math.min(0.05,(now-last)/1000); last = now;
+      if(R && !R.over && !R.paused){ update(dt); paint(); raf = requestAnimationFrame(frame); }
+    };
+    raf = requestAnimationFrame(frame);
+  }
+});
+
+function start(snap){
+  const prior = (snap && snap.S) || loadSave();
+  if(prior) S = prior;
+  screenIntro();
+}
+
+try{
+  window.claude && window.claude.hot && window.claude.hot.snapshot &&
+    window.claude.hot.snapshot(() => ({S:S}));
+}catch(e){}
+
+if(window.claude && window.claude.hot && window.claude.hot.ready){
+  window.claude.hot.ready(start);
+}else{
+  start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+}
+</script>
