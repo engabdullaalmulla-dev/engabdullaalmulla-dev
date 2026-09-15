@@ -1002,3 +1002,691 @@ the game teaches:
 The design's job is to make verb 1 feel as rewarding as verb 3 even though it pays nothing
 immediately. That is why `just-ready` gets a haptic, a sound, a ring and a steam puff on the shelf:
 the game applauds preparation, not only payment.
+
+---
+
+## 6. Interaction and feel — the juice specification
+
+`docs/art-plan.md` is right that this is the highest-return work in the project and that it costs
+nothing but code. With Warm Vector art, it is also where *all* of the perceived quality lives:
+flat shapes moving beautifully read as a game; flat shapes teleporting read as a prototype.
+
+**Named easing curves** — used by name everywhere below:
+
+| Name | Curve | Character |
+|---|---|---|
+| `e-out` | `cubic-bezier(.22, 1, .36, 1)` | Fast start, long settle. Default for anything arriving |
+| `e-in` | `cubic-bezier(.4, 0, 1, 1)` | Accelerating away. Default for anything leaving |
+| `e-pop` | `cubic-bezier(.34, 1.56, .64, 1)` | Overshoot. Rewards, confirmations, pips |
+| `e-snap` | `cubic-bezier(.2, .9, .3, 1.25)` | Slight overshoot, quick. Cards arriving, counters |
+| `e-std` | `cubic-bezier(.4, 0, .2, 1)` | Neutral. Screen transitions, fades |
+
+**The 100 ms rule (P5):** every player input produces a visible change within 100 ms, even when the
+consequence takes longer. A cook takes 2.2 seconds; the `+` deforms in 40 ms.
+
+### 6.1 Taps
+
+| Action | Motion | Duration / easing | Haptic | SFX |
+|---|---|---|---|---|
+| `+` accepted (start a cook) | `+` scales 1 → 0.88 → 1; button fills `amber-500`, glyph `ink-950`, then reverts; cook bar animates from 0 | 160 ms `e-pop` | Light impact | `sfx_machine_start` |
+| `+` denied (bin full / all slots busy) | Card shakes ±3 pt, 3 cycles; pip row flashes `state-soon` | 160 ms `e-in` | **None** | `ui_denied` |
+| Bin body accepted (take stock) | Card scales 1 → 0.94 → 1; top pip empties with a 120 ms collapse; ingredient flies to plate (§6.2) | 160 ms `e-pop` | Light impact | `sfx_pickup` |
+| Bin body denied (stock 0, or plate full) | Card shakes ±3 pt; if the plate is full, the **plate** shakes too | 160 ms `e-in` | **None** | `ui_denied` |
+| Ticket / customer accepted | Card scales 1 → 1.06 → 1; barista → `serve` | 220 ms `e-pop` | Medium impact | `sfx_serve` |
+| Ticket / customer denied | The **plate** shakes ±5 pt, 3 cycles, and its edge flashes `state-soon`; the customer does **not** move | 180 ms `e-in` | **None** | `ui_denied` |
+| Scrape | Bin glyph lid tilts 20°; plate items drop out of frame staggered 40 ms | 200 ms `e-in` | Light | `sfx_scrape` |
+| Any primary button | Scale 0.98, fill darkens one token step | 90 ms `e-std` | Light on press | `ui_tap` |
+| Pause | Glyph scales 0.9; the whole game layer desaturates to 40% and the scrim fades in | 180 ms `e-std` | Light | `ui_pause` |
+
+**Denied actions never get a haptic.** A buzz on a failed tap teaches the hand that the tap worked.
+
+### 6.2 Item travel — bin to plate
+
+The single most-repeated animation in the game (~40× a shift). It must be quick enough not to gate
+the next tap and legible enough to teach where things go.
+
+| Beat | Timing | Spec |
+|---|---|---|
+| 0 ms | — | A copy of the ingredient sprite is spawned at the bin sprite's screen position, 52 pt, over everything |
+| 0–260 ms | `e-out` | It travels along a quadratic bezier to the target plate slot. Control point is the midpoint raised **40 pt** — a shallow arc, not a straight line. Simultaneously scales 52 → 36 pt and rotates −8° → 0° |
+| 150 ms | — | The barista switches to `reach` (she is already moving before the item lands) |
+| 260 ms | — | The travelling copy is destroyed; the real plate slot appears at scale 0.7 |
+| 260–340 ms | `e-pop` | The slot scales 0.7 → 1.08 → 1.0. The plate well nudges down 2 pt and back |
+| 300 ms | — | The barista returns to `idle` over 150 ms |
+| 260 ms | — | If this completes a wanted dish: the plate `complete-wanted` transition begins (§6.3) |
+
+**Concurrency:** up to three travels may overlap. Each takes the next free plate slot, decided at
+spawn time, so two fast taps never contend for one slot.
+
+### 6.3 Plate completion
+
+| Beat | Timing | Spec |
+|---|---|---|
+| 0–160 ms | `e-std` | Plate fill `ink-850` → `#1D2C22`; edge 1 pt `ink-600` → 2 pt `cream-50`; `amber-400` outer glow 0 → 6 pt |
+| 0–200 ms | `e-out` | The assembled dish sprite fades in behind the ingredient tiles at 44 pt, 0 → 45% opacity |
+| 60 ms | — | The dish name types on, left to right, 4 characters per frame (~24 ms/char) |
+| 0–240 ms | `e-snap` | The matching ticket enters `serveable`; its caret drops in from 8 pt above and begins bobbing |
+| — | — | Haptic: **soft double-tick**. SFX `sfx_dish_ready` — a two-note rise, the game's most important "you may proceed" sound |
+
+If the completed dish is **unwanted**, none of the above fires: the plate goes `complete-unwanted`
+(grey, no glow, name in `cream-600`) over 160 ms `e-std`, with `sfx_dish_ready_flat` — the same
+figure, flattened, quieter, no haptic. The player hears the difference without looking.
+
+### 6.4 Serving and payment
+
+| Beat | Timing | Spec |
+|---|---|---|
+| 0 ms | — | Plate slots clear instantly; well returns to `empty` |
+| 0–220 ms | `e-pop` | Ticket card scales 1 → 1.06 → 1. Customer body: `delighted` expression, rig scale 1.06, tilt 3° |
+| 0–220 ms | `e-out` | The dish sprite flies from the plate to the customer's hands along a 30 pt arc, scaling 44 → 28 pt, then fades over 80 ms |
+| 40–260 ms | — | Barista `serve` pose, returning to `idle` over 150 ms |
+| **Multi-dish, not yet complete** | 400 ms | A 16 pt `ok-500` check replaces the chip row, then the card cross-fades to dish 2 over 220 ms. Index updates. **No payment.** Haptic: light. SFX `sfx_serve_partial` |
+| **Order complete — payment** | | |
+| 0–120 ms | `e-out` | The floating payment appears above the card: `+{total}` in `display-s`, `ok-500` if patience was > 50% at serve, `state-soon` otherwise. This colour split is kept from the prototype and is the player's only feedback on tip quality |
+| 120–850 ms | `e-out` | It rises 28 pt and fades to 0 (the prototype's `rise` keyframe, kept) |
+| 0–520 ms | `e-in` then gravity | **Coin burst**: `4 + round(total/12)` coins, capped at 12. Each is a 12 pt `brass-400` disc with a 3 pt `ink-outline` stroke, launched with random velocity (−80…80, −220…−320 pt/s), gravity 900 pt/s², spin 0 → 540°, fading over the last 160 ms. They arc toward the HUD `EARNED` block |
+| 300–900 ms | `e-out` | HUD `EARNED` counts up from the old to the new value, tabular so nothing reflows, with a 1.0 → 1.1 → 1.0 scale pop on the block at 300 ms |
+| 220–460 ms | `e-in` | The customer rig translates 60 pt toward the door, rotates 12°, scales 0.9, fades to 0. The ticket card becomes `empty` |
+| — | — | Haptic: **medium impact** at 0 ms, then a **light tick** at 300 ms as the counter starts. SFX `sfx_serve` → `sfx_coins` → `sfx_till` |
+| **If this crosses the target** | +120 ms | The goal bar flashes `cream-50` for 120 ms, the `TARGET` HUD block flips to `ok-500` with a check and pops, the barista plays `celebrate` for 900 ms, `sfx_target_met` fires. **The shift does not end** — the player keeps playing for the remaining seconds, which is where the best takings come from |
+
+### 6.5 Customer arrival and departure
+
+| Event | Motion | Duration | Sound |
+|---|---|---|---|
+| **Arrival** | Body enters zone D from the door edge (right in LTR, left in RTL), translating 60 pt with a −8° → 0° rotate and 0 → 1 opacity. 90 ms later the ticket card scales 0.88 → 1.0 with y +8 → 0. 180 ms later the order string draws downward | 280 ms body `e-snap`, 280 ms card `e-snap`, 180 ms string linear | `sfx_door_chime` (pitched randomly ±2 semitones so a busy shift doesn't sound mechanical) |
+| **Patience crossing 55%** | Expression → `impatient` over 200 ms; patience bar hue cross-fades `state-calm` → `state-soon` over 300 ms and the stripe pattern fades in | 300 ms `e-std` | none |
+| **Patience crossing 25%** | Expression → `annoyed`; 6 pt forward lean over 240 ms; bar grows 6 → 8 pt; stripes accelerate to 3 pitch/s; the seconds badge scales 0 → 1 `e-pop`. If this is the hottest seat, the full urgent treatment (§5.8) engages over 200 ms | 240 ms `e-out` | `sfx_impatient` once, then `amb_chair_scrape` loops if hottest |
+| **Satisfied departure** | See §6.4 | 460 ms | `sfx_door_chime` reversed, quiet |
+| **Walkout** | Ticket fills `state-urgent` @18% for 120 ms. "walked out" float rises in `state-urgent`, 850 ms. Body stands (translate y −10 pt, 140 ms), then exits 70 pt toward the door with a 14° rotate, fading over 380 ms. Card collapses to `empty` over 240 ms. The streak chip breaks (§5.7). In endless, one life segment shatters | 380 ms `e-in` | `sfx_walkout` — a chair scrape and a door, **deliberately quiet**. The mistake is legible; it does not need a klaxon. Haptic: one **heavy** impact, the only heavy haptic in the game |
+
+### 6.6 Wave and day transitions
+
+| Event | Spec |
+|---|---|
+| **Wave change (endless, every 25 s)** | The clock bar sweeps back to 100% over 160 ms `e-out`. The HUD `WAVE` number flips: old scrolls up and out 120 ms, new scrolls in from below 160 ms `e-snap`. A 40 pt banner drops from under the HUD reading "WAVE {n}" in `display-s`, holds 900 ms, retracts — total 1400 ms, non-blocking, never covering the order rail. `sfx_wave`. Haptic: light |
+| **Life lost (endless)** | The segment shatters into 5 shards that fall with gravity and fade, 320 ms. Remaining segments do not re-flow. At one life left the last segment begins pulsing `state-urgent` at 0.8 Hz |
+| **Last 10 seconds of a day** | The clock bar pulses opacity 1.0 → 0.7 once a second. From 5 s, `sfx_clock_tick` on each second, rising a semitone each time. No screen-wide effect — the player is at their busiest and must not be visually interrupted |
+| **Day end** | Play freezes. Everything on screen **falls away**: bins drop 200 pt over 320 ms `e-in` staggered 30 ms apart, plate drops, tickets rise 120 pt and fade, the café band fades to 0 over 240 ms. Total 520 ms, then S-07/S-08 fades in over 240 ms `e-std`. `sfx_shutter` |
+| **Shift start** | The reverse: bins rise into place from 200 pt below, staggered 40 ms apart `e-out`, over 420 ms, while the café band fades in. The clock does not start until the last bin lands. `sfx_shutter` reversed + `amb_cafe` loop begins |
+| **Screen-to-screen (all others)** | Forward: incoming slides x +24 → 0 with opacity 0 → 1, 240 ms `e-std`; outgoing fades to 0 and scales 0.98 over 160 ms. Back: mirrored. Modals (S-05, S-09, S-17): scrim fades 200 ms, panel scales 0.94 → 1 with y +16 → 0 over 260 ms `e-snap` |
+
+### 6.7 Haptics — the complete map
+
+Three strengths only. Over-haptics is the most common mobile-game feel error and it drains battery.
+
+| Strength | Fires on |
+|---|---|
+| **Light** | `+` accepted · stock taken · plate item lands · button press · partial serve · cook completes (`just-ready`) · counter tick during a count-up (once, not per digit) |
+| **Medium** | Successful serve · order completed and paid · purchase confirmed · target met |
+| **Heavy** | **Walkout only.** One event, one feeling. Losing a life in endless uses the same heavy impact |
+| **Never** | Any denied action · any passive state change · any per-frame effect · anything while the app is backgrounded |
+
+Respects the OS haptics setting and the S-13 toggle. Disabled entirely under Low Power Mode.
+
+### 6.8 Sound list
+
+Twenty-nine SFX, two loops, one music bed — consistent with `art-plan.md`'s "20–30 short SFX plus
+one loop", and all of it library-licensable.
+
+**Design rules:** every SFX is ≤ 600 ms except where noted. All are in **C minor pentatonic**, so
+overlapping sounds never clash during a rush. Simultaneous voices are capped at 6, oldest dropped.
+Repeated sounds (`sfx_pickup`, `sfx_door_chime`) are pitch-randomised ±2 semitones.
+
+| # | Name | Fires when | Character |
+|---|---|---|---|
+| 1 | `sfx_machine_start` | `+` accepted | Short mechanical clunk, the hiss of a lever |
+| 2 | `sfx_cook_done` | A cook completes and stock lands | Bright two-note rise, pitched per ingredient so six bins are audibly distinct |
+| 3 | `sfx_pickup` | Stock taken from a bin | Soft ceramic tap |
+| 4 | `sfx_plate_land` | Item lands in a plate slot | Light click on porcelain |
+| 5 | `sfx_dish_ready` | Plate completes a **wanted** dish | Two-note rise, warm, confident |
+| 6 | `sfx_dish_ready_flat` | Plate completes an **unwanted** dish | Same figure, flattened, quieter |
+| 7 | `sfx_serve` | Successful serve | Plate set down + a small "there you go" |
+| 8 | `sfx_serve_partial` | One of a multi-dish order delivered | Half of `sfx_serve`, no resolution |
+| 9 | `sfx_coins` | Payment | Brass coin scatter, 520 ms |
+| 10 | `sfx_till` | Count-up ends | Old mechanical till ding |
+| 11 | `sfx_tip_big` | Tip fraction > 40% | An extra bright coin, layered over `sfx_coins` |
+| 12 | `sfx_streak_up` | Streak increments | Single note, +1 semitone per step, resetting at 10 |
+| 13 | `sfx_streak_break` | Streak resets | Quiet descending two-note figure |
+| 14 | `sfx_target_met` | Money crosses the target | Warm three-note resolve |
+| 15 | `sfx_door_chime` | Customer arrives / leaves happy | Shop bell, pitch-randomised |
+| 16 | `sfx_impatient` | Patience crosses 25% | A cup set down hard, once per customer |
+| 17 | `sfx_walkout` | Customer walks out | Chair scrape + door, **quiet** |
+| 18 | `sfx_scrape` | Plate scraped | Contents into a bin |
+| 19 | `ui_denied` | Any denied action | Dry, short, unmusical thud. Deliberately unpleasant and deliberately small |
+| 20 | `ui_tap` | Any button press | Soft click |
+| 21 | `ui_pause` | Pause opened | Muffled stop |
+| 22 | `ui_count_tick` | Resume countdown 3, 2, 1 | Wood block |
+| 23 | `ui_count_go` | Resume countdown "GO" | Wood block, up a fifth |
+| 24 | `sfx_clock_tick` | Each of the last 5 seconds | Rising semitone per tick |
+| 25 | `sfx_shutter` | Shift start / end | Metal shutter, 700 ms |
+| 26 | `sfx_wave` | Endless wave change | Rising sweep + a soft gong |
+| 27 | `sfx_life_lost` | Endless life lost | Glass fracture, short |
+| 28 | `sfx_purchase` | Upgrade bought | Coins out + a satisfying mechanical set |
+| 29 | `sfx_purchase_big` | Premium unlock | Fuller version of 28 with the `sfx_target_met` figure over it |
+| L1 | `amb_cafe` | Loops during play | Room tone, distant street, a fan. −26 dB |
+| L2 | `amb_chair_scrape` | Loops while a hottest-seat customer is urgent | One voice only, −18 dB, stops instantly on resolve |
+| M1 | `mus_cafe` | Loops on all non-gameplay screens; **ducked to −14 dB during play** | Oud + rhodes + brushed kit, ~92 BPM, 90 s loop, warm and unhurried. During a shift the music steps back so the SFX can do the work |
+
+---
+
+## 7. Readability under pressure
+
+The design target: a player who glances at the screen for **500 ms** must be able to answer three
+questions — *who is about to leave*, *what can I serve right now*, and *what is ready to pick up* —
+without reading a single word.
+
+### 7.1 The half-second parse
+
+| Question | Channel | Where the eye goes |
+|---|---|---|
+| **Who is about to leave?** | The urgent column wash — a 12% `state-urgent` vertical gradient behind one customer, full-height through zones C and D | Peripheral vision. Colour-in-a-column is the fastest pre-attentive cue available |
+| **How much time do they have?** | Patience bar **length** | Already looking at that column |
+| **Can I serve right now?** | The plate's `cream-50` ring + `amber-400` glow, and the caret pointing from the ready ticket down at the counter | The ring is the brightest thing on the screen when it is on, and nothing else in the game is ever allowed to be that bright |
+| **What is ready to pick up?** | Filled `amber-500` pips, counted not read, plus the bin's `ink-450` edge lift | Bottom third, where the thumb already is |
+| **What is cooking?** | `state-calm` bars filling — the only blue in the play area | Same place |
+
+**The brightness ladder is the whole trick.** Exactly one thing on screen is allowed to be at
+`cream-50` brightness at a time: whatever the player should touch next. Everything else lives
+between `ink-800` and `amber-500`.
+
+### 7.2 Colour coding rules
+
+| Colour | Means, and means only | Appears in |
+|---|---|---|
+| `state-calm` blue | "Time is being spent, and that is fine" | Cook progress bars, patience ≥ 55% |
+| `state-soon` amber | "Attention soon", and separately: warm interactive affordance | Patience 25–55%, the `+` glyph, the clock bar, recoverable warnings |
+| `state-urgent` red | "About to be lost" | Patience < 25%, walkout, clock < 20%, last life, destructive confirm |
+| `ok-500` green | **Money and goals only** | Goal bar, floating payment on a good tip, "Served" stat, purchase checks |
+| `brass-400` | **Currency figures only** | Cash totals, prices, coins, AED numbers |
+| `cream-50` | "Touch this next" | Ready plate ring, ready ticket ring, primary text |
+
+**Two colours are never used for state at all:** the ten customer identity hues, and the whole
+environment palette. A player must never have to ask whether a colour is decoration.
+
+### 7.3 What may and may not use red
+
+**Red is reserved for loss and for the irreversible.** It is used for:
+
+- A customer below 25% patience, and the walkout that follows
+- The clock bar below 20%, and the last life in endless
+- The failure row on S-08 and the shortfall marker
+- The second-tap confirm state on destructive actions ("Start over", "Restart the day")
+
+**Red may never be used for:**
+
+| Not red | Use instead |
+|---|---|
+| The scrape/trash button at rest | `ink-800` fill, `cream-400` glyph |
+| Any button in its resting state | Amber for primary, transparent for secondary |
+| A recoverable error (S-17 purchase failure) | `state-soon` amber |
+| "Not affordable" in the shop | `cream-600` dimming |
+| Food, drink, or any environment element | The food and environment palettes |
+| A customer's identity chip | The ten identity hues (none of which is `state-urgent`) |
+| Decoration, borders, dividers, badges | `ink-600` / `amber-500` |
+
+The rule exists because red's job is to be **rare**. A red trash icon sitting on screen for ninety
+seconds costs the urgent customer their only unique signal.
+
+### 7.4 Icon versus text
+
+| Rule | Application |
+|---|---|
+| **Icon alone** — only where the object is the icon | Ingredient sprites in bins and on the plate. Six shapes, learned in one shift, used 40× a shift. Text here would be slower to parse than the shape |
+| **Icon + text** — everywhere the player is *choosing* | Ticket cards (chips + dish name), shop rows, recipe list, settings rows. Under pressure the icon is read; at leisure the text confirms |
+| **Text alone** — every number, every label, every action word | HUD, prices, timers, buttons, stats. No number is ever encoded as a picture |
+| **Never icon-only** | Any destructive or irreversible action; any purchase; anything that appears fewer than five times per session |
+| **Always paired with text on first appearance** | A newly unlocked ingredient shows its name on the bin at 2× normal prominence for the whole first shift it exists |
+
+Button labels are **verbs, not nouns**: "Start shift", "Bank 320 AED", "Open day 4", "Try day 3
+again". No button in the game is labelled "OK".
+
+### 7.5 Minimum touch targets
+
+| Element | Size | Notes |
+|---|---|---|
+| Absolute minimum, anywhere | **44 × 44** | Apple HIG floor |
+| Minimum for anything touched during a shift | **48 × 48** | Android floor, adopted as the in-play standard |
+| `+` cook button | **48 × 48** | The most-pressed control in the game. Cornered so it also catches off-target taps from the card edge |
+| Bin take-target | **114 × 54 minimum** | The remaining L of the card |
+| Ticket card (5 seats — the worst case) | **66 × 138** | Narrow but very tall; supplemented by the customer body below it |
+| Customer body hit region | **column width × 110** | A second, larger target for the same action. At 5 seats the combined ticket + body target is 66 × 260 |
+| Scrape button | **64 × 64** | Larger than the minimum because a mis-tap here costs three ingredients |
+| Primary buttons on menu screens | **358 × 56** | |
+| Spacing between any two distinct targets | **≥ 8 pt**, and ≥ 4 pt of dead zone where they share a card | |
+
+### 7.6 What must never overlap
+
+| Never overlapping | Why |
+|---|---|
+| The `+` button and the bin take-target | The two are opposite actions on the same card. A 4 pt dead zone separates them, permanently |
+| Any two ticket cards | 7 pt minimum gap, even at 5 seats |
+| The floating payment and the patience bar of an adjacent seat | Floats are clipped to their own column and z-ordered above their own card only |
+| The urgent badge and the patience bar | The badge sits at the card's top-right, overlapping the *corner* by 6 pt, above the bar's right terminus but never over its fill |
+| The coach caption (S-18) and the element it points at | The caption is always placed on the opposite side of the screen's midline from its target |
+| Any modal panel and the order rail | Pause and unlock cards are vertically centred; the rail top at y 117 is never covered by a panel whose top edge is above y 232 |
+| The wave banner and the order rail | The banner occupies y 117–157 only when the rail's cards are shorter; otherwise it renders as an overlay **above** the HUD, not below it |
+| Text and any sprite | Every label sits in its own reserved band. No text is ever set over art |
+| The system home indicator and any control | 34 pt bottom inset is empty, always |
+
+---
+
+## 8. Accessibility
+
+### 8.1 Colour-blind safety
+
+The prototype leans on green → amber → red for patience. Roughly **8% of men** cannot reliably
+separate those. The fix is structural, not a filter.
+
+**Fix 1 — reassign the hues.** Green is removed from the urgency ramp entirely and given one
+permanent job: **money**. The patience ramp becomes **blue → amber → red**.
+
+| | Old | New | Why |
+|---|---|---|---|
+| Calm | `#4FBF7B` green | **`#5B9DD9` blue** | Blue-vs-orange is the one colour axis that survives both deuteranopia and protanopia. Green-vs-red is the one that does not |
+| Soon | `#F2A03D` amber | `#F2A03D` amber | Unchanged |
+| Urgent | `#E24B2E` red | `#E24B2E` red | Unchanged — and now separated from calm by hue *and* by 22 points of L\* |
+
+**Fix 2 — the Two-Channel Rule.** *No state in this game is ever signalled by hue alone.* Every
+state carries at least two of: length, pattern, size, shape, position, motion, sound.
+
+| State | Hue | Second channel | Third channel |
+|---|---|---|---|
+| Patience calm | blue | bar length 100–55% | solid fill, `neutral` face |
+| Patience soon | amber | bar length 55–25% | 6 pt stripes scrolling 1/s, `impatient` face |
+| Patience urgent | red | bar length 25–0% | 4 pt stripes at 3/s, bar grows to 8 pt, seconds badge, `annoyed` face + lean |
+| Plate ready | *(none)* | `cream-50` 2 pt ring — **luminance**, not hue | caret pointer + printed dish name + `sfx_dish_ready` |
+| Ticket serveable | *(none)* | `cream-50` ring + `amber-400` glow | bobbing caret |
+| Bin has stock | amber pips | **countable discrete pips** | edge lift to `ink-450`, sprite raised 2 pt |
+| Bin cooking | blue | bar **filling** (direction) | steam particle, sprite `running` |
+| Target met | green | a drawn check glyph | a pop, `sfx_target_met` |
+| Money earned | brass | the `+` sign and the numeral | coin burst, `sfx_coins` |
+
+**Fix 3 — the greyscale test, as a build gate.** Every screen is rendered to greyscale in CI. If
+two states of the same component cannot be told apart in greyscale, the build fails. This is the
+only way the Two-Channel Rule stays true as the game grows.
+
+**Fix 4 — an explicit setting (S-13 → Colour-blind mode), three levels:**
+
+| Level | Effect |
+|---|---|
+| **Off** | Hues as specified; patterns still on (they are the default, not an accommodation) |
+| **Patterns** *(default)* | As specified above |
+| **Patterns + shapes** | The patience bar is replaced by **five discrete notches** that extinguish one at a time — countable rather than measured. The seconds badge shows from 100% rather than 25%. Bin pips gain a numeral. The plate ready state adds a 16 pt check glyph inside the ring |
+
+**Fix 5 — never rely on the identity hues.** The ten customer chips carry a **letter** (the name's
+initial) in every case, so two customers are always distinguishable without colour.
+
+### 8.2 Text sizing
+
+| Provision | Spec |
+|---|---|
+| Scale steps | **Normal 1.0 · Large 1.15 · Largest 1.3**, applied to every `body-*` and `num-*` style. `display-*` scales at half the rate (1.0 / 1.075 / 1.15) because it is already large and reflows hardest |
+| OS setting | Read at launch and pre-selected; overridable in-app, because a player may want large system text and compact game text |
+| What does not scale | The `label` style stays at 9 pt (it is a fixed-width HUD element) but **gains weight** from DM Mono 500 to 700 at Large and Largest |
+| Reflow guarantee | Every screen is laid out with min-height rows and scrollable content areas. **No screen may clip at Largest.** The gameplay screen's zone heights are fixed, so at Largest the ticket dish name truncates to one line and the bin name hides — the sprites carry the meaning (§7.4) |
+| Line length | Never above 68 characters at Normal |
+| Contrast | Every text/background pair ≥ **4.5:1**; `cream-600` on `ink-800` is the floor case and is used only for non-essential tertiary copy, never for anything needed during a shift |
+
+### 8.3 Reduced motion
+
+Honours `prefers-reduced-motion` (mirrored from the OS, overridable in S-13). The prototype already
+does the blunt version; this is the considered one.
+
+| Effect | Full motion | Reduced motion |
+|---|---|---|
+| Item bin → plate | 260 ms arc | **100 ms cross-fade** — the travel is removed, the confirmation is kept |
+| Card pops, pip pops, button squash | Scale animations | Replaced by a 90 ms opacity/fill flash |
+| Coin burst | 12 physics coins | A single coin icon fading in and out over 240 ms |
+| Floating payment | Rise 28 pt + fade | Fade in place, 600 ms |
+| Customer arrive/leave | Translate + rotate | Fade only, 200 ms |
+| Idle bob, urgent sway, caret bob, parallax | On | **Off entirely** |
+| Stripe pattern scroll | 1–3 pitches/s | **Static stripes** — the pattern stays (it is an accessibility channel), only the scrolling stops |
+| Screen transitions | Slide + fade | Fade only, 160 ms |
+| Day start/end fall-away | 520 ms staggered | 200 ms fade |
+| Scrim blur | 2 pt blur | No blur, scrim opacity 80% |
+
+**Nothing that carries information is removed** — only the way it moves changes. And reduced motion
+never changes timing of the *simulation*: cook times, patience and the clock are untouched.
+
+### 8.4 One-handed reach
+
+Portrait, held in one hand, thumb pivoting from the lower corner. The natural reach arc covers
+roughly the **bottom 55%** of a 844 pt screen.
+
+| Zone | y range | Reach | What lives there — and why |
+|---|---|---|---|
+| Bin grid | 585–810 | **Easy** | The most-tapped controls in the game (`+` ×6, take ×6) are in the easiest region. Correct |
+| Plate strip | 493–585 | **Easy** | Scrape, and the plate's visual feedback |
+| Café band | 277–493 | **Reachable** | The customer bodies — a secondary, larger target for the serve action, deliberately placed in the mid-reach band |
+| Order rail | 117–277 | **Stretch** | Tickets are a *stretch* target — which is exactly why the customer body below duplicates the same action in an easier place. **Serving is always reachable one-handed** |
+| HUD | 47–117 | **Hard** | Contains nothing interactive except pause, which is deliberately hard to hit by accident |
+
+**Hand preference (S-13 → Right / Left)** mirrors the horizontal position of: the pause button, the
+scrape button, the back chevron, and the shop's buy buttons. It does **not** mirror the bin grid or
+the order rail — those are spatial memory and must stay stable.
+
+**No control in the game requires a second hand, a long-press, a drag, a swipe or a multi-touch
+gesture.** Every action is a single tap. This is a design constraint, not an accommodation: it is
+what makes the game playable on a bus, which is where this player plays.
+
+### 8.5 Arabic / RTL
+
+The game is set in the UAE; Arabic is a first-class locale, not a translation layer.
+
+| Concern | Decision |
+|---|---|
+| **Layout mirroring** | Full RTL mirror of every screen: back chevron moves right, pause moves left, stat rows flip key/value, buttons keep full width, list rows reverse |
+| **Order rail** | Mirrored — seat 1 becomes the rightmost. The café band mirrors with it so ticket and body stay in the same column |
+| **Bin grid** | **Mirrored.** The grid reads right-to-left in Arabic. It is a *reading* surface (six named machines), not a control panel, and Arabic players expect to scan it in their reading direction |
+| **Progress fill direction** | **Mirrored.** Goal bar fills right → left; clock bar drains left → right; patience bars drain toward the trailing edge. Progress must always advance in the reading direction or it reads as running backwards |
+| **Sprites** | **Never mirrored.** A jug's handle, a croissant's curve and the barista's stance are objects, not directions. Mirroring them makes the art look wrong for no gain |
+| **Directional glyphs** | **Always mirrored:** chevrons, the recipe "→" arrow, the serveable caret's horizontal offset. **Never mirrored:** the "+" glyph, the check, the clock |
+| **Customer arrival** | Enters from the *leading* edge and exits toward the *trailing* edge, so the door swaps sides with the layout |
+| **Numerals** | Western Arabic (0–9) by default; an S-13 sub-toggle switches to Eastern Arabic (٠–٩). Prices read `١٦ د.إ` in Arabic, `16 AED` in English. Numerals stay **LTR within RTL text** — enforce with directional isolates so a price never scrambles |
+| **Typography** | Cairo 700/900 for display, IBM Plex Sans Arabic 400/500/600 for UI. **Line-height +15%** across the board for Arabic (ascenders and descenders are taller). **No letter-spacing, ever** — it breaks Arabic joining. **No uppercase transform** — the `label` style drops its `+0.14em` tracking and uppercase and instead uses weight 600 in Arabic. **No faux bold or faux italic** |
+| **Text expansion** | Arabic runs ~15% shorter than English here, which is the easy direction — but German-length is the real design constraint, so every label box is sized for **+35%** over the English string |
+| **Names** | The `NAMES` array is already Arabic; in the Arabic locale they render in Arabic script (رامي، نور، دانة…) and the identity chip carries the Arabic initial |
+| **Right-thumb default** | Arabic locale defaults the hand preference to Right as well — reading direction and handedness are unrelated |
+
+---
+
+## 9. Build list — v1.0 code-authored assets
+
+**120 assets**, all authored in-repo as hand-written SVG/vector. This is a build list, not a
+commissioning sheet: each row names the asset, its viewBox (R1), the primitives it is made from,
+the states it must support, and the display sizes it must stay legible at. **The smallest in-game
+size is the binding constraint** — an asset that fails at its smallest size is not finished (R9).
+
+Conventions used in every row: all coordinates on the 4-unit grid (R2), artwork inside the 80 × 80
+padding box (R3), radii from {4, 8, 12, 24, 48} (R4), angles from {0, 30, 45, 60, 90} (R5), ≤ 9
+shapes (R6), 6-unit `ink-outline` silhouette stroke (R7), light upper-right 60° (R8), tokens only
+(R10). "Shade" and "H-dot"/"H-bar" refer to the recipes in §2.6.
+
+### 9.1 Ingredients — 7
+
+| # | Asset | viewBox | Primitives | States | Display sizes (smallest **bold**) |
+|---|---|---|---|---|---|
+| 1 | `ing/shot` | 96×96 | rounded-rect 44×40 r12 `fill-porcelain`; top ellipse 44×12; clipped liquid rect `espresso`; saucer ellipse 64×10; shade; H-dot; contact ellipse | base · dimmed (locked bin) · silhouette (recipe ghost) | 52 (bin), 36 (plate), **21 (ticket chip)** |
+| 2 | `ing/tea` | 96×96 | two mirrored arcs forming a waisted istikana `fill-glass`; liquid path `tea`; saucer ellipse 60×10; shade; H-bar; contact | as above | 52, 36, **21** |
+| 3 | `ing/syrup` | 96×96 | rounded-rect 32×52 r8 `fill-honey`; neck trapezoid; cap rect 20×8 r4; drip circle r6; shade; H-bar; contact | as above | 52, 36, **21** |
+| 4 | `ing/milk` | 96×96 | rect 40×52 r8 `fill-porcelain`; 30° pouring-lip triangle; C-handle stroke; liquid arc `milk`; shade; H-dot; contact | as above | 52, 36, **21** |
+| 5 | `ing/pastry` | 96×96 | three overlapping rounded-rects r12 on a 30° arc `fill-dough`; two 30° score strokes; shade; H-bar; contact | as above | 52, 36, **21** |
+| 6 | `ing/ice` | 96×96 | three squares 26×26 r4 at 0°/30°/−30° `fill-glass`; inner `ice-core` squares; shade on lowest; H-dot on highest; contact | as above | 52, 36, **21** |
+| 7 | `ing/locked` | 96×96 | padlock: rounded-rect body 44×36 r8 `ink-700`; shackle arc stroke; keyhole circle r5 | base only | 52, **28** |
+
+**Silhouette separation check (R9):** squat/no-handle · waisted · narrow-neck-with-drip ·
+straight-with-handle-and-lip · crescent-no-vessel · three-part-cluster-with-gaps. All six differ in
+outline alone.
+
+### 9.2 Dishes — 8
+
+Each reuses its ingredient vessel geometry and changes fill plus one garnish shape.
+
+| # | Asset | viewBox | Built from | States | Display sizes |
+|---|---|---|---|---|---|
+| 8 | `dish/espresso` | 96×96 | `ing/shot` unchanged | base · ghost 45% (plate backdrop) · large (unlock card) | 120, 72, 64, 44, **32** |
+| 9 | `dish/mint-tea` | 96×96 | `ing/tea` + `mint` liquid + two leaf ellipses at 30° | as above | 120, 72, 64, 44, **32** |
+| 10 | `dish/latte` | 96×96 | shot vessel heightened to 44×52 + `milk` liquid + one `tea` heart path | as above | 120, 72, 64, 44, **32** |
+| 11 | `dish/karak` | 96×96 | `ing/tea` + `karak` liquid + `cream-50` foam arc + cardamom dot r4 | as above | 120, 72, 64, 44, **32** |
+| 12 | `dish/almond-croissant` | 96×96 | `ing/pastry` + three `almond` flake triangles + four `cream-50` dusting dots r3 | as above | 120, 72, 64, 44, **32** |
+| 13 | `dish/iced-latte` | 96×96 | tumbler rect 44×60 r8 `fill-glass` + `milk` liquid + two `ice-core` squares + straw rect at 30° | as above | 120, 72, 64, 44, **32** |
+| 14 | `dish/date-pastry` *(reserved)* | 96×96 | pastry base + `date` filling ellipse + `cream-50` lattice strokes | as above | 120, 72, 64, 44, **32** |
+| 15 | `dish/saffron-tea` *(reserved)* | 96×96 | tea base + `fill-honey` liquid + three saffron strand strokes | as above | 120, 72, 64, 44, **32** |
+
+Rows 14–15 exist so the expansion described in `target-player.md` §"How to last a while" has
+somewhere to land without a style revision.
+
+### 9.3 Machines — 6
+
+Each machine sits in a bin card and again, at 32 pt, on the café shelf.
+
+| # | Asset | viewBox | Primitives | States | Display sizes |
+|---|---|---|---|---|---|
+| 16 | `mach/espresso` | 96×96 | body rounded-rect 60×52 r8 `fill-steel`; group head rect 24×12; portafilter rect + handle; drip tray rect; shade; H-bar | **idle** · **running** (lever rotated 30°, `amber-400` lamp circle r4 on) · dimmed (locked) | 52 (bin), **32 (shelf)** |
+| 17 | `mach/samovar` | 96×96 | urn body: circle r26 `fill-steel` + neck rect; tap rect at 30°; lid disc; shade; H-dot | idle · running (tap `sun-300` stream rect) · dimmed | 52, **32** |
+| 18 | `mach/syrup-rack` | 96×96 | two bottles rounded-rect 20×44 r8 `fill-honey`; shelf rect `wood-600`; pump strokes; shade | idle · running (pump depressed 6 units) · dimmed | 52, **32** |
+| 19 | `mach/steamer` | 96×96 | jug rect 36×48 r8 `fill-porcelain`; wand stroke at 30°; base rect `fill-steel`; shade; H-dot | idle · running (wand lowered, steam anchor point) · dimmed | 52, **32** |
+| 20 | `mach/oven` | 96×96 | box 64×56 r8 `fill-steel`; door rect 48×36 r4 with `ink-700` window; two knob circles r5; shade; H-bar | idle · running (window `sun-300`, knob rotated 30°) · dimmed | 52, **32** |
+| 21 | `mach/ice-well` | 96×96 | trough rounded-rect 64×36 r12 `fill-steel`; three ice squares r4 `fill-glass`; scoop arc; shade; H-bar | idle · running (scoop rotated) · dimmed | 52, **32** |
+
+### 9.4 Customer parts library — 30
+
+Assembled per §2.9. Every part shares the 96 × 128 viewBox and registers to the same pivots, so any
+combination is valid without adjustment.
+
+| # | Group | Count | viewBox | Primitives per part | States |
+|---|---|---|---|---|---|
+| 22–27 | `char/head` | **6** | 96×128 | circle r28 **or** squircle 56×56 r24, in 4 skin tokens (2 shapes × 4 tones, 6 shipped) | base · shaded (shade recipe) |
+| 28–35 | `char/hair` | **8** | 96×128 | ≤ 4-node path over the head: ghutra+agal, shayla, short crop, bun, curls (5 circles r10), cap, long, bald+beard | base only |
+| 36–41 | `char/torso` | **6** | 96×128 | one rounded trapezoid, top 48 → bottom 84, y 92–120, top r24: kandura, abaya, courier polo, office shirt, hoodie, apron | base · leaning (translate +6, rotate 3°) |
+| 42–46 | `char/mouth` | **5** | 96×128 | one 16-unit path at (48, 70): neutral, pleased, impatient, annoyed, delighted | base only |
+| 47–48 | `char/brow` | **2** | 96×128 | rect 12×3 r2, left and right | rotation −20°/−10°/0°/+10°/+20° |
+| 49–51 | `char/accessory` | **3** | 96×128 | phone rect 14×22 r4; tote rounded-rect + strap arc; glasses two circles r11 + bridge | base only |
+
+Eyes are two circles r 3.5 drawn by the assembler, not an asset. Twelve named regulars are twelve
+fixed combinations of the above, bound permanently to the `NAMES` array.
+
+**Display sizes:** 110 pt (café band) · 64 pt (result screen) · **28 pt (identity chip — head and
+hair silhouette only, no features)**.
+
+### 9.5 Barista parts — 9
+
+| # | Asset | viewBox | Primitives | States | Display sizes |
+|---|---|---|---|---|---|
+| 52 | `barista/head` | 96×128 | squircle 56×56 r24, skin token 2, plus bound hair path | base | 140, 120, **64** |
+| 53 | `barista/torso` | 96×128 | apron trapezoid `fill-linen` + collar path + two tie strokes | base | 140, 120, **64** |
+| 54–57 | `barista/arm` | 96×128 ×4 | two rounded-rect limbs (upper 14×34 r8, fore 12×30 r8) rotating about a shoulder pivot | **idle** · **reach** · **serve** · **celebrate** | 140, 120, **64** |
+| 58–60 | `barista/mouth` | 96×128 ×3 | one path: neutral, pleased, delighted | base | 140, 120, **64** |
+
+### 9.6 Environment layers — 6
+
+| # | Asset | viewBox | Primitives | States | Display |
+|---|---|---|---|---|---|
+| 61 | `env/street` | 390×216 | 5–7 flat shop silhouettes `street-700`; one lamp circle r10 `sun-300`; one passer-by silhouette (reuses `char/torso` + head) | **day** · **dusk** · **night** (fill token swap only — §2.11) | 390 wide, **full-bleed at min band 150 pt** |
+| 62 | `env/window-frame` | 390×216 | rect frame strokes 6 units `wood-600`; one 30° `cream-50` glint bar | base | 390 |
+| 63 | `env/wall` | 390×216 | `ink-800` rect; `tile-500` band rect 390×32; six tile division strokes | base | 390 |
+| 64 | `env/shelf` | 390×216 | rect 358×8 r4 `wood-600` + three jar rounded-rects r8 `fill-glass` | base | 390 |
+| 65 | `env/counter` | 390×216 | face rect `wood-600`; top rect 390×8 `wood-400`; one `cream-50` rim stroke 2 units | base | 390 |
+| 66 | `env/door` | 390×216 | rect 56×120 r8 `wood-600`; handle rect; chime circle r5 | **closed** · **open** (rotate 20° about the hinge edge, 240 ms) | 56 |
+
+### 9.7 UI glyphs — 28
+
+All `viewBox="0 0 24 24"`, 2-unit grid, **1.5-unit stroke** (R7), round caps and joins, currentColor.
+
+| # | Glyph | Primitives | Used on |
+|---|---|---|---|
+| 67 | `plus` | two rects 14×2 r1 | Bin `+` |
+| 68 | `check` | two-node polyline | Target met, purchases, colour-blind ready cue |
+| 69 | `close` | two rects rotated ±45° | Store, modals |
+| 70 | `chevron` | two-node polyline | Back, list rows (mirrors in RTL) |
+| 71 | `caret` | filled triangle, 12×8 | The serveable pointer |
+| 72 | `lock` | rounded-rect + arc | Locked bins, locked recipes |
+| 73 | `pause` | two rects 4×14 r2 | HUD |
+| 74 | `gear` | circle + 6 rects at 60° | Settings |
+| 75 | `speaker` | trapezoid + two arcs | Sound toggle (arcs removed = off) |
+| 76 | `music-note` | ellipse + stem rect | Music toggle |
+| 77 | `haptic` | rounded-rect + two arcs | Haptics toggle |
+| 78 | `motion` | arrow arc | Reduced motion |
+| 79 | `contrast` | circle, half filled | Colour-blind mode |
+| 80 | `text-size` | two "A" paths at different scales | Text size |
+| 81 | `hand` | palm rounded-rect + 4 finger rects | Hand preference, coach pointer |
+| 82 | `globe` | circle + 3 arcs | Language |
+| 83 | `coin` | circle r10 + inner circle r6 | Currency, particles |
+| 84 | `aed-mark` | د.إ set as a path | Arabic price display |
+| 85 | `streak-steam` | three 30° wavy strokes | Streak chip |
+| 86 | `clock` | circle + two hands | Shift length, endless "lasted" |
+| 87 | `stool` | seat ellipse + 3 legs | "Another seat" upgrade |
+| 88 | `chair` | back rect + seat rect | "Comfier chairs" upgrade |
+| 89 | `basket` | trapezoid + 3 weave strokes | "Bigger bins" upgrade |
+| 90 | `bolt` | one 6-node path | Machine speed upgrade |
+| 91 | `grid` | 3 rects | Machine slots upgrade |
+| 92 | `scrape-bin` | body trapezoid + lid rect (tilts on press) | The scrape button |
+| 93 | `warning` | rounded triangle + bar + dot | Recoverable errors, urgent badge |
+| 94 | `book` | two rects + spine stroke | Recipes screen |
+
+### 9.8 UI primitives — 7
+
+Drawn by the engine from tokens, not exported. Listed because they are still authored assets.
+
+| # | Asset | Spec | States |
+|---|---|---|---|
+| 95 | `ui/button-plate` | rounded-rect r10, 358×56, token fill | rest · pressed · disabled · focus |
+| 96 | `ui/card` | rounded-rect r12, 1-unit `ink-600` edge | rest · raised · dashed (empty seat) |
+| 97 | `ui/pill` | rounded-rect r16 | rest · active |
+| 98 | `ui/segmented-track` | rounded-rect r12, `ink-700`, 2–3 cells | per-cell selected / unselected |
+| 99 | `ui/stripe-pattern` | 45° stripe tile, `ink-950` @14%, pitch 6 and 4 | static · scrolling 1/s · scrolling 3/s |
+| 100 | `ui/scrim` | full-frame `ink-950` @72% (the one permitted gradient: 0→72% over 24 pt at the top edge) | in · out |
+| 101 | `ui/focus-ring` | rounded-rect stroke 2 pt `focus-500`, 2 pt offset | on · off |
+
+### 9.9 Effects — 9
+
+All built from the same primitives; all transform-and-opacity only.
+
+| # | Asset | Primitives | Count / lifetime | Fires on |
+|---|---|---|---|---|
+| 102 | `fx/steam` | 4 circles r4–r8 `sun-300` @40% | 4 per puff, 800 ms rise + fade | Cook running, cook complete, shelf machines |
+| 103 | `fx/coin` | reuses `coin` glyph, `brass-400` fill, 3-unit stroke | 4–12, 520 ms, gravity 900 pt/s² | Payment, purchase |
+| 104 | `fx/sparkle` | 4-point star path, 3 sizes | 6–12, 420 ms | Dish unlock, streak ≥5, purchase success |
+| 105 | `fx/ring-pulse` | circle stroke 3 units `amber-400`, r 8 → 28 | 1, 260 ms | Cook complete (from the pip) |
+| 106 | `fx/dust` | 4 circles r3 `cream-600` @30% | 4, 300 ms | Card landing, bin grid entry |
+| 107 | `fx/shard` | 5 triangles `cream-200` | 5, 320 ms, gravity | Endless life lost, streak break |
+| 108 | `fx/float-text` | live text, `display-s` | 1, 850 ms rise 28 pt | Payment, "walked out" |
+| 109 | `fx/stamp` | rounded-rect plaque r8 + live text, rotated −7° | 1, 180 ms impact + 60 ms settle | Day result, purchase success |
+| 110 | `fx/confetti` | 3 shapes: rect 8×4 r2, circle r4, 30° parallelogram | 20, 900 ms | New personal best only |
+
+### 9.10 Wordmark — 2
+
+| # | Asset | viewBox | Spec |
+|---|---|---|---|
+| 111 | `brand/wordmark-en` | 390×120 | "CAFÉ RUSH" as outlined paths from Bricolage 800, plus a 2×64 `amber-500` rule and `ing/tea` at 56 pt with a steam anchor |
+| 112 | `brand/wordmark-ar` | 390×120 | "كافيه راش" as paths from Cairo 900, same rule and glass. **Not a mirror** — separately composed, because Arabic display type needs its own spacing |
+
+### 9.11 Store and launch — 5
+
+| # | Asset | Size | Spec |
+|---|---|---|---|
+| 113 | `store/app-icon` | 1024×1024 | `ing/tea` at 640 pt on an `ink-900` field with a `terracotta-600` 30° corner band. **No text** (it is unreadable at 60 pt and breaks localisation) |
+| 114 | `store/adaptive-fg` | 432×432 | Android adaptive foreground: the glass only, inside the 66% safe circle |
+| 115 | `store/adaptive-bg` | 432×432 | Flat `ink-900` with the `terracotta-600` band |
+| 116 | `store/splash` | 390×844 | `brand/wordmark-*` centred per S-01. Authored per locale from the same vector |
+| 117 | `store/feature-graphic` | 1024×500 | The café band composition at full width with the wordmark right-aligned |
+
+App Store screenshots are **captured from the running game**, not authored — which is only possible
+because the art is vector and renders identically at any capture resolution.
+
+### 9.12 Empty and system states — 3
+
+| # | Asset | viewBox | Spec | Appears on |
+|---|---|---|---|---|
+| 118 | `sys/no-connection` | 96×96 | `env/door` closed + a 30° cross-out stroke `cream-600` | S-17 store unreachable |
+| 119 | `sys/nothing-here` | 96×96 | An empty saucer: two ellipses + shade | Shop with everything maxed; endless with no best yet |
+| 120 | `sys/spinner` | 24×24 | A 270° arc stroke 2 units, rotating 360° / 900 ms linear | Purchase in flight, save load |
+
+### 9.13 Totals
+
+| Group | Count |
+|---|---|
+| Ingredients | 7 |
+| Dishes | 8 |
+| Machines | 6 |
+| Customer parts | 30 |
+| Barista parts | 9 |
+| Environment layers | 6 |
+| UI glyphs | 28 |
+| UI primitives | 7 |
+| Effects | 9 |
+| Wordmark | 2 |
+| Store and launch | 5 |
+| Empty / system | 3 |
+| **Total** | **120** |
+
+**115 in-game, 5 store and launch.** Every one is authored in-repo as vector code, so the entire
+list is re-colourable from the token tables in §2.3 and restyleable by editing the rules in §2.5 —
+a change of look is a global edit, not a re-draw (§2.11).
+
+### 9.14 Audio, for completeness
+
+Not art, and the one category bought rather than authored: **29 SFX + 2 ambience loops + 1 music
+bed**, itemised in §6.8. All library-licensable; `art-plan.md` prices a library licence at USD
+50–200, which is the only external spend in this entire specification.
+
+---
+
+## 10. Motion, empty and error states, and the first 30 seconds
+
+### 10.1 Motion principles
+
+Four rules that govern every animation in §6, so that a new one can be written without asking.
+
+| # | Rule | Consequence |
+|---|---|---|
+| **M1** | **Motion explains causality.** Anything that moves is showing where something came from or where it went. Nothing moves for decoration. | The bin → plate arc exists to teach that stock becomes plate contents. The coin burst arcs toward the HUD because that is where the money goes |
+| **M2** | **Duration is inversely proportional to frequency.** A thing that happens 40× a shift gets ≤ 260 ms. A thing that happens once a shift may take 900 ms. A thing that happens once a day may take 1400 ms | Item travel 260 ms; payment 850 ms; day transition 520 ms; wave banner 1400 ms |
+| **M3** | **Nothing blocks input.** The only animations that gate the player are the day start (420 ms) and the resume countdown (1800 ms), both of which are also pauses in the simulation. No reward animation ever stops the player from acting | A payment count-up never delays the next tap |
+| **M4** | **Arrivals overshoot; departures accelerate away.** `e-out`/`e-pop`/`e-snap` in, `e-in` out. Universally | Gives the whole game one consistent sense of weight without any physics simulation |
+
+### 10.2 Empty states
+
+| Where | Condition | What is shown |
+|---|---|---|
+| Plate well | No ingredients | Dashed edge, three ghost slot outlines, `body-s` `cream-600` "Tap a bin to start a dish." Becomes "Tap a machine below" for the first shift only |
+| Ticket card | Seat unoccupied | Dashed 1 pt `#2A221E` edge, no contents, and an **empty stool** drawn in the café band below it. The empty card is deliberately quiet — an empty seat is not a problem, it is headroom |
+| Bin | Live, stock 0, nothing cooking | Pips all grey. **No error styling.** An empty bin is a normal state, not a failure |
+| Order rail | All seats empty, > 6 s since the last customer | The barista plays an extended idle (wiping the counter, 2.4 s). No UI message — quiet moments are the game's only rest |
+| Upgrade shop | Everything maxed | `sys/nothing-here` at 64 pt, `display-m` "Nothing left to buy.", `body-m` "The café is as good as it gets. Go make some money." Primary button becomes "Open day {n+1}" |
+| Endless best card | No run recorded | `body-m` `cream-400` "No run yet." with the 3-life icons shown full |
+| Recipes screen | Nothing locked | No empty state needed — the list is always populated |
+| Store | Already purchased | The screen is not reachable; the Home utility row hides the bag icon entirely |
+
+### 10.3 Error states
+
+The game runs offline and owns its own save, so there are exactly four error surfaces.
+
+| Error | Screen | Message | Recovery |
+|---|---|---|---|
+| Purchase failed / store unreachable | S-17 | "The store didn't answer." — `state-soon` warning glyph, **not red** | "Try again" / "Not now". The game remains fully playable |
+| Nothing to restore | S-17 | "Nothing to restore on this account." + one line explaining store accounts | "Try again" / "Not now" |
+| Save unreadable | S-21 | "We couldn't read your save." + "nothing you paid for is lost either way" | "Try again" / "Start fresh" (two-step confirm naming the day it erases) |
+| Save write failed (disk full) | Toast | A 48 pt toast under the HUD: "Couldn't save — check your storage." 4 s, `state-soon` left bar | Non-blocking. The shift continues; the game retries on the next screen change |
+
+**Rules for all four:** no error codes in the headline (a reference string may sit at the bottom in
+`num-s` `cream-600`); no red unless the state is genuinely unrecoverable; never a dead end — every
+error screen offers at least one way forward; and the game **never loses the current shift** to an
+error. If something fails mid-shift, it is a toast, not a modal.
+
+### 10.4 The first thirty seconds
+
+What a first-time player sees, second by second. This is the sequence the whole onboarding design
+is optimised for, and its goal is narrow: **the player must experience the game's actual skill —
+starting something before they need it — inside thirty seconds.**
+
+| Time | On screen | Player does | What they learn |
+|---|---|---|---|
+| **0:00** | S-01 splash: wordmark, karak glass, one steam puff | Nothing | The tone: warm, dark, quiet, unhurried |
+| **0:01** | S-19 language picker (first run only), two large cards | Taps one | The game knows where it is set |
+| **0:02** | S-02 home: the café, lit, the barista wiping the counter; DAY 1; one bright button | Reads "Open the café" | This is a place, and they run it |
+| **0:04** | Tap → S-03 briefing. Target **190 AED**, 90 seconds, 3 seats, two dishes on the menu with their recipes drawn as chips | Skims | The contract, and that dishes are made of parts |
+| **0:07** | Tap "Let's go" → the bins rise into place from below, staggered, 420 ms. `sfx_shutter`. Clock **not running** | Watches | Something is beginning |
+| **0:08** | **OB-1.** Everything dims to 35% except the Shot bin's `+`, ringed and pulsing. A caption: "Start a shot. Machines cook on their own. Tap +." A hand taps it every 1.2 s. One customer is already seated, wanting an espresso, and **cannot leave** | Taps `+` | **Verb 1: start a cook.** Light haptic, `sfx_machine_start`, the cook bar begins filling |
+| **0:10** | **OB-2.** The dim lifts. The cook bar fills in `state-calm` over 2.2 s in full view. Caption: "It cooks while you do other things." | Watches it fill | **Cooking takes time, and it happens by itself.** This is the game's entire premise, shown in two seconds |
+| **0:12** | The pip fills with a pop, a ring pulses, steam rises off the shelf machine, `sfx_cook_done`, light haptic. The bin lights up. Caption: "Now tap the bin to put it on the plate." | Taps the bin | **Verb 2: take stock.** The sprite arcs to the plate over 260 ms and lands with a bounce |
+| **0:14** | **OB-3.** The plate goes `complete-wanted`: `cream-50` ring, `amber-400` glow, "Espresso" types on, `sfx_dish_ready`, soft double-tick. The seated customer's ticket gains a ring and a bobbing caret | Taps the customer | **Verb 3: serve.** Barista `serve` pose, dish flies to their hands, `+14` floats up in `ok-500`, 6 coins burst toward the HUD, EARNED counts up, `sfx_coins` → `sfx_till`, medium haptic |
+| **0:16** | **The clock starts.** The coach disappears entirely. `amb_cafe` fades in. A second customer arrives with a door chime, wanting mint tea | Looks at the recipe chips on the new ticket | They already know what the two chips mean, because they just used both verbs |
+| **0:19** | They tap `+` on Tea, then `+` on Syrup. Two cook bars fill side by side | Waits, watching bars | **Two things can happen at once.** The simultaneity `rush-pivot.md` identifies as the whole game |
+| **0:22** | A third customer arrives, wanting espresso — and the Shot bin is **empty**, because they used it | Taps `+` on Shot, then assembles the mint tea while it cooks | **The lesson.** They are now cooking one thing while serving another, which is the skill |
+| **0:24** | **OB-4** slides down as a non-blocking banner for 3.5 s: "Start the next thing before you need it. Pastry takes four seconds." | Reads it while playing | The strategy, stated once, at the exact moment it becomes true |
+| **0:27** | Mint tea completes and is served. Streak chip appears at ×2 with a pop and a rising note | Notices the chip | **There is a reward for not dropping the ball** |
+| **0:30** | Three seats occupied, two bins cooking, one patience bar crossing into amber with its stripes fading in | Triaging | They are playing the game. No tutorial remains on screen |
+
+**The design commitments this sequence makes:**
+
+- **No text wall.** The prototype's `!S.seen` card is deleted. Every rule is taught by a gated tap.
+- **No customer can be lost during OB-1 to OB-3**, and the clock does not start until the player has
+  personally completed all three verbs. The first failure a player experiences should be their own.
+- **The first payment lands before 0:16.** The full reward chain — float, coins, count-up, till,
+  haptic — fires on the very first serve, at full strength. Nothing is held back for later.
+- **Onboarding is skippable from the first frame** via a text button, and never appears again once
+  `S.seen` is set.
+- **By 0:30 there is no UI on screen that was not there at 0:16.** The game teaches itself and then
+  gets out of the way — which is, finally, the whole point of P1.

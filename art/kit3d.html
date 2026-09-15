@@ -1,0 +1,531 @@
+<title>Café Rush 3D Kit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --sheet:#EDEDE9; --card:#FFFFFF; --ink:#191A17; --ink-2:#5C5F59; --ink-3:#8C8F88;
+  --rule:#D9D9D2; --studio:#1A1714; --studio-2:#241F1A; --studio-edge:#3A3129; --studio-ink:#F6EEE2;
+  --accent:#A8611E;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --sheet:#131412; --card:#1B1C19; --ink:#ECECE5; --ink-2:#9EA199; --ink-3:#767971;
+  --rule:#2A2C27; --accent:#D89149;
+}}
+:root[data-theme="dark"]{
+  --sheet:#131412; --card:#1B1C19; --ink:#ECECE5; --ink-2:#9EA199; --ink-3:#767971;
+  --rule:#2A2C27; --accent:#D89149;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sheet);color:var(--ink);
+  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-block:36px 64px;padding-left:16px;padding-right:16px}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;
+   font-size:clamp(28px,7vw,42px);letter-spacing:-.03em;margin:0;text-wrap:balance}
+h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:19px;
+   letter-spacing:-.02em;margin:0}
+.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.lede{color:var(--ink-2);max-width:62ch;margin:10px 0 0}
+section{margin-top:44px}
+.head{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+
+.stage{background:var(--studio);border:1px solid var(--studio-edge);border-radius:12px;overflow:hidden;
+  position:relative}
+.stage canvas{display:block;width:100%;height:auto}
+.stage .cap{position:absolute;left:12px;top:10px;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:#7A6B5C}
+.loading{padding:60px 16px;text-align:center;color:#7A6B5C;font-size:12px}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.rule{background:var(--card);padding:13px 14px}
+.rule b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:13px;margin-bottom:3px}
+.rule span{color:var(--ink-2);font-size:11.5px;line-height:1.5}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.cell{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 8px 9px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.cell canvas.big{width:76px;height:76px;image-rendering:auto}
+.cell .nm{font-size:11px;line-height:1.2}
+.cell .mini{display:flex;align-items:flex-end;gap:7px;padding-top:6px;border-top:1px solid var(--rule);
+  width:100%;justify-content:center}
+.cell .cap2{font-size:9px;color:var(--ink-3);letter-spacing:.06em}
+
+.mock{background:#171310;border:1px solid #3B302A;border-radius:12px;padding:14px;color:#F7EFE3}
+.mock .lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#6F6058;margin-bottom:7px}
+.rail{display:flex;gap:7px;margin-bottom:14px}
+.tick{flex:1;background:#231C18;border:1px solid #3B302A;border-radius:10px;padding:7px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:5px}
+.bar{width:100%;height:4px;border-radius:3px;background:#3A2F29;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
+.chips{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.chip{width:22px;height:22px;border-radius:5px;background:#2E2521;border:1px solid #3B302A;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dishnm{font-size:8.5px;color:#A8988A}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.bin{background:#231C18;border:1px solid #3B302A;border-radius:11px;padding:6px 4px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.bin .bn{font-size:8.5px;color:#A8988A}
+.pips{display:flex;gap:3px}
+.pip{width:7px;height:7px;border-radius:50%;background:#3A2F29}
+.pip.on{background:#F2A03D}
+.plus{position:absolute;top:0;right:0;width:26px;height:26px;border-radius:0 11px 0 11px;
+  background:#2E2521;color:#F2A03D;font-size:14px;display:flex;align-items:center;justify-content:center}
+.note{font-size:11.5px;color:var(--ink-2);margin-top:12px;max-width:62ch}
+.note b{color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){ .two{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Café Rush · art kit v2</div>
+  <h1>Real geometry, real lights</h1>
+  <p class="lede">Every object below is an actual 3D model — built in code from lathes and primitives,
+  lit by three lights, casting real shadows. Nothing here is a drawing of a cup. It is a cup, turned on a
+  virtual lathe the same way a real one is turned on a real one.</p>
+
+  <section>
+    <div class="head"><h2>The turntable</h2>
+      <div class="lede">Fourteen models, rotating live. This is WebGL running right now, not a video.</div></div>
+    <div class="stage"><span class="cap">live render</span>
+      <div id="stage-host"><div class="loading" id="loading">building geometry…</div></div></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Why a café is the easy case</h2>
+      <div class="lede">Almost everything you serve is rotationally symmetric, and that is the one class
+      of object procedural modelling nails without a sculptor.</div></div>
+    <div class="rules">
+      <div class="rule"><b>Lathe, not sculpt</b><span>A cup, glass, saucer, bottle and jug are each a
+        profile curve spun 360°. I write the profile as numbers; the mesh follows.</span></div>
+      <div class="rule"><b>Light does the shading</b><span>The work a painter would do by hand — highlight,
+        falloff, contact shadow — is done by the renderer, identically, for every asset.</span></div>
+      <div class="rule"><b>Every angle is free</b><span>Change the camera and you have a new pose. In 2D
+        that is a redraw; here it is one number.</span></div>
+      <div class="rule"><b>Materials are shared</b><span>One porcelain, one glass, one pastry. Twelve
+        objects cannot drift out of style because they share the same five materials.</span></div>
+      <div class="rule"><b>Bakeable</b><span>Render once at build time to a sprite atlas and the phone
+        draws flat 2D at runtime — the look of 3D at the cost of 2D.</span></div>
+      <div class="rule"><b>Parametric</b><span>A taller glass is one number. A whole new drink is a
+        profile and a colour, not a commission.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Baked to sprites</h2>
+      <div class="lede">The same models rendered once and captured as flat images, shown at the sizes the
+      game actually uses. This is the production path: the phone never runs a 3D scene.</div></div>
+    <div class="grid" id="sprites"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>In the game</h2>
+      <div class="lede">Baked sprites dropped into the real gameplay layout at real size.</div></div>
+    <div class="mock">
+      <div class="lbl">Orders</div>
+      <div class="rail" id="rail"></div>
+      <div class="lbl">Machines</div>
+      <div class="bins" id="binrow"></div>
+    </div>
+    <p class="note">What changed versus the flat kit: <b>the shading is no longer my problem.</b> In the
+    vector kit every highlight was a shape I placed by hand, and consistency depended on me obeying my own
+    rules. Here the lighting rig decides, so consistency is automatic — and it stays automatic when a
+    thirteenth drink arrives.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  if(!window.THREE){ document.getElementById("loading").textContent = "3D library unavailable."; return; }
+  var T = window.THREE;
+
+  /* ---------- materials: five, shared by everything ---------- */
+  var MAT = {
+    porcelain: new T.MeshStandardMaterial({color:0xFFFBF2, roughness:0.32, metalness:0.02}),
+    glass:     new T.MeshStandardMaterial({color:0xDCEAF0, roughness:0.06, metalness:0.0,
+                                           transparent:true, opacity:0.34, side:T.DoubleSide}),
+    /* a metalness-heavy material goes black without an environment map to reflect,
+       so the jug is brushed-light rather than mirror metal */
+    metal:     new T.MeshStandardMaterial({color:0xEFEAE0, roughness:0.38, metalness:0.25}),
+    pastry:    new T.MeshStandardMaterial({color:0xC2833A, roughness:0.78, metalness:0.0}),
+    dark:      new T.MeshStandardMaterial({color:0x3A2419, roughness:0.35, metalness:0.0})
+  };
+  function liquid(hex, rough){ return new T.MeshStandardMaterial({color:hex, roughness:rough==null?0.24:rough, metalness:0.0}); }
+  var LIQ = {
+    espresso: liquid(0x2E1B10, 0.18), crema: liquid(0xC4884E, 0.5),
+    tea: liquid(0xC86B2A), karak: liquid(0xD2A171), milk: liquid(0xFBF3E4, 0.45),
+    syrup: liquid(0xE0A32B), latte: liquid(0xC08B57, 0.4), foam: liquid(0xFFFBF2, 0.6)
+  };
+  var SOLID = {
+    mint: new T.MeshStandardMaterial({color:0x4E9E86, roughness:0.6}),
+    ice:  new T.MeshStandardMaterial({color:0xCDECF7, roughness:0.05, metalness:0.0, transparent:true, opacity:0.78}),
+    straw:new T.MeshStandardMaterial({color:0xE0605C, roughness:0.45}),
+    almond:new T.MeshStandardMaterial({color:0xE8D9B8, roughness:0.7}),
+    skinA:new T.MeshStandardMaterial({color:0xF0C49B, roughness:0.75}),
+    skinB:new T.MeshStandardMaterial({color:0xC1885F, roughness:0.75}),
+    hairA:new T.MeshStandardMaterial({color:0x2E2119, roughness:0.8}),
+    hairB:new T.MeshStandardMaterial({color:0xC9A227, roughness:0.7}),
+    shirtA:new T.MeshStandardMaterial({color:0x4E9E86, roughness:0.8}),
+    shirtB:new T.MeshStandardMaterial({color:0xD95F43, roughness:0.8}),
+    eye:  new T.MeshStandardMaterial({color:0x241C16, roughness:0.4})
+  };
+
+  /* ---------- helpers ---------- */
+  function lathe(pairs, mat, seg){
+    var pts = pairs.map(function(p){ return new T.Vector2(p[0], p[1]); });
+    var g = new T.LatheGeometry(pts, seg || 48);
+    var m = new T.Mesh(g, mat);
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+  }
+  function mesh(g, mat){ var m = new T.Mesh(g, mat); m.castShadow = true; m.receiveShadow = true; return m; }
+  function grp(){ return new T.Group(); }
+
+  /* profiles ------------------------------------------------------------- */
+  function cupProfile(rb, rt, h, wall){
+    return [[0,0],[rb,0],[rb*1.03,h*0.07],[rb*0.98,h*0.22],[rt,h*0.94],[rt*1.03,h],
+            [rt*1.03-wall,h],[rb*0.96-wall*0.4,h*0.24],[rb*0.9-wall*0.4,h*0.1],[0,h*0.1]];
+  }
+  var ISTIKANA = [[0,0],[0.94,0],[1.0,0.14],[0.88,1.3],[1.0,2.3],[1.24,3.0],[1.28,3.12],
+                  [1.14,3.12],[0.9,2.3],[0.78,1.3],[0.88,0.32],[0,0.3]];
+
+  function saucer(r){
+    return lathe([[0,0.04],[r*0.72,0.02],[r*0.94,0.16],[r,0.28],[r*0.93,0.3],[r*0.72,0.16],[0,0.14]], MAT.porcelain);
+  }
+  function handle(r, tube, x, y, mat){
+    var m = mesh(new T.TorusGeometry(r, tube, 10, 26, Math.PI*1.25), mat || MAT.porcelain);
+    m.position.set(x, y, 0); m.rotation.z = -Math.PI*0.62;
+    return m;
+  }
+  function disc(r, y, mat){
+    var m = mesh(new T.CylinderGeometry(r, r*0.96, 0.06, 40), mat);
+    m.position.y = y; return m;
+  }
+
+  /* ---------- models ---------- */
+  function mDemitasse(big){
+    var g = grp(), s = big ? 1.18 : 1;
+    g.add(saucer(2.5*s));
+    var cup = lathe(cupProfile(1.16*s, 1.42*s, 1.62*s, 0.12), MAT.porcelain);
+    cup.position.y = 0.26; g.add(cup);
+    g.add(handle(0.52*s, 0.11, 1.5*s, 1.02*s));
+    g.add(disc(1.3*s, 0.26 + 1.5*s, LIQ.espresso));
+    g.add(disc(1.02*s, 0.3 + 1.5*s, LIQ.crema));
+    return g;
+  }
+  function mLatteCup(){
+    var g = grp();
+    g.add(saucer(2.85));
+    var cup = lathe(cupProfile(1.42, 1.72, 1.95, 0.13), MAT.porcelain);
+    cup.position.y = 0.26; g.add(cup);
+    g.add(handle(0.6, 0.12, 1.82, 1.2));
+    g.add(disc(1.6, 2.1, LIQ.latte));
+    var heart = mesh(new T.SphereGeometry(0.42, 16, 12), LIQ.foam);
+    heart.scale.set(1, 0.16, 0.8); heart.position.set(-0.14, 2.16, 0.08); g.add(heart);
+    var tip = mesh(new T.ConeGeometry(0.3, 0.7, 14), LIQ.foam);
+    tip.scale.set(1, 0.22, 0.8); tip.rotation.x = Math.PI/2; tip.position.set(-0.14, 2.16, -0.6); g.add(tip);
+    return g;
+  }
+  function mIstikana(liqMat, fill){
+    var g = grp();
+    g.add(lathe(ISTIKANA, MAT.glass));
+    var f = fill == null ? 2.45 : fill;
+    g.add(lathe([[0,0.32],[0.84,0.32],[0.76,1.3],[0.88,2.3],[1.02,f],[0,f]], liqMat));
+    return g;
+  }
+  function mSyrup(){
+    var g = grp();
+    g.add(lathe([[0,0],[1.02,0],[1.08,0.16],[1.08,1.65],[0.86,2.1],[0.4,2.45],[0.4,3.0],[0,3.0]], LIQ.syrup));
+    var cap = mesh(new T.CylinderGeometry(0.5, 0.5, 0.42, 22), new T.MeshStandardMaterial({color:0x8A5E10, roughness:0.5}));
+    cap.position.y = 3.14; g.add(cap);
+    return g;
+  }
+  function mMilkJug(){
+    var g = grp();
+    g.add(lathe([[0,0],[1.05,0],[1.1,0.12],[1.34,2.05],[1.38,2.16],[1.26,2.16],[1.22,0.2],[0,0.16]], MAT.metal));
+    g.add(disc(1.16, 2.02, LIQ.milk));
+    g.add(handle(0.56, 0.11, -1.42, 1.3, MAT.metal));
+    var spout = mesh(new T.ConeGeometry(0.42, 0.72, 4), MAT.metal);
+    spout.position.set(1.32, 2.18, 0); spout.rotation.z = -0.65; g.add(spout);
+    return g;
+  }
+  function mCroissant(iced){
+    var g = grp();
+    var R = 1.32, tube = 0.52, arc = Math.PI*1.3;
+    var body = mesh(new T.TorusGeometry(R, tube, 14, 34, arc), MAT.pastry);
+    body.rotation.x = Math.PI/2; body.position.y = tube; g.add(body);
+    [0, arc].forEach(function(a, i){
+      var tip = mesh(new T.SphereGeometry(tube*0.92, 14, 10), MAT.pastry);
+      tip.scale.set(1, 1, 0.8);
+      tip.position.set(Math.cos(a)*R, tube, -Math.sin(a)*R);
+      g.add(tip);
+    });
+    if(iced){
+      for(var k=0;k<3;k++){
+        var d = mesh(new T.TorusGeometry(R, 0.075, 8, 20, 0.5), LIQ.foam);
+        d.rotation.x = Math.PI/2; d.rotation.z = 0; d.position.y = tube + 0.44;
+        d.rotation.y = 0; d.rotation.z = 0;
+        var w = grp(); w.add(d); w.rotation.y = -(0.45 + k*0.62); g.add(w);
+        var fl = mesh(new T.BoxGeometry(0.34, 0.06, 0.2), SOLID.almond);
+        fl.position.set(Math.cos(0.5+k*0.7)*R, tube + 0.5, -Math.sin(0.5+k*0.7)*R);
+        fl.rotation.y = k; g.add(fl);
+      }
+    }
+    return g;
+  }
+  function cube(x, y, z, rot){
+    var c = mesh(new T.BoxGeometry(0.82, 0.82, 0.82), SOLID.ice);
+    c.position.set(x, y, z); c.rotation.set(rot, rot*1.7, rot*0.6);
+    return c;
+  }
+  function mIce(){
+    var g = grp();
+    g.add(cube(-0.42, 0.42, 0.2, 0.35));
+    g.add(cube(0.5, 0.42, -0.18, -0.5));
+    g.add(cube(0.02, 1.18, 0.05, 0.22));
+    return g;
+  }
+  function mIcedLatte(){
+    var g = grp();
+    var prof = [[0,0],[1.06,0],[1.12,0.15],[1.02,3.3],[1.06,3.42],[0.92,3.42],[0.88,0.28],[0,0.26]];
+    g.add(lathe(prof, MAT.glass));
+    g.add(lathe([[0,0.3],[0.86,0.3],[0.8,1.85],[0,1.85]], LIQ.milk));
+    g.add(lathe([[0,1.85],[0.82,1.85],[0.8,3.05],[0,3.05]], LIQ.latte));
+    [[-0.3,2.3,0.2,0.4],[0.34,2.65,-0.2,-0.3],[0.02,1.9,-0.3,0.8]].forEach(function(c){
+      var b = mesh(new T.BoxGeometry(0.6,0.6,0.6), SOLID.ice);
+      b.position.set(c[0],c[1],c[2]); b.rotation.set(c[3],c[3]*1.4,0); g.add(b);
+    });
+    var straw = mesh(new T.CylinderGeometry(0.13,0.13,3.4,12), SOLID.straw);
+    straw.position.set(0.42, 3.1, 0.1); straw.rotation.z = -0.24; g.add(straw);
+    return g;
+  }
+  function mMintGlass(){
+    var g = mIstikana(LIQ.tea, 2.4);
+    for(var i=0;i<3;i++){
+      var leaf = mesh(new T.SphereGeometry(0.44, 12, 8), SOLID.mint);
+      leaf.scale.set(1, 0.2, 0.62);
+      leaf.position.set(Math.cos(i*2.2)*0.5, 2.5 + (i%2)*0.14, Math.sin(i*2.2)*0.5);
+      leaf.rotation.y = i*1.3; leaf.rotation.z = 0.2;
+      g.add(leaf);
+    }
+    return g;
+  }
+  function mKarak(){
+    var g = mIstikana(LIQ.karak, 2.42);
+    var pod = mesh(new T.SphereGeometry(0.2, 10, 8), new T.MeshStandardMaterial({color:0x8C9B5A, roughness:0.8}));
+    pod.scale.set(1, 0.7, 0.55); pod.position.set(0.3, 2.5, 0.2); g.add(pod);
+    return g;
+  }
+  function mPerson(skin, hair, shirt, scarf){
+    var g = grp();
+    var body = lathe([[0,0],[1.15,0],[1.18,0.12],[0.92,1.5],[0.72,1.9],[0,1.95]], shirt);
+    g.add(body);
+    var neck = mesh(new T.CylinderGeometry(0.26,0.3,0.3,14), skin);
+    neck.position.y = 2.0; g.add(neck);
+    var head = mesh(new T.SphereGeometry(0.82, 26, 20), skin);
+    head.position.y = 2.72; head.scale.set(1, 1.08, 0.94); g.add(head);
+    if(scarf){
+      var sc = mesh(new T.SphereGeometry(0.93, 24, 18, 0, Math.PI*2, 0, Math.PI*0.62), hair);
+      sc.position.y = 2.72; sc.scale.set(1, 1.12, 1); g.add(sc);
+      var fold = mesh(new T.SphereGeometry(0.88, 20, 14, 0, Math.PI*2, Math.PI*0.42, Math.PI*0.3), hair);
+      fold.position.y = 2.66; fold.scale.set(1.04, 1.5, 1.04); g.add(fold);
+    }else{
+      var cap = mesh(new T.SphereGeometry(0.87, 24, 18, 0, Math.PI*2, 0, Math.PI*0.55), hair);
+      cap.position.y = 2.74; cap.scale.set(1, 1.05, 0.98); g.add(cap);
+    }
+    [-0.3, 0.3].forEach(function(x){
+      var e = mesh(new T.SphereGeometry(0.1, 10, 8), SOLID.eye);
+      e.position.set(x, 2.72, 0.76); g.add(e);
+    });
+    return g;
+  }
+
+  var MODELS = [
+    {id:"shot",   nm:"Shot",     kind:"ing",  make:function(){ return mDemitasse(false); }},
+    {id:"tea",    nm:"Tea",      kind:"ing",  make:function(){ return mIstikana(LIQ.tea, 2.4); }},
+    {id:"syrup",  nm:"Syrup",    kind:"ing",  make:mSyrup},
+    {id:"milk",   nm:"Milk",     kind:"ing",  make:mMilkJug},
+    {id:"pastry", nm:"Pastry",   kind:"ing",  make:function(){ return mCroissant(false); }},
+    {id:"ice",    nm:"Ice",      kind:"ing",  make:mIce},
+    {id:"espresso",nm:"Espresso",kind:"dish", make:function(){ return mDemitasse(true); }},
+    {id:"mint",   nm:"Mint tea", kind:"dish", make:mMintGlass},
+    {id:"latte",  nm:"Latte",    kind:"dish", make:mLatteCup},
+    {id:"karak",  nm:"Karak chai",kind:"dish",make:mKarak},
+    {id:"almond", nm:"Almond croissant",kind:"dish",make:function(){ return mCroissant(true); }},
+    {id:"iced",   nm:"Iced latte",kind:"dish",make:mIcedLatte},
+    {id:"p1",     nm:"Customer",  kind:"char", make:function(){ return mPerson(SOLID.skinA, SOLID.hairA, SOLID.shirtA, false); }},
+    {id:"p2",     nm:"Customer",  kind:"char", make:function(){ return mPerson(SOLID.skinB, SOLID.hairB, SOLID.shirtB, true); }}
+  ];
+
+  /* Every model is scaled to the same height and stood on the floor, centred in x/z.
+     Without this a jug dwarfs a demitasse and the row reads as junk. */
+  function normalize(obj, targetH){
+    var holder = grp();
+    obj.updateMatrixWorld(true);
+    var sz = new T.Box3().setFromObject(obj).getSize(new T.Vector3());
+    /* scale by the LARGEST dimension, not height — a cup-and-saucer and a croissant
+       are short and wide, and normalising their height makes them enormous */
+    var reach = Math.max(sz.x, sz.y, sz.z, 0.001);
+    obj.scale.setScalar(targetH / reach);
+    obj.updateMatrixWorld(true);
+    var b2 = new T.Box3().setFromObject(obj);
+    var c2 = b2.getCenter(new T.Vector3());
+    obj.position.x -= c2.x; obj.position.z -= c2.z; obj.position.y -= b2.min.y;
+    holder.add(obj);
+    return holder;
+  }
+
+  /* ---------- lighting rig, shared by both renderers ---------- */
+  function rig(scene){
+    scene.add(new T.HemisphereLight(0xffffff, 0x7A6551, 0.62));
+    var key = new T.DirectionalLight(0xfff3e2, 1.05);
+    key.position.set(4.5, 8, 5);
+    key.castShadow = true;
+    key.shadow.mapSize.width = 1024; key.shadow.mapSize.height = 1024;
+    var d = 14;
+    key.shadow.camera.left = -d; key.shadow.camera.right = d;
+    key.shadow.camera.top = d; key.shadow.camera.bottom = -d;
+    key.shadow.camera.near = 0.5; key.shadow.camera.far = 40;
+    key.shadow.bias = -0.0012;
+    scene.add(key);
+    var fill = new T.DirectionalLight(0xFFD9A8, 0.4); fill.position.set(-6, 3, -4); scene.add(fill);
+    var rim = new T.DirectionalLight(0xBFD8E8, 0.3); rim.position.set(0, 2, -7); scene.add(rim);
+  }
+
+  /* ---------- turntable ---------- */
+  var host = document.getElementById("stage-host");
+  var W = Math.min(host.clientWidth || 820, 860);
+  var COLS = 5, GAP = 5.2, ROWGAP = 8.0, ROWS = Math.ceil(14 / COLS);
+  var HALFW = (COLS*GAP)/2, HALFH = 7.0;
+  var showR = new T.WebGLRenderer({antialias:true, alpha:true});
+  showR.setPixelRatio(Math.min(devicePixelRatio, 2));
+  showR.setSize(W, Math.round(W * (HALFH*2) / (HALFW*2)));
+  showR.outputEncoding = T.sRGBEncoding;
+  showR.shadowMap.enabled = true; showR.shadowMap.type = T.PCFSoftShadowMap;
+  document.getElementById("loading").remove();
+  host.appendChild(showR.domElement);
+
+  var showScene = new T.Scene(); rig(showScene);
+  var showCam = new T.OrthographicCamera(-HALFW, HALFW, HALFH, -HALFH, 0.1, 120);
+  showCam.position.set(0, 12, 14); showCam.lookAt(0, 1.4, 0);
+
+  var ground = new T.Mesh(new T.PlaneGeometry(200,200), new T.ShadowMaterial({opacity:0.26}));
+  ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; showScene.add(ground);
+
+  var spinners = [];
+  MODELS.forEach(function(m, i){
+    var col = i % COLS, row = Math.floor(i / COLS);
+    var holder = normalize(m.make(), 3.4);
+    holder.position.set((col - (COLS-1)/2) * GAP, 0, (row - (ROWS-1)/2) * ROWGAP);
+    showScene.add(holder);
+    spinners.push(holder);
+  });
+
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var t0 = performance.now();
+  function loop(){
+    var t = (performance.now() - t0) / 1000;
+    if(!reduce) spinners.forEach(function(s, i){ s.rotation.y = t * 0.45 + i * 0.4; });
+    showR.render(showScene, showCam);
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* ---------- bake to sprites ---------- */
+  var BAKE = 192;
+  var bakeR = new T.WebGLRenderer({antialias:true, alpha:true, preserveDrawingBuffer:true});
+  bakeR.setPixelRatio(1); bakeR.setSize(BAKE, BAKE);
+  bakeR.outputEncoding = T.sRGBEncoding;
+  bakeR.shadowMap.enabled = true; bakeR.shadowMap.type = T.PCFSoftShadowMap;
+
+  var bakeScene = new T.Scene(); rig(bakeScene);
+  var bg = new T.Mesh(new T.PlaneGeometry(60,60), new T.ShadowMaterial({opacity:0.3}));
+  bg.rotation.x = -Math.PI/2; bg.receiveShadow = true; bakeScene.add(bg);
+  var bakeCam = new T.PerspectiveCamera(26, 1, 0.1, 100);
+
+  bakeCam.position.set(3.2, 5.2, 7.6);
+  bakeCam.lookAt(0, 1.55, 0);
+
+  var sprites = {};
+  function bake(model){
+    var holder = normalize(model.make(), 3.4);
+    bakeScene.add(holder);
+    bakeR.render(bakeScene, bakeCam);
+    var c = document.createElement("canvas"); c.width = BAKE; c.height = BAKE;
+    c.getContext("2d").drawImage(bakeR.domElement, 0, 0);
+    bakeScene.remove(holder);
+    return c;
+  }
+
+  var grid = document.getElementById("sprites");
+  MODELS.forEach(function(m){
+    var src = bake(m);
+    sprites[m.id] = src;
+    var cell = document.createElement("div"); cell.className = "cell";
+    var big = document.createElement("canvas"); big.className = "big";
+    big.width = BAKE; big.height = BAKE; big.getContext("2d").drawImage(src, 0, 0);
+    cell.appendChild(big);
+    var nm = document.createElement("div"); nm.className = "nm"; nm.textContent = m.nm;
+    cell.appendChild(nm);
+    var mini = document.createElement("div"); mini.className = "mini";
+    [26, 20].forEach(function(px){
+      var c = document.createElement("canvas");
+      c.width = px * 2; c.height = px * 2;
+      c.style.width = px + "px"; c.style.height = px + "px";
+      var x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+      x.drawImage(src, 0, 0, px*2, px*2);
+      mini.appendChild(c);
+    });
+    var cap = document.createElement("span"); cap.className = "cap2"; cap.textContent = "26 / 20";
+    mini.appendChild(cap);
+    cell.appendChild(mini);
+    grid.appendChild(cell);
+  });
+
+  /* ---------- in-game mock ---------- */
+  function px(id, size){
+    var c = document.createElement("canvas");
+    c.width = size*2; c.height = size*2;
+    c.style.width = size+"px"; c.style.height = size+"px";
+    c.style.display = "block";
+    var x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+    x.drawImage(sprites[id], 0, 0, size*2, size*2);
+    return c;
+  }
+  var ORDERS = [
+    {who:"p1", dish:"Latte", needs:["shot","milk"], pat:78, col:"#4FBF7B"},
+    {who:"p2", dish:"Karak chai", needs:["tea","milk","syrup"], pat:44, col:"#F2A03D"},
+    {who:"p1", dish:"Almond croissant", needs:["pastry","syrup"], pat:15, col:"#E24B2E"}
+  ];
+  var rail = document.getElementById("rail");
+  ORDERS.forEach(function(o){
+    var t = document.createElement("div"); t.className = "tick";
+    var bar = document.createElement("div"); bar.className = "bar";
+    var fill = document.createElement("i"); fill.style.width = o.pat+"%"; fill.style.background = o.col;
+    bar.appendChild(fill); t.appendChild(bar);
+    t.appendChild(px(o.who, 34));
+    var nm = document.createElement("div"); nm.className = "dishnm"; nm.textContent = o.dish; t.appendChild(nm);
+    var ch = document.createElement("div"); ch.className = "chips";
+    o.needs.forEach(function(n){
+      var s = document.createElement("span"); s.className = "chip";
+      s.appendChild(px(n, 20)); ch.appendChild(s);
+    });
+    t.appendChild(ch); rail.appendChild(t);
+  });
+  var BINS = [["shot","Shot",2],["tea","Tea",3],["syrup","Syrup",1],
+              ["milk","Milk",2],["pastry","Pastry",0],["ice","Ice",2]];
+  var binrow = document.getElementById("binrow");
+  BINS.forEach(function(b){
+    var d = document.createElement("div"); d.className = "bin";
+    var p = document.createElement("div"); p.className = "plus"; p.textContent = "+"; d.appendChild(p);
+    d.appendChild(px(b[0], 28));
+    var n = document.createElement("div"); n.className = "bn"; n.textContent = b[1]; d.appendChild(n);
+    var pips = document.createElement("div"); pips.className = "pips";
+    for(var k=0;k<3;k++){
+      var s = document.createElement("span"); s.className = "pip" + (k < b[2] ? " on" : "");
+      pips.appendChild(s);
+    }
+    d.appendChild(pips); binrow.appendChild(d);
+  });
+})();
+</script>
