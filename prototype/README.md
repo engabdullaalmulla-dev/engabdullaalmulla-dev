@@ -3,11 +3,12 @@
 Two grey-box prototypes of the same café, testing two different games. Neither has art
 or audio. See `../docs/rush-pivot.md` for why there are two.
 
-- **`frenzy.html` — Café Rush.** Real-time. Machines cook on background timers, three to
-  five seats fill at once, food spoils if you leave it, customers walk out if you are
-  slow. Ninety-second shifts against an earnings target, upgrades in between, and an
-  endless rush unlocked after day three that ramps until three people walk out. This is
-  the cooking-frenzy loop.
+- **`frenzy.html` — Café Rush.** Real-time, two layers. Machines cook *ingredients* on
+  background timers into stock bins; *dishes* are assembled from stock. Assembly is
+  instant, cooking is not, so the skill is having steamed milk ready before the latte
+  order walks in. Three to five seats fill at once, customers walk out if you are slow.
+  Ninety-second shifts against an earnings target, upgrades in between, and an endless
+  rush unlocked after day three that ramps until three people walk out.
 - **`cafe.html` — Little Street Café.** Calm. One customer at a time, no timers in
   relaxed mode, a menu you plan each morning against fewer board spaces than you have
   recipes, and regulars whose stories advance. See `../docs/vertical-slice.md`.
@@ -32,7 +33,10 @@ number change — and the numbers carry over to whichever engine you pick.
 
 **`frenzy.html`**
 
-- `ITEMS` — price, cook time, and the day each unlocks
+- `ING` — the six ingredients and their cook times
+- `DISHES` — what each drink is made of, its price, and the day it unlocks. Ingredients
+  unlock implicitly: a bin goes live when some unlocked dish needs it, so day one runs on
+  three bins and day five on all six
 - `dayCfg()` — spawn rate, order size, patience, and the earnings target. The target is
   *derived* from what a day can physically produce rather than hand-drawn, so the
   difficulty does not flatten once upgrades start landing; `share` is the dial
@@ -53,6 +57,7 @@ number change — and the numbers carry over to whichever engine you pick.
 
 Both save to `localStorage`; each has a restart control on screen.
 
-The empty band under the HUD in the rush build is deliberate — the play area is packed to
-the bottom so everything tappable stays in thumb reach. That band is where the room art
-goes if this design survives playtesting.
+The rush build's layout mirrors the commercial reference: orders pinned to the top, prep
+pinned to the bottom, and an empty band between them. That band is the counter — the slot
+the café and character art occupies if this design survives playtesting. See
+`../docs/art-plan.md` for what filling it actually costs.
