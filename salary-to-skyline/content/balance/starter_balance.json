@@ -1,0 +1,396 @@
+{
+  "metadata": {
+    "spec_version": "1.0",
+    "prepared_date": "2026-09-15",
+    "status": "Illustrative fixtures only; no implemented game or validated balance",
+    "currency_code": "VDH",
+    "currency_display_en": "VDh",
+    "minor_units_per_major": 100,
+    "money_serialization": "signed decimal string of integer minor units",
+    "rate_unit": "annual nominal basis points unless explicitly labeled otherwise",
+    "simulation_step": "one player-advanced month",
+    "names_are_uncleared_placeholders": true,
+    "disclaimer": "All economic values and rules are fictional game design, not real-world Dubai prices or regulations."
+  },
+  "technical": {
+    "engine_candidate": "Godot 4.7.2 stable",
+    "language": "typed GDScript",
+    "engine_and_plugins_must_be_verified_at_m0": true,
+    "seed": 20260915,
+    "core_offline": true,
+    "runtime_llm": false,
+    "real_market_feeds": false,
+    "real_money_investment": false,
+    "wall_clock_progression": false
+  },
+  "time_and_focus": {
+    "focus_capacity_per_simulated_month": 100,
+    "full_time_work_focus": 55,
+    "full_time_study_focus": 65,
+    "part_time_work_focus": 25,
+    "typical_optional_action_focus": 10,
+    "critical_budget_and_recovery_actions_cost_focus": false,
+    "smart_advance_max_months_per_request": 12,
+    "no_forced_calendar_day_gates": true
+  },
+  "fictional_lending_defaults": {
+    "mortgage_annual_rate_bps": 500,
+    "mortgage_term_months": 300,
+    "maximum_ltv_bps": 8000,
+    "maximum_debt_service_ratio_bps": 3500,
+    "eligible_trailing_net_rent_inclusion_bps": 7000,
+    "rent_history_required_months": 12,
+    "price_valuation_basis": "minimum of accepted price and independent lender valuation",
+    "combined_acquisition_cost_bps": 600,
+    "recommended_initial_reserve_months": 3,
+    "not_uae_law_or_a_bank_offer": true
+  },
+  "starts": [
+    {
+      "id": "fresh_work",
+      "age_months": 216,
+      "opening_cash_minor": "2000000",
+      "monthly_salary_minor": "520000",
+      "monthly_essentials_minor": "320000",
+      "active_job_id": "operations_assistant",
+      "study_program_id": null,
+      "funding_note": "Starting budget yields 2,000 surplus before discretionary actions."
+    },
+    {
+      "id": "fresh_university",
+      "age_months": 216,
+      "opening_cash_minor": "2000000",
+      "monthly_stipend_minor": "180000",
+      "monthly_education_loan_draw_minor": "150000",
+      "monthly_essentials_minor": "260000",
+      "monthly_tuition_minor": "90000",
+      "active_job_id": null,
+      "study_program_id": "technology_fulltime",
+      "funding_note": "Illustrative 36-month funded route: monthly loan draw is debt, not income. 36 draws total 54,000; cash ends at 12,800 before other events. No interest during the configured study period; this is a fictional concession."
+    },
+    {
+      "id": "fresh_work_study",
+      "age_months": 216,
+      "opening_cash_minor": "2000000",
+      "monthly_salary_minor": "320000",
+      "monthly_essentials_minor": "260000",
+      "monthly_tuition_minor": "67500",
+      "active_job_id": "part_time_support",
+      "study_program_id": "business_parttime",
+      "funding_note": "Illustrative 48-month route has -75 monthly surplus before discretionary actions; savings cover the difference."
+    }
+  ],
+  "study_program_examples": [
+    {
+      "id": "technology_fulltime",
+      "duration_months": 36,
+      "focus_per_month": 65,
+      "monthly_tuition_minor": "90000"
+    },
+    {
+      "id": "business_parttime",
+      "duration_months": 48,
+      "focus_per_month": 65,
+      "monthly_tuition_minor": "67500"
+    }
+  ],
+  "education_funding_example": {
+    "loan_draw_months": 36,
+    "monthly_draw_minor": "150000",
+    "maximum_facility_minor": "6000000",
+    "annual_rate_during_study_bps": 0,
+    "repayment_annual_rate_bps": 800,
+    "repayment_term_months": 120,
+    "post_study_grace_months": 3,
+    "grace_interest_policy": "zero during configured grace period",
+    "salary_or_placement_guarantee": false
+  },
+  "job_examples": [
+    {
+      "id": "operations_assistant",
+      "family": "operations",
+      "focus_per_month": 55,
+      "monthly_base_salary_minor": "520000",
+      "minimum_relevant_experience_months": 0,
+      "requires_degree": false
+    },
+    {
+      "id": "operations_coordinator",
+      "family": "operations",
+      "focus_per_month": 55,
+      "monthly_base_salary_minor": "740000",
+      "minimum_relevant_experience_months": 12,
+      "requires_degree": false,
+      "additional_requirement": "relevant skill threshold and actual vacancy; not automatic"
+    },
+    {
+      "id": "part_time_support",
+      "family": "operations",
+      "focus_per_month": 25,
+      "monthly_base_salary_minor": "320000",
+      "minimum_relevant_experience_months": 0,
+      "requires_degree": false
+    },
+    {
+      "id": "junior_technology_analyst",
+      "family": "technology",
+      "focus_per_month": 55,
+      "monthly_base_salary_minor": "900000",
+      "minimum_relevant_experience_months": 0,
+      "requires_degree": true,
+      "additional_requirement": "relevant degree/skills and vacancy; no placement guarantee"
+    }
+  ],
+  "district_examples": [
+    {
+      "id": "old_quay",
+      "display_name_en": "Old Quay",
+      "slice_enabled": true,
+      "identity": "established apartment stock; maintenance exposure"
+    },
+    {
+      "id": "garden_ring",
+      "display_name_en": "Garden Ring",
+      "slice_enabled": true,
+      "identity": "family demand; competing housing supply"
+    },
+    {
+      "id": "harbor_loop",
+      "display_name_en": "Harbor Loop",
+      "slice_enabled": false,
+      "identity": "waterfront; premium prices and operating charges"
+    },
+    {
+      "id": "dune_estates",
+      "display_name_en": "Dune Estates",
+      "slice_enabled": false,
+      "identity": "villas; larger commitments"
+    },
+    {
+      "id": "southgate_works",
+      "display_name_en": "Southgate Works",
+      "slice_enabled": false,
+      "identity": "employment and transport-linked demand"
+    },
+    {
+      "id": "reef_arc",
+      "display_name_en": "Reef Arc",
+      "slice_enabled": false,
+      "identity": "premium coastal lifestyle; discretionary demand"
+    }
+  ],
+  "building_examples": [
+    {
+      "id": "building_oq_01",
+      "district_id": "old_quay",
+      "kind": "apartment_building",
+      "visual_asset_id": "placeholder_apartment_01",
+      "unit_ids": [
+        "unit_oq_101",
+        "unit_oq_102"
+      ]
+    },
+    {
+      "id": "building_gr_01",
+      "district_id": "garden_ring",
+      "kind": "apartment_building",
+      "visual_asset_id": "placeholder_apartment_02",
+      "unit_ids": [
+        "unit_gr_201"
+      ]
+    }
+  ],
+  "ready_unit_examples": [
+    {
+      "id": "unit_oq_101",
+      "building_id": "building_oq_01",
+      "type": "studio",
+      "area_sqm": 38,
+      "asking_price_minor": "28000000",
+      "annual_contract_rent_minor": "3000000",
+      "annual_service_charges_minor": "480000",
+      "annual_maintenance_forecast_minor": "180000",
+      "annual_management_fee_minor": "150000",
+      "forecast_vacancy_bps": 500,
+      "initial_state": "listed",
+      "player_owned": false
+    },
+    {
+      "id": "unit_oq_102",
+      "building_id": "building_oq_01",
+      "type": "one_bed",
+      "area_sqm": 66,
+      "asking_price_minor": "60000000",
+      "annual_contract_rent_minor": "5400000",
+      "annual_service_charges_minor": "720000",
+      "annual_maintenance_forecast_minor": "300000",
+      "annual_management_fee_minor": "180000",
+      "forecast_vacancy_bps": 500,
+      "initial_state": "listed",
+      "player_owned": false,
+      "reference_fixture_id": "RENT-A"
+    },
+    {
+      "id": "unit_gr_201",
+      "building_id": "building_gr_01",
+      "type": "one_bed",
+      "area_sqm": 70,
+      "asking_price_minor": "57000000",
+      "annual_contract_rent_minor": "5100000",
+      "annual_service_charges_minor": "480000",
+      "annual_maintenance_forecast_minor": "180000",
+      "annual_management_fee_minor": "170000",
+      "forecast_vacancy_bps": 700,
+      "initial_state": "listed",
+      "player_owned": false,
+      "note": "Alternative intended to prompt comparison; not guaranteed undervalued."
+    }
+  ],
+  "offplan_example": {
+    "id": "offplan_gr_pilot",
+    "district_id": "garden_ring",
+    "developer_id": "developer_example_01",
+    "contract_price_minor": "80000000",
+    "expected_construction_months": 36,
+    "guaranteed_completion": false,
+    "stages": [
+      {
+        "id": "booking",
+        "trigger": "booking",
+        "amount_bps": 2000
+      },
+      {
+        "id": "milestone_25",
+        "trigger": "construction_progress_bps",
+        "threshold": 2500,
+        "amount_bps": 1000
+      },
+      {
+        "id": "milestone_50",
+        "trigger": "construction_progress_bps",
+        "threshold": 5000,
+        "amount_bps": 1000
+      },
+      {
+        "id": "milestone_75",
+        "trigger": "construction_progress_bps",
+        "threshold": 7500,
+        "amount_bps": 1000
+      },
+      {
+        "id": "milestone_100",
+        "trigger": "construction_progress_bps",
+        "threshold": 10000,
+        "amount_bps": 1000
+      },
+      {
+        "id": "handover",
+        "trigger": "handover_ready",
+        "amount_bps": 4000
+      }
+    ],
+    "final_construction_and_handover_can_be_due_together": true,
+    "pre_handover_value_policy": "paid principal minus impairment; assignment estimates separately disclosed",
+    "rental_income_before_completed_handover": false,
+    "assignment_terms": "must be configured explicitly before implementation; no instant unrestricted resale",
+    "state_machine_required": true
+  },
+  "purchase_model": {
+    "type": "non_consumable_full_campaign_unlock",
+    "proposed_actual_aed_price_tests": [
+      "29.99",
+      "39.99"
+    ],
+    "production_product_id": null,
+    "owner_approval_required": true,
+    "store_price_must_be_localized": true,
+    "virtual_currency_sales": false,
+    "paid_bailouts": false,
+    "forced_advertising": false
+  },
+  "reference_fixtures": {
+    "salary_12_month": {
+      "opening_cash_minor": "2000000",
+      "salary_minor": "520000",
+      "essentials_minor": "320000",
+      "expected_closing_cash_minor": "4400000",
+      "months": 12
+    },
+    "university_36_month_before_events": {
+      "expected_closing_cash_minor": "1280000",
+      "expected_debt_minor": "5400000",
+      "months": 36
+    },
+    "work_study_48_month_before_events": {
+      "expected_closing_cash_minor": "1640000",
+      "months": 48
+    },
+    "mortgages": [
+      {
+        "id": "MORT-A",
+        "principal_minor": "48000000",
+        "expected_payment_minor": "280603",
+        "expected_first_interest_minor": "200000",
+        "expected_first_principal_minor": "80603",
+        "expected_first_closing_balance_minor": "47919397",
+        "annual_rate_bps": 500,
+        "term_months": 300
+      },
+      {
+        "id": "MORT-B",
+        "principal_minor": "22400000",
+        "expected_payment_minor": "130948",
+        "expected_first_interest_minor": "93333",
+        "expected_first_principal_minor": "37615",
+        "expected_first_closing_balance_minor": "22362385",
+        "annual_rate_bps": 500,
+        "term_months": 300
+      },
+      {
+        "id": "EDU-A",
+        "principal_minor": "5000000",
+        "expected_payment_minor": "60664",
+        "expected_first_interest_minor": "33333",
+        "expected_first_principal_minor": "27331",
+        "expected_first_closing_balance_minor": "4972669",
+        "annual_rate_bps": 800,
+        "term_months": 120
+      },
+      {
+        "id": "ZERO-A",
+        "principal_minor": "1200000",
+        "expected_payment_minor": "100000",
+        "expected_first_interest_minor": "0",
+        "expected_first_principal_minor": "100000",
+        "expected_first_closing_balance_minor": "1100000",
+        "annual_rate_bps": 0,
+        "term_months": 12
+      }
+    ],
+    "RENT-A": {
+      "expected_effective_annual_rent_minor": "5130000",
+      "expected_annual_noi_minor": "3930000",
+      "expected_monthly_noi_minor": "327500",
+      "expected_monthly_cash_after_debt_minor": "46897",
+      "expected_annual_cash_after_debt_minor": "562764",
+      "expected_fully_occupied_actual_noi_minor": "4200000",
+      "gross_yield_on_price_bps": 900,
+      "net_yield_on_price_bps": 655
+    },
+    "advance_rent": {
+      "receipt_minor": "5400000",
+      "first_month_earned_minor": "450000",
+      "remaining_liability_after_first_month_minor": "4950000",
+      "refundable_security_deposit_minor": "225000"
+    },
+    "refinance": {
+      "old_debt_minor": "40000000",
+      "new_debt_minor": "45000000",
+      "fees_minor": "500000",
+      "cash_released_minor": "4500000",
+      "debt_increase_minor": "5000000",
+      "net_worth_change_minor": "-500000"
+    },
+    "integer_round_trip_test": "9007199254740993"
+  }
+}

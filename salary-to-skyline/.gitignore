@@ -1,0 +1,9 @@
+# Godot editor/import cache
+.godot/
+# Android gradle build template: regenerate with tools/install_android_build_template.sh
+android/
+# Local export output
+build/
+*.apk
+*.aab
+*.idsig
