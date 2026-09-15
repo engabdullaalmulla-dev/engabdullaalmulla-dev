@@ -41,13 +41,15 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 
 .goalbar{height:5px;background:var(--panel-2);border-radius:3px;margin:0 16px 12px;overflow:hidden}
 .goalbar i{display:block;height:100%;width:0;background:var(--green);border-radius:3px;transition:width .18s}
+.goalbar.warn i{background:var(--red)}
 
 /* ---------- seats ---------- */
-.seats{display:flex;gap:7px;padding:0 16px 12px;align-items:center;flex:1;min-height:0}
+.arena{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-height:0}
+.seats{display:flex;gap:7px;padding:0 16px 14px;align-items:flex-start}
 .seat{
   flex:1 1 0;min-width:0;background:var(--panel);border:1px solid var(--edge);border-radius:10px;
   padding:8px 5px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  min-height:108px;position:relative;
+  min-height:128px;position:relative;
 }
 .seat.empty{background:none;border-style:dashed;border-color:#2A221E}
 .seat.empty .inner{display:none}
@@ -149,21 +151,23 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   <section class="screen" id="s-intro" hidden></section>
   <section class="screen" id="s-play" hidden>
     <div class="hud">
-      <div class="blk"><span>Day</span><b class="num" id="h-day">1</b></div>
-      <div class="blk"><span>Earned</span><b class="num" id="h-money">0</b></div>
-      <div class="blk"><span>Target</span><b class="num" id="h-target">0</b></div>
+      <div class="blk"><span id="lbl-day">Day</span><b class="num" id="h-day">1</b></div>
+      <div class="blk"><span id="lbl-money">Earned</span><b class="num" id="h-money">0</b></div>
+      <div class="blk"><span id="lbl-target">Target</span><b class="num" id="h-target">0</b></div>
       <div class="grow"></div>
       <div class="blk" id="combo"><span>Streak</span><b class="num" id="h-combo">0</b></div>
     </div>
     <div class="goalbar"><i id="h-goal"></i></div>
     <div class="clock" id="h-clockwrap"><i id="h-clock"></i></div>
-    <div class="seats" id="seats"></div>
-    <div class="traywrap">
-      <div class="lbl">Counter · tap to bin</div>
-      <div class="tray" id="tray"></div>
-    </div>
-    <div class="stwrap">
-      <div class="stations" id="stations"></div>
+    <div class="arena">
+      <div class="seats" id="seats"></div>
+      <div class="traywrap">
+        <div class="lbl">Counter · tap to bin</div>
+        <div class="tray" id="tray"></div>
+      </div>
+      <div class="stwrap">
+        <div class="stations" id="stations"></div>
+      </div>
     </div>
   </section>
   <section class="screen" id="s-result" hidden></section>
@@ -191,6 +195,8 @@ const HUES = ["#E8B86D","#C9A0DC","#7FC8A9","#F09B8C","#9BB8E8","#D9C06B","#E8A0
 const BURN = 7.0;      /* seconds a finished item survives before it spoils */
 const CLEAN = 2.5;     /* seconds the slot is blocked after spoiling */
 const DAYLEN = 90;
+const WAVE = 25;       /* seconds per difficulty step in endless */
+const LIVES = 3;       /* customers you may lose before an endless run ends */
 
 const SPEED_COST = [90,180,320];
 const CAP_COST   = [150,300];
@@ -216,12 +222,27 @@ function dayCfg(d){
   };
 }
 
+/* Endless has no target and no closing bell — it just keeps ramping.
+   This is the cheapest test of whether the loop outlives its own content. */
+function waveCfg(w){
+  /* Steeper than the campaign on purpose. Seats cap how many customers can be
+     in the café at once, so spawn rate alone never kills you — the wall is
+     patience shrinking below the time it takes to cook an order. */
+  return {
+    target: 0,
+    spawn: Math.max(0.8, 3.0 - (w-1)*0.25),
+    maxItems: w < 2 ? 1 : w < 4 ? 2 : w < 8 ? 3 : 4,
+    patience: Math.max(6, 16 - (w-1)*0.9)
+  };
+}
+
 /* ===================== state ===================== */
 
 const NEWSTATE = () => {
   const up = {};
   IDS.forEach(id => up[id] = {sp:0, cap:1});
-  return {day:1, cash:0, seats:3, tray:4, chairs:0, up:up, bestCombo:0, seen:false};
+  return {day:1, cash:0, seats:3, tray:4, chairs:0, up:up, bestCombo:0, seen:false,
+          bestEndless:{money:0, wave:0}};
 };
 
 let S = NEWSTATE();
@@ -296,8 +317,20 @@ function screenIntro(){
 
   const go = el("button","btn", S.seen ? "Start shift" : "Let's go");
   go.type = "button";
-  go.addEventListener("click", () => { S.seen = true; save(); startShift(); });
+  go.addEventListener("click", () => { S.seen = true; save(); startShift(false); });
   wrap.appendChild(go);
+
+  if(S.day > 3){
+    const en = el("button","btn sec", S.bestEndless.money
+      ? "Endless rush · best " + S.bestEndless.money
+      : "Endless rush");
+    en.type = "button";
+    en.style.marginTop = "8px";
+    en.addEventListener("click", () => startShift(true));
+    wrap.appendChild(en);
+    wrap.appendChild(el("div","hint","Endless has no closing time and no target. It gets "
+      + "harder every " + WAVE + " seconds and ends when " + LIVES + " people walk out."));
+  }
 
   v.appendChild(wrap);
   show("intro");
@@ -351,9 +384,10 @@ function buildPlayDOM(){
   });
 }
 
-function startShift(){
-  const cfg = dayCfg(S.day);
-  R = {cfg:cfg, t:0, money:0, combo:0, best:0, served:0, lost:0, spoiled:0,
+function startShift(endless){
+  const cfg = endless ? waveCfg(1) : dayCfg(S.day);
+  R = {cfg:cfg, endless:!!endless, wave:1, t:0, money:0, combo:0, best:0,
+       served:0, lost:0, spoiled:0,
        seats:new Array(S.seats).fill(null), stations:{}, tray:[], spawnT:0.6, over:false};
   IDS.forEach(id => {
     R.stations[id] = [];
@@ -388,7 +422,11 @@ function spawn(){
 
 function update(dt){
   R.t += dt;
-  if(R.t >= DAYLEN){ endShift(); return; }
+  if(R.endless){
+    const w = 1 + Math.floor(R.t/WAVE);
+    if(w !== R.wave){ R.wave = w; R.cfg = waveCfg(w); }
+    if(R.lost >= LIVES){ endShift(); return; }
+  }else if(R.t >= DAYLEN){ endShift(); return; }
 
   R.spawnT -= dt;
   if(R.spawnT <= 0) spawn();
@@ -476,14 +514,23 @@ function floaty(i, text, color){
 
 function paint(){
   if(!R) return;
-  $("h-day").textContent = S.day;
   $("h-money").textContent = R.money;
-  $("h-target").textContent = R.cfg.target;
   $("h-combo").textContent = R.combo;
   $("combo").classList.toggle("on", R.combo >= 2);
-  $("h-goal").style.width = Math.min(100, (R.money / R.cfg.target)*100) + "%";
-
-  const left = Math.max(0, 1 - R.t/DAYLEN);
+  let left;
+  if(R.endless){
+    $("lbl-day").textContent = "Wave";      $("h-day").textContent = R.wave;
+    $("lbl-target").textContent = "Best";   $("h-target").textContent = S.bestEndless.money;
+    const lives = Math.max(0, LIVES - R.lost);
+    $("h-goal").style.width = (lives/LIVES*100) + "%";
+    $("h-goal").parentNode.classList.toggle("warn", lives <= 1);
+    left = 1 - (R.t % WAVE)/WAVE;
+  }else{
+    $("lbl-day").textContent = "Day";       $("h-day").textContent = S.day;
+    $("lbl-target").textContent = "Target"; $("h-target").textContent = R.cfg.target;
+    $("h-goal").style.width = Math.min(100, (R.money / R.cfg.target)*100) + "%";
+    left = Math.max(0, 1 - R.t/DAYLEN);
+  }
   $("h-clock").style.width = (left*100) + "%";
   $("h-clockwrap").classList.toggle("low", left < 0.2);
 
@@ -531,9 +578,10 @@ function paint(){
 function endShift(){
   R.over = true;
   cancelAnimationFrame(raf);
+  if(R.best > S.bestCombo) S.bestCombo = R.best;
+  if(R.endless){ endEndless(); return; }
   const won = R.money >= R.cfg.target;
   if(won) S.cash += R.money;
-  if(R.best > S.bestCombo) S.bestCombo = R.best;
   save();
 
   const v = $("s-result"); v.textContent = "";
@@ -568,6 +616,58 @@ function endShift(){
   go.type = "button";
   go.addEventListener("click", () => { if(won) screenShop(); else screenIntro(); });
   wrap.appendChild(go);
+
+  v.appendChild(wrap);
+  show("result");
+}
+
+function mmss(t){
+  const m = Math.floor(t/60), sec = Math.floor(t%60);
+  return m + ":" + (sec < 10 ? "0" : "") + sec;
+}
+
+function endEndless(){
+  S.cash += R.money;
+  const prev = S.bestEndless;
+  const rec = R.money > prev.money;
+  if(rec) S.bestEndless = {money:R.money, wave:R.wave};
+  save();
+
+  const v = $("s-result"); v.textContent = "";
+  const wrap = el("div","mid");
+  wrap.appendChild(el("div","lbl","Endless rush"));
+  wrap.appendChild(el("div","big", rec ? "New best" : "Rush over"));
+
+  const card = el("div","card");
+  const row = (k, val, cls) => {
+    const r = el("div","stat");
+    r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v num" + (cls ? " "+cls : ""), val));
+    card.appendChild(r);
+  };
+  row("Lasted", mmss(R.t));
+  row("Reached wave", String(R.wave), "good");
+  row("Taken", R.money + " AED", rec ? "good" : "");
+  row("Served", String(R.served));
+  row("Spoiled", String(R.spoiled), R.spoiled ? "bad" : "");
+  row("Best streak", "×" + R.best);
+  if(!rec && prev.money) row("Your best", prev.money + " AED · wave " + prev.wave);
+  wrap.appendChild(card);
+
+  wrap.appendChild(el("div","hint", rec
+    ? "Banked into your cash. Spend it on the upgrade screen between days."
+    : "Everything you took is banked either way — an endless run is never wasted."));
+
+  const again = el("button","btn","Go again");
+  again.type = "button";
+  again.addEventListener("click", () => startShift(true));
+  wrap.appendChild(again);
+
+  const back = el("button","btn sec","Back to the café");
+  back.type = "button";
+  back.style.marginTop = "8px";
+  back.addEventListener("click", screenIntro);
+  wrap.appendChild(back);
 
   v.appendChild(wrap);
   show("result");
