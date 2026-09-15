@@ -1,28 +1,33 @@
 extends Control
 
-## The face of the game.
+## The city is the screen.
 ##
-## Design rule for this layer: you are looking at a room in a city, not at an
-## account. The world is full-bleed at the top; underneath it there is one
-## number that matters, one sentence explaining it, one visible ambition, and
-## one thing to do. Everything else — the ledger, the assumptions, the
-## transaction list — lives behind a deliberate tap, because a player who wants
-## the arithmetic should be able to get all of it, and a player who does not
-## should never be handed a dashboard.
+## You stand in Old Quay. Cars run the avenue, boats drift past the quay, the
+## sun crosses the sky and the windows come on at dusk. You tap a place and your
+## character walks there; the camera follows. Living a month is something you
+## watch happen to the district, not a figure that silently changes.
 ##
-## The UI reads committed state and issues validated commands. It cannot write
-## a balance.
+## The interface floats over the world and stays out of the way: where you are,
+## what you can do here, and how much you are holding. Every other number is in
+## the Ledger, one tap away.
+##
+## This layer reads committed state and issues validated commands. It cannot
+## write a balance.
 
 const SAVING_STEPS: Array = [100000, 250000, 500000]
 
 const DISCRETIONARY_CHOICES: Array = [
-	{"id": "city_evening", "label": "An evening out by the water", "amount": 12000,
+	{"id": "city_evening", "label": "An evening on the promenade", "amount": 12000,
 	 "note": "You will remember it. The fund will not notice."},
 	{"id": "work_clothes", "label": "Clothes that fit the job", "amount": 45000,
 	 "note": "Three weeks of setting money aside, spent in an afternoon."},
 	{"id": "new_phone", "label": "The phone you keep looking at", "amount": 180000,
 	 "note": "Two and a half months of everything you manage to save."},
 ]
+
+## Roughly four seconds of simulated day per lived month.
+const JOURNEY_SECONDS: float = 4.6
+const JOURNEY_HOUR_SPEED: float = 4.2
 
 var engine: GameEngine
 var content: ContentLibrary
@@ -34,10 +39,15 @@ var _last_recap: Dictionary = {}
 var _message: String = ""
 var _message_level: String = "info"
 
+var _journey: bool = false
+var _journey_time: float = 0.0
+var _went_out: bool = false
+
 var _world: WorldView
-var _stage: VBoxContainer
-var _panel: VBoxContainer
+var _hud: VBoxContainer
+var _dock: VBoxContainer
 var _overlay: Control
+var _scrim: ColorRect
 
 var _shot_path: String = ""
 var _shot_delay: int = 18
@@ -55,29 +65,53 @@ func _ready() -> void:
 	content = loaded["value"]
 	engine = GameEngine.create(content)
 
-	var backdrop := ColorRect.new()
-	backdrop.color = Palette.NIGHT
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(backdrop)
-
-	_stage = VBoxContainer.new()
-	_stage.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_stage.add_theme_constant_override("separation", 0)
-	add_child(_stage)
-
-	# Full-bleed world: 180x160 logical at exactly 4x on a 720-wide viewport.
+	# The world sits behind everything, edge to edge.
 	_world = WorldView.new()
-	_world.custom_minimum_size = Vector2(720, 640)
-	_stage.add_child(_world)
+	_world.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_world.arrived.connect(_on_arrived)
+	add_child(_world)
 
-	var margins := MarginContainer.new()
-	margins.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_apply_safe_area(margins)
-	_stage.add_child(margins)
+	# A soft band under the top readout so it stays legible over a bright sky.
+	var top_scrim := ColorRect.new()
+	top_scrim.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	top_scrim.offset_bottom = 150
+	top_scrim.color = Color(0.04, 0.03, 0.10, 0.45)
+	top_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(top_scrim)
 
-	_panel = VBoxContainer.new()
-	_panel.add_theme_constant_override("separation", 10)
-	margins.add_child(_panel)
+	# A soft scrim only under the bottom dock, so the city stays visible.
+	_scrim = ColorRect.new()
+	_scrim.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_scrim.anchor_top = 0.66
+	_scrim.offset_top = 0
+	_scrim.offset_bottom = 0
+	_scrim.color = Color(0.04, 0.03, 0.10, 0.62)
+	_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_scrim)
+
+	var top := MarginContainer.new()
+	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	top.add_theme_constant_override("margin_left", Palette.GUTTER)
+	top.add_theme_constant_override("margin_right", Palette.GUTTER)
+	top.add_theme_constant_override("margin_top", 16)
+	add_child(top)
+	_hud = VBoxContainer.new()
+	_hud.add_theme_constant_override("separation", 6)
+	top.add_child(_hud)
+
+	var bottom := MarginContainer.new()
+	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bottom.anchor_top = 0.66
+	bottom.offset_top = 0
+	bottom.offset_bottom = 0
+	bottom.add_theme_constant_override("margin_left", Palette.GUTTER)
+	bottom.add_theme_constant_override("margin_right", Palette.GUTTER)
+	bottom.add_theme_constant_override("margin_top", 12)
+	bottom.add_theme_constant_override("margin_bottom", 18)
+	add_child(bottom)
+	_dock = VBoxContainer.new()
+	_dock.add_theme_constant_override("separation", 8)
+	bottom.add_child(_dock)
 
 	_overlay = Control.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -108,38 +142,100 @@ func _apply_startup_actions() -> void:
 				"advance":
 					for i in (parts[1].to_int() if parts.size() > 1 else 1):
 						_commit_month()
-					_screen = "home"
+					_screen = "city"
 				"preview":
 					_open_preview()
 				"recap":
 					_screen = "recap"
 				"sheet":
 					_sheet = parts[1] if parts.size() > 1 else ""
-					_screen = "home"
+					_screen = "city"
 				"save":
 					_earmark(parts[1].to_int() if parts.size() > 1 else 100000)
-				"spend":
-					_spend(DISCRETIONARY_CHOICES[0])
-				"home":
-					_screen = "home"
-					_sheet = ""
+				"goto":
+					_world.city.place_player(parts[1] if parts.size() > 1 else "home")
+					_screen = "city"
+				"room":
+					_world.set_mode("room")
+					_screen = "city"
+				"hour":
+					_world.city.hour = float(parts[1].to_int() if parts.size() > 1 else 18)
+				"walk":
+					_world.city.travel_to(parts[1] if parts.size() > 1 else "studio")
+					_screen = "city"
+				"live":
+					_pending_preview = MonthEngine.preview(engine.state).get("value", {})
+					_confirm_month()
+
+# --- input --------------------------------------------------------------------
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _screen != "city" or not _sheet.is_empty() or _journey:
+		return
+	if _world.mode != "city":
+		return
+	if not (event is InputEventScreenTouch or event is InputEventMouseButton):
+		return
+	var pressed: bool = event.pressed if event is InputEventMouseButton else event.pressed
+	if not pressed:
+		return
+	var point: Vector2 = event.position
+	var place_id: String = _world.city.place_at(_world.to_logical(point))
+	if place_id.is_empty():
+		return
+	if _world.city.travel_to(place_id):
+		_notify("Walking to %s." % String(_world.map().places[place_id]["name"]).to_lower(), "info")
+		_rebuild()
+	get_viewport().set_input_as_handled()
 
 
-func _apply_safe_area(node: MarginContainer) -> void:
-	var top: int = 14
-	var bottom: int = 16
-	var safe: Rect2i = DisplayServer.get_display_safe_area()
-	var screen: Vector2i = DisplayServer.screen_get_size()
-	if safe.size.y > 0 and screen.y > 0:
-		var scale: float = float(size.y if size.y > 0 else 1280) / float(screen.y)
-		bottom += int(maxf(0.0, float(screen.y - (safe.position.y + safe.size.y)) * scale))
-	node.add_theme_constant_override("margin_left", Palette.GUTTER)
-	node.add_theme_constant_override("margin_right", Palette.GUTTER)
-	node.add_theme_constant_override("margin_top", top)
-	node.add_theme_constant_override("margin_bottom", bottom)
+func _on_arrived(place_id: String) -> void:
+	if _journey:
+		if not _went_out:
+			_went_out = true
+			_world.city.travel_to("home")
+		return
+	_notify("", "info")
+	_rebuild()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_advance_journey(delta)
+	_reflect_world()
+	_capture(delta)
+
+
+func _reflect_world() -> void:
+	if engine.state == null:
+		return
+	var fill: float = 0.0
+	var goal: Dictionary = engine.first_home_goal()
+	if goal["ok"] and int((goal["value"] as Dictionary)["cash_needed_minor"]) > 0:
+		fill = float((goal["value"] as Dictionary)["earmarked_minor"]) \
+			/ float((goal["value"] as Dictionary)["cash_needed_minor"])
+	# Each month settles at a different hour of the day, so you see the district
+	# at dawn, at noon, at sunset and after dark as the year goes round.
+	const HOURS: Array = [8.0, 12.5, 16.0, 18.3, 20.0, 22.0, 6.0]
+	var settled_hour: float = float(HOURS[engine.state.month_index % HOURS.size()])
+	if not _journey:
+		_world.reflect(settled_hour, fill, engine.state.arrears() > 0)
+	else:
+		_world.reflect(_world.city.hour, fill, engine.state.arrears() > 0)
+
+
+func _advance_journey(delta: float) -> void:
+	if not _journey:
+		return
+	_journey_time += delta
+	if _journey_time < JOURNEY_SECONDS:
+		return
+	_journey = false
+	_world.city.hour_speed = 0.0
+	_screen = "recap"
+	_rebuild()
+
+
+func _capture(_delta: float) -> void:
 	if _shot_path.is_empty():
 		return
 	_frames += 1
@@ -152,24 +248,28 @@ func _process(_delta: float) -> void:
 # --- composition --------------------------------------------------------------
 
 func _rebuild() -> void:
-	for child in _panel.get_children():
-		_panel.remove_child(child)
+	for child in _hud.get_children():
+		_hud.remove_child(child)
+		child.queue_free()
+	for child in _dock.get_children():
+		_dock.remove_child(child)
 		child.queue_free()
 	for child in _overlay.get_children():
 		_overlay.remove_child(child)
 		child.queue_free()
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# There is no life yet: nothing else can be shown, whatever was requested.
 	if engine.state == null:
 		_screen = "new_life"
 		_sheet = ""
 
-	_refresh_world()
+	_scrim.visible = _screen != "new_life"
 
 	if _screen == "new_life":
 		_build_new_life()
 	else:
-		_build_home()
+		_build_hud()
+		_build_dock()
 
 	if _screen == "preview":
 		_build_preview_note()
@@ -179,35 +279,29 @@ func _rebuild() -> void:
 		_build_sheet()
 
 
-func _refresh_world() -> void:
-	if engine.state == null:
-		_world.configure("dawn", 0.0, false)
-		return
-	var fill: float = 0.0
-	var goal: Dictionary = engine.first_home_goal()
-	if goal["ok"] and int((goal["value"] as Dictionary)["cash_needed_minor"]) > 0:
-		fill = float((goal["value"] as Dictionary)["earmarked_minor"]) \
-			/ float((goal["value"] as Dictionary)["cash_needed_minor"])
-	# The hour of day drifts month to month so no two months look identical.
-	var hours: Array = ["dawn", "day", "dusk", "night"]
-	var hour: String = "night" if _screen == "recap" else String(hours[engine.state.month_index % 4])
-	_world.configure(hour, fill, engine.state.arrears() > 0)
-
-
 func _build_new_life() -> void:
-	_panel.add_child(Palette.text("SALARY TO SKYLINE", Palette.BIG, Palette.INK))
-	_panel.add_child(Palette.sentence(
-		"A rented room, a salary, and a city that was not built for you yet.",
+	var frame := PanelContainer.new()
+	frame.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	frame.anchor_top = 0.42
+	frame.offset_top = 0
+	frame.offset_bottom = 0
+	frame.add_theme_stylebox_override("panel", Palette.fill(Palette.NIGHT, 0, Palette.GUTTER, 18))
+	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_overlay.add_child(frame)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+	frame.add_child(column)
+	column.add_child(Palette.text("SALARY TO SKYLINE", Palette.BIG, Palette.INK))
+	column.add_child(Palette.sentence(
+		"A rented room in Old Quay, a salary, and a city that was not built for you yet.",
 		Palette.BODY, Palette.INK_SOFT))
-	_panel.add_child(Palette.gap(2))
 
 	if engine.save_store.has_save(0):
 		var resume: Button = Palette.primary_action("Go back to your life")
 		resume.pressed.connect(_continue_life)
-		_panel.add_child(resume)
-		_panel.add_child(Palette.gap(2))
+		column.add_child(resume)
 
-	# The routes scroll, so a shorter phone never clips the third life.
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -215,7 +309,7 @@ func _build_new_life() -> void:
 	routes.add_theme_constant_override("separation", 10)
 	routes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(routes)
-	_panel.add_child(scroll)
+	column.add_child(scroll)
 
 	for start_id in _ordered_start_ids():
 		var route := VBoxContainer.new()
@@ -234,84 +328,150 @@ func _build_new_life() -> void:
 		Palette.SMALL, Palette.INK_FAINT))
 
 
-func _build_home() -> void:
+## A thin band over the sky: when it is, what you are holding, and the way in to
+## everything else.
+func _build_hud() -> void:
 	var state: GameState = engine.state
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
 
-	var ribbon := HBoxContainer.new()
-	ribbon.add_child(Palette.text(SimCalendar.label(state.month_index), Palette.SMALL, Palette.INK_FAINT))
-	ribbon.add_child(Palette.text(
-		"age %d" % SimCalendar.age_years(int(state.player.get("age_months_at_start", 216)) + state.month_index),
-		Palette.SMALL, Palette.INK_FAINT, HORIZONTAL_ALIGNMENT_RIGHT))
-	_panel.add_child(ribbon)
+	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 0)
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_child(Palette.text(SimCalendar.label(state.month_index), Palette.SMALL, Palette.INK_SOFT))
+	left.add_child(Palette.text(Money.format(state.spendable_cash()), Palette.BIG, Palette.INK))
+	row.add_child(left)
 
-	_panel.add_child(Palette.text(Money.format(state.spendable_cash()), Palette.HERO, Palette.INK))
-	_panel.add_child(Palette.sentence(_position_sentence(), Palette.BODY, Palette.INK_SOFT))
+	var ledger: Button = Palette.choice("Ledger")
+	ledger.custom_minimum_size = Vector2(130, 44)
+	ledger.size_flags_horizontal = Control.SIZE_SHRINK_END
+	ledger.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ledger.pressed.connect(_open_sheet.bind("ledger"))
+	row.add_child(ledger)
+	_hud.add_child(row)
 
 	if not _message.is_empty():
-		_panel.add_child(Palette.text(_message, Palette.SMALL, Palette.severity(_message_level)))
+		_hud.add_child(Palette.text(_message, Palette.SMALL, Palette.severity(_message_level)))
 
-	_panel.add_child(Palette.gap(2))
-	_panel.add_child(_ambition_strip())
+
+## What is under your feet, and what you can do about it.
+func _build_dock() -> void:
+	if _world.mode == "room":
+		_build_room_dock()
+		return
+	var city: Node2D = _world.city
+	var place_id: String = city.current_place()
+	var places: Dictionary = _world.map().places
+
+	if city.is_walking():
+		_dock.add_child(Palette.text("On the way", Palette.TITLE, Palette.INK))
+		_dock.add_child(Palette.sentence("Old Quay does not stop while you cross it.",
+			Palette.SMALL, Palette.INK_FAINT))
+		return
+
+	var place: Dictionary = places.get(place_id, {})
+	_dock.add_child(Palette.text(String(place.get("name", "Old Quay")), Palette.TITLE, Palette.INK))
+	_dock.add_child(Palette.sentence(String(place.get("line", "")), Palette.SMALL, Palette.INK_SOFT))
+	_dock.add_child(_place_detail(place_id))
 
 	var breathe := Control.new()
 	breathe.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_panel.add_child(breathe)
+	_dock.add_child(breathe)
 
-	var act: Button = Palette.primary_action("Live this month")
-	act.pressed.connect(_open_preview)
-	_panel.add_child(act)
-
-	var quiet := HBoxContainer.new()
-	quiet.add_theme_constant_override("separation", 8)
-	for entry in [["saving", "Set aside"], ["spending", "Spend"], ["ledger", "Ledger"]]:
-		var button: Button = Palette.choice(String(entry[1]))
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 8)
+	for action in _actions_here(place_id):
+		var button: Button = Palette.choice(String(action["label"]), bool(action.get("tinted", false)))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.pressed.connect(_open_sheet.bind(String(entry[0])))
-		quiet.add_child(button)
-	_panel.add_child(quiet)
+		button.pressed.connect(action["run"])
+		actions.add_child(button)
+	if actions.get_child_count() > 0:
+		_dock.add_child(actions)
+
+	var live: Button = Palette.primary_action("Live this month")
+	live.pressed.connect(_open_preview)
+	_dock.add_child(live)
+	_dock.add_child(Palette.sentence("Tap a marker to walk there.", Palette.SMALL, Palette.INK_FAINT))
 
 
-## The ambition, always on screen: a line of brass that fills as the fund does.
-func _ambition_strip() -> Control:
-	var goal_result: Dictionary = engine.first_home_goal()
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
-	if not goal_result["ok"]:
-		return column
-	var goal: Dictionary = goal_result["value"]
-	var needed: int = int(goal["cash_needed_minor"])
-	var saved: int = int(goal["earmarked_minor"])
-
-	var heading := HBoxContainer.new()
-	heading.add_child(Palette.text("A studio of your own", Palette.SMALL, Palette.INK_SOFT))
-	heading.add_child(Palette.text("%s / %s" % [Money.format(saved, false), Money.format(needed, false)],
-		Palette.SMALL, Palette.BRASS, HORIZONTAL_ALIGNMENT_RIGHT))
-	column.add_child(heading)
-
-	var track := ProgressBar.new()
-	track.max_value = maxf(1.0, float(needed))
-	track.value = float(saved)
-	track.show_percentage = false
-	track.custom_minimum_size = Vector2(0, 6)
-	track.add_theme_stylebox_override("background", Palette.fill(Color(1, 1, 1, 0.10)))
-	track.add_theme_stylebox_override("fill", Palette.fill(Palette.BRASS))
-	column.add_child(track)
-	column.add_child(Palette.sentence(_ambition_sentence(goal), Palette.SMALL, Palette.INK_FAINT))
-	return column
+func _build_room_dock() -> void:
+	_dock.add_child(Palette.text("Inside", Palette.TITLE, Palette.INK))
+	_dock.add_child(Palette.sentence(
+		"Rent paid, jar on the desk, city outside the window.", Palette.SMALL, Palette.INK_SOFT))
+	var breathe := Control.new()
+	breathe.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_dock.add_child(breathe)
+	var out: Button = Palette.choice("Step outside")
+	out.pressed.connect(_leave_room)
+	_dock.add_child(out)
+	var live: Button = Palette.primary_action("Live this month")
+	live.pressed.connect(_open_preview)
+	_dock.add_child(live)
 
 
-func _build_sheet() -> void:
-	match _sheet:
-		"saving":
-			_sheet_panel("Set money aside", _saving_body)
-		"spending":
-			_sheet_panel("Spend some of it", _spending_body)
-		"ledger":
-			_sheet_panel("The ledger", _ledger_body)
+## The one line that matters wherever you are standing.
+func _place_detail(place_id: String) -> Control:
+	var state: GameState = engine.state
+	match place_id:
+		"studio":
+			var goal_result: Dictionary = engine.first_home_goal()
+			if not goal_result["ok"]:
+				return Palette.gap(0)
+			var goal: Dictionary = goal_result["value"]
+			var column := VBoxContainer.new()
+			column.add_theme_constant_override("separation", 4)
+			var line := HBoxContainer.new()
+			line.add_child(Palette.text("Cash needed at the door", Palette.SMALL, Palette.INK_FAINT))
+			line.add_child(Palette.text(Money.format(int(goal["cash_needed_minor"])),
+				Palette.BODY, Palette.BRASS, HORIZONTAL_ALIGNMENT_RIGHT))
+			column.add_child(line)
+			var track := ProgressBar.new()
+			track.max_value = maxf(1.0, float(goal["cash_needed_minor"]))
+			track.value = float(goal["earmarked_minor"])
+			track.show_percentage = false
+			track.custom_minimum_size = Vector2(0, 6)
+			track.add_theme_stylebox_override("background", Palette.fill(Color(1, 1, 1, 0.10)))
+			track.add_theme_stylebox_override("fill", Palette.fill(Palette.BRASS))
+			column.add_child(track)
+			column.add_child(Palette.sentence(_ambition_sentence(goal), Palette.SMALL, Palette.INK_FAINT))
+			return column
+		"work":
+			return Palette.sentence(
+				"%s lands here every month you hold the job." % Money.format(state.monthly_salary()),
+				Palette.SMALL, Palette.GOOD)
+		"home":
+			return Palette.sentence(
+				"%s of essentials leaves whatever you are holding, every month."
+					% Money.format(state.monthly_essentials_minor), Palette.SMALL, Palette.INK_FAINT)
+		"site":
+			return Palette.sentence(
+				"Off-plan towers are sold before they exist. Buying one is not built yet.",
+				Palette.SMALL, Palette.INK_FAINT)
+		_:
+			return Palette.sentence("In the jar: %s" % Money.format(state.restricted_cash()),
+				Palette.SMALL, Palette.BRASS)
 
 
-## Anything that is not the room rises over it from the bottom, leaving the
-## world visible above. Nothing in this game replaces the world with a document.
+func _actions_here(place_id: String) -> Array:
+	match place_id:
+		"home":
+			return [
+				{"label": "Go inside", "run": Callable(self, "_enter_room")},
+				{"label": "Set aside", "run": Callable(self, "_open_sheet").bind("saving"), "tinted": true},
+			]
+		"studio":
+			return [{"label": "Set money aside", "run": Callable(self, "_open_sheet").bind("saving"),
+				"tinted": true}]
+		"quay":
+			return [{"label": "Spend something", "run": Callable(self, "_open_sheet").bind("spending")}]
+		"work":
+			return [{"label": "Set aside", "run": Callable(self, "_open_sheet").bind("saving"),
+				"tinted": true}]
+		_:
+			return []
+
+# --- sheets and notes ---------------------------------------------------------
+
 func _rise(from: float, scrim: float) -> VBoxContainer:
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	var dim := ColorRect.new()
@@ -333,9 +493,18 @@ func _rise(from: float, scrim: float) -> VBoxContainer:
 	return column
 
 
+func _build_sheet() -> void:
+	match _sheet:
+		"saving":
+			_sheet_panel("Set money aside", _saving_body)
+		"spending":
+			_sheet_panel("Spend some of it", _spending_body)
+		"ledger":
+			_sheet_panel("The ledger", _ledger_body)
+
+
 func _sheet_panel(title: String, body_builder: Callable) -> void:
 	var column: VBoxContainer = _rise(0.30, 0.55)
-
 	var header := HBoxContainer.new()
 	header.add_child(Palette.text(title, Palette.TITLE, Palette.INK))
 	var close: Button = Palette.choice("Close")
@@ -394,8 +563,6 @@ func _spending_body(body: VBoxContainer) -> void:
 		body.add_child(Palette.gap(2))
 
 
-## Every number the simulation knows, for the player who wants them. This is the
-## only place that looks like a statement, and it is one tap away, not the app.
 func _ledger_body(body: VBoxContainer) -> void:
 	var state: GameState = engine.state
 	body.add_child(_ledger_line("Spendable now", Money.format(state.spendable_cash()), Palette.INK))
@@ -453,11 +620,9 @@ func _ledger_line(left: String, right: String, color: Color) -> HBoxContainer:
 	return row
 
 
-## The month ahead, written like a note to yourself rather than an invoice.
 func _build_preview_note() -> void:
-	var column: VBoxContainer = _rise(0.34, 0.55)
+	var column: VBoxContainer = _rise(0.36, 0.55)
 	var recap: Dictionary = _pending_preview
-
 	column.add_child(Palette.text(String(recap.get("month_label", "")).to_upper(),
 		Palette.SMALL, Palette.INK_FAINT))
 	column.add_child(Palette.text("What this month does to you", Palette.TITLE, Palette.INK))
@@ -506,7 +671,7 @@ func _note_line(verb: String, label: String, amount: int, color: Color) -> HBoxC
 
 
 func _build_recap_note() -> void:
-	var column: VBoxContainer = _rise(0.46, 0.35)
+	var column: VBoxContainer = _rise(0.50, 0.30)
 	var recap: Dictionary = _last_recap
 	var change: int = int(recap["net_cash_change_minor"])
 
@@ -540,29 +705,12 @@ func _build_recap_note() -> void:
 	onward.pressed.connect(_close_overlay)
 	column.add_child(onward)
 
-
 # --- sentences ----------------------------------------------------------------
-
-func _position_sentence() -> String:
-	var state: GameState = engine.state
-	var surplus: Dictionary = state.normal_monthly_surplus()
-	var left_over: int = int(surplus["surplus_minor"])
-	if state.arrears() > 0:
-		return "You are behind by %s. Everything else waits until that is cleared." \
-			% Money.format(state.arrears(), false)
-	if left_over > 0:
-		return "After everything you must pay, about %s a month is yours to aim with." \
-			% Money.format(left_over, false)
-	if left_over == 0:
-		return "You break even each month. Nothing is going wrong, and nothing is being built."
-	return "You are %s short every month. Savings are covering the difference, for now." \
-		% Money.format(-left_over, false)
-
 
 func _ambition_sentence(goal: Dictionary) -> String:
 	var shortfall: int = int(goal["shortfall_minor"])
 	if shortfall <= 0:
-		return "You could cover the closing cash on that studio. Buying is not built yet — that is the next milestone."
+		return "You could cover the cash on that studio. Buying is the next milestone, not this one."
 	var surplus: int = int(engine.state.normal_monthly_surplus()["surplus_minor"])
 	if surplus <= 0:
 		return "%s still to find, and nothing spare to find it with yet." % Money.format(shortfall, false)
@@ -577,7 +725,7 @@ func _recap_sentence(recap: Dictionary) -> String:
 		parts.append(String((line as Dictionary)["label"]).to_lower())
 	if parts.is_empty():
 		return "Nothing came in. The month still cost what it costs."
-	return "%s arrived, the bills went out, and the city carried on without asking." \
+	return "%s arrived, the bills went out, and Old Quay carried on without asking." \
 		% String(parts[0]).capitalize()
 
 
@@ -640,8 +788,10 @@ func _begin_life(start_id: String) -> void:
 	if not created["ok"]:
 		_notify(String(created.get("message", "could not start")), "alert")
 		return
-	_screen = "home"
+	_screen = "city"
 	_sheet = ""
+	_world.set_mode("city")
+	_world.city.place_player("home")
 	_notify("", "info")
 	_rebuild()
 
@@ -652,10 +802,22 @@ func _continue_life() -> void:
 		_notify(String(loaded.get("message", "could not load")), "alert")
 		_rebuild()
 		return
-	_screen = "home"
+	_screen = "city"
+	_world.set_mode("city")
+	_world.city.place_player("home")
 	var payload: Dictionary = loaded["value"]
 	if bool(payload.get("recovered_from_backup", false)):
 		_notify(String(payload.get("notice", "")), "warning")
+	_rebuild()
+
+
+func _enter_room() -> void:
+	_world.set_mode("room")
+	_rebuild()
+
+
+func _leave_room() -> void:
+	_world.set_mode("city")
 	_rebuild()
 
 
@@ -681,8 +843,23 @@ func _open_preview() -> void:
 	_rebuild()
 
 
+## Commit first, then play the month out across the district. The simulation is
+## already saved before a single frame of animation runs.
 func _confirm_month() -> void:
 	_commit_month()
+	if _screen != "recap":
+		return
+	_screen = "city"
+	_sheet = ""
+	_journey = true
+	_journey_time = 0.0
+	_went_out = false
+	_world.set_mode("city")
+	_world.city.hour = 6.5
+	_world.city.hour_speed = JOURNEY_HOUR_SPEED
+	if not _world.city.travel_to("work"):
+		_world.city.travel_to("home")
+		_went_out = true
 	_rebuild()
 
 
@@ -692,7 +869,7 @@ func _commit_month() -> void:
 	var result: Dictionary = engine.execute(command)
 	if not result["ok"]:
 		_notify(String(result.get("message", "the month could not be resolved")), "alert")
-		_screen = "home"
+		_screen = "city"
 		return
 	_last_recap = result["value"]
 	_screen = "recap"
@@ -729,7 +906,7 @@ func _run(command: Command, success: String) -> void:
 
 
 func _close_overlay() -> void:
-	_screen = "home"
+	_screen = "city"
 	_sheet = ""
 	_rebuild()
 

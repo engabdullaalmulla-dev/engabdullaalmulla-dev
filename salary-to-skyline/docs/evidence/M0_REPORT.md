@@ -15,10 +15,15 @@ viable; M0 cannot produce that evidence and does not claim to.
 
 Run the project and you can play this loop today, in portrait:
 
-The screen is a room in a city, not an account: an isometric pixel-art room fills the top half, and the
-numbers sit beneath it. The first attempt at this interface was a stack of finance-app cards and was thrown
-away; the direction that replaced it is recorded in `docs/decisions/0005-visual-direction.md`.
+The screen is Old Quay. An original isometric pixel-art district fills it edge to edge — streets, water,
+palms, a tower under construction — with traffic, boats and people moving through it, and the interface
+floating over the top and bottom. You tap a marker and your character walks there. Two earlier attempts at
+this interface (a finance-app card stack, then a static room) were thrown away; the direction that replaced
+them is in `docs/decisions/0005-visual-direction.md` and `0006-the-district-is-the-screen.md`.
 
+0. **Walk around the district.** Tap Home, the office, the promenade, the tower site or Old Quay 101 and
+   your character routes through the streets while the camera follows. Each place tells you the one number
+   that matters there.
 1. **Choose one of three lives** from the owner's fixture data — work now, funded university, or part-time
    work plus study. Each card shows its real opening cash, monthly income, tuition and essentials before you
    commit, and the university card shows that its loan draw is debt rather than income.
@@ -28,7 +33,9 @@ away; the direction that replaced it is recorded in `docs/decisions/0005-visual-
    stays yours), release it again with the trade-off spelled out, or spend on one of three optional purchases.
 4. **Advance a month**: a preview shows exactly what will be earned, borrowed and owed; confirming resolves the
    month atomically and a recap shows what changed and why.
-5. **Close and reopen**: the game resumes at the same month with the same cash, the same fund and the same
+5. **Watch the month happen**: confirming commits and saves the simulation first, then plays it out — the
+   sun crosses the sky, you walk to work and back, the windows light up — and the recap follows.
+6. **Close and reopen**: the game resumes at the same month with the same cash, the same fund and the same
    journal. Time never moves on its own.
 
 The first-home fund exists because the first apartment has to feel like a target long before it is reachable:
@@ -42,11 +49,14 @@ Screenshots (captured from the running build, `docs/evidence/screenshots/`):
 | File | Screen |
 |---|---|
 | `01_choose_a_life.png` | Choose a life — three routes written as lives, not spec sheets |
-| `02_the_room.png` | The room — one number, one sentence, the fund, one action |
-| `03_month_note.png` | The month ahead — what you earn, borrow, owe |
-| `04_month_recap.png` | The month after — what you kept |
-| `05_ledger_sheet.png` | The ledger — every figure, one tap away |
-| `06_set_aside.png` | Setting money aside toward the studio |
+| `02_old_quay.png` | Old Quay — standing on the promenade, boats and traffic moving |
+| `03_walking_there.png` | Walking across the district, camera following |
+| `04_after_dark.png` | The same streets after dark, at the studio you are saving for |
+| `05_living_a_month.png` | Living a month: the sun moves, you go to work |
+| `06_month_note.png` | The month ahead — what you earn, borrow, owe |
+| `07_month_recap.png` | The month after — what you kept |
+| `08_ledger_sheet.png` | The ledger — every figure, one tap away |
+| `09_your_room.png` | Inside the rented room, with the savings jar on the desk |
 
 Screenshots prove the screens render and the numbers displayed match the engine. They prove nothing about
 financial correctness (the tests do that) and nothing about how this feels on a real phone.
