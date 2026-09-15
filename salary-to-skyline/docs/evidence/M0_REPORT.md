@@ -15,6 +15,10 @@ viable; M0 cannot produce that evidence and does not claim to.
 
 Run the project and you can play this loop today, in portrait:
 
+The screen is a room in a city, not an account: an isometric pixel-art room fills the top half, and the
+numbers sit beneath it. The first attempt at this interface was a stack of finance-app cards and was thrown
+away; the direction that replaced it is recorded in `docs/decisions/0005-visual-direction.md`.
+
 1. **Choose one of three lives** from the owner's fixture data — work now, funded university, or part-time
    work plus study. Each card shows its real opening cash, monthly income, tuition and essentials before you
    commit, and the university card shows that its loan draw is debt rather than income.
@@ -37,11 +41,12 @@ Screenshots (captured from the running build, `docs/evidence/screenshots/`):
 
 | File | Screen |
 |---|---|
-| `01_new_life.png` | New Life — three routes with their real budgets |
-| `02_life.png` | Life — work, focus, first-home fund, optional spending |
-| `03_money.png` | Money — spendable vs set aside, surplus assumptions, net worth, commitments |
-| `04_preview.png` | Month preview — income, borrowing and costs separated before committing |
-| `05_recap.png` | Month recap — what changed |
+| `01_choose_a_life.png` | Choose a life — three routes written as lives, not spec sheets |
+| `02_the_room.png` | The room — one number, one sentence, the fund, one action |
+| `03_month_note.png` | The month ahead — what you earn, borrow, owe |
+| `04_month_recap.png` | The month after — what you kept |
+| `05_ledger_sheet.png` | The ledger — every figure, one tap away |
+| `06_set_aside.png` | Setting money aside toward the studio |
 
 Screenshots prove the screens render and the numbers displayed match the engine. They prove nothing about
 financial correctness (the tests do that) and nothing about how this feels on a real phone.
