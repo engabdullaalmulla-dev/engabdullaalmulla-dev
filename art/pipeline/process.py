@@ -17,6 +17,7 @@ from PIL import Image, ImageDraw, ImageFilter
 MASTER = 512          # one master per asset; everything downscales from this
 MARGIN = 0.08         # padding inside the square, so a row of sprites reads at one size
 GAME_SIZES = [34, 20] # what the bins and the order chips actually draw
+FACE_SIZES = [40, 30]  # what an order ticket and a seat draw a customer at
 THRESH = 34           # how far from the sampled backdrop still counts as backdrop
 
 # Asset id -> the sprite name the game already references.
@@ -91,6 +92,47 @@ def cut_background(im):
     out.putalpha(alpha)
     return out
 
+def head_crop(im, keep=0.60):
+    """Characters are busts: the shoulders run off the bottom of the frame, so the
+    subject touches the border and the backdrop is no longer a closed region to fill
+    from. Cropping to the head fixes that AND fixes legibility — a whole bust drawn at
+    40px leaves a 16px face, which is not a face."""
+    w, h = im.size
+    im = im.crop((0, 0, w, int(h * keep)))
+    # re-centre horizontally on the head: find the widest non-backdrop run near the top
+    px = im.convert("RGB").load()
+    bg = px[2, 2]
+    cols = []
+    for x in range(im.size[0]):
+        hit = 0
+        for y in range(4, im.size[1], 7):
+            c = px[x, y]
+            if max(abs(c[i] - bg[i]) for i in range(3)) > THRESH:
+                hit += 1
+        cols.append(hit)
+    live = [i for i, c in enumerate(cols) if c > 2]
+    if live:
+        cx = (live[0] + live[-1]) // 2
+        half = min(cx, im.size[0] - cx)
+        if half > im.size[0] * 0.28:
+            im = im.crop((cx - half, 0, cx + half, im.size[1]))
+    return im
+
+def fade_bottom(im, band=0.14):
+    """The head crop leaves a hard horizontal slice where it cut through the collar.
+    Fading the last band of alpha turns that slice into a vignette."""
+    w, h = im.size
+    a = im.split()[3].load()
+    y0 = int(h * (1 - band))
+    for y in range(y0, h):
+        k = 1.0 - (y - y0) / float(h - y0)
+        k = k * k
+        for x in range(w):
+            v = a[x, y]
+            if v:
+                a[x, y] = int(v * k)
+    return im
+
 def trim_and_square(im, margin=MARGIN, size=MASTER):
     bbox = im.getbbox()
     if not bbox:
@@ -125,10 +167,16 @@ def main():
             unnamed.append(f); continue
         src = Image.open(os.path.join(raw, f))
         wide = name.startswith("room_")
-        im = cut_background(src) if not wide else src.convert("RGBA")
-        im = trim_and_square(im) if not wide else im
+        face = re.match(r"^p\d+$", name) is not None
+        if wide:
+            im = src.convert("RGBA")
+        else:
+            im = cut_background(head_crop(src) if face else src)
+            if face:
+                im = fade_bottom(im)
+            im = trim_and_square(im, margin=0.04 if face else MARGIN)
         im.save(os.path.join(out, name + ".png"))
-        for s in ([] if wide else GAME_SIZES):
+        for s in ([] if wide else (FACE_SIZES if face else GAME_SIZES)):
             im.resize((s * 3, s * 3), Image.LANCZOS).save(
                 os.path.join(out, "%s@%d.png" % (name, s)))
         done.append((name, im))
