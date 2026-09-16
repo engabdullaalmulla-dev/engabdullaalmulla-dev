@@ -192,7 +192,7 @@ came back this way and had to be redone.
 | F-18 | Pendant lamp | a single brass pendant lamp with a ribbed amber glass shade, hanging from a short cord, lit |
 | F-19 | Wall lamp | a small brass wall sconce with a frosted glass globe, warm light glowing, **floating in empty space with no wall, no mounting surface and no shadow falling on the background** |
 | F-20 | Rug | a flat woven kilim rug in terracotta, cream and deep teal geometric bands, seen from above at an angle |
-| F-21 | Small plant | a small potted trailing pothos in a plain terracotta pot |
+| F-21 | Small plant | a small potted trailing pothos in a plain terracotta pot, **hand-painted game art and not a photograph**, standing on nothing with no shelf or table surface under it |
 | F-22 | Large plant | a tall potted monstera with four broad glossy leaves in a woven basket planter |
 | F-23 | Framed pictures | a cluster of three small framed pictures in mismatched brass and dark wood frames, the images soft and abstract, **floating in empty space with no wall behind them and no shadow falling on the background** |
 | F-24 | Bookshelf | a short open wooden bookshelf with a handful of worn books and one small brass ornament |
