@@ -111,26 +111,19 @@ def ticket(who, dish, needs, pct, col, secs, letter=""):
             % (edge, init, bar, INK7, pct, col, stripe, col if urgent else CREAM6, secs,
                sprite(who, 40), CREAM4, dish, chips))
 
-def cafe_band(h=216, grow=False):
+def cafe_band(h=216, grow=False, evening=False):
+    """Zone D. The room plate is aspect 1.78 against the band's 1.81, so `cover` fills it
+    with almost no crop. The plate already contains its own counter, shelves and window,
+    so nothing is drawn on top of it."""
     box = ("flex:1 1 %dpx;min-height:150px" % h) if grow else ("height:%dpx;flex:none" % h)
-    return ('<div style="%s;position:relative;overflow:hidden;background:%s">'
-            # window onto the street
-            '<div style="position:absolute;left:24px;top:22px;width:150px;height:96px;border-radius:10px;'
-            'background:%s;border:3px solid %s"></div>'
-            '<div style="position:absolute;left:44px;top:40px;width:26px;height:26px;border-radius:50%%;background:%s"></div>'
-            '<div style="position:absolute;left:92px;top:70px;width:56px;height:44px;border-radius:6px 6px 0 0;background:%s"></div>'
-            # shelf
-            '<div style="position:absolute;right:18px;top:34px;width:126px;height:7px;border-radius:4px;background:%s"></div>'
-            '<div style="position:absolute;right:30px;top:6px;">%s</div>'
-            '<div style="position:absolute;right:82px;top:8px;">%s</div>'
-            # barista behind the counter
-            '<div style="position:absolute;left:196px;bottom:52px;">%s</div>'
-            # counter
-            '<div style="position:absolute;left:0;right:0;bottom:0;height:52px;background:%s"></div>'
-            '<div style="position:absolute;left:0;right:0;bottom:44px;height:8px;background:%s"></div>'
-            '</div>'
-            % (box, TILE, STREET, INK6, SUN, TILE, WOOD2,
-               sprite("syrup", 30), sprite("milk", 28), sprite("p1", 96), WOOD, WOOD2))
+    img = "room_evening.png" if evening else "room_day.png"
+    return ('<div style="%s;position:relative;overflow:hidden;background:%s;'
+            'background-image:url(\'%s\');background-size:cover;background-position:center 42%%">'
+            # a short gradient at the top so the order rail above it does not collide
+            # with the busiest part of the plate
+            '<div style="position:absolute;left:0;right:0;top:0;height:46px;'
+            'background:linear-gradient(to bottom, %s, rgba(23,19,16,0))"></div>'
+            '</div>' % (box, INK9, img, INK9))
 
 def plate_strip(items, label, ready):
     slots = ''
