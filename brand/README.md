@@ -1,6 +1,24 @@
-# Café Rush — brand kit
+# Café Life — brand kit
 
-Everything with the name Café Rush on it comes from here.
+> ## ⚠ Mid-pivot — read this first
+>
+> The game is being renamed **Café Life** and restructured from thirty authored days into a
+> generational life sim. See **`docs/cafe-life.md`**, which supersedes the thirty-day spine.
+>
+> **Current:** the logo variants, both marketing graphics, the app icon, the colour tokens,
+> the swatch sheets and the fonts. The promise line is now *"Ninety seconds behind the
+> counter. Eighty years behind the café."*
+>
+> **Stale:** everything below that says *Café Rush*, *thirty days* or *five chapters* — the
+> promise in §1, the positioning in §2, the naming in §7 and the whole store listing in §10.
+> `guidelines.pdf` is stale for the same reason.
+>
+> The copy is deliberately **not** being rewritten yet. The loop it has to describe is one
+> day old and has been played only by a test harness. Writing the store listing twice is the
+> waste; writing it once, against a structure that has survived a playtest, is the plan.
+
+
+Everything with the game's name on it comes from here.
 
 **Start with `guidelines.pdf`** — 28 pages, A4 landscape, fonts embedded, readable on a
 machine that has none of them installed. `strategy.md` is the long-form argument the book
@@ -10,7 +28,7 @@ compresses; read it when you want to know *why* a rule exists.
 
 | Path | What |
 |---|---|
-| `guidelines.pdf` | The brand guidelines, 28 pages |
+| `guidelines.pdf` | The brand guidelines, 28 pages — **stale, still says Café Rush** |
 | `strategy.md` | Brand strategy, 11 sections — promise, positioning, voice, colour, type, store copy, rules |
 | `fonts/fonts.css` | 16 faces as data URIs (Bricolage Grotesque, DM Sans, DM Mono). Drop-in for a press page |
 | `assets/colour/tokens.css` | 30 core tokens, 6 art fills with shade partners, 8 accent fills |

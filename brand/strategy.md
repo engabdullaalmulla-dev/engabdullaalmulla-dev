@@ -1,3 +1,20 @@
+> ## ⚠ Mid-pivot — read this first
+>
+> The game is being renamed **Café Life** and restructured from thirty authored days into a
+> generational life sim. See **`docs/cafe-life.md`**, which supersedes the thirty-day spine.
+>
+> **Current:** the logo variants, both marketing graphics, the app icon, the colour tokens,
+> the swatch sheets and the fonts. The promise line is now *"Ninety seconds behind the
+> counter. Eighty years behind the café."*
+>
+> **Stale:** everything below that says *Café Rush*, *thirty days* or *five chapters* — the
+> promise in §1, the positioning in §2, the naming in §7 and the whole store listing in §10.
+> `guidelines.pdf` is stale for the same reason.
+>
+> The copy is deliberately **not** being rewritten yet. The loop it has to describe is one
+> day old and has been played only by a test harness. Writing the store listing twice is the
+> waste; writing it once, against a structure that has survived a playtest, is the plan.
+
 # Café Rush — Brand Strategy
 
 **Version** 1.0

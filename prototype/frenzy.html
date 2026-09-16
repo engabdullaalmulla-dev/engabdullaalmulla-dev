@@ -23,6 +23,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 
 #app{display:flex;flex-direction:column;height:100%;max-width:520px;margin:0 auto;position:relative}
 .screen{flex:1;display:flex;flex-direction:column;min-height:0}
+/* .screen sets display:flex, which beats the UA [hidden] rule -- without this the
+   play screen stays laid out and keeps swallowing taps meant for the result card. */
+.screen[hidden]{display:none}
 .pad{padding:0 16px}
 
 /* ---------- HUD ---------- */
