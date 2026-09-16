@@ -1,1205 +1,928 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Café Life</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
 :root{
-  --bg:#171310; --panel:#231C18; --panel-2:#2E2521; --edge:#3B302A;
-  --cream:#F7EFE3; --dim:#A8988A; --dimmer:#6F6058;
-  --amber:#F2A03D; --amber-d:#C97C22;
-  --red:#E24B2E; --green:#4FBF7B; --blue:#5B9DD9;
+  --bg:#171310; --panel:#231C18; --panel-2:#2E2521; --edge:#3B302A; --edge-2:#4A3C34;
+  --cream:#F7EFE3; --cream-2:#D9C9B6; --dim:#A8988A; --dimmer:#6F6058;
+  --amber:#F2A03D; --amber-l:#FFBC63; --amber-d:#C97C22; --brass:#E8C36B;
+  --terra:#A8452A; --green:#4FBF7B; --blue:#5B9DD9; --tile:#3E6E6B;
+  --wood:#7A4A2B; --wood-l:#A9704A; --sun:#F4D9A8;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;background:var(--bg);color:var(--cream);
-  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:14px;line-height:1.4;
-  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;
-  user-select:none;-webkit-user-select:none;
-}
-h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;letter-spacing:-.02em}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
-:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.num{font-variant-numeric:tabular-nums}
-
-#app{display:flex;flex-direction:column;height:100%;max-width:520px;margin:0 auto;position:relative}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,sans-serif;
+     overflow:hidden;display:flex;justify-content:center}
+#app{width:100%;max-width:440px;height:100%;display:flex;flex-direction:column;position:relative}
 .screen{flex:1;display:flex;flex-direction:column;min-height:0}
-/* .screen sets display:flex, which beats the UA [hidden] rule -- without this the
-   play screen stays laid out and keeps swallowing taps meant for the result card. */
 .screen[hidden]{display:none}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .pad{padding:0 16px}
 
-/* ---------- HUD ---------- */
-.hud{display:flex;align-items:center;gap:12px;padding:10px 16px 8px}
-.hud .blk{display:flex;flex-direction:column;line-height:1.05}
-.hud .blk span{font-size:9px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
-.hud .blk b{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
-.hud .grow{flex:1}
-#combo{color:var(--amber);opacity:0;transition:opacity .2s}
-#combo.on{opacity:1}
-.clock{height:5px;background:var(--panel-2);border-radius:3px;margin:0 16px 10px;overflow:hidden}
-.clock i{display:block;height:100%;width:100%;background:var(--amber);border-radius:3px}
-.clock.low i{background:var(--red)}
-.goalbar{height:5px;background:var(--panel-2);border-radius:3px;margin:0 16px 12px;overflow:hidden}
-.goalbar i{display:block;height:100%;width:0;background:var(--green);border-radius:3px;transition:width .18s}
-.goalbar.warn i{background:var(--red)}
+/* ---------- type ---------- */
+.lbl{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+     color:var(--dimmer)}
+.big{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:27px;
+     letter-spacing:-.02em;line-height:1.1;margin:4px 0 12px}
+.mid-t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.num{font-family:"DM Mono",monospace;font-weight:500;font-variant-numeric:tabular-nums}
+.hint{font-size:13px;line-height:1.5;color:var(--dim);margin-top:8px}
+.good{color:var(--green)} .bad{color:var(--terra)} .cash{color:var(--brass)}
 
-.arena{flex:1;display:flex;flex-direction:column;justify-content:space-between;min-height:0}
-.deck{flex:none}
-
-/* ---------- seats ---------- */
-.seats{display:flex;gap:7px;padding:0 16px 14px;align-items:flex-start}
-.seat{
-  flex:1 1 0;min-width:0;background:var(--panel);border:1px solid var(--edge);border-radius:10px;
-  padding:8px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  min-height:126px;position:relative;
-}
-.seat.empty{background:none;border-style:dashed;border-color:#2A221E}
-.seat.empty .inner{display:none}
-.seat .inner{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%}
-.face{
-  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:12px;color:#1A1512;flex:none;
-}
-.pat{width:100%;height:4px;background:#3A2F29;border-radius:3px;overflow:hidden}
-.pat i{display:block;height:100%;width:100%;background:var(--green)}
-.pat.mid i{background:var(--amber)}
-.pat.low i{background:var(--red)}
-.dish{font-size:9px;color:var(--dim);text-align:center;line-height:1.15;min-height:11px}
-.ord{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
-.oi{
-  width:21px;height:21px;border-radius:5px;background:var(--panel-2);border:1px solid var(--edge);
-  display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;
-}
-.of{font-size:8.5px;color:var(--dimmer)}
-.seat.serveable{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
-.seat.go{animation:pop .22s ease-out}
-@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
-.float{
-  position:absolute;left:50%;top:4px;transform:translateX(-50%);pointer-events:none;
-  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:15px;white-space:nowrap;
-  animation:rise .85s ease-out forwards;z-index:5;
-}
-@keyframes rise{0%{opacity:0;transform:translate(-50%,4px)}18%{opacity:1}100%{opacity:0;transform:translate(-50%,-28px)}}
-
-/* ---------- plate ---------- */
-.platewrap{padding:0 16px 14px;display:flex;gap:8px;align-items:center}
-.plate{
-  flex:1;display:flex;gap:6px;align-items:center;padding:8px 10px;min-height:52px;
-  background:#1E1815;border:1px dashed #33291F;border-radius:10px;
-}
-.plate.ready{border-style:solid;border-color:var(--green);background:#1D2C22}
-.plate .ph{color:var(--dimmer);font-size:11px}
-.plate .nm{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:13px;color:var(--green);margin-left:2px}
-.pi{
-  width:30px;height:30px;border-radius:7px;background:var(--panel-2);border:1px solid var(--edge);
-  display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;flex:none;
-}
-.binbtn{
-  width:46px;height:46px;border-radius:10px;border:1px solid var(--edge);background:var(--panel);
-  font-size:17px;flex:none;
-}
-.binbtn:disabled{opacity:.3}
-
-/* ---------- ingredient bins ---------- */
-.binswrap{padding:0 16px 16px}
-.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.bin{
-  background:var(--panel);border:1px solid var(--edge);border-radius:11px;
-  padding:8px 6px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;
-  min-height:102px;position:relative;
-}
-.bin .bic{font-size:20px;line-height:1;margin-top:2px}
-.bin .bnm{font-size:9px;color:var(--dim);text-align:center;line-height:1.1}
-.bin .pips{display:flex;gap:3px;min-height:8px;align-items:center}
-.pip{width:8px;height:8px;border-radius:50%;background:#3A2F29}
-.pip.on{background:var(--amber)}
-.bin .cooks{display:flex;gap:3px;width:100%;padding:0 2px}
-.ck{flex:1 1 0;height:4px;border-radius:2px;background:#3A2F29;overflow:hidden}
-.ck i{display:block;height:100%;width:0;background:var(--blue)}
-.bin.has{border-color:#5A4A3A}
-.bin.locked{opacity:.3}
-.bin.tap{animation:tap .16s ease-out}
-@keyframes tap{0%{transform:scale(1)}50%{transform:scale(.94)}100%{transform:scale(1)}}
-.plus{
-  position:absolute;top:0;right:0;width:44px;height:44px;border-radius:0 11px 0 11px;
-  background:var(--panel-2);color:var(--amber);font-size:17px;font-weight:500;line-height:1;
-  display:flex;align-items:center;justify-content:center;
-}
-.plus:active{background:var(--amber);color:#1A1512}
-.plus:disabled{color:var(--dimmer)}
-.bin.full .plus{color:var(--dimmer)}
-
-/* ---------- screens ---------- */
-.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:16px}
-.mid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:15px;padding:24px 16px;overflow-y:auto}
-.big{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:29px;line-height:1.05}
-.lbl{font-size:9px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase;margin-bottom:5px}
-.btn{
-  width:100%;padding:15px;border-radius:10px;background:var(--amber);color:#1A1512;
-  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
-}
-.btn:active{background:var(--amber-d)}
-.btn.sec{background:none;border:1px solid var(--edge);color:var(--cream)}
-.stat{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--edge);font-size:13px}
+/* ---------- chrome ---------- */
+.bar{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;flex:none}
+.bar .grow{flex:1}
+.pill{background:var(--panel);border:1px solid var(--edge);border-radius:999px;
+      padding:6px 12px;font-family:"DM Mono",monospace;font-size:13px;font-weight:500}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;
+      padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;
+      padding:7px 0;border-bottom:1px solid var(--edge)}
 .stat:last-child{border-bottom:0}
-.stat .k{color:var(--dim)}
-.stat .v{font-variant-numeric:tabular-nums;text-align:right}
-.v.good{color:var(--green)} .v.bad{color:var(--red)}
-.rows{display:flex;flex-direction:column;gap:7px}
-.urow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
-  background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:9px 11px}
-.urow .ui{font-size:17px;line-height:1}
-.urow .un{font-size:12.5px}
-.urow .ud{font-size:10.5px;color:var(--dim)}
-.ubtn{padding:7px 10px;border-radius:7px;background:var(--panel-2);border:1px solid var(--edge);
-  font-size:11px;color:var(--amber);white-space:nowrap}
-.ubtn:disabled{color:var(--dimmer);border-color:#2A221E}
-.ubtn.max{color:var(--green)}
-.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;flex:1}
-.hint{font-size:11.5px;color:var(--dimmer);line-height:1.5}
-.recipe{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 0}
-.recipe .ar{color:var(--dimmer);font-size:10px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
+.stat .k{font-size:13px;color:var(--dim)} .stat .v{font-family:"DM Mono",monospace;font-weight:500}
 
-<div id="app">
-  <section class="screen" id="s-intro" hidden></section>
-  <section class="screen" id="s-play" hidden>
-    <div class="hud">
-      <div class="blk"><span id="lbl-day">Day</span><b class="num" id="h-day">1</b></div>
-      <div class="blk"><span>Earned</span><b class="num" id="h-money">0</b></div>
-      <div class="blk"><span id="lbl-target">Target</span><b class="num" id="h-target">0</b></div>
-      <div class="grow"></div>
-      <div class="blk" id="combo"><span>Streak</span><b class="num" id="h-combo">0</b></div>
-    </div>
-    <div class="goalbar"><i id="h-goal"></i></div>
-    <div class="clock" id="h-clockwrap"><i id="h-clock"></i></div>
-    <div class="arena">
-      <div class="seats" id="seats"></div>
-      <div class="deck">
-        <div class="platewrap">
-          <div class="plate" id="plate"></div>
-          <button class="binbtn" id="clear" type="button" title="Scrape the plate">🗑</button>
-        </div>
-        <div class="binswrap"><div class="bins" id="bins"></div></div>
-      </div>
-    </div>
-  </section>
-  <section class="screen" id="s-result" hidden></section>
+.btn{width:100%;border:0;border-radius:13px;background:var(--amber);color:#0E0B09;
+     font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:16px;
+     padding:15px;margin-top:10px;cursor:pointer}
+.btn:active{background:var(--amber-d)}
+.btn.sec{background:var(--panel-2);color:var(--cream);border:1px solid var(--edge-2)}
+.btn:disabled{opacity:.4}
+.btn.sm{width:auto;padding:9px 13px;font-size:13px;margin:0;border-radius:10px}
+.tabs{display:flex;gap:6px;padding:0 16px 10px;flex:none}
+.tab{flex:1;padding:9px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);
+     font-size:12px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
+.tab.on{background:var(--amber);color:#0E0B09;border-color:var(--amber)}
+
+/* ---------- the room ---------- */
+.room{position:relative;height:216px;flex:none;overflow:hidden;
+      background:linear-gradient(#20323a 0%, #2b3b3f 38%, #3E6E6B 38%, #3E6E6B 62%, #2E2521 62%);
+      border-bottom:2px solid #120F0C}
+.room .floor{position:absolute;left:0;right:0;bottom:0;height:38%;
+             background:repeating-linear-gradient(90deg,#3a2c22 0 22px,#33261d 22px 44px)}
+.room .wall{position:absolute;left:0;right:0;top:38%;height:24%;
+            background:repeating-linear-gradient(90deg,#3E6E6B 0 26px,#396663 26px 28px)}
+.room .win{position:absolute;left:10px;top:12px;width:116px;height:66px;border-radius:5px;
+           background:linear-gradient(#1C2430,#2a3a44);border:3px solid #241a14}
+.room .counter{position:absolute;right:8px;bottom:14%;width:150px;height:44px;border-radius:4px;
+               background:linear-gradient(#A9704A,#7A4A2B);border:2px solid #241a14}
+.ob{position:absolute;font-size:22px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
+.room .glow{position:absolute;left:0;right:0;top:0;height:60%;
+            background:radial-gradient(60% 70% at 72% 20%,rgba(244,217,168,.20),transparent 70%)}
+.room .night{position:absolute;inset:0;background:rgba(12,10,8,.45);pointer-events:none;opacity:0}
+.room.dusk .night{opacity:1}
+.empty-note{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11px;
+            color:rgba(247,239,227,.5);font-family:"DM Mono",monospace}
+
+/* ---------- service ---------- */
+.svc{flex:1;display:flex;flex-direction:column;min-height:0}
+.svc-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex:none}
+.tick{height:5px;background:var(--panel-2);border-radius:3px;overflow:hidden;margin:0 16px;flex:none}
+.tick i{display:block;height:100%;background:var(--amber);width:0%}
+.guests{flex:1;overflow:hidden;position:relative;padding:12px 16px}
+.g{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--edge);
+   border-radius:13px;padding:10px 12px;margin-bottom:9px;cursor:pointer;
+   animation:slide .32s cubic-bezier(.2,.9,.3,1) both}
+.g.reg{border-color:var(--amber-d)}
+@keyframes slide{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+.g .face{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:20px;flex:none}
+.g .nm{font-weight:700;font-size:14px}
+.g .want{font-size:12px;color:var(--dim)}
+.g .pay{margin-left:auto;font-family:"DM Mono",monospace;font-weight:500;font-size:14px}
+.g.miss{opacity:.62}
+.g.tapped{border-color:var(--green)}
+.float{position:absolute;font-family:"DM Mono",monospace;font-weight:500;font-size:14px;
+       pointer-events:none;animation:up 1s ease-out forwards}
+@keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-38px)}}
+
+/* ---------- lists ---------- */
+.item{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--edge);
+      border-radius:13px;padding:11px 12px;margin-bottom:9px}
+.item .ic{width:40px;height:40px;border-radius:10px;background:var(--panel-2);display:grid;
+          place-items:center;font-size:20px;flex:none}
+.item .t{font-weight:700;font-size:14px} .item .d{font-size:12px;color:var(--dim);line-height:1.35}
+.item .mid{flex:1;min-width:0}
+.dish{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;
+      border:1px solid var(--edge);background:var(--panel);margin-bottom:8px;cursor:pointer}
+.dish.on{border-color:var(--amber);background:#2b2118}
+.dish .di{font-size:19px} .dish .dn{flex:1;font-size:14px;font-weight:700}
+.dish .dp{font-family:"DM Mono",monospace;font-size:13px;color:var(--brass)}
+.dish .tg{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+          color:var(--dimmer)}
+.dish.hot{box-shadow:inset 0 0 0 1px var(--amber-d)}
+.beat{border-left:2px solid var(--amber);padding:2px 0 2px 12px;margin:10px 0;font-size:13.5px;
+      line-height:1.55;color:var(--cream-2)}
+.who{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.who .face{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px}
+.bars{height:4px;background:var(--panel-2);border-radius:2px;overflow:hidden;margin-top:5px}
+.bars i{display:block;height:100%;background:var(--amber)}
+</style></head><body><div id="app">
+  <section class="screen" id="s-cafe" hidden></section>
+  <section class="screen" id="s-plan" hidden></section>
+  <section class="screen" id="s-serve" hidden></section>
+  <section class="screen" id="s-close" hidden></section>
   <section class="screen" id="s-shop" hidden></section>
+  <section class="screen" id="s-people" hidden></section>
 </div>
-
 <script>
-"use strict";
+/* ============================================================================
+   Café Life -- a café you build, and the people who keep coming back to it.
 
-/* ===================== content =====================
-   Two layers, which is the thing that makes this genre tick: machines produce
-   INGREDIENTS on background timers into stock bins, and DISHES are assembled
-   from stock. Assembly is instant, cooking is not — so the skill is keeping the
-   right stock up before the order that needs it walks in.                      */
-
-const ING = {
-  shot:  {nm:"Shot",   ic:"☕", time:2.2},
-  tea:   {nm:"Tea",    ic:"🫖", time:2.6},
-  spice: {nm:"Syrup",  ic:"🍯", time:1.0},
-  milk:  {nm:"Milk",   ic:"🥛", time:2.0},
-  pastry:{nm:"Pastry", ic:"🥐", time:4.0},
-  ice:   {nm:"Ice",    ic:"🧊", time:0.9}
-};
-const INGS = Object.keys(ING);
-
-const DISHES = {
-  espresso: {nm:"Espresso",  price:12, needs:["shot"],                 day:1},
-  mint:     {nm:"Mint tea",  price:10, needs:["tea","spice"],          day:1},
-  latte:    {nm:"Latte",     price:20, needs:["shot","milk"],          day:2},
-  karak:    {nm:"Karak chai",price:16, needs:["tea","milk","spice"],   day:3},
-  almond:   {nm:"Almond croissant", price:18, needs:["pastry","spice"],day:4},
-  iced:     {nm:"Iced latte",price:26, needs:["shot","milk","ice"],    day:5}
-};
-
-const NAMES = ["Rami","Noor","Dana","Samir","Aisha","Khalid","Mona","Yusuf","Salma","Tarek","Hana","Omar"];
-const HUES = ["#E8B86D","#C9A0DC","#7FC8A9","#F09B8C","#9BB8E8","#D9C06B","#E8A0B4","#8FD1C4"];
-
-const DAYLEN = 90;
-const WAVE = 25;
-const LIVES = 3;
-const SPEED_COST = [90,180,320];
-const SLOT_COST  = [150,300];
-const SEAT_COST  = [260,520];
-const CHAIR_COST = [220,440];
-const BIN_COST   = [200,400];
-
-function dishesFor(d){ return menuKeys(); }
-function ingsFor(d){
-  const s = {};
-  dishesFor(d).forEach(k => DISHES[k].needs.forEach(n => s[n] = true));
-  return INGS.filter(i => s[i]);
-}
-
-function dayCfg(d){
-  const spawn = Math.max(1.5, 3.5 - (d-1)*0.22);
-  const maxDish = d < 4 ? 1 : 2;
-  const pool = dishesFor(d);
-  const avg = pool.reduce((a,k) => a + DISHES[k].price, 0) / pool.length;
-  const ceiling = (DAYLEN/spawn) * ((1+maxDish)/2) * avg * 1.5;
-  const share = Math.min(0.72, 0.50 + (d-1)*0.04);
-  return {target: Math.round(ceiling*share/10)*10, spawn:spawn, maxDish:maxDish,
-          patience: Math.max(11, 20 - (d-1)*0.8)};
-}
-function waveCfg(w){
-  return {target:0, spawn: Math.max(0.9, 3.0 - (w-1)*0.22),
-          maxDish: w < 4 ? 1 : 2,
-          patience: Math.max(7, 18 - (w-1)*0.9)};
-}
-
-/* ===================== state ===================== */
-
-const NEWSTATE = () => {
-  const up = {};
-  INGS.forEach(i => up[i] = {sp:0, slots:1});
-  return {day:1, cash:1200, seats:3, chairs:0, binCap:3, up:up, seen:false,
-          bestCombo:0, bestEndless:{money:0, wave:0}};
-};
-
-let S = NEWSTATE();
-let R = null;
-let raf = null;
-const D = {};
+   There is no timer and nothing to fail. The decision is the board: you own more
+   recipes than you have slots to show, the season moves what people want, and
+   your regulars each have a usual. Service is watched, not fought -- tapping a
+   customer is generosity, not triage, and noticing people is how their stories
+   move. That inversion is the whole design.
+   ========================================================================== */
 
 const $ = id => document.getElementById(id);
-const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n; };
+const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c;
+                        if(x!=null)n.textContent=x; return n; };
 const pick = a => a[Math.floor(Math.random()*a.length)];
+const money = n => Math.round(n).toLocaleString("en-GB");
 
-function save(){ try{ localStorage.setItem("cafelife1", JSON.stringify({S:S,L:L})); }catch(e){} }
+/* ---------- recipes. tags are what a season or a person is in the mood for ---------- */
+const RECIPES = {
+  karak:   {nm:"Karak chai",     ic:"🫖", cost:2,  price:6,  tags:["warm","cheap"],   buy:0},
+  mint:    {nm:"Mint tea",       ic:"🌿", cost:2,  price:7,  tags:["warm","light"],   buy:0},
+  espresso:{nm:"Espresso",       ic:"☕", cost:3,  price:10, tags:["warm","quick"],   buy:140},
+  latte:   {nm:"Latte",          ic:"🥛", cost:5,  price:16, tags:["warm","slow"],    buy:220},
+  iced:    {nm:"Iced latte",     ic:"🧊", cost:6,  price:20, tags:["cold","slow"],    buy:300},
+  shake:   {nm:"Date shake",     ic:"🥤", cost:7,  price:24, tags:["cold","sweet"],   buy:380},
+  luqaimat:{nm:"Luqaimat",       ic:"🍡", cost:6,  price:18, tags:["sweet","share"],  buy:340},
+  regag:   {nm:"Regag roll",     ic:"🌯", cost:7,  price:19, tags:["savoury","fill"], buy:360},
+  croissant:{nm:"Almond croissant",ic:"🥐",cost:6, price:17, tags:["sweet","quick"],  buy:300},
+  saffron: {nm:"Saffron karak",  ic:"✨", cost:9,  price:34, tags:["warm","premium"], buy:700},
+  affogato:{nm:"Affogato",       ic:"🍨", cost:8,  price:28, tags:["cold","sweet"],   buy:640},
+  chai:    {nm:"Adeni chai",     ic:"🍵", cost:3,  price:12, tags:["warm","slow"],    buy:260}
+};
 
-
-const cookTime = i => ING[i].time * Math.pow(0.82, S.up[i].sp)
-                      * (1 + (L ? L.cafe.wear : 0) * 0.015);
-const patMul = () => 1 + S.chairs*0.15 + (L ? Math.max(-0.15, L.rep*0.01) : 0);
-
-function show(n){ ["intro","play","result","shop"].forEach(v => { $("s-"+v).hidden = (v!==n); }); }
-
-/* ===================== intro ===================== */
-
-
-
-/* ===================== shift ===================== */
-
-function buildPlayDOM(){
-  D.seats = []; D.bins = {}; D.plate = $("plate");
-
-  const seats = $("seats"); seats.textContent = "";
-  for(let i=0;i<S.seats;i++){
-    const s = el("div","seat empty");
-    const inner = el("div","inner");
-    const pat = el("div","pat"); const pi = el("i"); pat.appendChild(pi);
-    const face = el("div","face");
-    const dish = el("div","dish");
-    const ord = el("div","ord");
-    const of = el("div","of");
-    inner.appendChild(pat); inner.appendChild(face);
-    inner.appendChild(dish); inner.appendChild(ord); inner.appendChild(of);
-    s.appendChild(inner);
-    s.addEventListener("pointerdown", e => { e.preventDefault(); serveSeat(i); });
-    seats.appendChild(s);
-    D.seats.push({root:s, pi:pi, pat:pat, face:face, dish:dish, ord:ord, of:of, chips:[]});
-  }
-
-  const bins = $("bins"); bins.textContent = "";
-  const live = ingsFor(S.day);
-  INGS.forEach(i => {
-    const on = live.indexOf(i) >= 0;
-    const b = el("div","bin" + (on ? "" : " locked"));
-    b.setAttribute("role","button"); b.tabIndex = on ? 0 : -1;
-    const plus = el("button","plus","+"); plus.type = "button";
-    b.appendChild(plus);
-    b.appendChild(el("div","bic", on ? ING[i].ic : "🔒"));
-    b.appendChild(el("div","bnm", on ? ING[i].nm : "locked"));
-    const pips = el("div","pips"); const pipEls = [];
-    for(let k=0;k<S.binCap;k++){ const p = el("span","pip"); pips.appendChild(p); pipEls.push(p); }
-    b.appendChild(pips);
-    const cooks = el("div","cooks"); const ckEls = [];
-    for(let k=0;k<S.up[i].slots;k++){
-      const c = el("div","ck"); const f = el("i"); c.appendChild(f); cooks.appendChild(c); ckEls.push(f);
-    }
-    b.appendChild(cooks);
-    if(on){
-      plus.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); startCook(i); });
-      b.addEventListener("pointerdown", e => { e.preventDefault(); takeFromBin(i); });
-      b.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); takeFromBin(i); } });
-    }else{
-      plus.disabled = true;
-    }
-    bins.appendChild(b);
-    D.bins[i] = {root:b, pips:pipEls, cooks:ckEls, on:on};
-  });
-}
-
-function startShift(endless){
-  const cfg = endless ? waveCfg(1) : dayCfg(tier());
-  R = {cfg:cfg, endless:!!endless, wave:1, t:0, money:0, combo:0, best:0,
-       served:0, lost:0, wasted:0, plate:[],
-       seats:new Array(S.seats).fill(null), bins:{}, spawnT:0.8, over:false};
-  INGS.forEach(i => R.bins[i] = {stock:0, cooking:[]});
-  buildPlayDOM();
-  show("play");
-  paint();
-  let last = performance.now();
-  cancelAnimationFrame(raf);
-  const frame = now => {
-    const dt = Math.min(0.05, (now-last)/1000); last = now;
-    if(R && !R.over && !R.paused){ update(dt); paint(); raf = requestAnimationFrame(frame); }
-  };
-  raf = requestAnimationFrame(frame);
-}
-
-function spawn(){
-  const free = [];
-  R.seats.forEach((s,i) => { if(!s) free.push(i); });
-  if(!free.length) return;
-  const pool = dishesFor(S.day);
-  const n = 1 + Math.floor(Math.random()*R.cfg.maxDish);
-  const dishes = [];
-  for(let k=0;k<n;k++) dishes.push(pick(pool));
-  const steps = dishes.reduce((a,k) => a + DISHES[k].needs.length, 0);
-  const pm = R.cfg.patience * patMul() * (1 + (steps-1)*0.35);
-  R.seats[pick(free)] = {nm:pick(NAMES), hue:pick(HUES), dishes:dishes,
-                         got:dishes.map(()=>false), pat:pm, patMax:pm};
-  R.spawnT = R.cfg.spawn * (0.75 + Math.random()*0.5);
-}
-
-function update(dt){
-  R.t += dt;
-  if(R.endless){
-    const w = 1 + Math.floor(R.t/WAVE);
-    if(w !== R.wave){ R.wave = w; R.cfg = waveCfg(w); }
-    if(R.lost >= LIVES){ endShift(); return; }
-  }else if(R.t >= DAYLEN){ endShift(); return; }
-
-  R.spawnT -= dt;
-  if(R.spawnT <= 0) spawn();
-
-  for(let i=0;i<R.seats.length;i++){
-    const c = R.seats[i]; if(!c) continue;
-    c.pat -= dt;
-    if(c.pat <= 0){ R.seats[i] = null; R.lost++; R.combo = 0; floaty(i,"walked out","var(--red)"); }
-  }
-
-  INGS.forEach(i => {
-    const b = R.bins[i], ct = cookTime(i);
-    for(let k=b.cooking.length-1;k>=0;k--){
-      b.cooking[k] += dt;
-      if(b.cooking[k] >= ct){
-        b.cooking.splice(k,1);
-        if(b.stock < S.binCap) b.stock++;
-      }
-    }
-  });
-}
-
-function startCook(i){
-  if(handBlocked()) return; handTap();
-  if(!R || R.over) return;
-  const b = R.bins[i];
-  if(b.cooking.length >= S.up[i].slots) return;
-  if(b.stock + b.cooking.length >= S.binCap){ bump(D.bins[i].root); return; }
-  b.cooking.push(0);
-  bump(D.bins[i].root);
-  paint();
-}
-
-function takeFromBin(i){
-  if(handBlocked()) return; handTap();
-  if(!R || R.over) return;
-  const b = R.bins[i];
-  if(b.stock <= 0 || R.plate.length >= 3){ bump(D.bins[i].root); return; }
-  b.stock--; R.plate.push(i);
-  bump(D.bins[i].root);
-  paint();
-}
-
-function bump(node){ node.classList.remove("tap"); void node.offsetWidth; node.classList.add("tap"); }
-
-function plateDish(){
-  if(!R.plate.length) return null;
-  const k = R.plate.slice().sort().join(",");
-  for(const id in DISHES){
-    if(DISHES[id].day > S.day) continue;
-    if(DISHES[id].needs.slice().sort().join(",") === k) return id;
-  }
-  return null;
-}
-
-function serveSeat(i){
-  if(handBlocked()) return; handTap();
-  if(!R || R.over) return;
-  const c = R.seats[i]; if(!c) return;
-  const d = plateDish(); if(!d) return;
-  const k = c.dishes.findIndex((x,j) => !c.got[j] && x === d);
-  if(k < 0) return;
-
-  c.got[k] = true; R.plate = [];
-  const node = D.seats[i].root;
-  node.classList.remove("go"); void node.offsetWidth; node.classList.add("go");
-
-  if(c.got.every(Boolean)){
-    const pay = c.dishes.reduce((a,x) => a + DISHES[x].price, 0);
-    const frac = Math.max(0, c.pat/c.patMax);
-    R.combo++; if(R.combo > R.best) R.best = R.combo;
-    const tip = pay * (0.10 + 0.40*frac) * (1 + Math.min(R.combo,10)*0.05);
-    const total = Math.round(pay + tip);
-    R.money += total; R.served++; R.seats[i] = null;
-    floaty(i, "+" + total, frac > 0.5 ? "var(--green)" : "var(--amber)");
-  }
-  paint();
-}
-
-function floaty(i, text, color){
-  const host = D.seats[i] && D.seats[i].root; if(!host) return;
-  const f = el("div","float", text); f.style.color = color;
-  host.appendChild(f);
-  setTimeout(() => { if(f.parentNode) f.parentNode.removeChild(f); }, 900);
-}
-
-function paint(){
-  if(!R) return;
-  $("h-money").textContent = R.money;
-  $("h-combo").textContent = R.combo;
-  $("combo").classList.toggle("on", R.combo >= 2);
-  let left;
-  if(R.endless){
-    $("lbl-day").textContent = "Wave";    $("h-day").textContent = R.wave;
-    $("lbl-target").textContent = "Best"; $("h-target").textContent = S.bestEndless.money;
-    const lives = Math.max(0, LIVES - R.lost);
-    $("h-goal").style.width = (lives/LIVES*100) + "%";
-    $("h-goal").parentNode.classList.toggle("warn", lives <= 1);
-    left = 1 - (R.t % WAVE)/WAVE;
-  }else{
-    $("lbl-day").textContent = "Age";     $("h-day").textContent = L ? L.you.age : "";
-    $("lbl-target").textContent = "Target"; $("h-target").textContent = R.cfg.target;
-    $("h-goal").style.width = Math.min(100,(R.money/R.cfg.target)*100) + "%";
-    left = Math.max(0, 1 - R.t/DAYLEN);
-  }
-  $("h-clock").style.width = (left*100) + "%";
-  $("h-clockwrap").classList.toggle("low", left < 0.2);
-
-  const made = plateDish();
-  const wanted = made && R.seats.some(c => c && c.dishes.some((x,j) => !c.got[j] && x === made));
-
-  for(let i=0;i<R.seats.length;i++){
-    const c = R.seats[i], d = D.seats[i];
-    if(!c){ d.root.className = "seat empty"; d.chips = []; d.ord.textContent = ""; continue; }
-    const k = c.got.indexOf(false);
-    const want = c.dishes[k];
-    d.root.className = "seat" + (made && made === want ? " serveable" : "");
-    d.face.textContent = c.nm[0];
-    d.face.style.background = c.hue;
-    const frac = Math.max(0, c.pat/c.patMax);
-    d.pi.style.width = (frac*100) + "%";
-    d.pat.className = "pat" + (frac < 0.25 ? " low" : frac < 0.55 ? " mid" : "");
-    d.dish.textContent = DISHES[want].nm;
-    const needs = DISHES[want].needs;
-    if(d.chips.length !== needs.length || d.key !== want){
-      d.ord.textContent = ""; d.chips = []; d.key = want;
-      needs.forEach(n => { const o = el("div","oi", ING[n].ic); d.ord.appendChild(o); d.chips.push(o); });
-    }
-    d.of.textContent = c.dishes.length > 1 ? (k+1) + " of " + c.dishes.length : "";
-  }
-
-  D.plate.textContent = "";
-  D.plate.className = "plate" + (wanted ? " ready" : "");
-  if(!R.plate.length){
-    D.plate.appendChild(el("span","ph","Plate empty — tap a bin below"));
-  }else{
-    R.plate.forEach(i => D.plate.appendChild(el("span","pi", ING[i].ic)));
-    if(made){
-      const nm = el("span","nm", DISHES[made].nm);
-      if(!wanted) nm.style.color = "var(--dimmer)";
-      D.plate.appendChild(nm);
-    }
-  }
-  $("clear").disabled = !R.plate.length;
-
-  INGS.forEach(i => {
-    const d = D.bins[i]; if(!d || !d.on) return;
-    const b = R.bins[i];
-    d.pips.forEach((p,k) => { p.className = "pip" + (k < b.stock ? " on" : ""); });
-    const ct = cookTime(i);
-    d.cooks.forEach((f,k) => {
-      f.style.width = b.cooking[k] != null ? Math.min(100,(b.cooking[k]/ct)*100) + "%" : "0%";
-    });
-    d.root.classList.toggle("has", b.stock > 0);
-    d.root.classList.toggle("full", b.stock + b.cooking.length >= S.binCap);
-  });
-}
-
-/* ===================== result ===================== */
-
-function mmss(t){ const m = Math.floor(t/60), s = Math.floor(t%60); return m + ":" + (s<10?"0":"") + s; }
-
-function statRow(card, k, val, cls){
-  const r = el("div","stat");
-  r.appendChild(el("div","k",k));
-  r.appendChild(el("div","v num" + (cls ? " "+cls : ""), val));
-  card.appendChild(r);
-}
-
-
-
-function endEndless(){
-  S.cash += R.money;
-  const prev = S.bestEndless;
-  const rec = R.money > prev.money;
-  if(rec) S.bestEndless = {money:R.money, wave:R.wave};
-  save();
-
-  const v = $("s-result"); v.textContent = "";
-  const wrap = el("div","mid");
-  wrap.appendChild(el("div","lbl","Endless rush"));
-  wrap.appendChild(el("div","big", rec ? "New best" : "Rush over"));
-  const card = el("div","card");
-  statRow(card,"Lasted", mmss(R.t));
-  statRow(card,"Reached wave", String(R.wave), "good");
-  statRow(card,"Taken", R.money + " AED", rec ? "good" : "");
-  statRow(card,"Served", String(R.served));
-  statRow(card,"Best streak", "×" + R.best);
-  if(!rec && prev.money) statRow(card,"Your best", prev.money + " AED · wave " + prev.wave);
-  wrap.appendChild(card);
-  wrap.appendChild(el("div","hint","Everything you took is banked either way — an endless run is never wasted."));
-
-  const again = el("button","btn","Go again");
-  again.type = "button";
-  again.addEventListener("click", () => startShift(true));
-  wrap.appendChild(again);
-  const back = el("button","btn sec","Back to the café");
-  back.type = "button";
-  back.addEventListener("click", screenIntro);
-  wrap.appendChild(back);
-  v.appendChild(wrap);
-  show("result");
-}
-
-/* ===================== shop ===================== */
-
-
-
-/* ===================== boot ===================== */
-
-$("clear").addEventListener("click", () => {
-  if(!R || R.over || !R.plate.length) return;
-  R.wasted += R.plate.length; R.plate = []; paint();
-});
-
-document.addEventListener("visibilitychange", () => {
-  if(document.hidden){ if(R && !R.over){ R.paused = true; cancelAnimationFrame(raf); } }
-  else if(R && R.paused && !R.over){
-    R.paused = false;
-    let last = performance.now();
-    const frame = now => {
-      const dt = Math.min(0.05,(now-last)/1000); last = now;
-      if(R && !R.over && !R.paused){ update(dt); paint(); raf = requestAnimationFrame(frame); }
-    };
-    raf = requestAnimationFrame(frame);
-  }
-});
-
-
-/* ===================== the life =====================
-   Café Life wraps the ninety-second shift in three clocks: the shift, the year and
-   the life. The shift engine below this block is unchanged from the rush prototype
-   -- that loop was never the problem. What changes is what surrounds it, and the
-   fact that when you die the café does not.                                       */
-
-const FIRST = ["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid",
-               "Hana","Rami","Dana","Salma","Faisal","Reem","Jamal","Huda"];
-const SURNAME = ["Al Mulla","Al Hashimi","Bin Saeed","Al Rayes","Al Suwaidi"];
-const TEMPER = [
-  {k:"steady",  nm:"Steady",   d:"Never rattled. Loses nothing to a bad year."},
-  {k:"quick",   nm:"Quick",    d:"Starts fast. The hand lock arrives two years late."},
-  {k:"shrewd",  nm:"Shrewd",   d:"Reads the books. Rent and wages cost less."},
-  {k:"beloved", nm:"Beloved",  d:"The street likes them. Reputation climbs faster."},
-  {k:"restless",nm:"Restless", d:"Wants more than a counter. Expands cheaply, tires sooner."}
+const SEASONS = [
+  {nm:"Spring", want:["light","quick"],   note:"Mild. People sit outside and linger."},
+  {nm:"Summer", want:["cold","cold"],     note:"Forty degrees. Nobody wants anything hot."},
+  {nm:"Autumn", want:["warm","sweet"],    note:"The evenings turn. Sweet things sell."},
+  {nm:"Winter", want:["warm","fill"],     note:"Cold mornings. Everyone wants something hot."}
 ];
 
-/* the whole family, the café and the street. S stays what it always was: the
-   fittings and the money, the things that outlive the person holding them. */
-let L = null;
+/* ---------- what you build. every one of these shows up in the room ---------- */
+const ITEMS = {
+  stool:   {nm:"A stool",        ic:"🪑", cost:90,   max:10, d:"One more person can sit down.",
+            f:g=>g.seats++},
+  table:   {nm:"A table",        ic:"🛋️", cost:260,  max:3, d:"People stay longer, and spend more when they do.",
+            f:g=>{g.seats+=2; g.dwell+=0.12}},
+  sign:    {nm:"A painted sign", ic:"🪧", cost:300,  max:1, d:"The street can finally tell what this place is.",
+            f:g=>g.foot+=0.18},
+  awning:  {nm:"An awning",      ic:"⛱️", cost:420,  max:1, d:"Shade out front. Summer stops being a dead season.",
+            f:g=>g.foot+=0.12},
+  case_:   {nm:"A pastry case",  ic:"🍰", cost:380,  max:1, d:"Sweet things sell on sight, not on asking.",
+            f:g=>g.sweetLift=0.35},
+  grinder: {nm:"A proper grinder",ic:"⚙️",cost:460,  max:1, d:"Everything with coffee in it is worth more.",
+            f:g=>g.coffeeLift=0.25},
+  radio:   {nm:"A radio",        ic:"📻", cost:140,  max:1, d:"The room stops being silent.",
+            f:g=>g.mood++},
+  plant:   {nm:"Plants",         ic:"🪴", cost:120,  max:3, d:"Softens the corner by the window.",
+            f:g=>g.mood++},
+  aircon:  {nm:"Air conditioning",ic:"❄️",cost:640,  max:1, d:"Summer afternoons become usable.",
+            f:g=>g.ac=true},
+  slot:    {nm:"A bigger board", ic:"📋", cost:520,  max:6, d:"One more thing can be on the menu at once.",
+            f:g=>g.slots++},
+  backroom:{nm:"Open the back room",ic:"🚪",cost:900,max:1, d:"A quiet corner away from the counter.",
+            f:g=>{g.seats+=3; g.quiet=true}},
+  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:1800, max:1, d:"Twice the room. A different kind of café.",
+            f:g=>{g.seats+=6; g.dwell+=0.2}},
+  barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:2, d:"Serves alongside you. Wages every season.",
+            f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda"]),role:"barista",wage:120})},
+  manager: {nm:"Hire a manager", ic:"🗂️", cost:1400, max:1, d:"Can run a season without you. Wages every season.",
+            f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager",wage:260}); g.canSkip=true}},
+  freehold:{nm:"Buy the building",ic:"🏠", cost:9000, max:1,
+            d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
+            f:g=>g.rep+=5},
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:4200, max:99, pow:1.8, d:"Another café, another street, its own regulars.",
+            f:g=>g.branches.push({nm:pick(["Al Wasl","Jumeirah","Satwa","Deira","Karama"]),
+                                  since:g.year, yield:0.9+Math.random()*0.5})}
+};
 
-/* the hand. this is the whole ageing mechanic and it lives in the shift, not on a
-   stat screen: past your mid-forties a short recovery lock lands after every tap. */
-function handLock(){
-  if(!L) return 0;
-  const a = L.you.age - (L.you.temper === "quick" ? 2 : 0);
-  if(a < 40) return 0;
-  /* tuned against measured play, not drawn: at a calm 3.3 taps/s nothing is lost
-     until about 60, but in a burst -- three seats red at once -- it starts costing
-     from the early fifties. You feel old exactly when the café is busy. */
-  return Math.min(0.42, (a - 40) * 0.016);
-}
-function handBlocked(){
-  if(!R || !R.handUntil) return false;
-  return performance.now() < R.handUntil;
-}
-function handTap(){
-  const lk = handLock();
-  if(R && lk > 0) R.handUntil = performance.now() + lk*1000;
-}
-function staminaFor(age){
-  if(age < 42) return 5;
-  if(age < 52) return 4;
-  if(age < 60) return 3;
-  if(age < 70) return 2;
-  return 1;
-}
+/* ---------- the regulars. this is the forever engine ---------- */
+const REGULARS = [
+{k:"noor", nm:"Noor", ic:"📚", hue:"#C9A0DC", usual:"karak",
+ intro:"A student. Comes in with a laptop and stays four hours on one karak.",
+ beats:[
+  {t:"Noor asks, carefully, whether it is all right that she stays so long. You say it is."},
+  {t:"She is here every day now. Exams. She has started saying good morning to the regulars.",
+   need:"quiet", needT:"She needs somewhere quieter than the counter."},
+  {t:"Noor passed. She brings her mother in to show her the table she sat at."},
+  {t:"She graduates and takes a job two streets away. She still comes on Fridays."},
+  {t:"Noor brings her own daughter, who is four, and who wants the sweet thing in the case.",
+   need:"case_", needT:"There is nothing here a four-year-old wants."}]},
 
-function newPerson(age){
-  const t = pick(TEMPER);
-  return {nm:pick(FIRST), age:age, temper:t.k, temperNm:t.nm,
-          dies: 70 + Math.floor(Math.random()*20), skill:1, took:0, invented:0};
-}
+{k:"haddad", nm:"Mr Haddad", ic:"🗞️", hue:"#9BB8E8", usual:"espresso",
+ intro:"Retired. First customer of the day, every day, with a folded newspaper.",
+ beats:[
+  {t:"He tells you your espresso is nearly as good as the place he went to in Cairo in 1971."},
+  {t:"He starts keeping his own cup behind the counter. You let him."},
+  {t:"Mr Haddad is in hospital for a week. The morning is very quiet without him."},
+  {t:"He comes back thinner, and slower, and at the same time every morning."},
+  {t:"He does not come in. His son comes instead, to tell you, and to have one espresso."}]},
 
-function NEWLIFE(){
-  const you = newPerson(25);
+{k:"dana", nm:"Dana", ic:"🛵", hue:"#F09B8C", usual:"iced",
+ intro:"A delivery rider. In and out in ninety seconds, always something cold.",
+ beats:[
+  {t:"Dana asks if you can have it ready at 2pm without her asking. You start doing that."},
+  {t:"She brings three other riders. They stand outside and drink and shout at each other."},
+  {t:"Dana is saving for a van. She tells you the number every week.",
+   need:"awning", needT:"There is nowhere for them to stand out of the sun."},
+  {t:"She has the van. She still stops, but now she sits down for it."},
+  {t:"Dana employs four riders of her own and does the accounts at your table on Sundays."}]},
+
+{k:"samir", nm:"Samir", ic:"📱", hue:"#7FC8A9", usual:"regag",
+ intro:"Runs the phone repair shop opposite. Watches your customers like a hawk.",
+ beats:[
+  {t:"Samir says your awning blocks his sign. It does not. You buy him a regag roll."},
+  {t:"He starts sending customers over while they wait for a screen repair."},
+  {t:"Samir's shop is broken into. He sits in here until the police come."},
+  {t:"You and Samir have a running argument about football that the whole street follows."},
+  {t:"He asks whether you would ever want the unit next door. His lease is up."}]},
+
+{k:"aisha", nm:"Aisha", ic:"👜", hue:"#E8B86D", usual:"shake",
+ intro:"Comes on the way back from school with her daughter Mariam.",
+ beats:[
+  {t:"Mariam is six and will only drink the date shake, and only with two straws."},
+  {t:"Aisha asks if you do birthdays. You had not thought about it. You do now.",
+   need:"luqaimat", needT:"You have nothing anyone would want at a birthday."},
+  {t:"Mariam is eleven and comes on her own, with her own money, and orders for both of them."},
+  {t:"Aisha's husband left. She sits in the back for a long time and you do not charge her."},
+  {t:"Mariam is sixteen and asks whether you are hiring."}]},
+
+{k:"khalid", nm:"Khalid", ic:"🔑", hue:"#D9C06B", usual:"saffron",
+ intro:"The landlord's son. Drinks the most expensive thing you have, slowly.",
+ beats:[
+  {t:"Khalid asks what you would do with the place if it were yours."},
+  {t:"He mentions his father is selling three units on this street. He does not say which."},
+  {t:"Khalid stops charging you for the water. He does not explain why."},
+  {t:"He offers you the freehold before it goes to the market. It is not cheap.",
+   need:"cash2500", needT:"You cannot come anywhere near the number."},
+  {t:"Khalid comes in as a customer now, not a landlord. It is a better arrangement."}]}
+];
+
+/* ---------- moments: a service can stop and ask you something ---------- */
+const MOMENTS = [
+{t:"A man asks for the wifi password. There is no wifi.",
+ o:[{l:"Get wifi installed — 180", f:g=>{ g.cash-=180; g.dwell+=0.1; return "People stay longer now."; }},
+    {l:"Apologise", f:g=>"He drinks his coffee and goes."}]},
+{t:"Someone has left a wallet on the table by the window.",
+ o:[{l:"Run after them", f:g=>{ g.rep+=3; return "They tell everyone on the street about it."; }},
+    {l:"Keep it behind the counter", f:g=>{ g.rep+=1; return "They come back for it the next day."; }}]},
+{t:"A delivery app wants to list you. They take thirty per cent.",
+ o:[{l:"Sign up", f:g=>{ g.foot+=0.25; g.appCut=0.3; return "Busier. Thinner."; }},
+    {l:"Stay off it", f:g=>{ g.rep+=1; return "You stay a place people have to walk to."; }}]},
+{t:"A child knocks over a tray. Their mother is mortified.",
+ o:[{l:"Wave it off", f:g=>{ g.rep+=2; return "She becomes a regular on the strength of it."; }},
+    {l:"Ask them to be careful", f:g=>"They leave quickly and do not come back."}]},
+{t:"The coffee supplier has raised prices again.",
+ o:[{l:"Absorb it", f:g=>{ g.margin-=0.04; return "Your margin thins. Nobody notices but you."; }},
+    {l:"Put prices up", f:g=>{ g.priceLift+=0.1; g.rep-=1; return "A few people mention it."; }}]},
+{t:"A food blogger photographs the luqaimat for eleven minutes.",
+ o:[{l:"Let her work", f:g=>{ g.foot+=0.15; return "Saturdays are different after that."; }}]},
+{t:"It is Ramadan. The street is dead until sunset and then it is not.",
+ o:[{l:"Open for iftar", f:g=>{ g.cash+=Math.round(180*g.foot); return "Hard nights, good ones."; }},
+    {l:"Keep normal hours", f:g=>"A quiet month."}]},
+{t:"Someone asks whether you would cater their wedding. Four hundred cups.",
+ o:[{l:"Take it", f:g=>{ g.cash+=Math.round(520*g.foot); return money(520*g.foot)+" AED, and no sleep."; }},
+    {l:"Too big", f:g=>"It goes to the place on the corner."}]}
+];
+
+/* ============================== state ============================== */
+function NEW(){
   return {
-    gen:1, year:1996, house:pick(SURNAME),
-    you:you, spouse:null, kids:[],
-    cafe:{tenure:"rent", rent:520, wear:0},
-    street:{footfall:1.00, mood:"quiet"},
-    menu:["espresso","mint","latte"],
-    cookbook:[], staff:[], rep:0,
-    shiftsLeft:staminaFor(you.age), worked:0, yearTake:0,
-    dynasty:[], history:[], over:false
+    year:1996, season:0, gen:1, week:0,
+    owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
+           dies:72+Math.floor(Math.random()*18)},
+    cash:420, rent:90,
+    recipes:["karak","mint"], board:["karak","mint"], slots:2,
+    owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
+    sweetLift:0, coffeeLift:0, ac:false, quiet:false, canSkip:false, appCut:0,
+    staff:[], branches:[], regs:{}, cookbook:[], log:[], dynasty:[],
+    lastTake:0, seenIntro:false
   };
 }
+let G = NEW();
+let SV = null;                                     // the live service
+const SAVE = "cafelife_mgmt_1";
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(G)); }catch(e){} }
+function load(){ try{ const r=localStorage.getItem(SAVE); if(!r) return null;
+                      const p=JSON.parse(r); return (p&&p.year)?p:null; }catch(e){ return null; } }
 
-/* the menu is no longer gated by a day number -- it is what this family has on the
-   board, base recipes plus whatever any ancestor invented. */
-function menuKeys(){ return L ? L.menu.slice() : ["espresso"]; }
+const season = () => SEASONS[G.season % 4];
+const own = k => G.owned[k] || 0;
+const infl = () => 1 + (G.year - 1996) * 0.02;
+/* rent and wages track the size of the thing you built, so profit stays a margin
+   and never becomes a fountain. Flat rent was why cash hit six figures by year ten. */
+const rentNow = () => Math.round((80 + G.seats*11 + G.branches.length*130) * infl()
+                        + (own("freehold") ? 0 : G.lastTake * 0.07));
+const staffWage = () => Math.round(G.staff.reduce((a,s)=>a+s.wage,0) * infl());
+const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
+/* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
+function costOfItem(k, have){
+  const it = ITEMS[k];
+  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.6)) * infl());
+}
+const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
+function show(n){ ["cafe","plan","serve","close","shop","people"]
+  .forEach(v => $("s-"+v).hidden = (v!==n)); }
 
-/* difficulty comes from the street and your name, not from a campaign day */
-function tier(){
-  const t = 1 + (L.street.footfall - 1) * 6 + L.rep * 0.06;
-  return Math.max(1, Math.min(12, Math.round(t * 10) / 10));
+/* how appealing today's board is to a walk-in wanting `tag` */
+function boardHas(tag){ return G.board.some(k => RECIPES[k].tags.indexOf(tag) >= 0); }
+function priceOf(k){
+  const r = RECIPES[k];
+  let p = r.price * (1 + G.priceLift) * (1 + (G.year-1996)*0.018);
+  if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
+  if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
+  return Math.round(p);
 }
 
-function money(n){ return Math.round(n).toLocaleString("en-GB"); }
-function note(s){ L.history.unshift(L.year + " · " + s); L.history = L.history.slice(0,60); }
+/* ============================== the room ============================== */
+function drawRoom(host, dusk){
+  const r = el("div","room" + (dusk ? " dusk" : ""));
+  r.appendChild(el("div","floor")); r.appendChild(el("div","wall"));
+  r.appendChild(el("div","win"));   r.appendChild(el("div","counter"));
+  const at = (ic,l,b,sz) => { const o = el("div","ob",ic);
+    o.style.left = l+"px"; o.style.bottom = b+"px"; if(sz) o.style.fontSize = sz+"px";
+    r.appendChild(o); };
 
-/* ---------- recipes ---------- */
-const RECIPE_WORDS = ["House","Corner","Morning","Street","Family","Late","Little","Old"];
-function inventRecipe(){
-  const pool = INGS.filter(i => menuIngsAll().indexOf(i) >= 0);
-  const n = 2 + (Math.random() < 0.4 ? 1 : 0);
-  const needs = [];
-  const bag = pool.slice();
-  for(let k=0;k<n && bag.length;k++) needs.push(bag.splice(Math.floor(Math.random()*bag.length),1)[0]);
-  if(needs.length < 2) return null;
-  const base = needs.reduce((a,i) => a + ING[i].time*4 + 4, 0);
-  const q = 0.75 + Math.random()*0.5 + L.you.skill*0.05;
-  const price = Math.max(8, Math.round(base * q));
-  const key = "inv" + L.cookbook.length + "_" + L.gen;
-  const nm = pick(RECIPE_WORDS) + " " + pick(["karak","blend","cup","plate","special"]);
-  DISHES[key] = {nm:nm, price:price, needs:needs, day:0};
-  L.cookbook.push({key:key, nm:nm, price:price, needs:needs, by:L.you.nm, gen:L.gen, year:L.year});
-  L.menu.push(key);
-  L.you.invented++;
-  note(L.you.nm + " put " + nm + " on the board at " + price + " AED");
-  return DISHES[key];
+  at("☕", 300, 62, 18);                                   // the one machine you start with
+  for(let i=0;i<own("stool");i++)  at("🪑", 30+i*34, 18);
+  for(let i=0;i<own("table");i++)  at("🛋️", 44+i*70, 40, 26);
+  for(let i=0;i<own("plant");i++)  at("🪴", 8+i*118, 44, 20);
+  if(own("radio"))    at("📻", 340, 62, 15);
+  if(own("case_"))    at("🍰", 258, 62, 17);
+  if(own("grinder"))  at("⚙️", 372, 62, 15);
+  if(own("sign"))     at("🪧", 150, 150, 26);
+  if(own("awning"))   at("⛱️", 20, 152, 30);
+  if(own("aircon"))   at("❄️", 250, 156, 16);
+  if(own("backroom")) at("🚪", 402, 30, 26);
+  if(own("upstairs")) at("🪜", 386, 96, 22);
+  G.staff.forEach((s,i) => at(s.role==="manager" ? "🗂️" : "🧑‍🍳", 250+i*40, 24, 19));
+  r.appendChild(el("div","glow")); r.appendChild(el("div","night"));
+  if(!own("stool") && !own("table"))
+    r.appendChild(el("div","empty-note","a counter, two stools and one machine"));
+  host.appendChild(r);
 }
-function menuIngsAll(){
-  const s = {};
-  ["espresso","mint","latte","karak","almond","iced"].forEach(k => {
-    if(DISHES[k]) DISHES[k].needs.forEach(i => s[i] = true);
+
+/* ============================== the café ============================== */
+function screenCafe(){
+  const v = $("s-cafe"); v.textContent = "";
+  const bar = el("div","bar");
+  bar.appendChild(el("div","pill", season().nm + " " + G.year));
+  bar.appendChild(el("div","grow"));
+  bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
+  v.appendChild(bar);
+  drawRoom(v, G.season === 3);
+
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "14px";
+
+  const head = el("div");
+  head.appendChild(el("div","lbl", "Generation " + G.gen + " · " + G.owner.nm + ", " + G.owner.age));
+  head.appendChild(el("div","big", season().nm));
+  head.appendChild(el("div","hint", season().note));
+  sc.appendChild(head);
+
+  const c = el("div","card"); c.style.marginTop = "14px";
+  c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots));
+  G.board.forEach(k => {
+    const r = RECIPES[k], d = el("div","dish");
+    d.style.cursor = "default";
+    d.appendChild(el("div","di", r.ic));
+    d.appendChild(el("div","dn", r.nm));
+    const wanted = r.tags.some(t => season().want.indexOf(t) >= 0);
+    if(wanted) d.appendChild(el("div","tg","in season"));
+    d.appendChild(el("div","dp", priceOf(k) + ""));
+    c.appendChild(d);
   });
-  return INGS.filter(i => s[i]);
-}
+  if(!G.board.length) c.appendChild(el("div","hint","Nothing on the board. Nobody can order anything."));
+  sc.appendChild(c);
 
-/* ---------- the event deck ---------- */
-const EVENTS = [
-{w:3, ok:()=>L.cafe.tenure === "rent", t:"The landlord",
- d:()=>"He wants " + money(L.cafe.rent*0.25) + " AED more a year. He mentions, not gently, that the unit opposite is empty.",
- o:[{l:"Pay it", f:()=>{ L.cafe.rent = Math.round(L.cafe.rent*1.25); return "Rent is now " + money(L.cafe.rent) + " a year."; }},
-    {l:"Argue", f:()=>{ if(L.rep > 8){ return "He backs down. The street has opinions and he knows it."; }
-                        L.cafe.rent = Math.round(L.cafe.rent*1.4); L.rep -= 2;
-                        return "He raises it further out of spite. " + money(L.cafe.rent) + " a year."; }}]},
-{w:2, ok:()=>true, t:"Health inspector",
- d:()=>"A clipboard, and a long silence in front of the ice machine.",
- o:[{l:"Take the fine", f:()=>{ S.cash -= 260; return "260 AED, and a note on file."; }},
-    {l:"Close for a week and fix it", f:()=>{ S.cash -= 130; L.rep += 3; L.cafe.wear = Math.max(0,L.cafe.wear-3);
-        return "Expensive, and the street noticed you did it properly."; }}]},
-{w:2, ok:()=>L.year > 2002, t:"A chain opens opposite",
- d:()=>"Same green apron as the airport. Air conditioning you cannot afford.",
- o:[{l:"Undercut them", f:()=>{ L.street.footfall += 0.06; S.cash -= 310;
-        return "Cheaper for a year. It works, and it costs."; }},
-    {l:"Do nothing", f:()=>{ L.street.footfall -= 0.10;
-        return "Footfall drops. Some regulars stay, because they are regulars."; }}]},
-{w:2, ok:()=>true, t:"A food blogger",
- d:()=>"She photographs the karak for eleven minutes before drinking it.",
- o:[{l:"Let her work", f:()=>{ L.rep += 4; L.street.footfall += 0.05;
-        return "The post does well. Saturdays get busier."; }}]},
-{w:3, ok:()=>true, t:"Ramadan",
- d:()=>"Nothing before sunset, then everything at once.",
- o:[{l:"Open for iftar", f:()=>{ const g = Math.round(210*L.street.footfall); S.cash += g; L.rep += 1;
-        return "Hard nights. " + money(g) + " AED and a lot of goodwill."; }},
-    {l:"Keep normal hours", f:()=>"A quiet month."}]},
-{w:2, ok:()=>L.you.age > 46, t:"Your knees",
- d:()=>"Ninety seconds is the same ninety seconds. You are not.",
- o:[{l:"Carry on", f:()=>"You carry on."},
-    {l:"See someone about it", f:()=>{ S.cash -= 190; L.you.dies += 2;
-        return "190 AED. Worth it, probably."; }}]},
-{w:2, ok:()=>L.kids.length > 0, t:"Tuition",
- d:()=>{ const k = L.kids[0]; return k.nm + " has a place at the university in Sharjah. It is not free."; },
- o:[{l:"Pay", f:()=>{ S.cash -= 1250; L.kids[0].educated = true; L.kids[0].wants = false;
-        return "1,250 AED. They will be an engineer, and they will not want the café."; }},
-    {l:"Say the café is the education", f:()=>{ L.kids[0].wants = true; L.kids[0].resents = true;
-        return "They stay. They are good at it. They do not forgive it."; }}]},
-{w:2, ok:()=>true, t:"A machine gives out",
- d:()=>"The steamer, mid-rush, with four people waiting.",
- o:[{l:"Repair it", f:()=>{ S.cash -= 330; L.cafe.wear = Math.max(0,L.cafe.wear-4);
-        return "330 AED and two days shut."; }},
-    {l:"Nurse it along", f:()=>{ L.cafe.wear += 4; return "It runs. Slower, and it will be back."; }}]},
-{w:1, ok:()=>L.staff.length > 0, t:"The till is light",
- d:()=>L.staff[0].nm + " has been taking from the till. Not much. Every week.",
- o:[{l:"Let them go", f:()=>{ const s = L.staff.shift(); return s.nm + " leaves. You are short-handed."; }},
-    {l:"Ask why", f:()=>{ L.staff[0].loyal = true; L.rep += 1;
-        return "A sick mother. You sort it out. They never leave you after that."; }}]},
-{w:2, ok:()=>L.year > 2008, t:"The street is changing",
- d:()=>"Two of the old shops are gone. A phone repair place, a nail bar.",
- o:[{l:"Note it", f:()=>{ L.street.footfall += (Math.random()<0.5 ? 0.08 : -0.08);
-        return "The street does what it does."; }}]},
-{w:1, ok:()=>!L.spouse && L.you.age < 45, t:"Someone comes in every Thursday",
- d:()=>"Always the same order. Always the corner table.",
- o:[{l:"Say something", f:()=>{ L.spouse = {nm:pick(FIRST)}; L.rep += 2;
-        note(L.you.nm + " married " + L.spouse.nm); return "You say something."; }},
-    {l:"Don't", f:()=>"You don't."}]},
-{w:2, ok:()=>L.spouse && L.kids.length < 3 && L.you.age < 48, t:"A child",
- d:()=>"The flat above the shop is about to get smaller.",
- o:[{l:"Good", f:()=>{ const k = newPerson(0); k.wants = Math.random() < 0.55; L.kids.push(k);
-        note(k.nm + " born"); return k.nm + " is born. The café will be their whole childhood."; }}]},
-{w:1, ok:()=>true, t:"A wedding order",
- d:()=>"Four hundred cups, one afternoon, cash.",
- o:[{l:"Take it", f:()=>{ const g = Math.round(620*L.street.footfall); S.cash += g; L.cafe.wear += 2;
-        return money(g) + " AED, and the machines feel it."; }},
-    {l:"Too big", f:()=>"You turn it down. It goes to the chain."}]},
-{w:1, ok:()=>L.rep > 10, t:"They want to franchise you",
- d:()=>"A man with a folder says your name could be on eleven of these.",
- o:[{l:"Refuse", f:()=>{ L.rep += 3; return "The street hears you refused. That is worth more than the folder."; }},
-    {l:"Listen", f:()=>{ S.cash += 4200; L.rep -= 6; L.street.footfall -= 0.05;
-        return "4,200 AED. Something is different after that."; }}]},
-{w:2, ok:()=>true, t:"A quiet year",
- d:()=>"Nothing happens. The shutters go up, the shutters go down.",
- o:[{l:"Good", f:()=>"Good."}]}
-];
-
-function fireEvent(){
-  const live = EVENTS.filter(e => e.ok());
-  const bag = [];
-  live.forEach(e => { for(let i=0;i<e.w;i++) bag.push(e); });
-  return bag.length ? pick(bag) : null;
-}
-
-/* ---------- screens ---------- */
-
-function lifeHead(wrap, lbl, big){
-  wrap.appendChild(el("div","lbl", lbl));
-  wrap.appendChild(el("div","big", big));
-}
-function statCard(rows){
-  const card = el("div","card");
-  rows.forEach(r => { if(!r) return; statRow(card, r[0], r[1], r[2] || ""); });
-  return card;
-}
-
-function screenYear(){
-  const v = $("s-intro"); v.textContent = "";
-  const wrap = el("div","mid");
-  lifeHead(wrap, L.year + " · generation " + L.gen,
-           L.you.nm + ", " + L.you.age);
-
-  const lk = handLock();
-  wrap.appendChild(statCard([
-    ["In the till", money(S.cash) + " AED"],
-    ["Shifts left this year", L.shiftsLeft + " of " + staminaFor(L.you.age)],
-    ["Street footfall", Math.round(L.street.footfall*100) + "%"],
-    ["Reputation", (L.rep > 0 ? "+" : "") + L.rep, L.rep >= 0 ? "good" : "bad"],
-    lk > 0 ? ["Your hands", "−" + Math.round(lk*1000) + " ms per tap", "bad"] : null,
-    L.cafe.tenure === "rent" ? ["Rent", money(L.cafe.rent) + " AED / year"]
-                             : ["The building", L.cafe.tenure === "own" ? "Yours" : "On a long lease", "good"]
-  ]));
-
-  const menu = el("div","card");
-  menu.appendChild(el("div","lbl","On the board"));
-  menuKeys().forEach(k => {
-    const d = DISHES[k]; if(!d) return;
-    const r = el("div","recipe");
-    d.needs.forEach((n,j) => {
-      if(j) r.appendChild(el("span","ar","+"));
-      r.appendChild(el("span","pi", ING[n].ic));
+  const met = REGULARS.filter(r => regState(r.k).met);
+  if(met.length){
+    const p = el("div","card");
+    p.appendChild(el("div","lbl","Regulars"));
+    met.forEach(r => {
+      const st = regState(r.k), row = el("div","who");
+      const f = el("div","face", r.ic); f.style.background = r.hue + "33"; row.appendChild(f);
+      const m = el("div"); m.style.flex = "1";
+      m.appendChild(el("div","mid-t", r.nm));
+      m.appendChild(el("div","hint", st.done ? "Their story here is finished."
+        : "Chapter " + (st.beat+1) + " of " + r.beats.length));
+      const b = el("div","bars"); const i = el("i");
+      i.style.width = Math.round(st.beat/r.beats.length*100) + "%"; b.appendChild(i); m.appendChild(b);
+      row.appendChild(m); p.appendChild(row);
     });
-    r.appendChild(el("span","ar","→"));
-    const nm = el("span",null,d.nm); nm.style.flex = "1";
-    r.appendChild(nm);
-    r.appendChild(el("span","v num", d.price + ""));
-    const cb = L.cookbook.filter(c => c.key === k)[0];
-    if(cb){ nm.style.color = "var(--amber)"; nm.title = cb.by + ", " + cb.year; }
-    menu.appendChild(r);
+    sc.appendChild(p);
+  }
+
+  if(G.branches.length){
+    const b = el("div","card");
+    b.appendChild(el("div","lbl","Branches"));
+    G.branches.forEach(br => {
+      const r = el("div","stat");
+      r.appendChild(el("div","k", br.nm + " · since " + br.since));
+      r.appendChild(el("div","v cash", "+" + money(branchTake(br)) + " / season"));
+      b.appendChild(r);
+    });
+    sc.appendChild(b);
+  }
+
+  const plan = el("button","btn","Plan the season"); plan.type="button";
+  plan.onclick = screenPlan; sc.appendChild(plan);
+  const shop = el("button","btn sec","Spend " + money(G.cash) + " AED"); shop.type="button";
+  shop.onclick = () => screenShop("build"); sc.appendChild(shop);
+  if(met.length){
+    const pp = el("button","btn sec","The regulars"); pp.type="button";
+    pp.onclick = screenPeople; sc.appendChild(pp);
+  }
+  sc.appendChild(el("div",null," ")).style.height = "10px";
+  v.appendChild(sc);
+  show("cafe");
+}
+
+/* ============================== the board ============================== */
+function screenPlan(){
+  const v = $("s-plan"); v.textContent = "";
+  const bar = el("div","bar");
+  const back = el("div","pill","‹ Café"); back.style.cursor="pointer"; back.onclick = screenCafe;
+  bar.appendChild(back); bar.appendChild(el("div","grow"));
+  bar.appendChild(el("div","pill", G.board.length + " / " + G.slots));
+  v.appendChild(bar);
+
+  const sc = el("div","scroll pad");
+  sc.appendChild(el("div","lbl","The board"));
+  sc.appendChild(el("div","big","What is on today"));
+  sc.appendChild(el("div","hint","You own more than you can show. " + season().nm
+    + " wants " + season().want.filter((x,i,a)=>a.indexOf(x)===i).join(" and ")
+    + ". A regular whose usual is missing will notice."));
+
+  const wrap = el("div"); wrap.style.marginTop = "14px";
+  G.recipes.forEach(k => {
+    const r = RECIPES[k], on = G.board.indexOf(k) >= 0;
+    const d = el("div","dish" + (on ? " on" : ""));
+    const wanted = r.tags.some(t => season().want.indexOf(t) >= 0);
+    if(wanted) d.classList.add("hot");
+    d.appendChild(el("div","di", r.ic));
+    const mid = el("div"); mid.style.flex = "1";
+    mid.appendChild(el("div","dn", r.nm));
+    const whoWants = REGULARS.filter(x => x.usual === k && regState(x.k).met).map(x => x.nm);
+    mid.appendChild(el("div","tg",
+      r.tags.join(" · ") + (whoWants.length ? "  ·  " + whoWants.join(", ") + "'s usual" : "")));
+    d.appendChild(mid);
+    d.appendChild(el("div","dp", priceOf(k) + ""));
+    d.onclick = () => {
+      const i = G.board.indexOf(k);
+      if(i >= 0) G.board.splice(i,1);
+      else if(G.board.length < G.slots) G.board.push(k);
+      save(); screenPlan();
+    };
+    wrap.appendChild(d);
   });
-  if(L.cookbook.length){
-    const h = el("div","hint","Amber recipes are the family cookbook — "
-      + L.cookbook.length + " invented so far, and they outlive whoever wrote them.");
-    menu.appendChild(h);
-  }
-  wrap.appendChild(menu);
+  sc.appendChild(wrap);
 
-  if(L.shiftsLeft > 0){
-    const go = el("button","btn","Work the counter");
-    go.type = "button";
-    go.addEventListener("click", () => startShift(false));
-    wrap.appendChild(go);
+  const go = el("button","btn","Open for the season"); go.type = "button";
+  go.disabled = !G.board.length;
+  go.onclick = () => runService(false);
+  sc.appendChild(go);
+  if(G.canSkip){
+    const sk = el("button","btn sec","Let the manager run it"); sk.type = "button";
+    sk.onclick = () => runService(true); sc.appendChild(sk);
   }
-  if(L.staff.length && L.shiftsLeft > 0){
-    const dl = el("button","btn sec","Let " + L.staff[0].nm + " take it");
-    dl.type = "button";
-    dl.addEventListener("click", () => delegateShift());
-    wrap.appendChild(dl);
-  }
-  const close = el("button","btn" + (L.shiftsLeft > 0 ? " sec" : ""),
-                   L.shiftsLeft > 0 ? "Close the year early" : "Close the year");
-  close.type = "button";
-  close.addEventListener("click", advanceYear);
-  wrap.appendChild(close);
-
-  if(L.history.length){
-    const h = el("div","card");
-    h.appendChild(el("div","lbl","The café remembers"));
-    L.history.slice(0,5).forEach(line => h.appendChild(el("div","hint", line)));
-    wrap.appendChild(h);
-  }
-  v.appendChild(wrap);
-  show("intro");
+  v.appendChild(sc);
+  show("plan");
 }
 
-function delegateShift(){
-  const s = L.staff[0];
-  const cfg = dayCfg(tier());
-  const take = Math.round(cfg.target * (0.45 + s.skill*0.08) * (0.85 + Math.random()*0.3));
-  S.cash += take; L.yearTake += take; L.shiftsLeft--; L.worked++;
-  s.skill = Math.min(5, s.skill + 0.2);
+/* ============================== service ============================== */
+function branchTake(br){
+  const i = G.branches.indexOf(br);
+  return Math.round(180 * br.yield * infl() * Math.pow(0.88, i) * (1 + G.rep*0.006));
+}
+
+function visitsFor(c){
+  if(c.reg) return Math.min(80, 22 + regState(c.reg.k).warmth*4);
+  return 1 + Math.floor(Math.random()*3);
+}
+function buildQueue(){
+  const n = Math.max(6, Math.min(G.seats*3 + 6,
+            Math.round((8 + G.seats*2) * G.foot * (1 + G.rep*0.012))));
+  const q = [];
+  /* regulars come first -- they are the reason the place works */
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(st.met || (G.board.indexOf(r.usual) >= 0 && Math.random() < 0.55))
+      q.push({reg:r, want:r.usual});
+  });
+  for(let i=q.length;i<n;i++){
+    const tag = Math.random() < 0.62 ? pick(season().want) : pick(["warm","cold","sweet","savoury","quick"]);
+    q.push({reg:null, want:null, tag:tag});
+  }
+  for(let i=q.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [q[i],q[j]]=[q[j],q[i]]; }
+  return q;
+}
+
+function serveOne(c){
+  /* a guest buys the first thing on the board that suits them */
+  let k = null;
+  if(c.want && G.board.indexOf(c.want) >= 0) k = c.want;
+  else {
+    const fits = G.board.filter(b => c.tag ? RECIPES[b].tags.indexOf(c.tag) >= 0
+                                           : true);
+    if(fits.length) k = pick(fits);
+    else if(c.reg) k = null;
+    else if(G.board.length && Math.random() < 0.45) k = pick(G.board);
+  }
+  if(!k) return {k:null, pay:0, visits:0};
+  const n = visitsFor(c), p = priceOf(k);
+  const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut) * (1 + G.dwell));
+  return {k:k, pay:p*n, visits:n, profit:profit};
+}
+
+function runService(auto){
+  const q = buildQueue();
+  SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null};
+  if(auto){
+    q.forEach(c => { const r = serveOne(c);
+      if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*0.72); SV.served++;
+               if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
+      else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
+    closeSeason(true); return;
+  }
+  const v = $("s-serve"); v.textContent = "";
+  const top = el("div","svc-top");
+  top.appendChild(el("div","lbl", season().nm + " " + G.year));
+  const take = el("div","mid-t cash","0 AED"); take.id = "sv-take"; top.appendChild(take);
+  v.appendChild(top);
+  const tick = el("div","tick"); const ti = el("i"); ti.id = "sv-tick"; tick.appendChild(ti);
+  v.appendChild(tick);
+  const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
+  const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
+  foot.appendChild(el("div","hint","Tap someone to go over and say something. It is worth "
+    + "nothing on the till and everything to them."));
+  v.appendChild(foot);
+  show("serve");
+  SV.timer = setInterval(step, 620);
+  step();
+}
+
+function step(){
+  if(SV.moment) return;
+  if(SV.i >= SV.q.length){ clearInterval(SV.timer); setTimeout(() => closeSeason(false), 700); return; }
+  const c = SV.q[SV.i++];
+  const r = serveOne(c);
+  const list = $("sv-list");
+  const g = el("div","g" + (c.reg ? " reg" : "") + (r.k ? "" : " miss"));
+  const f = el("div","face", c.reg ? c.reg.ic : pick(["🧔","👩","🧑","👵","👨","🧕"]));
+  f.style.background = (c.reg ? c.reg.hue : "#6F6058") + "33";
+  g.appendChild(f);
+  const mid = el("div"); mid.style.flex = "1"; mid.style.minWidth = "0";
+  mid.appendChild(el("div","nm", c.reg ? c.reg.nm : "Someone"));
+  mid.appendChild(el("div","want", r.k ? RECIPES[r.k].nm + " ×" + r.visits
+    : (c.reg ? "wanted " + RECIPES[c.reg.usual].nm + " — not on the board"
+             : "wanted something " + c.tag + " — walked")));
+  g.appendChild(mid);
+  g.appendChild(el("div","pay" + (r.k ? " cash" : " bad"), r.k ? "+" + r.pay : "—"));
+
+  if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++;
+           if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
+  else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; }
+
+  g.onclick = () => {
+    if(g.classList.contains("tapped")) return;
+    g.classList.add("tapped");
+    const tip = r.k ? Math.round(r.pay*0.04)+2 : 0;
+    SV.tips += tip; SV.take += tip;
+    if(c.reg){ regState(c.reg.k).warmth += 2; if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k); }
+    const fl = el("div","float good", c.reg ? "♥ " + c.reg.nm : (tip ? "+" + tip : "♥"));
+    const b = g.getBoundingClientRect(), p = $("sv-list").getBoundingClientRect();
+    fl.style.left = (b.width - 92) + "px"; fl.style.top = (b.top - p.top) + "px";
+    $("sv-list").appendChild(fl); setTimeout(() => fl.remove(), 1000);
+    $("sv-take").textContent = money(SV.take) + " AED";
+  };
+
+  list.insertBefore(g, list.firstChild);
+  while(list.children.length > 7) list.lastChild.remove();
+  $("sv-take").textContent = money(SV.take) + " AED";
+  $("sv-tick").style.width = Math.round(SV.i/SV.q.length*100) + "%";
+
+  if(SV.i === Math.floor(SV.q.length*0.45) && Math.random() < 0.75) doMoment();
+}
+
+function doMoment(){
+  const m = pick(MOMENTS);
+  SV.moment = m;
+  const list = $("sv-list");
+  const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
+  card.appendChild(el("div","lbl","A moment"));
+  card.appendChild(el("div","hint", m.t));
+  m.o.forEach((o,i) => {
+    const b = el("button","btn" + (i ? " sec" : "")); b.type = "button"; b.textContent = o.l;
+    b.onclick = () => { const out = o.f(G); card.remove(); SV.moment = null;
+      const n = el("div","card"); n.appendChild(el("div","hint", out));
+      list.insertBefore(n, list.firstChild); save(); };
+    card.appendChild(b);
+  });
+  list.insertBefore(card, list.firstChild);
+}
+
+/* ============================== closing the season ============================== */
+function closeSeason(auto){
+  const wages = staffWage();
+  const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
+  const rent = rentNow();                    // charged on LAST season's takings
+  const net = SV.profit + branch - rent - wages;
+  G.cash += net; G.lastTake = SV.take;
+  G.rep += (SV.missed > SV.served*0.4 ? -1 : 1);
+  if(SV.tips > 0) G.rep += 1;
+
+  /* whose story moved */
+  const beats = [];
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(st.done) return;
+    if(!st.met){
+      if(SV.seen.indexOf(r.k) >= 0){ st.met = true; beats.push({r:r, intro:true}); }
+      return;
+    }
+    if(SV.seen.indexOf(r.k) < 0) return;
+    if(st.warmth < (st.beat+1)*2) return;
+    const b = r.beats[st.beat];
+    if(b.need){
+      /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant
+         a recipe gate could never open, and the story sat there forever. */
+      const ok = b.need === "quiet" ? G.quiet
+               : b.need === "cash2500" ? G.cash >= 2500
+               : (own(b.need) > 0 || G.recipes.indexOf(b.need) >= 0);
+      if(!ok){ beats.push({r:r, blocked:b.needT}); return; }
+    }
+    beats.push({r:r, beat:b});
+    st.beat++;
+    if(st.beat >= r.beats.length) st.done = true;
+  });
+
+  /* a finished story does not empty a seat forever -- a few seasons later somebody
+     new is sitting in it. In the shipped game this cast is assembled procedurally
+     from a role, a usual and a beat set; here it recycles the arcs with a new face. */
+  const arrivals = [];
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(!st.done) return;
+    st.rest = (st.rest || 0) + 1;
+    if(st.rest >= 4){
+      const nth = (st.cycle || 1) + 1;
+      G.regs[r.k] = {met:false, beat:0, warmth:0, done:false, cycle:nth, rest:0};
+      arrivals.push({r:r, nth:nth});
+    }
+  });
+
+  G.season++;
+  if(G.season % 4 === 0){ G.year++; G.owner.age++; }
   save();
-  const v = $("s-result"); v.textContent = "";
-  const wrap = el("div","mid");
-  lifeHead(wrap, "Delegated", s.nm + " worked it");
-  wrap.appendChild(statCard([["Taken", money(take) + " AED"],
-                             ["If you had worked it", "~" + money(cfg.target) + " AED"]]));
-  wrap.appendChild(el("div","hint","Staff never match you on a good day. They are how you keep "
-    + "the café open on the days you cannot be there, which is most of them, eventually."));
-  const b = el("button","btn","Back to " + L.year); b.type = "button";
-  b.addEventListener("click", screenYear); wrap.appendChild(b);
-  v.appendChild(wrap); show("result");
+
+  const v = $("s-close"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", SEASONS[(G.season+3)%4].nm + " " + (G.season%4===0 ? G.year-1 : G.year)
+    + (auto ? " · run by the manager" : "")));
+  sc.appendChild(el("div","big", net >= 0 ? "A good season" : "A thin season"));
+
+  const c = el("div","card");
+  const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
+  st("Served", String(SV.served), "good");
+  if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
+  if(SV.tips) st("Tips", "+" + money(SV.tips), "cash");
+  st("Takings", money(SV.take) + " AED", "cash");
+  if(branch) st("Branches", "+" + money(branch) + " AED", "cash");
+  st(own("freehold") ? "Ground rent" : "Rent", "−" + money(rent) + " AED", "bad");
+  if(!own("freehold") && G.lastTake > 400)
+    st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
+  if(wages) st("Wages", "−" + money(wages) + " AED", "bad");
+  st("Kept", (net>=0?"+":"") + money(net) + " AED", net>=0 ? "good" : "bad");
+  sc.appendChild(c);
+
+  beats.forEach(b => {
+    const card = el("div","card");
+    const row = el("div","who");
+    const f = el("div","face", b.r.ic); f.style.background = b.r.hue + "33"; row.appendChild(f);
+    const m = el("div"); m.appendChild(el("div","mid-t", b.r.nm));
+    m.appendChild(el("div","lbl", b.intro ? ((regState(b.r.k).cycle||1) > 1 ? "someone new" : "a new regular") : b.blocked ? "waiting" : "their story"));
+    row.appendChild(m); card.appendChild(row);
+    card.appendChild(el("div","beat", b.intro ? b.r.intro : b.blocked ? b.blocked : b.beat.t));
+    if(b.blocked) card.appendChild(el("div","hint","Their story is held here until the café can hold it."));
+    sc.appendChild(card);
+  });
+
+  arrivals.forEach(x => {
+    const card = el("div","card");
+    card.appendChild(el("div","lbl","the corner table"));
+    card.appendChild(el("div","beat","Somebody new has started coming in and ordering "
+      + RECIPES[x.r.usual].nm + ". The chair does not stay empty for long."));
+    sc.appendChild(card);
+  });
+
+  if(G.owner.age >= G.owner.dies){
+    const go = el("button","btn","…"); go.type = "button";
+    go.textContent = G.owner.nm + " is getting old";
+    go.onclick = succession; sc.appendChild(go);
+  } else {
+    const go = el("button","btn","Spend, and open " + SEASONS[G.season%4].nm);
+    go.type = "button"; go.onclick = () => screenShop("close");
+    sc.appendChild(go);
+  }
+  sc.appendChild(el("div")).style.height = "14px";
+  v.appendChild(sc);
+  show("close");
 }
 
-function advanceYear(){
-  const v = $("s-result"); v.textContent = "";
-  const wrap = el("div","mid");
+/* ============================== the shop ============================== */
+function screenShop(from){
+  const v = $("s-shop"); v.textContent = "";
+  const bar = el("div","bar");
+  const back = el("div","pill","‹ Café"); back.style.cursor="pointer"; back.onclick = screenCafe;
+  bar.appendChild(back); bar.appendChild(el("div","grow"));
+  bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
+  v.appendChild(bar);
 
-  /* books */
-  const rent = L.cafe.tenure === "own" ? 0
-             : Math.round(L.cafe.rent * (L.you.temper === "shrewd" ? 0.9 : 1));
-  const wages = L.staff.reduce((a,s) => a + 760, 0);
-  S.cash -= (rent + wages);
-  L.cafe.wear += 1 + L.worked*0.2;
+  let tab = screenShop.tab || "build";
+  const tabs = el("div","tabs");
+  [["build","Build"],["menu","Recipes"]].forEach(([k,nm]) => {
+    const t = el("div","tab" + (tab===k?" on":""), nm);
+    t.onclick = () => { screenShop.tab = k; screenShop(from); }; tabs.appendChild(t);
+  });
+  v.appendChild(tabs);
 
-  lifeHead(wrap, "Books · " + L.year, L.worked ? "Year closed" : "A year you did not work");
-  wrap.appendChild(statCard([
-    ["Taken", money(L.yearTake) + " AED", L.yearTake ? "good" : ""],
-    rent ? ["Rent", "−" + money(rent) + " AED", "bad"] : null,
-    wages ? ["Wages", "−" + money(wages) + " AED", "bad"] : null,
-    ["In the till", money(S.cash) + " AED", S.cash < 0 ? "bad" : ""]
-  ]));
-  if(S.cash < 0){
-    L.rep -= 1;
-    wrap.appendChild(el("div","hint","You are behind. Nobody repossesses the café — this is "
-      + "not that kind of game — but the street notices a shop that cannot pay, and a year "
-      + "you do not work is a year the rent still runs."));
-  }
-
-  /* the event */
-  const ev = fireEvent();
-  if(ev){
-    const c = el("div","card");
-    c.appendChild(el("div","lbl", ev.t));
-    c.appendChild(el("div","hint", ev.d()));
-    wrap.appendChild(c);
-    ev.o.forEach((opt,i) => {
-      const b = el("button","btn" + (i ? " sec" : "")); b.type = "button";
-      b.textContent = opt.l;
-      b.addEventListener("click", () => {
-        const outcome = opt.f();
-        note(ev.t + " — " + opt.l);
-        afterEvent(outcome);
-      });
-      wrap.appendChild(b);
+  const sc = el("div","scroll pad");
+  if(tab === "build"){
+    Object.keys(ITEMS).forEach(k => {
+      const it = ITEMS[k], have = own(k);
+      if(have >= it.max) return;
+      const cost = costOfItem(k, have);
+      const row = el("div","item");
+      row.appendChild(el("div","ic", it.ic));
+      const mid = el("div","mid");
+      mid.appendChild(el("div","t", it.nm + (it.max>1 && have ? " ×"+have : "")));
+      mid.appendChild(el("div","d", it.d));
+      row.appendChild(mid);
+      const b = el("button","btn sm", money(cost)); b.type = "button";
+      b.disabled = cost > G.cash;
+      b.onclick = () => { G.cash -= cost; G.owned[k] = have+1; it.f(G); save(); screenShop(from); };
+      row.appendChild(b); sc.appendChild(row);
     });
   } else {
-    const b = el("button","btn","Carry on"); b.type = "button";
-    b.addEventListener("click", () => afterEvent(null)); wrap.appendChild(b);
+    Object.keys(RECIPES).forEach(k => {
+      if(G.recipes.indexOf(k) >= 0) return;
+      const r = RECIPES[k], row = el("div","item");
+      row.appendChild(el("div","ic", r.ic));
+      const mid = el("div","mid");
+      mid.appendChild(el("div","t", r.nm));
+      mid.appendChild(el("div","d", r.tags.join(" · ") + " · sells for " + r.price + " AED"));
+      const wants = REGULARS.filter(x => x.usual === k).map(x => x.nm);
+      if(wants.length) mid.appendChild(el("div","d", "Somebody on this street drinks this."));
+      row.appendChild(mid);
+      const b = el("button","btn sm", money(r.buy)); b.type = "button";
+      b.disabled = r.buy > G.cash;
+      b.onclick = () => { G.cash -= r.buy; G.recipes.push(k);
+        G.cookbook.push({k:k, by:G.owner.nm, year:G.year, gen:G.gen});
+        save(); screenShop(from); };
+      row.appendChild(b); sc.appendChild(row);
+    });
+    if(!sc.children.length) sc.appendChild(el("div","hint","You have learned everything there is here."));
   }
-  v.appendChild(wrap); show("result");
-}
-
-function afterEvent(outcome){
-  L.year++; L.you.age++;
-  L.kids.forEach(k => k.age++);
-  if(L.you.temper === "beloved") L.rep += 1;
-  L.street.footfall = Math.max(0.5, Math.min(2.2,
-    L.street.footfall + (Math.random()-0.48)*0.05));
-  L.you.skill = Math.min(6, L.you.skill + L.worked*0.15);
-  L.yearTake = 0; L.worked = 0;
-  L.shiftsLeft = staminaFor(L.you.age);
-  save();
-
-  if(L.you.age >= L.you.dies){ succession(outcome); return; }
-  screenDecisions(outcome);
-}
-
-function screenDecisions(outcome){
-  const v = $("s-shop"); v.textContent = "";
-  const head = el("div","pad"); head.style.paddingTop = "18px";
-  head.appendChild(el("div","lbl","Before " + L.year + " opens"));
-  head.appendChild(el("div","big", money(S.cash) + " AED"));
-  if(outcome) head.appendChild(el("div","hint", outcome));
-  v.appendChild(head);
-
-  const scroll = el("div","scroll pad"); scroll.style.paddingTop = "14px";
-  const rows = el("div","rows");
-  const buy = (icon,name,desc,cost,hidden,apply) => {
-    if(hidden) return;
-    const r = el("div","urow");
-    r.appendChild(el("div","ui",icon));
-    const mid = el("div");
-    mid.appendChild(el("div","un",name));
-    mid.appendChild(el("div","ud",desc));
-    r.appendChild(mid);
-    const b = el("button","btn sm", cost ? money(cost) : "Do it");
-    b.type = "button";
-    b.disabled = cost > S.cash;
-    b.addEventListener("click", () => { S.cash -= cost; apply(); save(); screenDecisions(null); });
-    r.appendChild(b);
-    rows.appendChild(r);
-  };
-
-  buy("📓","Work on a recipe",
-      "A week of evenings. It goes in the cookbook, and it stays there after you.",
-      300, L.cookbook.length >= 10, () => { const d = inventRecipe(); });
-  buy("🧑‍🍳","Hire someone",
-      "They work shifts you cannot. Never as well as you.",
-      420, L.staff.length >= 3, () => {
-        const s = newPerson(22); s.skill = 1 + Math.random()*1.5; L.staff.push(s);
-        note("Hired " + s.nm); });
-  buy("🔧","Service the machines",
-      "Wear is at " + Math.round(L.cafe.wear) + ". It is in every cook time.",
-      240, L.cafe.wear < 3, () => { L.cafe.wear = 0; });
-  buy("📜","Take a long lease",
-      "Twenty years at a fixed rent. The landlord stops being a weather system.",
-      4200, L.cafe.tenure !== "rent", () => {
-        L.cafe.tenure = "lease"; note("Signed a twenty-year lease"); });
-  buy("🏠","Buy the building",
-      "No rent, ever again, for anyone who comes after you.",
-      16000, L.cafe.tenure === "own", () => {
-        L.cafe.tenure = "own"; L.rep += 5; note("Bought the building"); });
-  buy("🪑","Another seat",
-      "More people at once. More people going red at once.",
-      260*(S.seats-2), S.seats >= 6, () => { S.seats++; });
-  buy("🛋️","Better chairs",
-      "Everyone waits longer before they mind.",
-      220*(S.chairs+1), S.chairs >= 3, () => { S.chairs++; });
-  buy("🧺","Bigger bins",
-      "Stockpile deeper in the quiet stretches.",
-      200*(S.binCap-2), S.binCap >= 6, () => { S.binCap++; });
-
-  ingsFor(tier()).forEach(i => {
-    const u = S.up[i];
-    buy(ING[i].ic, ING[i].nm + " — faster",
-        cookTime(i).toFixed(1) + "s → " + (cookTime(i)*0.82).toFixed(1) + "s",
-        90*Math.pow(2,u.sp), u.sp >= 3, () => { u.sp++; });
-  });
-
-  scroll.appendChild(rows);
-  const go = el("button","btn","Open " + L.year);
-  go.type = "button";
-  go.addEventListener("click", () => { save(); screenYear(); });
-  scroll.appendChild(go);
-  v.appendChild(scroll);
+  if(tab === "menu"){
+    const n = G.cookbook.filter(c => c.invented).length;
+    const cost = Math.round(900 * Math.pow(1.45, n) * infl());
+    const row = el("div","item"); row.style.borderColor = "var(--amber-d)";
+    row.appendChild(el("div","ic","📓"));
+    const mid = el("div","mid");
+    mid.appendChild(el("div","t","Work out something of your own"));
+    mid.appendChild(el("div","d","A season of evenings. It goes on the board and into the "
+      + "cookbook under your name, and it is still there for whoever comes after you."));
+    row.appendChild(mid);
+    const b2 = el("button","btn sm", money(cost)); b2.type = "button";
+    b2.disabled = cost > G.cash;
+    b2.onclick = () => { G.cash -= cost; invent(); save(); screenShop(from); };
+    row.appendChild(b2); sc.appendChild(row);
+  }
+  const go = el("button","btn", from === "close" ? "Open " + SEASONS[G.season%4].nm : "Back to the café");
+  go.type = "button"; go.onclick = screenCafe; sc.appendChild(go);
+  sc.appendChild(el("div")).style.height = "14px";
+  v.appendChild(sc);
   show("shop");
 }
 
-/* ---------- death, and the part that makes it a forever game ---------- */
-function succession(outcome){
-  L.dynasty.push({gen:L.gen, nm:L.you.nm, from:L.year - (L.you.age-25), to:L.year,
-                  age:L.you.age, invented:L.you.invented});
-  note(L.you.nm + " died at " + L.you.age);
-
-  const heirs = L.kids.filter(k => k.age >= 16);
-  const v = $("s-result"); v.textContent = "";
-  const wrap = el("div","mid");
-  lifeHead(wrap, "Generation " + L.gen + " · " + L.year, L.you.nm + " is gone");
-  if(outcome) wrap.appendChild(el("div","hint", outcome));
-
-  wrap.appendChild(statCard([
-    ["Lived to", String(L.you.age)],
-    ["Ran the café for", (L.you.age - 25) + " years"],
-    ["Recipes invented", String(L.you.invented), L.you.invented ? "good" : ""],
-    ["Left behind", money(S.cash) + " AED"],
-    ["The building", L.cafe.tenure === "own" ? "Owned outright" : "Still not yours", 
-      L.cafe.tenure === "own" ? "good" : "bad"]
-  ]));
-
-  const c = el("div","card");
-  c.appendChild(el("div","lbl","What carries over"));
-  c.appendChild(el("div","hint",
-    "The machines, worn. The seats and the chairs. The building, if you bought it. "
-    + L.cookbook.length + " family recipes, each with the name of whoever wrote it. "
-    + "The street's memory of this family. Everything except the hands."));
-  wrap.appendChild(c);
-
-  if(heirs.length){
-    heirs.forEach((k,i) => {
-      const b = el("button","btn" + (i ? " sec" : "")); b.type = "button";
-      b.textContent = k.nm + ", " + k.age + (k.wants ? "" : " — does not want it");
-      b.addEventListener("click", () => takeOver(k));
-      wrap.appendChild(b);
-    });
-  } else {
-    wrap.appendChild(el("div","hint","There is no one old enough to take it. The café is sold. "
-      + "You play whoever bought it — the cookbook stays on the wall, under another family's name."));
-    const b = el("button","btn","Someone buys it"); b.type = "button";
-    b.addEventListener("click", () => takeOver(null));
-    wrap.appendChild(b);
-  }
-  v.appendChild(wrap); show("result");
+const INV_A = ["House","Corner","Morning","Street","Family","Late","Old","Second"];
+const INV_B = ["karak","blend","cup","plate","special","pour","tea"];
+function invent(){
+  const n = G.cookbook.filter(c => c.invented).length;
+  const base = pick(Object.keys(RECIPES).filter(k => G.recipes.indexOf(k) >= 0));
+  const src = RECIPES[base];
+  const k = "own" + n + "_" + G.gen;
+  RECIPES[k] = {nm: pick(INV_A) + " " + pick(INV_B), ic: src.ic,
+                cost: Math.round(src.cost * 1.1),
+                price: Math.round(src.price * (1.35 + n*0.06)),
+                tags: src.tags.slice(), buy:0};
+  G.recipes.push(k);
+  G.cookbook.push({k:k, nm:RECIPES[k].nm, by:G.owner.nm, year:G.year, gen:G.gen,
+                   invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
+                   tags:RECIPES[k].tags, ic:RECIPES[k].ic});
 }
-
-function takeOver(kid){
-  const sold = !kid;
-  const heir = kid || newPerson(30);
-  if(sold){ L.house = pick(SURNAME); S.cash = 1500; L.rep = Math.round(L.rep*0.3);
-            note("The café was sold to the " + L.house + " family"); }
-  else { note(heir.nm + " took over"); if(heir.resents) L.rep -= 2; }
-
-  L.gen++;
-  L.you = heir;
-  if(L.you.age < 18) L.you.age = 18;
-  L.you.dies = L.you.age + 40 + Math.floor(Math.random()*25);
-  L.you.skill = sold ? 1 : 1 + L.cookbook.length*0.1;
-  L.you.invented = 0;
-  L.spouse = null;
-  L.kids = [];
-  L.shiftsLeft = staminaFor(L.you.age);
-  L.yearTake = 0; L.worked = 0;
-  save();
-  screenYear();
-}
-
-function screenIntro(){
-  if(!L){ L = NEWLIFE(); }
-  if(L.gen === 1 && L.year === 1996 && !S.seen){ screenOpening(); return; }
-  screenYear();
-}
-
-function screenOpening(){
-  const v = $("s-intro"); v.textContent = "";
-  const wrap = el("div","mid");
-  lifeHead(wrap, "1996", "You are " + L.you.age);
-  const c = el("div","card");
-  c.appendChild(el("div","lbl","Café Life"));
-  const p = el("div","hint");
-  p.innerHTML = "A shop on a shopping street. The lease is your father's, the machines are "
-    + "second-hand, and the first customer is already outside.<br><br>"
-    + "Tap <b style='color:var(--amber)'>+</b> on a machine to start an ingredient. It cooks "
-    + "in the background into that machine's bin. Tap the bin to put one on the plate, and "
-    + "when the plate matches a drink, tap the customer who ordered it.<br><br>"
-    + "<b>Assembling is instant. Cooking is not.</b> That is the whole shift, and you will "
-    + "play it for the next fifty years — until your hands slow down, and it is somebody "
-    + "else's counter.";
-  c.appendChild(p);
-  wrap.appendChild(c);
-  wrap.appendChild(statCard([["Temperament", L.you.temperNm],
-                             ["", TEMPER.filter(t=>t.k===L.you.temper)[0].d]]));
-  const go = el("button","btn","Open the shutters"); go.type = "button";
-  go.addEventListener("click", () => { S.seen = true; save(); screenYear(); });
-  wrap.appendChild(go);
-  v.appendChild(wrap); show("intro");
-}
-
-function endShift(){
-  R.over = true; cancelAnimationFrame(raf);
-  if(R.best > S.bestCombo) S.bestCombo = R.best;
-  if(R.endless){ endEndless(); return; }
-
-  S.cash += R.money; L.yearTake += R.money; L.shiftsLeft--; L.worked++;
-  const cfg = R.cfg;
-  const good = R.money >= cfg.target;
-  if(good) L.rep += 1; else if(R.lost > R.served*0.4) L.rep -= 1;
-  save();
-
-  const v = $("s-result"); v.textContent = "";
-  const wrap = el("div","mid");
-  lifeHead(wrap, L.year + " · shift closed", good ? "A good day" : "A day");
-  const card = el("div","card");
-  statRow(card,"Taken", money(R.money) + " AED", good ? "good" : "");
-  statRow(card,"A good day here", money(cfg.target) + " AED");
-  statRow(card,"Served", String(R.served), "good");
-  statRow(card,"Walked out", String(R.lost), R.lost ? "bad" : "");
-  statRow(card,"Best streak", "×" + R.best);
-  if(handLock() > 0) statRow(card,"Lost to your hands",
-    "≈" + Math.round(handLock()*R.served*3*10)/10 + "s", "bad");
-  wrap.appendChild(card);
-
-  if(handLock() > 0.12 && !good){
-    wrap.appendChild(el("div","hint","You are " + L.you.age + ". The shift has not got harder — "
-      + "you have got slower, and it is time to think about who else can stand here."));
-  }
-
-  const go = el("button","btn", L.shiftsLeft > 0
-    ? "Another shift · " + L.shiftsLeft + " left" : "Close the year");
-  go.type = "button";
-  go.addEventListener("click", () => { if(L.shiftsLeft > 0) startShift(false); else advanceYear(); });
-  wrap.appendChild(go);
-  if(L.shiftsLeft > 0){
-    const b = el("button","btn sec","Back to " + L.year); b.type = "button";
-    b.addEventListener("click", screenYear); wrap.appendChild(b);
-  }
-  v.appendChild(wrap);
-  show("result");
-}
-
-function start(snap){
-  const prior = (snap && snap.L) || loadSave();
-  if(prior){ S = prior.S; L = prior.L; rehydrate(); }
-  screenIntro();
-}
-
-/* invented recipes live in the save, not in DISHES -- put them back on the board */
+/* recipes invented by earlier generations have to be put back on load */
 function rehydrate(){
-  if(!L || !L.cookbook) return;
-  L.cookbook.forEach(c => { DISHES[c.key] = {nm:c.nm, price:c.price, needs:c.needs, day:0}; });
+  (G.cookbook||[]).forEach(c => { if(c.invented && !RECIPES[c.k])
+    RECIPES[c.k] = {nm:c.nm, ic:c.ic, cost:c.cost, price:c.price, tags:c.tags, buy:0}; });
 }
 
-function loadSave(){
-  try{
-    const raw = localStorage.getItem("cafelife1"); if(!raw) return null;
-    const p = JSON.parse(raw);
-    if(!p || !p.S || !p.L || typeof p.L.year !== "number") return null;
-    const base = NEWSTATE();
-    INGS.forEach(i => { if(p.S.up && p.S.up[i]) base.up[i] = {sp:p.S.up[i].sp|0, slots:p.S.up[i].slots||1}; });
-    return {S: Object.assign(base, p.S, {up:base.up}), L: p.L};
-  }catch(e){ return null; }
+/* ============================== the regulars =============================== */
+function screenPeople(){
+  const v = $("s-people"); v.textContent = "";
+  const bar = el("div","bar");
+  const back = el("div","pill","‹ Café"); back.style.cursor="pointer"; back.onclick = screenCafe;
+  bar.appendChild(back); v.appendChild(bar);
+  const sc = el("div","scroll pad");
+  sc.appendChild(el("div","lbl","The regulars"));
+  sc.appendChild(el("div","big","Who keeps coming back"));
+  REGULARS.forEach(r => {
+    const st = regState(r.k); if(!st.met) return;
+    const card = el("div","card");
+    const row = el("div","who");
+    const f = el("div","face", r.ic); f.style.background = r.hue + "33"; row.appendChild(f);
+    const m = el("div"); m.style.flex="1";
+    m.appendChild(el("div","mid-t", r.nm));
+    m.appendChild(el("div","lbl","usual — " + RECIPES[r.usual].nm));
+    row.appendChild(m); card.appendChild(row);
+    card.appendChild(el("div","hint", r.intro));
+    for(let i=0;i<st.beat;i++) card.appendChild(el("div","beat", r.beats[i].t));
+    if(st.done) card.appendChild(el("div","lbl","— their story here is finished"));
+    sc.appendChild(card);
+  });
+  v.appendChild(sc);
+  show("people");
 }
 
-try{
-  window.claude && window.claude.hot && window.claude.hot.snapshot &&
-    window.claude.hot.snapshot(() => ({S:S, L:L}));
-}catch(e){}
-if(window.claude && window.claude.hot && window.claude.hot.ready){ window.claude.hot.ready(start); }
-else{ start((window.claude && window.claude.hot && window.claude.hot.data) || {}); }
-</script>
+/* ============================== succession ============================== */
+function succession(){
+  G.dynasty.push({gen:G.gen, nm:G.owner.nm, to:G.year, age:G.owner.age});
+  const v = $("s-close"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl","Generation " + G.gen + " · " + G.year));
+  sc.appendChild(el("div","big", G.owner.nm + " hands it over"));
+  const done = REGULARS.filter(r => regState(r.k).done).length;
+  const c = el("div","card");
+  [["Ran the café for", (G.owner.age-26) + " years"],
+   ["Recipes learned", String(G.cookbook.length)],
+   ["Stories seen through", done + " of " + REGULARS.length],
+   ["Branches", String(G.branches.length)],
+   ["Left behind", money(G.cash) + " AED"]].forEach(([k,val]) => {
+     const r = el("div","stat"); r.appendChild(el("div","k",k));
+     r.appendChild(el("div","v",val)); c.appendChild(r); });
+  sc.appendChild(c);
+  sc.appendChild(el("div","hint","The room stays exactly as you built it. So does the cookbook, "
+    + "and so do the regulars — though the ones who were old when you started will not be here "
+    + "for your daughter, and the children who came in with their mothers will be the ones "
+    + "propping up the counter."));
+  const go = el("button","btn","Hand over the keys"); go.type = "button";
+  go.onclick = () => {
+    G.gen++;
+    G.owner = {nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid"]),
+               age:26, dies:72+Math.floor(Math.random()*18)};
+    /* the regulars who finished their arc move on; a new generation meets new people */
+    REGULARS.forEach(r => { const st = regState(r.k);
+      if(st.done){ G.regs[r.k] = {met:false, beat:0, warmth:0, done:false}; } });
+    save(); screenCafe();
+  };
+  sc.appendChild(go);
+  v.appendChild(sc);
+  show("close");
+}
+
+/* ============================== boot ============================== */
+function intro(){
+  const v = $("s-cafe"); v.textContent = "";
+  const bar = el("div","bar"); bar.appendChild(el("div","pill","Spring 1996"));
+  v.appendChild(bar);
+  drawRoom(v, false);
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";
+  sc.appendChild(el("div","lbl","Café Life"));
+  sc.appendChild(el("div","big","A counter and two stools"));
+  [ "You have one machine, two recipes and four hundred and twenty dirhams. There is no "
+    + "clock and nothing here can be failed.",
+    "Each season you choose what goes on the board — you will always own more recipes than "
+    + "you have room to show, and the season moves what people want. Then you open, and you "
+    + "watch who comes in.",
+    "Some of them will come back. Tap someone while they are here and you go over and say "
+    + "something; it is worth almost nothing on the till, and it is the only way anyone's "
+    + "story moves."
+  ].forEach(t => sc.appendChild(el("div","hint", t)));
+  const go = el("button","btn","Open the shutters"); go.type = "button";
+  go.onclick = () => { G.seenIntro = true; save(); screenCafe(); };
+  sc.appendChild(go);
+  v.appendChild(sc); show("cafe");
+}
+const prior = load();
+if(prior){ G = prior; rehydrate(); }
+G.seenIntro ? screenCafe() : intro();
+</script></body></html>

@@ -1,209 +1,165 @@
-# Café Life — the forever pivot
+# Café Life — the design
 
-**Status** Supersedes the thirty-day structure in `docs/requirements.md` §4 and the
-"five chapters" spine. Everything in `docs/design-spec.md` about the *shift* stands
-unchanged. `docs/target-player.md` is unaffected and is the reason this pivot is correct.
-
----
-
-## 1. The instruction, and what it does not mean
-
-> "You know how BitLife lasts forever, it continues, you can do many things. I want this
-> app to be the same. Call it Café Life not Café Rush. I want a long lasting forever game."
-
-**What changes:** the game stops being thirty authored days with an ending. It becomes a
-life, and then the next life, in the same café.
-
-**What does not change:** the ninety-second rush. The player rejected the calm prototype in
-one sentence — *"this is boring"* — and asked for Cooking Madness by name. "Lasts forever"
-modifies the *structure*, not the verb. Removing the rush to make a menu-driven text sim
-would answer this instruction by contradicting the last three.
-
-So: **the rush is the verb. The life is the frame.** Ninety seconds behind the counter,
-eighty years behind the café.
+**Status** Supersedes the thirty-day campaign in `docs/requirements.md` §4 *and* the
+rush-wrapped-in-a-life design that briefly replaced it. `docs/design-spec.md` stands for
+colour, type and readability. `docs/target-player.md` is unchanged and is the evidence base.
 
 ---
 
-## 2. Why "forever" usually fails, and the one move that fixes it
+## 1. What changed, and why the research already said so
 
-Endless games die in one of two ways.
+The game is a **management sim**, not a time-pressure game. You build a café from a counter
+and two stools, and the people who keep coming back have lives that happen in it.
 
-**Infinite but identical.** Endless Rush is this. Wave 40 is wave 4 with the numbers turned
-up. You have seen everything it has in four minutes. Endless is a *score attack*, and score
-attacks are a mode, not a game.
+I had the emphasis wrong. `docs/target-player.md` line 13 records the genres the reference
+player named: *story, cooking, farming, building, tycoon*. The Dash reference was one line
+inside that list, and I built three iterations on it. The same document's most-upvoted reply
+recommends **Kairosoft** — premium-priced management sims — from someone who owns five of
+them, and §"What the top comment adds" already concluded:
 
-**Infinite but flat.** A treadmill of numbers going up. Prestige, reset, repeat. It lasts
-forever the way a corridor lasts forever.
+> Kairosoft's longevity does not come from content volume. It comes from deep interlocking
+> systems that reward optimisation, so the game outlives its own content. That is the cheaper
+> route to "lasts a while" for a small team than simply authoring more levels.
 
-BitLife avoids both with two engines: **breadth** (career × crime × family × health, all
-interacting) and **re-randomisation** (you die, and the next person is dealt a different
-hand). What it does *not* have is **consequence that outlives the run** — your previous lives
-are a list on a menu. Nothing you did in life four is present in life five.
+That is the brief. Management, not triage.
 
-**That absence is our opening.** In Café Life the run ends and the *café does not*.
-
-> You die. Your daughter opens the same shutters the next morning. Your machines are still
-> there, worn. Your karak recipe is still on the board. The regular who knew you is older and
-> still comes in. The rent you refused to convert to a freehold in 1994 is now someone else's
-> problem, and it is hers.
-
-Generation 8 plays a completely different café from generation 1 — but it is *the same café*,
-carrying what every generation before left in it. That is the forever engine, and it is a
-better one than BitLife's because each run raises the stakes of the next instead of clearing
-the board.
+**The risk, named honestly:** the very first prototype was calm and was rejected as boring.
+The difference is not tone. That build was *sequential and flat* — seven days, no growth, no
+ownership, nothing to build toward. Nothing you did on day three changed day four. What is
+here instead is a compounding economy, a room that visibly fills up, and people whose stories
+only move if you pay attention to them. Calm was never the problem; having nothing to decide
+was the problem.
 
 ---
 
-## 3. Three nested clocks
+## 2. The loop
 
-| Clock | Length | What happens | Who it is for |
-|---|---|---|---|
-| **The shift** | 90 seconds | The rush, exactly as specified today | The hands |
-| **The year** | 3–8 minutes | Work some shifts, then rent, events, decisions | The head |
-| **The life** | 30–50 years | You age, marry, raise an heir, hand it over, die | The gut |
+**The season is the unit.** Four a year.
 
-A session is any number of years. A year is a complete, satisfying unit — which is what makes
-this a game you can put down for a fortnight, which is the thing she asked for.
+1. **The board.** You own more recipes than you have slots to show. The season moves what
+   people want. Each regular has a usual. This is the whole decision, and everything else
+   feeds it.
+2. **Open.** About twenty seconds, watched, not fought. People come in, order, pay, leave.
+   Some are regulars and you know their faces. Occasionally it stops and asks you something.
+3. **Close.** Takings, rent, wages. Whose story moved. Then you spend.
 
-### The year, concretely
+**Nothing can be failed.** There is no timer, no walkout meter, no lose state. A bad season
+is a thin one.
 
-1. **Work the season.** You have *stamina* shifts this year. Play them, or delegate to staff.
-   A delegated shift auto-resolves on staff skill and always earns less than playing it well.
-   Skipping is allowed and costs money, never progress. Nothing expires.
-2. **Books.** Rent or mortgage, wages, ingredient costs, what is left is yours.
-3. **Events.** One to three cards. The landlord, the inspector, a chain opening opposite, a
-   blogger, Ramadan, your son wanting tuition money, your knees.
-4. **Decisions.** Hire, fire, buy a machine, invent a recipe, buy the building, extend,
-   marry, have a child, retire.
+### The inversion that makes it work
 
----
-
-## 4. Ageing, and the best idea in this document
-
-In BitLife your age is a number that gates menu options. In Café Life **your age is in your
-hands.**
-
-From your mid-forties, a short recovery lock lands after every tap — you cannot fire the next
-input for a moment. It starts at nothing and grows:
-
-The curve was tuned against measured play rather than drawn. Driving the prototype at two
-rates — a calm 3.3 taps/s, and an 8 taps/s burst, which is what three seats going red at once
-actually looks like — gives this:
-
-| Age | Lock | Taps landed, calm | Taps landed, in a burst |
-|---|---|---|---|
-| 30 | 0 ms | 30 / 30 | 30 / 30 |
-| 45 | 80 ms | 30 / 30 | 30 / 30 |
-| 55 | 240 ms | 30 / 30 | **15 / 30** |
-| 65 | 400 ms | **15 / 30** | **8 / 30** |
-| 75 | 420 ms | 15 / 30 | 8 / 30 |
-
-**This is the shape the mechanic needed.** Ageing costs you nothing while the café is calm,
-and costs you half your hands the moment it is busy. You do not notice getting older until
-there is a rush on — which is exactly how it works, and it is not something a stat screen can
-say. The first pass bit only from 65 and left the years between 42 and 60 identical; twenty
-wasted years of a fifty-year life, and worth catching before any of it was written up.
-
-Stamina falls alongside it: five shifts a year at 25, one at 72.
-
-This is worth more than any number on a stat screen, because it makes every meta decision
-land at the right emotional moment. You hire staff *because you can feel yourself slowing
-down*. You teach your daughter the karak recipe *because you can no longer make sixty a day*.
-You retire *because the shift you used to clear now beats you*. The game tells you it is time
-by making your own hands unreliable, and that is a thing a text sim cannot do.
-
-**It must never read as a bug.** The locked control dims for its lock and the HUD shows your
-age beside the clock, so the player always knows the game did not drop the input — they did.
+In the rush build, tapping was triage — you tapped to stop someone leaving. Here, **tapping
+is attention.** Tap a guest and you go over and say something. It is worth a rounding error
+on the till, and it is the only thing that moves a regular's story. The mechanic is
+generosity rather than damage control, and it is the reason the loop is pleasant to sit in.
 
 ---
 
-## 5. The systems (the "many things")
+## 3. The regulars, which are the forever engine
 
-| System | What it gives | Persists past death? |
-|---|---|---|
-| **The menu** | Invent recipes by combining ingredients. Quality rolls against your skill | **Yes — the family cookbook** |
-| **The machines** | The existing upgrade tree: speed, slots, bins, seats, chairs | Yes, and they wear |
-| **The building** | Rent → long lease → freehold → extend → upstairs → second branch | Yes. The single biggest generational decision |
-| **Staff** | Hire, train, they age, quit, steal, or marry into the family | Partly — the good ones stay |
-| **The street** | Other shops open and close. Footfall rises and falls. A mall gets built | Yes. It has a life without you |
-| **The family** | Marriage, children, who wants the café and who does not | Yes — it *is* the succession |
-| **The body** | Stamina and the hand lock | No. That is the point |
-| **Reputation** | The street's memory of you and your parents | Yes |
+Six named people, each with a five-beat arc, each with a usual. They are how a café stops
+being a spreadsheet.
 
-**The cookbook is the collection engine.** A recipe you invent in 1997 is still earning in
-2090, under your great-granddaughter, labelled with the year and the name of whoever made it.
-It is the single strongest reason to keep playing, and it costs almost nothing to build
-because a recipe is a row of ingredients and a price.
+- **You meet them by what is on the board.** Put espresso up and Mr Haddad starts coming.
+  Never buy the date shake and you never meet Aisha.
+- **Warmth accrues** from serving them and, much faster, from noticing them.
+- **Beats are gated on the café.** Noor needs somewhere quieter than the counter before her
+  story can continue; Aisha needs something a child would want at a birthday; Khalid's
+  freehold beat needs you to be able to come near the number. A story you cannot yet hold
+  sits and waits, and the close screen says so.
+- **A finished arc does not empty the chair.** Four seasons later somebody new is sitting in
+  it ordering the same thing.
 
-### Succession, and the good dark bit
-
-Your heir is not you. Different starting skill, different temperament, and **they might not
-want it.** You can lean on them (they take it, and resent you — a permanent trait), let them
-go (the café passes to someone else, or is sold), or fail to raise one at all.
-
-If it is sold, **you play the buyer.** The café continues without your family, your cookbook
-becomes "the previous family's recipes," and you may keep them on the board or take them off.
-Taking them off is free. It is also the only genuinely sad thing in the game.
+Arcs run over decades, so the café outlives the people in it: Mr Haddad's last beat is his
+son coming in to tell you, and Aisha's daughter goes from six years old and two straws to
+sixteen and asking whether you are hiring.
 
 ---
 
-## 6. What this does to the commercial model
+## 4. What the bot runs actually showed
 
-It makes it stronger, not weaker. "Buy once, own forever" and "a game that lasts forever" are
-the same promise said twice.
+Driven by a policy bot for 120 seasons — thirty years — reinvesting greedily each season.
 
-Content economics improve too. Thirty authored days is a fixed cost that buys a fixed number
-of hours. A systemic life sim is mostly tables and text — BitLife's entire content advantage
-is that its content is cheap — and the 41 art assets already made cover it, because the
-*shift* is where the art is and the shift is unchanged.
+| Year | Cash | Served | Missed | Seats | Slots | Recipes | Branches | Story beats |
+|---|---|---|---|---|---|---|---|---|
+| 1999 | 253 | 11 | 4 | 4 | 2 | 3 | 0 | 1 |
+| 2002 | 1,069 | 30 | 11 | 14 | 3 | 3 | 0 | 6 |
+| 2005 | 10,925 | 78 | 7 | 27 | 8 | 11 | 2 | 18 |
+| 2008 | 37,840 | 85 | 2 | 27 | 8 | 12 | 7 | 16 |
+| 2014 | 59,147 | 85 | 2 | 27 | 8 | 12 | 14 | 9 |
+| 2020 | 74,595 | 86 | 1 | 27 | 8 | 12 | 19 | 9 |
+| 2026 | 96,694 | 85 | 2 | 27 | 8 | 12 | 23 | 17 |
 
-**Candidate promise lines**, to replace "A ninety-second cooking rush you buy once and own
-forever":
+**Years 1–8 are the good game.** Tight, slow, every dirham decided. Seats 4 → 27, missed
+customers falling as the board gets wide enough to answer the season.
 
-1. **Ninety seconds behind the counter. Eighty years behind the café.**
-2. Run the café. Then your daughter runs it. One price, no ads, forever.
-3. A café that outlives you.
+**Years 9–12 open up** — recipes complete, slots max, branches start.
 
-Line 1 carries both clocks and is the recommendation.
+**Years 13–30 are flat, and this is the honest limit of the current build.** Seats, slots
+and recipes are all at their ceiling and never move again. What still moves is branches and
+the regulars cycling. Cash grows about 4% a year rather than compounding — the fixes below
+did that much — but the *café* is finished around year twelve.
+
+### Three balance bugs the runs caught, and what fixed them
+
+1. **Six customers a season.** A shown face was one cup. A face is now one person's whole
+   season of visits — a regular is 22–80 visits, a walk-in one to three — which is what makes
+   a café a café.
+2. **Cash hit 751,000 by 2026** on flat rent. Rent and wages now scale with seats and
+   branches, supply costs inflate slightly faster than prices, trade is capped by seating,
+   and the landlord takes 7% of takings until you buy the freehold. That last one is both
+   the permanent sink and the reason the freehold is a goal.
+3. **Nothing to spend it on after year twelve.** Every axis had a `max`. Branches are now
+   uncapped with a cost that compounds at 1.8× and a return that decays at 0.88×, and you can
+   invent your own recipes forever at a compounding price. Both are sinks whose cost curve
+   outruns their return, so they absorb money without breaking the economy.
+
+**What is still missing to earn the word "forever":** the cast is six arcs on a loop and that
+is visible by year fifteen. The shipping answer is a procedural cast — a role, a usual and a
+beat set, assembled combinatorially — plus at least one more uncapped system besides branches.
+That is real design work and it is not done. The current build is a strong twelve-year game
+with an endless tail, and calling it more than that would be a lie.
 
 ---
 
-## 7. What this invalidates
+## 5. Building from scratch
 
-**Survives untouched:** the shift loop and its prototype, all 41 art assets, the colour,
-type, zone and readability systems in `docs/design-spec.md`, the fonts, the tokens, the icon
-(a glass of karak — no text on it).
+Fifteen purchasables, and **every one appears in the room.** The first screen is a counter,
+two stools and one machine, captioned as such. The awning, the sign, the pastry case, the
+plants, the barista all show up where you put them. That visible accretion is the reward for
+spending, and it is why the shop is not a stat screen.
 
-**Dead:** thirty days in five chapters. The day-target curve as a *campaign* — it survives as
-the within-year difficulty function, driven now by street footfall and reputation rather than
-by a day number. Endless Rush as the endgame; the life is the endgame, and Endless becomes
-what it always was, a score-attack side mode.
-
-**Needs rewriting:** `docs/requirements.md` §4 and everything downstream of "30 days" — the
-promise line, the positioning statement, the store description, and roughly forty mentions
-across `brand/strategy.md`.
-
-**The rename is cheap in tooling and expensive in copy.** The wordmark, both marketing
-graphics, the swatch sheets and the guidelines PDF are all generated by scripts, so they
-re-render from a string change. The icon needs nothing. What actually costs is the writing:
-the promise, the positioning, the store listing, the rules that mention thirty days.
-
-**Do not rewrite the brand kit yet.** The lesson of this project is that the calm prototype
-was only obviously wrong once it was playable. Prove the life loop first, then write the copy
-once, against a structure that has survived contact.
+Rooms → back room → upstairs → branches, each with its own street and its own yield.
 
 ---
 
-## 8. Open questions worth deciding early
+## 6. What this retires
 
-1. **The name.** "Café Life" signals the genre immediately, which is most of its value. It
-   also echoes BitLife closely enough that a trademark check is worth doing *before* the
-   wordmark and store listing are locked — renaming after launch costs far more than renaming
-   now. Not a legal opinion; a scheduling one.
-2. **Does the life ever end?** Recommendation: no hard cap, but a *dynasty* screen that names
-   every generation, so "forever" has a visible spine rather than being a number that climbs.
-3. **Real-time or turn-based years?** Turn-based. A real-time clock is the four-hour timer
-   she uninstalled three games over.
-4. **How much can be delegated?** Everything, eventually — and that is the reward for a long
-   dynasty, not a paywall. A player who has built a five-branch chain should be able to play
-   one shift a year and still run an empire.
+**Dead:** the ninety-second rush as the core loop. `prototype/frenzy.html` stays in the repo
+as a reference — the engine is sound and the bug fix from last week is in it — but the game
+is not built on it. The hand-lock ageing mechanic goes with it; ageing is now what makes you
+hire a manager, not what makes you drop taps.
+
+**Alive:** all 41 art assets — the prototype uses emoji placeholders to stay a single
+portable file, and the shipped build swaps in `art/sprites/`. The colour, type and
+readability systems. The generational frame: an owner ages, hands over, and the room, the
+cookbook and the street's memory carry across.
+
+**Stale, deliberately:** `brand/strategy.md` and `brand/guidelines.pdf`, which carry a
+mid-pivot banner. The promise line needs rewriting again — *"Ninety seconds behind the
+counter"* is no longer true of a game with no ninety seconds in it. Writing it a third time
+before a human has played this loop is the waste.
+
+---
+
+## 7. Open questions
+
+1. **Is watching enjoyable enough?** Twenty seconds of guests arriving, with tapping as
+   generosity. Bots cannot answer this. It is the single thing a playtest must settle, and it
+   is the same question the first calm prototype failed.
+2. **How big must the cast be?** Six is demonstrably too few by year fifteen. Twenty authored
+   arcs plus procedural assembly is the guess; it needs testing, not guessing.
+3. **The name.** Still worth a trademark check against BitLife before anything locks.
+4. **Price.** `docs/target-player.md` flags that AED 29.99 is above what the reference player
+   signalled, and that the Kairosoft comparison is the argument for it. A management sim makes
+   that comparison much easier to make than a frenzy clone did.

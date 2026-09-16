@@ -1,11 +1,13 @@
 > ## ⚠ Mid-pivot — read this first
 >
-> The game is being renamed **Café Life** and restructured from thirty authored days into a
-> generational life sim. See **`docs/cafe-life.md`**, which supersedes the thirty-day spine.
+> The game is **Café Life**, a management sim — you build a café from a counter and two
+> stools, and the regulars have stories. The rush is retired. See **`docs/cafe-life.md`**, which supersedes the thirty-day spine.
 >
-> **Current:** the logo variants, both marketing graphics, the app icon, the colour tokens,
-> the swatch sheets and the fonts. The promise line is now *"Ninety seconds behind the
-> counter. Eighty years behind the café."*
+> **Current:** the logo variants, the app icon, the colour tokens, the swatch sheets and
+> the fonts.
+>
+> **Stale as of the management pivot:** the promise line on both marketing graphics —
+> *"Ninety seconds behind the counter"* is not true of a game with no ninety seconds in it.
 >
 > **Stale:** everything below that says *Café Rush*, *thirty days* or *five chapters* — the
 > promise in §1, the positioning in §2, the naming in §7 and the whole store listing in §10.
