@@ -1,0 +1,135 @@
+{
+ "artboards": [
+  {
+   "file": "FirstRun.dc.html",
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "01 First run"
+  },
+  {
+   "file": "Title.dc.html",
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "02 Title"
+  },
+  {
+   "file": "Main.dc.html",
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "03 The caf\u00e9"
+  },
+  {
+   "file": "Board.dc.html",
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "04 The board"
+  },
+  {
+   "file": "Service.dc.html",
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "05 Service"
+  },
+  {
+   "file": "Moment.dc.html",
+   "x": 0,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "06 A moment"
+  },
+  {
+   "file": "Close.dc.html",
+   "x": 470,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "07 The close"
+  },
+  {
+   "file": "ShopBuild.dc.html",
+   "x": 940,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "08 Shop \u00b7 build"
+  },
+  {
+   "file": "ShopRecipes.dc.html",
+   "x": 1410,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "09 Shop \u00b7 recipes"
+  },
+  {
+   "file": "Regulars.dc.html",
+   "x": 1880,
+   "y": 1000,
+   "w": 390,
+   "h": 844,
+   "title": "10 The regulars"
+  },
+  {
+   "file": "Story.dc.html",
+   "x": 0,
+   "y": 2000,
+   "w": 390,
+   "h": 844,
+   "title": "11 One story"
+  },
+  {
+   "file": "Cookbook.dc.html",
+   "x": 470,
+   "y": 2000,
+   "w": 390,
+   "h": 844,
+   "title": "12 The cookbook"
+  },
+  {
+   "file": "Branches.dc.html",
+   "x": 940,
+   "y": 2000,
+   "w": 390,
+   "h": 844,
+   "title": "13 Branches"
+  },
+  {
+   "file": "Succession.dc.html",
+   "x": 1410,
+   "y": 2000,
+   "w": 390,
+   "h": 844,
+   "title": "14 Succession"
+  }
+ ],
+ "annotations": [
+  {
+   "id": "loop",
+   "x": 0,
+   "y": -150,
+   "w": 900,
+   "text": "THE SEASON IS THE LOOP\n03 the caf\u00e9 \u2192 04 the board \u2192 05 service \u2192 07 the close \u2192 08 spend \u2192 back to 03.\nFour seasons a year, forty years a generation. Nothing can be failed."
+  },
+  {
+   "id": "forever",
+   "x": 1880,
+   "y": -150,
+   "w": 460,
+   "text": "THE FOREVER PART\n10\u201312 and 14 are what outlive one owner: the regulars, their stories, the cookbook and the handover."
+  }
+ ],
+ "launch": {
+  "view": "canvas"
+ }
+}
