@@ -124,6 +124,26 @@ with an endless tail, and calling it more than that would be a lie.
 
 ## 5. Building from scratch
 
+**Time of day does not multiply with growth stage, and mostly does not need to.** R-09, R-10
+and R-11 are all painted on the *large* café, so as literal plates they only apply once the
+player has extended. Tested whether the grade could be lifted off them — per-channel gain and
+lift mapping `room_grown` onto each condition — and applied to an earlier stage instead:
+
+| Condition | Gain (R,G,B) | Lift |
+|---|---|---|
+| night | 0.82 / 0.63 / 0.49 | −38 / −20 / −7 |
+| rain | 0.89 / 0.68 / 0.57 | −30 / −16 / −12 |
+| summer | 0.99 / 1.02 / 1.10 | −11 / −7 / −8 |
+
+It half-works, and the half that fails is the informative one. Applied to `room_bare` or
+`room_small` the grade gives a convincing **dusk** — warmer, dimmer, lamp-lit — which is a
+fourth time of day on every growth stage for free. It cannot give night or rain, because the
+sunlight through the window and the hard shadows on the floor are painted in, and no colour
+transform removes them. A dark window is geometry, not grade.
+
+So: use the grade for evening at any stage, and treat R-09 to R-11 as the large café only.
+An early-stage night plate would have to be painted, and probably is not worth one.
+
 **Placement, not more art, is what the room needs next.** With R-04 and twenty-nine fittings
 in hand, compositing them exposes two things no additional asset fixes:
 
