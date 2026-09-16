@@ -49,6 +49,13 @@ FITTINGS = {
     "f-28": "f_fridge",    "f-29": "f_sink",      "f-30": "f_awning",
     "f-31": "f_sign",      "f-32": "f_planter",
 }
+
+# the second dish set, joining the twelve already on the menu
+NAMES.update({
+    "d-13": "chai",    "d-14": "qahwa",   "d-15": "kunafa",  "d-16": "balaleet",
+    "d-17": "chebab",  "d-18": "khameer", "d-19": "basbousa","d-20": "jallab",
+    "d-21": "roselem", "d-22": "camelcap","d-23": "sahlab",  "d-24": "maamoul",
+})
 NAMES.update(FITTINGS)
 
 # How big each fitting is IN THE ROOM, relative to a stool.

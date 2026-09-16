@@ -342,8 +342,8 @@ premium ends of it.
 
 | # | Name | Subject line |
 |---|---|---|
-| D-13 | Adeni chai | a small clear glass of creamy pale Yemeni adeni chai with a dusting of cardamom, on a small saucer |
-| D-14 | Qahwa | a tiny handleless porcelain finjan cup of pale golden Arabic coffee, a few whole dates beside it |
+| D-13 | Adeni chai | a small clear glass of creamy pale Yemeni adeni chai with a dusting of cardamom, on a **plain undecorated white** saucer with no pattern, rim design or gilding |
+| D-14 | Qahwa | a tiny **plain undecorated white** handleless porcelain finjan cup of pale golden Arabic coffee with **no palm motif, banding, crest or gilding on it**, two whole dates beside it |
 | D-15 | Kunafa | a wedge of hot orange shredded kunafa pastry with soft white cheese pulling from the cut edge, drizzled with syrup |
 | D-16 | Balaleet | a plate of sweet saffron vermicelli topped with a thin folded omelette, garnished with pistachio |
 | D-17 | Chebab | a stack of three small saffron pancakes with date syrup and cream cheese, on a white plate |
@@ -396,9 +396,11 @@ images stay constant.
 - [ ] One object only, nothing extra in frame
 - [ ] Light from upper left, one soft contact shadow beneath
 - [ ] No text anywhere, including on signs and boards that are meant to be blank
-- [ ] **No national emblem, flag, crest or state insignia.** F-14 came back with the Saudi
-      emblem — a palm above crossed swords — on every cup, in a game set in the UAE. Generators
-      reach for it whenever an asset is "traditional Arabic"; the crockery in this café is plain
+- [ ] **All crockery is plain.** No emblem, crest, palm motif, coloured banding or gilding on any
+      cup, saucer or plate. This is the single most repeated failure in the set — F-14, D-13 and
+      D-14 all came back decorated, and F-14 carried the Saudi national emblem, a palm above
+      crossed swords, in a game set in the UAE. Generators reach for ornate Gulf crockery on any
+      prompt with regional character, and at 34px the decoration is noise whatever it depicts
 - [ ] Readable as a silhouette at 50 px — shrink it and check
 - [ ] Sits convincingly beside the existing forty-one when viewed as a row
 - [ ] **§B2 only:** recognisably the same person as the original
