@@ -59,13 +59,17 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
 .room{position:relative;height:216px;flex:none;overflow:hidden;
       background:linear-gradient(#20323a 0%, #2b3b3f 38%, #3E6E6B 38%, #3E6E6B 62%, #2E2521 62%);
       border-bottom:2px solid #120F0C}
-.room .floor{position:absolute;left:0;right:0;bottom:0;height:38%;
+.room.noplate .floor{display:block}
+.room .floor{display:none;position:absolute;left:0;right:0;bottom:0;height:38%;
              background:repeating-linear-gradient(90deg,#3a2c22 0 22px,#33261d 22px 44px)}
-.room .wall{position:absolute;left:0;right:0;top:38%;height:24%;
+.room.noplate .wall{display:block}
+.room .wall{display:none;position:absolute;left:0;right:0;top:38%;height:24%;
             background:repeating-linear-gradient(90deg,#3E6E6B 0 26px,#396663 26px 28px)}
-.room .win{position:absolute;left:10px;top:12px;width:116px;height:66px;border-radius:5px;
+.room.noplate .win{display:block}
+.room .win{display:none;position:absolute;left:10px;top:12px;width:116px;height:66px;border-radius:5px;
            background:linear-gradient(#1C2430,#2a3a44);border:3px solid #241a14}
-.room .counter{position:absolute;right:8px;bottom:14%;width:150px;height:44px;border-radius:4px;
+.room.noplate .counter{display:block}
+.room .counter{display:none;position:absolute;right:8px;bottom:14%;width:150px;height:44px;border-radius:4px;
                background:linear-gradient(#A9704A,#7A4A2B);border:2px solid #241a14}
 .ob{position:absolute;font-size:22px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
 .room .glow{position:absolute;left:0;right:0;top:0;height:60%;
@@ -143,6 +147,10 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 const money = n => Math.round(n).toLocaleString("en-GB");
 
 /* ---------- recipes. tags are what a season or a person is in the mood for ---------- */
+const SPRITE = {"karak": "karak", "mint": "mint", "espresso": "espresso", "latte": "latte", "iced": "iced", "shake": "dateshake", "luqaimat": "luqaimat", "regag": "regag", "croissant": "almond", "saffron": "saffron", "affogato": "affogato", "chai": "chai"};
+const ITEM_SPRITE = {"stool": "f_stool", "table": "f_table_sm", "sign": "f_sign", "awning": "f_awning", "case_": "f_case", "grinder": "f_grinder", "radio": "f_radio", "plant": "f_plant_lg", "aircon": "f_aircon", "slot": "f_menuboard", "backroom": "f_banquette", "upstairs": "f_bookshelf", "barista": "f_urn", "manager": "p_ledger", "branch": "f_till", "freehold": "p_keys"};
+const REG_FACE = {"noor": "p5", "haddad": "p6", "dana": "p9", "samir": "p11", "aisha": "p4", "khalid": "p3"};
+const ART = "../art/sprites/";
 const RECIPES = {
   karak:   {nm:"Karak chai",     ic:"🫖", cost:2,  price:6,  tags:["warm","cheap"],   buy:0},
   mint:    {nm:"Mint tea",       ic:"🌿", cost:2,  price:7,  tags:["warm","light"],   buy:0},
@@ -292,6 +300,29 @@ const MOMENTS = [
     {l:"Too big", f:g=>"It goes to the place on the corner."}]}
 ];
 
+
+/* Art. The sprites live in ../art/sprites/, so this file is no longer standalone --
+   opened on its own, every img falls back to the emoji it replaced, which is why the
+   emoji stay in the tables. */
+function sprite(name, px, emoji, cls){
+  if(!name) return el("span", cls, emoji);
+  const w = el("span", cls);
+  w.style.cssText = "display:inline-flex;align-items:center;justify-content:center;width:" +
+    px + "px;height:" + px + "px;flex:none;font-size:" + Math.round(px*0.8) + "px";
+  const im = document.createElement("img");
+  im.src = ART + name + ".png"; im.alt = "";
+  im.style.cssText = "width:100%;height:100%;object-fit:contain";
+  im.onerror = function(){ w.textContent = emoji || ""; };
+  w.appendChild(im);
+  return w;
+}
+function dishArt(k, px){ const r = RECIPES[k] || {}; return sprite(SPRITE[k], px, r.ic); }
+function faceArt(r, px, aged){
+  const f = REG_FACE[r.k];
+  return sprite(f ? (aged && f !== "p8" ? f + "_old" : f) : null, px, r.ic);
+}
+const WALKIN = ["p1","p2","p7","p10","p12","p8"];
+
 /* ============================== state ============================== */
 function NEW(){
   return {
@@ -342,29 +373,49 @@ function priceOf(k){
 }
 
 /* ============================== the room ============================== */
+function roomPlate(){
+  if(own("upstairs")) return "room_large";
+  if(G.seats >= 8 || own("backroom")) return "room_grown";
+  if(G.seats >= 4 || own("table")) return "room_small";
+  return "room_bare";
+}
+/* where a fitting stands on the plate, as a fraction of the frame, and how big it is
+   relative to a stool. The third number is its room scale from art/sprites/fittings.json. */
+const SLOTS = {
+  f_banquette:[0.09,0.86,2.55], f_table_lg:[0.26,0.84,1.85], f_table_sm:[0.38,0.82,1.26],
+  f_stool:[0.47,0.83,1.00],     f_plant_lg:[0.02,0.80,1.70], f_plant_sm:[0.20,0.78,0.90],
+  f_rug:[0.30,0.93,2.00],       f_case:[0.72,0.60,1.70],     f_till:[0.88,0.58,1.05],
+  f_grinder:[0.80,0.57,1.15],   f_radio:[0.64,0.56,0.90],    f_menuboard:[0.58,0.88,1.45],
+  f_awning:[0.10,0.16,2.10],    f_sign:[0.30,0.12,1.35],     f_aircon:[0.62,0.10,1.40],
+  f_urn:[0.68,0.58,1.20],       f_bookshelf:[0.94,0.80,1.50], p_keys:[0.50,0.55,0.70],
+  p_ledger:[0.56,0.56,0.80]
+};
 function drawRoom(host, dusk){
   const r = el("div","room" + (dusk ? " dusk" : ""));
-  r.appendChild(el("div","floor")); r.appendChild(el("div","wall"));
-  r.appendChild(el("div","win"));   r.appendChild(el("div","counter"));
-  const at = (ic,l,b,sz) => { const o = el("div","ob",ic);
-    o.style.left = l+"px"; o.style.bottom = b+"px"; if(sz) o.style.fontSize = sz+"px";
-    r.appendChild(o); };
+  const plate = document.createElement("img");
+  plate.src = ART + roomPlate() + ".png"; plate.alt = "";
+  plate.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 52%";
+  plate.onerror = function(){ r.classList.add("noplate"); plate.remove(); };
+  r.appendChild(plate);
 
-  at("☕", 300, 62, 18);                                   // the one machine you start with
-  for(let i=0;i<own("stool");i++)  at("🪑", 30+i*34, 18);
-  for(let i=0;i<own("table");i++)  at("🛋️", 44+i*70, 40, 26);
-  for(let i=0;i<own("plant");i++)  at("🪴", 8+i*118, 44, 20);
-  if(own("radio"))    at("📻", 340, 62, 15);
-  if(own("case_"))    at("🍰", 258, 62, 17);
-  if(own("grinder"))  at("⚙️", 372, 62, 15);
-  if(own("sign"))     at("🪧", 150, 150, 26);
-  if(own("awning"))   at("⛱️", 20, 152, 30);
-  if(own("aircon"))   at("❄️", 250, 156, 16);
-  if(own("backroom")) at("🚪", 402, 30, 26);
-  if(own("upstairs")) at("🪜", 386, 96, 22);
-  G.staff.forEach((s,i) => at(s.role==="manager" ? "🗂️" : "🧑‍🍳", 250+i*40, 24, 19));
+  const H = 216, BASE = 34;
+  Object.keys(G.owned).forEach(function(k){
+    const nm = ITEM_SPRITE[k], slot = SLOTS[nm];
+    if(!nm || !slot || !G.owned[k]) return;
+    const n = Math.min(G.owned[k], 3);
+    for(let i2=0;i2<n;i2++){
+      const px = Math.round(BASE * slot[2]);
+      const im = document.createElement("img");
+      im.src = ART + nm + ".png"; im.alt = "";
+      im.style.cssText = "position:absolute;width:" + px + "px;height:" + px +
+        "px;object-fit:contain;left:" + Math.round(slot[0]*100 + i2*5) + "%;top:" +
+        Math.round(slot[1]*H - px) + "px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.5))";
+      im.onerror = function(){ im.remove(); };
+      r.appendChild(im);
+    }
+  });
   r.appendChild(el("div","glow")); r.appendChild(el("div","night"));
-  if(!own("stool") && !own("table"))
+  if(roomPlate() === "room_bare")
     r.appendChild(el("div","empty-note","a counter, two stools and one machine"));
   host.appendChild(r);
 }
@@ -392,7 +443,7 @@ function screenCafe(){
   G.board.forEach(k => {
     const r = RECIPES[k], d = el("div","dish");
     d.style.cursor = "default";
-    d.appendChild(el("div","di", r.ic));
+    d.appendChild(dishArt(k, 26));
     d.appendChild(el("div","dn", r.nm));
     const wanted = r.tags.some(t => season().want.indexOf(t) >= 0);
     if(wanted) d.appendChild(el("div","tg","in season"));
@@ -408,7 +459,9 @@ function screenCafe(){
     p.appendChild(el("div","lbl","Regulars"));
     met.forEach(r => {
       const st = regState(r.k), row = el("div","who");
-      const f = el("div","face", r.ic); f.style.background = r.hue + "33"; row.appendChild(f);
+      const f = faceArt(r, 48, G.gen > 1); f.className = "face";
+      f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+      f.style.background = r.hue + "33"; row.appendChild(f);
       const m = el("div"); m.style.flex = "1";
       m.appendChild(el("div","mid-t", r.nm));
       m.appendChild(el("div","hint", st.done ? "Their story here is finished."
@@ -467,7 +520,7 @@ function screenPlan(){
     const d = el("div","dish" + (on ? " on" : ""));
     const wanted = r.tags.some(t => season().want.indexOf(t) >= 0);
     if(wanted) d.classList.add("hot");
-    d.appendChild(el("div","di", r.ic));
+    d.appendChild(dishArt(k, 26));
     const mid = el("div"); mid.style.flex = "1";
     mid.appendChild(el("div","dn", r.nm));
     const whoWants = REGULARS.filter(x => x.usual === k && regState(x.k).met).map(x => x.nm);
@@ -576,7 +629,9 @@ function step(){
   const r = serveOne(c);
   const list = $("sv-list");
   const g = el("div","g" + (c.reg ? " reg" : "") + (r.k ? "" : " miss"));
-  const f = el("div","face", c.reg ? c.reg.ic : pick(["🧔","👩","🧑","👵","👨","🧕"]));
+  const f = c.reg ? faceArt(c.reg, 40, G.gen > 1) : sprite(pick(WALKIN), 40, "🧑");
+  f.className = "face";
+  f.style.borderRadius = "50%"; f.style.overflow = "hidden";
   f.style.background = (c.reg ? c.reg.hue : "#6F6058") + "33";
   g.appendChild(f);
   const mid = el("div"); mid.style.flex = "1"; mid.style.minWidth = "0";
@@ -707,7 +762,9 @@ function closeSeason(auto){
   beats.forEach(b => {
     const card = el("div","card");
     const row = el("div","who");
-    const f = el("div","face", b.r.ic); f.style.background = b.r.hue + "33"; row.appendChild(f);
+    const f = faceArt(b.r, 44, G.gen > 1); f.className = "face";
+    f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+    f.style.background = b.r.hue + "33"; row.appendChild(f);
     const m = el("div"); m.appendChild(el("div","mid-t", b.r.nm));
     m.appendChild(el("div","lbl", b.intro ? ((regState(b.r.k).cycle||1) > 1 ? "someone new" : "a new regular") : b.blocked ? "waiting" : "their story"));
     row.appendChild(m); card.appendChild(row);
@@ -762,7 +819,7 @@ function screenShop(from){
       if(have >= it.max) return;
       const cost = costOfItem(k, have);
       const row = el("div","item");
-      row.appendChild(el("div","ic", it.ic));
+      row.appendChild(sprite(ITEM_SPRITE[k], 34, it.ic, "ic"));
       const mid = el("div","mid");
       mid.appendChild(el("div","t", it.nm + (it.max>1 && have ? " ×"+have : "")));
       mid.appendChild(el("div","d", it.d));
@@ -776,7 +833,7 @@ function screenShop(from){
     Object.keys(RECIPES).forEach(k => {
       if(G.recipes.indexOf(k) >= 0) return;
       const r = RECIPES[k], row = el("div","item");
-      row.appendChild(el("div","ic", r.ic));
+      row.appendChild(sprite(SPRITE[k], 34, r.ic, "ic"));
       const mid = el("div","mid");
       mid.appendChild(el("div","t", r.nm));
       mid.appendChild(el("div","d", r.tags.join(" · ") + " · sells for " + r.price + " AED"));
@@ -796,7 +853,7 @@ function screenShop(from){
     const n = G.cookbook.filter(c => c.invented).length;
     const cost = Math.round(900 * Math.pow(1.45, n) * infl());
     const row = el("div","item"); row.style.borderColor = "var(--amber-d)";
-    row.appendChild(el("div","ic","📓"));
+    row.appendChild(sprite("p_card", 34, "📓", "ic"));
     const mid = el("div","mid");
     mid.appendChild(el("div","t","Work out something of your own"));
     mid.appendChild(el("div","d","A season of evenings. It goes on the board and into the "
@@ -849,7 +906,9 @@ function screenPeople(){
     const st = regState(r.k); if(!st.met) return;
     const card = el("div","card");
     const row = el("div","who");
-    const f = el("div","face", r.ic); f.style.background = r.hue + "33"; row.appendChild(f);
+    const f = faceArt(r, 44, G.gen > 1); f.className = "face";
+    f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+    f.style.background = r.hue + "33"; row.appendChild(f);
     const m = el("div"); m.style.flex="1";
     m.appendChild(el("div","mid-t", r.nm));
     m.appendChild(el("div","lbl","usual — " + RECIPES[r.usual].nm));

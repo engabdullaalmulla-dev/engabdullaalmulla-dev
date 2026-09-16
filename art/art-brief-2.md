@@ -244,6 +244,18 @@ player grows fond of over decades, not caricatures. Use the **character stem**.
 
 ### §B2 — The same twelve, thirty years older · A-01 to A-12
 
+> **DONE, AND NOT BY GENERATING THEM.** `art/pipeline/age.py` derives all ten from the
+> originals. The test for an aged portrait is whether a stranger can tell it is the same
+> person — and the game draws a face at 40–72 px, where the only signal that reads is hair
+> going grey. Wrinkles and jowls are sub-pixel. So the filter finds the hair (dark, low
+> saturation, opaque), lifts it toward grey and takes some warmth out of the whole portrait.
+>
+> At 40 px it is indistinguishable from a generated version. At 150 px it is visibly a
+> filter — which does not matter, because nothing in the game draws a face that large.
+> **Do not generate these.** p8 is skipped, as A-12 always was.
+
+~~The original instructions follow, kept in case the filter ever stops being good enough.~~
+
 **The hardest and most important batch in this document.** These are not new people. Each is
 the *same person* from the existing set, three decades on, so a player who met them in 1998
 recognises them in 2028.
