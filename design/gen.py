@@ -394,11 +394,11 @@ SCREENS["Shop"] = wrap(
     + title_block("Between shifts", "712 AED",
                   "Faster machines refill sooner. More slots cook several at once. Bigger bins let you stockpile before a rush.")
     + '<div class="col pad" style="gap:8px;margin-top:16px;flex:1;overflow:hidden">'
-    + urow("shot", "Shot &mdash; speed", "2.2s &rarr; 1.8s", "90 AED")
-    + urow("shot", "Shot &mdash; slots", "1 at a time &rarr; 2", "150 AED")
-    + urow("milk", "Milk &mdash; speed", "1.6s &rarr; 1.3s", "180 AED")
-    + urow("pastry", "Pastry &mdash; slots", "2 at a time &rarr; 3", "300 AED")
-    + urow("ice", "Ice &mdash; speed", "Ready in 0.33s &mdash; fully tuned", "", True)
+    + urow("m_espresso", "Espresso machine &mdash; speed", "2.2s &rarr; 1.8s per shot", "90 AED")
+    + urow("m_espresso", "Espresso machine &mdash; slots", "1 at a time &rarr; 2", "150 AED")
+    + urow("m_steamer", "Steamer &mdash; speed", "2.0s &rarr; 1.6s per jug", "180 AED")
+    + urow("m_oven", "Oven &mdash; slots", "2 at a time &rarr; 3", "300 AED")
+    + urow("m_kettle", "Kettle &mdash; speed", "Brews in 1.4s &mdash; fully tuned", "", True)
     + urow("karak", "Another seat", "3 seats &rarr; 4", "260 AED")
     + '</div>'
       '<div class="col pad" style="gap:10px;padding-bottom:14px">'
