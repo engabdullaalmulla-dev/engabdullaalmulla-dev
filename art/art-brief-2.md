@@ -217,7 +217,7 @@ came back this way and had to be redone.
 
 ---
 
-## §B — People · 30 assets
+## §B — People · 23 assets (12 to generate)
 
 The forever engine. Twelve portraits exist; this takes the street to twenty-four faces, ages
 the existing twelve, and adds the six children who grow up across generations.
@@ -288,7 +288,24 @@ recognises them in 2028.
 twelve has to be the one who stops coming in, and the absence of the asset is the point.
 Eleven images in this batch, not twelve.
 
-### §B3 — Six children · K-01 to K-06
+### ~~§B3 — Six children · K-01 to K-06~~ — CUT
+
+> **Cut, and not because a generator refused.** It did refuse, which is the guardrail working
+> as designed: a close-up, realistically-shaded portrait of a six-year-old is exactly the shape
+> of request image models block, and that is not something to engineer around.
+>
+> It turned out not to matter, because **the game never draws a child.** Every child in the
+> design appears in the *text* of an adult's story beat, on a card showing the adult's face —
+> Aisha watches Mariam grow from six to sixteen across four beats, and the face on all four is
+> Aisha's. That is the better telling anyway: the story is a mother watching her daughter, so
+> the mother is who you should be looking at.
+>
+> A child who grows up enough to become a regular in her own right is, by then, an adult
+> portrait — generate her in §B1 as a young woman, with no child version ever needed.
+>
+> ~~The original six follow, kept only as a record of what was asked for.~~
+
+### ~~Original K-01 to K-06~~
 
 Children who appear young and grow into adults across a generation. Each one is the **child
 version of an existing or new adult** — same face, same eyes, twenty-five years earlier.

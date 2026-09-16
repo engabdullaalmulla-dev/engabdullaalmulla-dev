@@ -20,7 +20,9 @@ import sys, os
 import numpy as np
 from PIL import Image
 
-AGED = ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p9", "p10", "p11"]  # p8 is A-12: skipped
+AGED = ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"]
+# p12 is A-12, the grandmother, and is deliberately absent: she does not get thirty
+# more years. I first skipped p8 by mistake, which is A-08 and does get them.
 SIZES = [40, 30]
 
 
@@ -53,7 +55,7 @@ def main():
                 os.path.join(out, "%s_old@%d.png" % (p, s)))
         n += 1
         print("  %-12s <- %s" % (p + "_old.png", p + ".png"))
-    print("\n%d aged portraits written (A-12 skipped by design)" % n)
+    print("\n%d aged portraits written (A-12 / p12 skipped by design)" % n)
 
 
 if __name__ == "__main__":
