@@ -124,6 +124,22 @@ with an endless tail, and calling it more than that would be a lie.
 
 ## 5. Building from scratch
 
+**Placement, not more art, is what the room needs next.** With R-04 and twenty-nine fittings
+in hand, compositing them exposes two things no additional asset fixes:
+
+1. **Anchor points.** A fitting needs to know where on the plate it stands and at what
+   baseline — a pastry case sits *on* the counter, a rug lies *under* a table, a sconce hangs
+   on the wall. Dropped at arbitrary coordinates they clip through the counter and float.
+   The room plate needs a small table of named slots, and each fitting a slot type.
+2. **Ground shadows.** Every sprite carries its own baked contact shadow from a flat grey
+   backdrop. In a room with hard directional sun they read as pasted on. A cheap elliptical
+   shadow drawn under each placed object, angled to match the plate, closes most of the gap.
+
+Neither is an art problem. Both are the difference between "the assets exist" and "the room
+looks built".
+
+
+
 Fifteen purchasables, and **every one appears in the room.** The first screen is a counter,
 two stools and one machine, captioned as such. The awning, the sign, the pastry case, the
 plants, the barista all show up where you put them. That visible accretion is the reward for
