@@ -33,7 +33,8 @@ NAMES = {
     "r-01": "room_counter", "r-02": "room_day", "r-03": "room_evening",
     "r-04": "room_bare",   "r-05": "room_small",   "r-06": "room_grown",
     "r-07": "room_large",  "r-08": "room_back",    "r-09": "room_night",
-    "r-10": "room_rain",   "r-11": "room_summer",
+    "r-10": "room_rain",   "r-11": "room_summer",  "r-12": "room_1990s",
+    "r-13": "room_2030s",
 }
 for i in range(1, 13):
     NAMES["c-%02d" % i] = "p%d" % i

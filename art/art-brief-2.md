@@ -306,6 +306,10 @@ Upload the adult portrait and ask for the child.
 >
 > *"the street outside the window is a UAE shopping street — low sand-coloured buildings, date
 > palms, a hot white sky — not a European street, no deciduous trees, no pastel townhouses"*
+>
+> **All ten plates are now generated and all ten carry the European street.** That is at least
+> uniform: it is one decision to make rather than a split set. Redoing them is ten images in
+> one conversation with R-04 attached, and nothing in the game is blocked while they stand.
 
 
 
