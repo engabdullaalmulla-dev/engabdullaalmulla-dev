@@ -31,7 +31,7 @@ NAMES = {
     "m-01": "m_espresso","m-02": "m_kettle","m-03": "m_syrup",
     "m-04": "m_steamer","m-05": "m_oven", "m-06": "m_ice",
     "r-01": "room_counter", "r-02": "room_day", "r-03": "room_evening",
-    "r-04": "room_bare",
+    "r-04": "room_bare",   "r-05": "room_small",   "r-06": "room_grown",
 }
 for i in range(1, 13):
     NAMES["c-%02d" % i] = "p%d" % i

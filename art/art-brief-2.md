@@ -295,6 +295,20 @@ Upload the adult portrait and ask for the child.
 
 ## §C — Room states · 10 assets
 
+> **The street through the window is wrong in R-04, R-05 and R-06.** All three show pastel
+> European townhouses, deciduous trees and a cast-iron lamppost. The game is set on a UAE
+> shopping street and the menu is karak, luqaimat, regag and qahwa. The three are consistent
+> with each other and usable, but the room is the most-seen image in the game and this is the
+> one detail in it that contradicts the premise.
+>
+> **Every room prompt from here must carry this clause**, and R-04 to R-06 should be redone as
+> a set, in one conversation, with R-04 attached so the geometry holds:
+>
+> *"the street outside the window is a UAE shopping street — low sand-coloured buildings, date
+> palms, a hot white sky — not a European street, no deciduous trees, no pastel townhouses"*
+
+
+
 **16:9, scene stem, no people.** The same café at different stages of its life and different
 times of day. R-04 matters most: it is the first thing a new player sees.
 
