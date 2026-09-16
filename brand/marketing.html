@@ -1,0 +1,87 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="assets/colour/tokens.css">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#555;font-family:"DM Sans",sans-serif}
+  .stage{position:relative;overflow:hidden;background:var(--ink-900);margin:24px}
+
+  /* the room plate, pushed back so type sits in front of it */
+  .plate{position:absolute;inset:0;background-size:cover;background-position:center 46%;
+         filter:saturate(.82) brightness(.62)}
+  .scrim{position:absolute;inset:0}
+  .glow{position:absolute;border-radius:50%;
+        background:radial-gradient(closest-side, rgba(244,217,168,.12), rgba(244,217,168,0) 70%)}
+
+  .wm{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.045em;
+      line-height:.88;color:var(--cream-50);white-space:nowrap;position:relative}
+  .wm i{font-style:normal;color:var(--amber-500)}
+  .promise{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;color:var(--cream-50);
+           letter-spacing:-.02em;line-height:1.05}
+  .label{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.24em;
+         color:var(--amber-500)}
+  .rule{height:2px;background:var(--amber-500);opacity:.85}
+  .food{position:absolute;display:block;
+        filter:drop-shadow(0 18px 26px rgba(0,0,0,.55))}
+
+  /* ---------- Google Play feature graphic, 1024 x 500 ---------- */
+  #feature{width:1024px;height:500px}
+  #feature .scrim{background:
+     linear-gradient(90deg, rgba(23,19,16,.97) 0%, rgba(23,19,16,.93) 40%, rgba(23,19,16,.55) 72%, rgba(23,19,16,.72) 100%),
+     radial-gradient(120% 80% at 50% 120%, rgba(0,0,0,.55), rgba(0,0,0,0) 60%)}
+  #feature .glow{left:-90px;top:60px;width:620px;height:420px}
+  #feature .copy{position:absolute;left:64px;top:126px;width:560px}
+  #feature .wm{font-size:88px}
+  #feature .promise{font-size:23px;margin-top:22px;max-width:470px}
+  #feature .rule{width:52px;margin:26px 0 14px}
+  #feature .label{font-size:14px}
+
+  /* ---------- social / OG banner, 1200 x 630 ---------- */
+  #social{width:1200px;height:630px}
+  #social .scrim{background:
+     linear-gradient(105deg, rgba(23,19,16,.96) 0%, rgba(23,19,16,.9) 46%, rgba(23,19,16,.5) 78%, rgba(23,19,16,.68) 100%),
+     radial-gradient(120% 80% at 50% 125%, rgba(0,0,0,.6), rgba(0,0,0,0) 60%)}
+  #social .glow{left:-40px;top:70px;width:700px;height:500px}
+  #social .copy{position:absolute;left:84px;top:150px;width:660px}
+  #social .lock{display:flex;align-items:center;gap:26px}
+  #social .lock img{width:104px;height:104px;border-radius:23px;display:block;
+                    box-shadow:0 14px 30px rgba(0,0,0,.5)}
+  #social .wm{font-size:82px}
+  #social .promise{font-size:27px;margin-top:30px;max-width:600px}
+  #social .rule{width:56px;margin:30px 0 16px}
+  #social .label{font-size:15px}
+</style></head><body>
+
+<div id="feature" class="stage">
+  <div class="plate" style="background-image:url('../art/sprites/room_day.png')"></div>
+  <div class="scrim"></div><div class="glow"></div>
+  <img class="food" src="../art/sprites/luqaimat.png" style="right:26px;bottom:-56px;width:300px">
+  <img class="food" src="../art/sprites/karak.png"    style="right:246px;bottom:36px;width:246px">
+  <img class="food" src="../art/sprites/latte.png"    style="right:14px;top:6px;width:232px">
+  <div class="copy">
+    <div class="wm">Caf<i>é</i> Rush</div>
+    <div class="promise">A ninety-second cooking rush<br>you buy once and own forever.</div>
+    <div class="rule"></div>
+    <div class="label">No ads &nbsp;·&nbsp; No timers &nbsp;·&nbsp; One price</div>
+  </div>
+</div>
+
+<div id="social" class="stage">
+  <div class="plate" style="background-image:url('../art/sprites/room_evening.png')"></div>
+  <div class="scrim"></div><div class="glow"></div>
+  <img class="food" src="../art/sprites/regag.png"     style="right:-30px;bottom:-40px;width:330px">
+  <img class="food" src="../art/sprites/luqaimat.png"  style="right:250px;bottom:-66px;width:286px">
+  <img class="food" src="../art/sprites/karak.png"     style="right:96px;top:44px;width:262px">
+  <img class="food" src="../art/sprites/dateshake.png" style="right:316px;top:96px;width:216px">
+  <div class="copy">
+    <div class="lock">
+      <img src="assets/icon/ios/icon-1024.png" alt="">
+      <div class="wm">Caf<i>é</i> Rush</div>
+    </div>
+    <div class="promise">A ninety-second cooking rush<br>you buy once and own forever.</div>
+    <div class="rule"></div>
+    <div class="label">No ads &nbsp;·&nbsp; No timers &nbsp;·&nbsp; One price</div>
+  </div>
+</div>
+
+</body></html>
