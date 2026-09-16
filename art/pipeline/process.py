@@ -11,7 +11,7 @@ The background is removed by flood-filling inward from the edges rather than by 
 threshold alone. That distinction matters: a milk pitcher is the same grey as the
 backdrop, and a threshold would punch a hole straight through it.
 """
-import sys, os, re, io, math
+import sys, os, re, io, math, json
 from PIL import Image, ImageDraw, ImageFilter
 
 MASTER = 512          # one master per asset; everything downscales from this
@@ -55,6 +55,10 @@ FITTINGS = {
     "f-28": "f_fridge",    "f-29": "f_sink",      "f-30": "f_awning",
     "f-31": "f_sign",      "f-32": "f_planter",
 }
+
+# §B2 ageing portraits. A-08 is p8 and does get thirty more years; A-12 is p12, the
+# grandmother, and is the one who does not.
+NAMES.update({"a-%02d" % i: "p%d_old" % i for i in range(1, 12)})
 
 # small props the interface leans on. S-01 is deliberately absent: it duplicated F-31,
 # which is the same blank hanging sign, and was cut from the brief rather than generated.
@@ -101,7 +105,7 @@ KEYWORDS = [
 
 def target_name(fn):
     stem = os.path.splitext(os.path.basename(fn))[0].lower()
-    m = re.search(r"\b([idmrcfsb])[-_ ]?(\d{1,2})\b", stem)
+    m = re.search(r"\b([idmrcfsba])[-_ ]?(\d{1,2})\b", stem)
     if m:
         key = "%s-%02d" % (m.group(1), int(m.group(2)))
         if key in NAMES:
@@ -233,6 +237,7 @@ def main():
                 im = fade_bottom(im)
             im = trim_and_square(im, margin=0.04 if face else MARGIN)
         im.save(os.path.join(out, name + ".png"))
+        if name.endswith("_old"): face = True
         sizes = [] if wide else (FACE_SIZES if face else
                  (FIT_SIZES if name.startswith("f_") else GAME_SIZES))
         for s in sizes:
@@ -279,6 +284,20 @@ def main():
         print("\nfittings.json -> %d room scales" % len(data))
         if missing:
             print("  no ROOM_SCALE for: %s (defaulted to 1.0 -- add them)" % ", ".join(missing))
+
+    ph = os.path.join(out, "PLACEHOLDERS.json")
+    if os.path.exists(ph):
+        try:
+            left = json.load(open(ph))
+        except Exception:
+            left = []
+        left = [n for n in left if n not in [d for d, _ in done]]
+        if left:
+            json.dump(sorted(left), open(ph, "w"), indent=2)
+            print("\nSTILL PLACEHOLDER, do not ship: %s" % ", ".join(sorted(left)))
+        else:
+            os.remove(ph)
+            print("\nevery placeholder has been replaced by generated art")
 
     print("\n%d sprites written to %s" % (len(done), os.path.normpath(out)))
 

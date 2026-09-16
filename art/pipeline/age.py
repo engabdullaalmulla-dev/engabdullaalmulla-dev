@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Derive the aged portraits (§B2) from the originals instead of generating them.
+"""PLACEHOLDER aged portraits, so the prototype runs before §B2 is generated.
+
+These are NOT the shipping assets. The filter holds at the 40px a service row draws
+and visibly does not at the 150px a story screen can, so §B2 is still eleven images
+to generate properly. Running process.py over a generated a-XX file overwrites the
+placeholder and removes it from art/sprites/PLACEHOLDERS.json.
+
+What it does: derive an aged portrait from the original.
 
     python3 age.py ../sprites
 
