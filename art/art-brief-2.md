@@ -178,8 +178,10 @@ These extend the six machines that already exist. Match `m_espresso.png` exactly
 | F-16 | Sahlab urn | a polished steel heated drinks urn with a brass tap and a domed lid, gently steaming |
 | F-17 | Saj griddle | a domed black cast iron saj griddle on a low burner, used for thin regag bread |
 
-**Anything wall-mounted — F-10, F-18, F-19, F-23 — must be drawn floating, with no wall and no
-shadow cast onto the backdrop.** The cut keys out a flat grey by flooding in from the edges, so
+**Anything wall-mounted — F-10, F-19, F-23 — must be drawn floating, with no wall and no
+shadow cast onto the backdrop.** Saying "no wall" is not enough on its own; say **floating in
+empty space**, which is the phrasing that works. F-18 passes without it only because a pendant
+hangs on a cord in mid-air rather than against a surface. The cut keys out a flat grey by flooding in from the edges, so
 a shadow on the wall is not background: it survives as a grey slab welded to the object. F-10
 came back this way and had to be redone.
 
@@ -188,11 +190,11 @@ came back this way and had to be redone.
 | # | Name | Subject line |
 |---|---|---|
 | F-18 | Pendant lamp | a single brass pendant lamp with a ribbed amber glass shade, hanging from a short cord, lit |
-| F-19 | Wall lamp | a small brass wall sconce with a frosted glass globe, warm light glowing |
+| F-19 | Wall lamp | a small brass wall sconce with a frosted glass globe, warm light glowing, **floating in empty space with no wall, no mounting surface and no shadow falling on the background** |
 | F-20 | Rug | a flat woven kilim rug in terracotta, cream and deep teal geometric bands, seen from above at an angle |
 | F-21 | Small plant | a small potted trailing pothos in a plain terracotta pot |
 | F-22 | Large plant | a tall potted monstera with four broad glossy leaves in a woven basket planter |
-| F-23 | Framed pictures | a cluster of three small framed pictures in mismatched brass and dark wood frames, the images soft and abstract |
+| F-23 | Framed pictures | a cluster of three small framed pictures in mismatched brass and dark wood frames, the images soft and abstract, **floating in empty space with no wall behind them and no shadow falling on the background** |
 | F-24 | Bookshelf | a short open wooden bookshelf with a handful of worn books and one small brass ornament |
 | F-25 | Radio | a small vintage tabletop radio in cream bakelite with a gold mesh speaker grille and two round dials |
 
