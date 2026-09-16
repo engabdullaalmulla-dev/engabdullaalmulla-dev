@@ -1,0 +1,400 @@
+# Café Life — art brief 2
+
+**Give this whole file to an image-generating AI. Everything it needs is here.**
+
+This is the **second** set. Forty-one assets already exist and ship. **Ninety-five** more are
+listed below (ninety-six entries — one of them, A-12, is deliberately not generated). Read §2 before generating anything — the hard part of this set is not the
+prompts, it is matching art that already exists.
+
+---
+
+## 1. What art can and cannot fix
+
+Be clear about this before spending an afternoon on it.
+
+Driving the game for thirty simulated years showed the ceiling is **systemic, not
+artistic**: seats, board slots and recipes all max out around year twelve and the next
+eighteen years are flat. No quantity of new pictures changes that. More dishes do not make
+year twenty interesting.
+
+**But two of the gaps below are real blockers that no system can work around:**
+
+**Fittings (§A).** The game's core reward loop is *buy a thing, see it appear in your café*.
+There are currently **zero** assets for this — the prototype puts emoji in the room. Thirty-two
+objects turn the shop from a stat screen into the thing people actually play a tycoon game
+for. **This is the highest-value art in this document.**
+
+**People ageing (§B).** This is a game where you run a café for forty years and then your
+daughter runs it. A regular met at 25 must visibly be 55 later. A child who came in with her
+mother must grow up and order for herself. Nothing but art can do this, and without it the
+generational frame is just a number changing on a screen.
+
+Everything after §B is breadth, and breadth is worth having, but those two are the ones that
+buy longevity.
+
+---
+
+## 2. How to work — read this before generating anything
+
+### The anchor is no longer a prompt, it is the existing art
+
+Last time the anchor was one latte you generated first. This time the anchor is **the
+forty-one assets already in the game**. New art that does not match them is worse than no new
+art, because a mismatched set reads as broken rather than as incomplete.
+
+**Before each batch, upload the reference images and say:**
+
+> *"Match the exact style, camera angle, lighting direction, level of detail and background of
+> these images. Same hand-painted glossy look, same warm key light from the upper left, same
+> plain flat grey background."*
+
+| Generating | Upload as reference |
+|---|---|
+| Fittings (§A) | `latte.png`, `m_espresso.png`, `m_oven.png` |
+| People (§B) | The two or three existing portraits nearest in age and dress |
+| **Aged portraits (§B2)** | **The original portrait of that exact person, and nothing else** |
+| Rooms (§C) and branches (§D) | `room_day.png`, `room_evening.png` |
+| Dishes (§E) | `latte.png`, `karak.png`, `luqaimat.png` |
+
+Stay in one conversation per section. If the style drifts, re-upload and say *"match this."*
+
+### Order of work
+
+1. **§A fittings first.** Most valuable, and objects are where generators are most reliable.
+2. **§C rooms**, because §A objects have to sit in them believably.
+3. **§E dishes**, easy wins, same recipe as last time.
+4. **§D branches.**
+5. **§B people last** — faces are where generators are least consistent, and the ageing
+   pass in §B2 is the hardest thing in this document. Come to it with a working rhythm.
+
+### Judge them as a row, never one at a time
+
+Fittings appear in the room at **40–70 px**. Portraits at **40–72 px**. Before accepting
+anything, shrink the whole batch to that size and look at them together. Anything you cannot
+identify at that size needs a bolder silhouette and must be regenerated, not accepted.
+
+---
+
+## 3. Output requirements — apply to every image
+
+| Requirement | Value |
+|---|---|
+| Aspect ratio | Square 1:1, except rooms and branches (marked) |
+| Resolution | 1024 × 1024 minimum |
+| Background | **Plain flat neutral grey.** No gradient, no scene, no surface |
+| Subject | **One object only.** No duplicates, no side props, no hands |
+| Framing | Centred, filling about 80% of the frame, clear margin all round |
+| Camera | Three-quarter view from **30 degrees above** — identical for every object |
+| Light | Single warm key from **upper left**, soft cool fill from lower right |
+| Shadow | One soft contact shadow beneath. Nothing else |
+| Text | **None.** No labels, no brand names, no writing |
+
+---
+
+## 4. The stems
+
+Do not edit these between assets. If you improve one halfway through, everything before it
+must be regenerated.
+
+**Object stem** — §A fittings, §E dishes:
+
+```
+mobile casual game asset, hand-painted digital illustration, glossy stylised realism, rich
+saturated colour, soft airbrushed shading with crisp specular highlights, subtle dark outline,
+appetising and clean, three-quarter view from 30 degrees above, single warm key light from the
+upper left with a soft cool fill from the lower right, one soft contact shadow beneath, object
+centred and filling 80 percent of the frame, plain flat neutral grey background, no text, no
+labels, no logo, no hands, no props
+```
+
+**Character stem** — §B:
+
+```
+mobile casual game character portrait, hand-painted digital illustration, glossy stylised
+realism, warm friendly face, large expressive eyes, soft airbrushed skin shading, gentle smile,
+head and shoulders only, facing forward, single warm key light from the upper left, plain flat
+neutral grey background, no text, no logo, no hands
+```
+
+**Scene stem** — §C rooms, §D branches. This is the object stem with the centring clause
+removed:
+
+```
+mobile casual game background plate, hand-painted digital illustration, glossy stylised
+realism, rich saturated colour, soft airbrushed shading with crisp specular highlights, single
+warm key light from the upper left, warm and inviting, no people, no text, no labels, no logo
+```
+
+**Negative prompt** (Stable Diffusion / Flux; Midjourney after `--no`):
+
+```
+photograph, photorealistic, 3d render, cgi, low quality, blurry, watermark, signature, text,
+letters, numbers, logo, hands, fingers, busy background, gradient background, drop shadow,
+harsh rim light, flat vector, cel shading, outline sketch, duplicate objects, cropped,
+off-centre
+```
+
+---
+
+## §A — Fittings · 32 assets
+
+Everything a player can buy, so it can appear in the room the moment they buy it. These are
+the most valuable assets in this document.
+
+Each must read as **one silhouette at 50 px**. A bookshelf crowded with forty tiny objects
+becomes a grey rectangle; a bookshelf with six bold shapes still reads.
+
+### Seating — 6
+
+| # | Name | Subject line |
+|---|---|---|
+| F-01 | Wooden stool | a simple round wooden bar stool with three splayed legs, worn honey-coloured wood |
+| F-02 | Padded stool | an upholstered bar stool with a tan leather seat and a black metal footrest |
+| F-03 | Small table | a small round café table with a dark wood top and a single cast iron pedestal base |
+| F-04 | Large table | a rectangular wooden café table for four with square tapered legs, warm oak |
+| F-05 | Corner banquette | a padded corner bench seat in deep terracotta fabric with button tufting and a wooden base |
+| F-06 | Outdoor set | a small round metal bistro table with two folding chairs, painted dark green, seen as one group |
+
+### The counter front — 5
+
+| # | Name | Subject line |
+|---|---|---|
+| F-07 | Pastry case | a curved glass countertop pastry display case with two brass-edged shelves, empty and lit from within |
+| F-08 | Menu board | a freestanding wooden A-frame chalkboard, the slate surface blank and softly dusty |
+| F-09 | Till | a vintage brass and enamel cash register with round keys and a pull lever |
+| F-10 | Cup shelf | a small wooden wall shelf stacked with neat rows of white porcelain cups and saucers |
+| F-11 | Water station | a tall glass water dispenser with a brass tap on a small wooden stand, a stack of glasses beside it |
+
+### Equipment — 6
+
+These extend the six machines that already exist. Match `m_espresso.png` exactly.
+
+| # | Name | Subject line |
+|---|---|---|
+| F-12 | Coffee grinder | a chrome and black conical burr coffee grinder with a glass bean hopper on top |
+| F-13 | Blender | a heavy countertop blender with a thick glass jug and a brushed steel base |
+| F-14 | Dallah set | a traditional Arabic brass coffee dallah with a long curved spout, beside three small handleless finjan cups |
+| F-15 | Citrus juicer | a cast metal manual citrus press with a long lever arm, painted deep red |
+| F-16 | Sahlab urn | a polished steel heated drinks urn with a brass tap and a domed lid, gently steaming |
+| F-17 | Saj griddle | a domed black cast iron saj griddle on a low burner, used for thin regag bread |
+
+### Atmosphere — 8
+
+| # | Name | Subject line |
+|---|---|---|
+| F-18 | Pendant lamp | a single brass pendant lamp with a ribbed amber glass shade, hanging from a short cord, lit |
+| F-19 | Wall lamp | a small brass wall sconce with a frosted glass globe, warm light glowing |
+| F-20 | Rug | a flat woven kilim rug in terracotta, cream and deep teal geometric bands, seen from above at an angle |
+| F-21 | Small plant | a small potted trailing pothos in a plain terracotta pot |
+| F-22 | Large plant | a tall potted monstera with four broad glossy leaves in a woven basket planter |
+| F-23 | Framed pictures | a cluster of three small framed pictures in mismatched brass and dark wood frames, the images soft and abstract |
+| F-24 | Bookshelf | a short open wooden bookshelf with a handful of worn books and one small brass ornament |
+| F-25 | Radio | a small vintage tabletop radio in cream bakelite with a gold mesh speaker grille and two round dials |
+
+### Climate and back of house — 4
+
+| # | Name | Subject line |
+|---|---|---|
+| F-26 | Air conditioner | a wall-mounted white split air conditioning unit with horizontal vanes, clean and modern |
+| F-27 | Heater | a small freestanding oil-filled column radiator in cream enamel |
+| F-28 | Fridge | a compact stainless steel under-counter refrigerator with a single door and a brushed handle |
+| F-29 | Sink station | a double stainless steel commercial sink with a tall swan-neck mixer tap |
+
+### Outside — 3
+
+| # | Name | Subject line |
+|---|---|---|
+| F-30 | Awning | a folded fabric shop awning in wide terracotta and cream stripes with a scalloped edge, on a metal frame |
+| F-31 | Painted sign | a blank hanging shop sign board in dark painted wood with a brass frame and two chain links, **no writing on it** |
+| F-32 | Planter box | a long wooden street planter box filled with low green shrubs and small white flowers |
+
+---
+
+## §B — People · 30 assets
+
+The forever engine. Twelve portraits exist; this takes the street to twenty-four faces, ages
+the existing twelve, and adds the six children who grow up across generations.
+
+### §B1 — Twelve more regulars · C-13 to C-24
+
+A Dubai shopping street. Depict everyone warmly and respectfully — these are people the
+player grows fond of over decades, not caricatures. Use the **character stem**.
+
+| # | Name | Subject line |
+|---|---|---|
+| C-13 | Taxi driver | a man in his fifties with a thick grey moustache and a lined kind face, a pale blue collared shirt |
+| C-14 | Nurse | a woman in her thirties with dark hair tied back tightly, warm brown skin, pale green medical scrubs |
+| C-15 | Builder | a man in his forties with a weathered tanned face and short black hair, a high-visibility orange vest over a grey shirt |
+| C-16 | Fishmonger | a stocky man in his fifties with a shaved head and a broad grin, a navy apron over a white shirt |
+| C-17 | Lawyer | a woman in her forties with sleek shoulder-length black hair and small gold earrings, a charcoal blazer |
+| C-18 | Art student | a young person in their twenties with cropped bleached hair and a nose ring, a paint-flecked denim jacket |
+| C-19 | Imam | a serene man in his sixties with a full white beard and a white embroidered kufi cap, a grey thobe |
+| C-20 | Gym owner | a broad-shouldered woman in her thirties with a high ponytail and freckles, a black athletic zip top |
+| C-21 | Tailor | an older South Asian man in his sixties with round wire spectacles and neat white hair, a beige waistcoat with a tape measure round his neck |
+| C-22 | Flight attendant | a poised woman in her twenties with hair in a neat chignon, a deep red uniform jacket and a small scarf |
+| C-23 | Musician | a man in his thirties with long dark hair tied back and a short beard, a faded black band t-shirt |
+| C-24 | Retired teacher | a woman in her seventies with short silver curls and bright attentive eyes, a soft blue cardigan and reading glasses on a chain |
+
+### §B2 — The same twelve, thirty years older · A-01 to A-12
+
+**The hardest and most important batch in this document.** These are not new people. Each is
+the *same person* from the existing set, three decades on, so a player who met them in 1998
+recognises them in 2028.
+
+**Method — do these one at a time:**
+
+1. Upload **only** the original portrait for that person.
+2. Prompt: *"The same person as this image, thirty years older. Keep the same face shape, eye
+   colour, skin tone, nose and smile. Age it naturally: greying or thinning hair, deeper lines
+   around the eyes and mouth, slightly softer jaw. Same clothing style, worn a little more
+   plainly. Identical art style, lighting, framing and plain grey background."*
+3. Put the two side by side. If a stranger could not tell they are the same person, regenerate.
+
+| # | Ages | From |
+|---|---|---|
+| A-01 | Young man with curls → a man in his fifties | `p1.png` |
+| A-02 | Woman with auburn bob → a woman in her sixties, hair faded to sandy grey | `p2.png` |
+| A-03 | Emirati man → a man in his seventies, moustache white | `p3.png` |
+| A-04 | Emirati woman → a woman in her sixties | `p4.png` |
+| A-05 | Student → a woman in her fifties, the same round glasses | `p5.png` |
+| A-06 | Older man → a man in his eighties, frailer, still neat | `p6.png` |
+| A-07 | Courier → a man in his fifties, the red cap long gone | `p7.png` |
+| A-08 | Older woman → a woman in her nineties, very lined, still warm | `p8.png` |
+| A-09 | Office worker → a woman in her seventies, hair fully silver | `p9.png` |
+| A-10 | Teenager → a man in his forties, the shyness gone | `p10.png` |
+| A-11 | Shopkeeper → a man in his sixties, heavier, greying stubble | `p11.png` |
+| A-12 | Grandmother → *skip.* She does not get thirty more years. | — |
+
+**A-12 is deliberately not generated.** In a game about a café that outlives people, one of the
+twelve has to be the one who stops coming in, and the absence of the asset is the point.
+Eleven images in this batch, not twelve.
+
+### §B3 — Six children · K-01 to K-06
+
+Children who appear young and grow into adults across a generation. Each one is the **child
+version of an existing or new adult** — same face, same eyes, twenty-five years earlier.
+Upload the adult portrait and ask for the child.
+
+| # | Name | Subject line |
+|---|---|---|
+| K-01 | Girl, six | a cheerful girl of about six with dark hair in two short plaits and a bright yellow t-shirt, two front teeth missing |
+| K-02 | Boy, seven | a boy of about seven with close-cropped black hair and large curious eyes, a striped green polo shirt |
+| K-03 | Girl, eleven | a girl of about eleven with long dark hair and a serious, slightly wary expression, a plain school uniform |
+| K-04 | Boy, twelve | a boy of about twelve with a mop of curly hair and a wide gap-toothed grin, a football shirt |
+| K-05 | Girl, sixteen | a teenage girl of about sixteen with hair in a high bun and a confident level gaze, a denim jacket |
+| K-06 | Boy, sixteen | a teenage boy of about sixteen, tall and thin with a first shadow of a moustache, a grey hoodie |
+
+---
+
+## §C — Room states · 10 assets
+
+**16:9, scene stem, no people.** The same café at different stages of its life and different
+times of day. R-04 matters most: it is the first thing a new player sees.
+
+| # | Name | Subject line |
+|---|---|---|
+| R-04 | **The bare shop** | an almost empty small shop unit, bare concrete floor, one plain wooden counter, two stools, a single small coffee machine, blank walls, a shuttered window, cold flat morning light, nothing on the shelves, faintly sad and full of potential |
+| R-05 | Modest café | the same small shop a few years on, a few mismatched chairs and one small table, a handful of cups on a plain shelf, one potted plant, warm but still sparse |
+| R-06 | Established café | the same café now comfortably furnished, tiled teal wall, full shelves of cups and jars, three tables, hanging pendant lamps, plants, warm and busy-looking |
+| R-07 | The large café | the same café extended, a wide room with a long counter, many tables, a staircase rising at the back, generous and prosperous |
+| R-08 | The back room | a small quiet back room of a café, one low table and a soft bench, a single lamp, a shelf of books, calm and away from the counter |
+| R-09 | Night | the café interior late at night, chairs stacked on tables, one lamp left on over the counter, the street outside black and empty |
+| R-10 | Rain | the café interior on a rare rainy evening, water running down the window, the street outside glossy with reflected light, warm inside |
+| R-11 | Summer glare | the café interior at the height of summer, harsh white light flooding the window, the interior in cool shade, an air conditioner visible |
+| R-12 | The nineteen-nineties | the same café interior styled for the late 1990s, a boxy television on a bracket, a wall telephone, patterned laminate counter, warmer and more cluttered |
+| R-13 | The twenty-thirties | the same café interior decades later, cleaner lines, slim glass screens on the wall, the same wooden counter now visibly worn smooth, one original pendant lamp kept |
+
+---
+
+## §D — Branch exteriors · 6 assets
+
+**16:9, scene stem, no people.** Each branch is a different street with a different character,
+so that opening the fourth café feels like going somewhere rather than buying a number.
+
+| # | Name | Subject line |
+|---|---|---|
+| B-01 | Jumeirah | the exterior of a small café on a quiet low-rise coastal street, pale stucco walls, bougainvillea, bright open sky, sea light |
+| B-02 | Satwa | the exterior of a small café on a busy old shopping street, tangled shopfront signage and awnings, narrow pavement, tailors and grocers either side |
+| B-03 | Deira | the exterior of a small café in a narrow souk alley, shaded by fabric canopies, spice sacks and brass shops nearby, dusty golden light |
+| B-04 | Karama | the exterior of a small café in a low concrete apartment block, plain balconies above, parked cars, flat late afternoon light |
+| B-05 | Mall unit | the frontage of a small café unit inside a polished shopping mall, glass balustrades and marble floors, cool even artificial light |
+| B-06 | Airport kiosk | a compact café kiosk in an airport concourse, wide windows onto an apron, tall ceilings, cool blue-grey daylight |
+
+---
+
+## §E — Dishes · 12 assets
+
+Object stem, same as the twelve that exist. Breadth for the menu, and the seasonal and
+premium ends of it.
+
+| # | Name | Subject line |
+|---|---|---|
+| D-13 | Adeni chai | a small clear glass of creamy pale Yemeni adeni chai with a dusting of cardamom, on a small saucer |
+| D-14 | Qahwa | a tiny handleless porcelain finjan cup of pale golden Arabic coffee, a few whole dates beside it |
+| D-15 | Kunafa | a wedge of hot orange shredded kunafa pastry with soft white cheese pulling from the cut edge, drizzled with syrup |
+| D-16 | Balaleet | a plate of sweet saffron vermicelli topped with a thin folded omelette, garnished with pistachio |
+| D-17 | Chebab | a stack of three small saffron pancakes with date syrup and cream cheese, on a white plate |
+| D-18 | Khameer bread | a warm round of golden khameer flatbread split and filled with date paste, on a wooden board |
+| D-19 | Basbousa | a diamond-cut square of golden semolina cake soaked in syrup with an almond pressed into the top |
+| D-20 | Jallab | a tall glass of dark jallab with crushed ice, pine nuts and raisins floating on top |
+| D-21 | Rose lemonade | a tall frosted glass of pale pink rose lemonade with mint and a thin lemon slice |
+| D-22 | Camel milk cappuccino | a wide ceramic cup of cappuccino with dense pale foam and a simple leaf pattern |
+| D-23 | Sahlab | a warm cup of thick white sahlab dusted with cinnamon and chopped pistachio |
+| D-24 | Date maamoul | three small pale shortbread maamoul biscuits with a pressed pattern, one broken open to show a dark date centre |
+
+---
+
+## §F — System objects · 6 assets
+
+Object stem. Small things the interface leans on. Lowest priority — skip if you are tired.
+
+| # | Name | Subject line |
+|---|---|---|
+| S-01 | Open sign | a small hanging wooden shop sign with a brass chain, blank faced, **no writing** |
+| S-02 | Ledger | a worn hardback accounts ledger lying closed, dark green cloth cover with a brass corner |
+| S-03 | Keys | a small ring of three worn brass door keys with a leather fob |
+| S-04 | Cash box | an open metal cash tin with neatly stacked banknotes and loose coins |
+| S-05 | Wall clock | a round wall clock with a plain cream face, brass rim and simple black hands |
+| S-06 | Recipe card | a single blank handwritten-looking recipe card, aged cream paper, **no writing on it** |
+
+---
+
+## 6. Batches
+
+Ninety-five images. Five per message for everything except the ageing pass, which is one at a
+time — twenty-eight messages in all. Keep each batch inside one section so the reference
+images stay constant.
+
+| Batch | Assets | Notes |
+|---|---|---|
+| 1–7 | §A F-01 to F-32 | Reference: `latte.png`, `m_espresso.png`, `m_oven.png` |
+| 8–9 | §C R-04 to R-13 | 16:9. Reference: `room_day.png`, `room_evening.png` |
+| 10 | §D B-01 to B-06 | 16:9 |
+| 11–13 | §E D-13 to D-24 | Reference the existing dishes |
+| 14–16 | §B1 C-13 to C-24 | Character stem |
+| 17–27 | §B2 A-01 to A-11 | **One image per message.** Upload only that person's original |
+| 28 | §B3 K-01 to K-06 | Upload the adult, ask for the child |
+
+---
+
+## 7. Quality checklist — every finished asset
+
+- [ ] Plain flat grey background, no gradient, no invented scene
+- [ ] One object only, nothing extra in frame
+- [ ] Light from upper left, one soft contact shadow beneath
+- [ ] No text anywhere, including on signs and boards that are meant to be blank
+- [ ] Readable as a silhouette at 50 px — shrink it and check
+- [ ] Sits convincingly beside the existing forty-one when viewed as a row
+- [ ] **§B2 only:** recognisably the same person as the original
+
+---
+
+## 8. Delivering the files
+
+Send them in the batches above. Name them by the reference in this document — `F-01`, `A-05`,
+`R-04` — or just say which batch each message is; the pipeline in `art/pipeline/process.py`
+cuts the grey background, trims, squares and exports the game sizes.
+
+Assets that are meant to be blank — F-31, S-01, S-06 — will often come back with invented
+writing on them. Regenerate rather than accepting; text baked into art cannot be translated
+into Arabic later, and this game ships in both.
