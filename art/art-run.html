@@ -1,0 +1,229 @@
+<title>Café Life Art Run</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ink:#171310; --panel:#231C18; --panel2:#2E2521; --edge:#3B302A; --edge2:#4A3C34;
+  --cream:#F7EFE3; --cream2:#D9C9B6; --dim:#A8988A; --dimmer:#6F6058;
+  --amber:#F2A03D; --amberL:#FFBC63; --amberD:#C97C22; --brass:#E8C36B;
+  --green:#4FBF7B; --terra:#A8452A;
+  --disp:"Bricolage Grotesque",-apple-system,system-ui,sans-serif;
+  --body:"DM Sans",-apple-system,system-ui,sans-serif;
+  --mono:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--ink);color:var(--cream);font-family:var(--body);margin:0;
+     padding-inline:16px;padding-block:0 64px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto}
+h1,h2,h3{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;margin:0;
+         text-wrap:balance}
+.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+     color:var(--dimmer)}
+
+/* ---- sticky progress ---- */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--ink);
+     padding-block:14px 12px;border-bottom:1px solid var(--edge);margin-bottom:22px}
+.bar .row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bar h1{font-size:19px;flex:1;min-width:150px}
+.count{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--brass);
+       font-variant-numeric:tabular-nums}
+.track{height:4px;border-radius:2px;background:var(--panel2);margin-top:10px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--amber);width:0%;transition:width .25s}
+
+/* ---- the card you work from ---- */
+.now{background:var(--panel);border:1px solid var(--amberD);border-radius:16px;
+     padding:18px;margin-bottom:14px;
+     /* clear the sticky bar when advancing scrolls this into view */
+     scroll-margin-top:calc(96px + env(safe-area-inset-top,0px))}
+.now.scene{border-color:var(--amber);background:#2b2118}
+.now-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.chip{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;
+      background:var(--amber);color:var(--ink);padding:3px 9px;border-radius:999px}
+.now.scene .chip{background:var(--cream)}
+.now h2{font-size:23px;margin-top:6px}
+.sub{font-size:13px;color:var(--dim);margin-top:3px}
+.attach{margin-top:14px;border:1px dashed var(--edge2);border-radius:11px;padding:11px 13px}
+.attach ul{margin:7px 0 0;padding-left:18px;font-family:var(--mono);font-size:12.5px;
+           color:var(--cream2)}
+.attach li{margin-bottom:3px}
+pre.msg{font-family:var(--mono);font-size:13px;line-height:1.62;background:var(--ink);
+        border:1px solid var(--edge);border-radius:11px;padding:14px;margin:14px 0 0;
+        white-space:pre-wrap;word-break:break-word;color:var(--cream2);
+        max-height:46vh;overflow:auto}
+.acts{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+button{font-family:var(--disp);font-weight:800;font-size:15px;border:0;border-radius:12px;
+       padding:14px 18px;cursor:pointer;min-height:48px}
+.primary{background:var(--amber);color:var(--ink);flex:1;min-width:150px}
+.primary:hover{background:var(--amberL)}
+.ghost{background:var(--panel2);color:var(--cream);border:1px solid var(--edge2)}
+.ghost:hover{border-color:var(--dim)}
+button:focus-visible,a:focus-visible,.step:focus-visible{outline:2px solid var(--amberL);
+       outline-offset:2px}
+.hint{font-size:12.5px;color:var(--dimmer);margin-top:10px}
+
+/* ---- the run ---- */
+.secrow{display:flex;align-items:baseline;gap:10px;margin:26px 0 8px}
+.secrow .lbl{flex:none}
+.secrow .rule{flex:1;height:1px;background:var(--edge)}
+.secrow .n{font-family:var(--mono);font-size:11px;color:var(--dimmer)}
+.step{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+      background:transparent;border:0;border-bottom:1px solid var(--edge);
+      padding:9px 6px;border-radius:0;min-height:44px;font-family:var(--body);
+      font-weight:400;font-size:14px;color:var(--cream);cursor:pointer}
+.step:hover{background:var(--panel)}
+.step.cur{background:var(--panel);box-shadow:inset 2px 0 0 var(--amber)}
+.step .tick{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--edge2);
+            flex:none;display:grid;place-items:center}
+.step.done .tick{background:var(--green);border-color:var(--green)}
+.step.done .tick svg{display:block}
+.step .tick svg{display:none}
+.step .id{font-family:var(--mono);font-size:11.5px;color:var(--dim);width:58px;flex:none}
+.step .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.step.done .nm{color:var(--dimmer);text-decoration:line-through}
+.step.scene .id{color:var(--amber)}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--edge);
+       font-size:12.5px;color:var(--dimmer)}
+footer a{color:var(--amber)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="row">
+      <h1>Café Life &mdash; art run</h1>
+      <div class="count"><span id="c-done">0</span> / <span id="c-all">99</span> sent</div>
+    </div>
+    <div class="track"><i id="track"></i></div>
+  </div>
+
+  <div id="now"></div>
+
+  <div id="list"></div>
+
+  <footer>
+    Ninety-five images across four set-ups. Send each set-up once, then one line per message.
+    Progress is remembered in this browser only.
+    <button class="ghost" id="reset" style="font-size:12px;padding:7px 12px;min-height:0;
+            margin-left:8px">Start over</button>
+  </footer>
+</div>
+
+<script type="application/json" id="steps">[{"kind": "scene", "id": "SET-UP 1", "name": "Objects, dishes and props", "sec": "Set-up", "attach": ["art/sprites/latte.png", "art/sprites/m_espresso.png", "art/sprites/m_oven.png"], "text": "I'm making art for a mobile game. I'll send you one short line at a time — each line is one game asset.\n\nFor every image from now on, use exactly this style block, unchanged:\n\nmobile casual game asset, hand-painted digital illustration, glossy stylised realism, rich saturated colour, soft airbrushed shading with crisp specular highlights, subtle dark outline, appetising and clean, three-quarter view from 30 degrees above, single warm key light from the upper left with a soft cool fill from the lower right, one soft contact shadow beneath, object centred and filling 80 percent of the frame, plain flat neutral grey background, no text, no labels, no logo, no hands, no props\n\nMatch the exact style, camera angle, lighting direction, level of detail and background of the three images I've attached. Same hand-painted glossy look, same warm key light from the upper left, same plain flat grey background.\n\nSquare 1:1, 1024x1024 or larger. One object only, nothing else in frame. No writing anywhere in the image, ever — not on signs, boards or labels.\n\nReply just \"ready\" and wait. From my next message on, each line is one asset: generate one image and send back only the image."}, {"kind": "asset", "id": "F-01", "name": "Wooden stool", "sec": "Fittings", "attach": [], "text": "F-01 — a simple round wooden bar stool with three splayed legs, worn honey-coloured wood"}, {"kind": "asset", "id": "F-02", "name": "Padded stool", "sec": "Fittings", "attach": [], "text": "F-02 — an upholstered bar stool with a tan leather seat and a black metal footrest"}, {"kind": "asset", "id": "F-03", "name": "Small table", "sec": "Fittings", "attach": [], "text": "F-03 — a small round café table with a dark wood top and a single cast iron pedestal base"}, {"kind": "asset", "id": "F-04", "name": "Large table", "sec": "Fittings", "attach": [], "text": "F-04 — a rectangular wooden café table for four with square tapered legs, warm oak"}, {"kind": "asset", "id": "F-05", "name": "Corner banquette", "sec": "Fittings", "attach": [], "text": "F-05 — a padded corner bench seat in deep terracotta fabric with button tufting and a wooden base"}, {"kind": "asset", "id": "F-06", "name": "Outdoor set", "sec": "Fittings", "attach": [], "text": "F-06 — a small round metal bistro table with two folding chairs, painted dark green, seen as one group"}, {"kind": "asset", "id": "F-07", "name": "Pastry case", "sec": "Fittings", "attach": [], "text": "F-07 — a curved glass countertop pastry display case with two brass-edged shelves, empty and lit from within"}, {"kind": "asset", "id": "F-08", "name": "Menu board", "sec": "Fittings", "attach": [], "text": "F-08 — a freestanding wooden A-frame chalkboard, the slate surface blank and softly dusty"}, {"kind": "asset", "id": "F-09", "name": "Till", "sec": "Fittings", "attach": [], "text": "F-09 — a vintage brass and enamel cash register with round keys and a pull lever"}, {"kind": "asset", "id": "F-10", "name": "Cup shelf", "sec": "Fittings", "attach": [], "text": "F-10 — a small wooden wall shelf stacked with neat rows of white porcelain cups and saucers"}, {"kind": "asset", "id": "F-11", "name": "Water station", "sec": "Fittings", "attach": [], "text": "F-11 — a tall glass water dispenser with a brass tap on a small wooden stand, a stack of glasses beside it"}, {"kind": "asset", "id": "F-12", "name": "Coffee grinder", "sec": "Fittings", "attach": [], "text": "F-12 — a chrome and black conical burr coffee grinder with a glass bean hopper on top"}, {"kind": "asset", "id": "F-13", "name": "Blender", "sec": "Fittings", "attach": [], "text": "F-13 — a heavy countertop blender with a thick glass jug and a brushed steel base"}, {"kind": "asset", "id": "F-14", "name": "Dallah set", "sec": "Fittings", "attach": [], "text": "F-14 — a traditional Arabic brass coffee dallah with a long curved spout, beside three small handleless finjan cups"}, {"kind": "asset", "id": "F-15", "name": "Citrus juicer", "sec": "Fittings", "attach": [], "text": "F-15 — a cast metal manual citrus press with a long lever arm, painted deep red"}, {"kind": "asset", "id": "F-16", "name": "Sahlab urn", "sec": "Fittings", "attach": [], "text": "F-16 — a polished steel heated drinks urn with a brass tap and a domed lid, gently steaming"}, {"kind": "asset", "id": "F-17", "name": "Saj griddle", "sec": "Fittings", "attach": [], "text": "F-17 — a domed black cast iron saj griddle on a low burner, used for thin regag bread"}, {"kind": "asset", "id": "F-18", "name": "Pendant lamp", "sec": "Fittings", "attach": [], "text": "F-18 — a single brass pendant lamp with a ribbed amber glass shade, hanging from a short cord, lit"}, {"kind": "asset", "id": "F-19", "name": "Wall lamp", "sec": "Fittings", "attach": [], "text": "F-19 — a small brass wall sconce with a frosted glass globe, warm light glowing"}, {"kind": "asset", "id": "F-20", "name": "Rug", "sec": "Fittings", "attach": [], "text": "F-20 — a flat woven kilim rug in terracotta, cream and deep teal geometric bands, seen from above at an angle"}, {"kind": "asset", "id": "F-21", "name": "Small plant", "sec": "Fittings", "attach": [], "text": "F-21 — a small potted trailing pothos in a plain terracotta pot"}, {"kind": "asset", "id": "F-22", "name": "Large plant", "sec": "Fittings", "attach": [], "text": "F-22 — a tall potted monstera with four broad glossy leaves in a woven basket planter"}, {"kind": "asset", "id": "F-23", "name": "Framed pictures", "sec": "Fittings", "attach": [], "text": "F-23 — a cluster of three small framed pictures in mismatched brass and dark wood frames, the images soft and abstract"}, {"kind": "asset", "id": "F-24", "name": "Bookshelf", "sec": "Fittings", "attach": [], "text": "F-24 — a short open wooden bookshelf with a handful of worn books and one small brass ornament"}, {"kind": "asset", "id": "F-25", "name": "Radio", "sec": "Fittings", "attach": [], "text": "F-25 — a small vintage tabletop radio in cream bakelite with a gold mesh speaker grille and two round dials"}, {"kind": "asset", "id": "F-26", "name": "Air conditioner", "sec": "Fittings", "attach": [], "text": "F-26 — a wall-mounted white split air conditioning unit with horizontal vanes, clean and modern"}, {"kind": "asset", "id": "F-27", "name": "Heater", "sec": "Fittings", "attach": [], "text": "F-27 — a small freestanding oil-filled column radiator in cream enamel"}, {"kind": "asset", "id": "F-28", "name": "Fridge", "sec": "Fittings", "attach": [], "text": "F-28 — a compact stainless steel under-counter refrigerator with a single door and a brushed handle"}, {"kind": "asset", "id": "F-29", "name": "Sink station", "sec": "Fittings", "attach": [], "text": "F-29 — a double stainless steel commercial sink with a tall swan-neck mixer tap"}, {"kind": "asset", "id": "F-30", "name": "Awning", "sec": "Fittings", "attach": [], "text": "F-30 — a folded fabric shop awning in wide terracotta and cream stripes with a scalloped edge, on a metal frame"}, {"kind": "asset", "id": "F-31", "name": "Painted sign", "sec": "Fittings", "attach": [], "text": "F-31 — a blank hanging shop sign board in dark painted wood with a brass frame and two chain links, no writing on it"}, {"kind": "asset", "id": "F-32", "name": "Planter box", "sec": "Fittings", "attach": [], "text": "F-32 — a long wooden street planter box filled with low green shrubs and small white flowers"}, {"kind": "asset", "id": "D-13", "name": "Adeni chai", "sec": "Dishes", "attach": [], "text": "D-13 — a small clear glass of creamy pale Yemeni adeni chai with a dusting of cardamom, on a small saucer"}, {"kind": "asset", "id": "D-14", "name": "Qahwa", "sec": "Dishes", "attach": [], "text": "D-14 — a tiny handleless porcelain finjan cup of pale golden Arabic coffee, a few whole dates beside it"}, {"kind": "asset", "id": "D-15", "name": "Kunafa", "sec": "Dishes", "attach": [], "text": "D-15 — a wedge of hot orange shredded kunafa pastry with soft white cheese pulling from the cut edge, drizzled with syrup"}, {"kind": "asset", "id": "D-16", "name": "Balaleet", "sec": "Dishes", "attach": [], "text": "D-16 — a plate of sweet saffron vermicelli topped with a thin folded omelette, garnished with pistachio"}, {"kind": "asset", "id": "D-17", "name": "Chebab", "sec": "Dishes", "attach": [], "text": "D-17 — a stack of three small saffron pancakes with date syrup and cream cheese, on a white plate"}, {"kind": "asset", "id": "D-18", "name": "Khameer bread", "sec": "Dishes", "attach": [], "text": "D-18 — a warm round of golden khameer flatbread split and filled with date paste, on a wooden board"}, {"kind": "asset", "id": "D-19", "name": "Basbousa", "sec": "Dishes", "attach": [], "text": "D-19 — a diamond-cut square of golden semolina cake soaked in syrup with an almond pressed into the top"}, {"kind": "asset", "id": "D-20", "name": "Jallab", "sec": "Dishes", "attach": [], "text": "D-20 — a tall glass of dark jallab with crushed ice, pine nuts and raisins floating on top"}, {"kind": "asset", "id": "D-21", "name": "Rose lemonade", "sec": "Dishes", "attach": [], "text": "D-21 — a tall frosted glass of pale pink rose lemonade with mint and a thin lemon slice"}, {"kind": "asset", "id": "D-22", "name": "Camel milk cappuccino", "sec": "Dishes", "attach": [], "text": "D-22 — a wide ceramic cup of cappuccino with dense pale foam and a simple leaf pattern"}, {"kind": "asset", "id": "D-23", "name": "Sahlab", "sec": "Dishes", "attach": [], "text": "D-23 — a warm cup of thick white sahlab dusted with cinnamon and chopped pistachio"}, {"kind": "asset", "id": "D-24", "name": "Date maamoul", "sec": "Dishes", "attach": [], "text": "D-24 — three small pale shortbread maamoul biscuits with a pressed pattern, one broken open to show a dark date centre"}, {"kind": "asset", "id": "S-01", "name": "Open sign", "sec": "Props", "attach": [], "text": "S-01 — a small hanging wooden shop sign with a brass chain, blank faced, no writing"}, {"kind": "asset", "id": "S-02", "name": "Ledger", "sec": "Props", "attach": [], "text": "S-02 — a worn hardback accounts ledger lying closed, dark green cloth cover with a brass corner"}, {"kind": "asset", "id": "S-03", "name": "Keys", "sec": "Props", "attach": [], "text": "S-03 — a small ring of three worn brass door keys with a leather fob"}, {"kind": "asset", "id": "S-04", "name": "Cash box", "sec": "Props", "attach": [], "text": "S-04 — an open metal cash tin with neatly stacked banknotes and loose coins"}, {"kind": "asset", "id": "S-05", "name": "Wall clock", "sec": "Props", "attach": [], "text": "S-05 — a round wall clock with a plain cream face, brass rim and simple black hands"}, {"kind": "asset", "id": "S-06", "name": "Recipe card", "sec": "Props", "attach": [], "text": "S-06 — a single blank handwritten-looking recipe card, aged cream paper, no writing on it"}, {"kind": "scene", "id": "SET-UP 2", "name": "Rooms and streets", "sec": "Set-up", "attach": ["art/sprites/room_day.png", "art/sprites/room_evening.png"], "text": "New batch — these are wide background scenes, not objects. The two attached images are room plates from the same game. Match their style, palette and lighting exactly.\n\nStyle block for every image from now on:\n\nmobile casual game background plate, hand-painted digital illustration, glossy stylised realism, rich saturated colour, soft airbrushed shading with crisp specular highlights, single warm key light from the upper left, warm and inviting, no people, no text, no labels, no logo\n\n16:9 landscape, not square. No people in any of them. No writing anywhere.\n\nReply \"ready\" and wait. Each line after this is one scene."}, {"kind": "asset", "id": "R-04", "name": "The bare shop", "sec": "Rooms", "attach": [], "text": "R-04 — an almost empty small shop unit, bare concrete floor, one plain wooden counter, two stools, a single small coffee machine, blank walls, a shuttered window, cold flat morning light, nothing on the shelves, faintly sad and full of potential"}, {"kind": "asset", "id": "R-05", "name": "Modest café", "sec": "Rooms", "attach": [], "text": "R-05 — the same small shop a few years on, a few mismatched chairs and one small table, a handful of cups on a plain shelf, one potted plant, warm but still sparse"}, {"kind": "asset", "id": "R-06", "name": "Established café", "sec": "Rooms", "attach": [], "text": "R-06 — the same café now comfortably furnished, tiled teal wall, full shelves of cups and jars, three tables, hanging pendant lamps, plants, warm and busy-looking"}, {"kind": "asset", "id": "R-07", "name": "The large café", "sec": "Rooms", "attach": [], "text": "R-07 — the same café extended, a wide room with a long counter, many tables, a staircase rising at the back, generous and prosperous"}, {"kind": "asset", "id": "R-08", "name": "The back room", "sec": "Rooms", "attach": [], "text": "R-08 — a small quiet back room of a café, one low table and a soft bench, a single lamp, a shelf of books, calm and away from the counter"}, {"kind": "asset", "id": "R-09", "name": "Night", "sec": "Rooms", "attach": [], "text": "R-09 — the café interior late at night, chairs stacked on tables, one lamp left on over the counter, the street outside black and empty"}, {"kind": "asset", "id": "R-10", "name": "Rain", "sec": "Rooms", "attach": [], "text": "R-10 — the café interior on a rare rainy evening, water running down the window, the street outside glossy with reflected light, warm inside"}, {"kind": "asset", "id": "R-11", "name": "Summer glare", "sec": "Rooms", "attach": [], "text": "R-11 — the café interior at the height of summer, harsh white light flooding the window, the interior in cool shade, an air conditioner visible"}, {"kind": "asset", "id": "R-12", "name": "The nineteen-nineties", "sec": "Rooms", "attach": [], "text": "R-12 — the same café interior styled for the late 1990s, a boxy television on a bracket, a wall telephone, patterned laminate counter, warmer and more cluttered"}, {"kind": "asset", "id": "R-13", "name": "The twenty-thirties", "sec": "Rooms", "attach": [], "text": "R-13 — the same café interior decades later, cleaner lines, slim glass screens on the wall, the same wooden counter now visibly worn smooth, one original pendant lamp kept"}, {"kind": "asset", "id": "B-01", "name": "Jumeirah", "sec": "Branches", "attach": [], "text": "B-01 — the exterior of a small café on a quiet low-rise coastal street, pale stucco walls, bougainvillea, bright open sky, sea light"}, {"kind": "asset", "id": "B-02", "name": "Satwa", "sec": "Branches", "attach": [], "text": "B-02 — the exterior of a small café on a busy old shopping street, tangled shopfront signage and awnings, narrow pavement, tailors and grocers either side"}, {"kind": "asset", "id": "B-03", "name": "Deira", "sec": "Branches", "attach": [], "text": "B-03 — the exterior of a small café in a narrow souk alley, shaded by fabric canopies, spice sacks and brass shops nearby, dusty golden light"}, {"kind": "asset", "id": "B-04", "name": "Karama", "sec": "Branches", "attach": [], "text": "B-04 — the exterior of a small café in a low concrete apartment block, plain balconies above, parked cars, flat late afternoon light"}, {"kind": "asset", "id": "B-05", "name": "Mall unit", "sec": "Branches", "attach": [], "text": "B-05 — the frontage of a small café unit inside a polished shopping mall, glass balustrades and marble floors, cool even artificial light"}, {"kind": "asset", "id": "B-06", "name": "Airport kiosk", "sec": "Branches", "attach": [], "text": "B-06 — a compact café kiosk in an airport concourse, wide windows onto an apron, tall ceilings, cool blue-grey daylight"}, {"kind": "scene", "id": "SET-UP 3", "name": "New faces", "sec": "Set-up", "attach": ["art/sprites/p5.png", "art/sprites/p6.png", "art/sprites/p8.png"], "text": "New batch — character portraits. The three attached images are portraits from the same set. Match their style, framing and lighting exactly.\n\nStyle block for every image from now on:\n\nmobile casual game character portrait, hand-painted digital illustration, glossy stylised realism, warm friendly face, large expressive eyes, soft airbrushed skin shading, gentle smile, head and shoulders only, facing forward, single warm key light from the upper left, plain flat neutral grey background, no text, no logo, no hands\n\nSquare 1:1. Head and shoulders only, facing forward, plain flat grey background. These are regulars in a café on a Dubai shopping street — warm and respectful, never caricatures.\n\nReply \"ready\" and wait. Each line after this is one person."}, {"kind": "asset", "id": "C-13", "name": "Taxi driver", "sec": "New regulars", "attach": [], "text": "C-13 — a man in his fifties with a thick grey moustache and a lined kind face, a pale blue collared shirt"}, {"kind": "asset", "id": "C-14", "name": "Nurse", "sec": "New regulars", "attach": [], "text": "C-14 — a woman in her thirties with dark hair tied back tightly, warm brown skin, pale green medical scrubs"}, {"kind": "asset", "id": "C-15", "name": "Builder", "sec": "New regulars", "attach": [], "text": "C-15 — a man in his forties with a weathered tanned face and short black hair, a high-visibility orange vest over a grey shirt"}, {"kind": "asset", "id": "C-16", "name": "Fishmonger", "sec": "New regulars", "attach": [], "text": "C-16 — a stocky man in his fifties with a shaved head and a broad grin, a navy apron over a white shirt"}, {"kind": "asset", "id": "C-17", "name": "Lawyer", "sec": "New regulars", "attach": [], "text": "C-17 — a woman in her forties with sleek shoulder-length black hair and small gold earrings, a charcoal blazer"}, {"kind": "asset", "id": "C-18", "name": "Art student", "sec": "New regulars", "attach": [], "text": "C-18 — a young person in their twenties with cropped bleached hair and a nose ring, a paint-flecked denim jacket"}, {"kind": "asset", "id": "C-19", "name": "Imam", "sec": "New regulars", "attach": [], "text": "C-19 — a serene man in his sixties with a full white beard and a white embroidered kufi cap, a grey thobe"}, {"kind": "asset", "id": "C-20", "name": "Gym owner", "sec": "New regulars", "attach": [], "text": "C-20 — a broad-shouldered woman in her thirties with a high ponytail and freckles, a black athletic zip top"}, {"kind": "asset", "id": "C-21", "name": "Tailor", "sec": "New regulars", "attach": [], "text": "C-21 — an older South Asian man in his sixties with round wire spectacles and neat white hair, a beige waistcoat with a tape measure round his neck"}, {"kind": "asset", "id": "C-22", "name": "Flight attendant", "sec": "New regulars", "attach": [], "text": "C-22 — a poised woman in her twenties with hair in a neat chignon, a deep red uniform jacket and a small scarf"}, {"kind": "asset", "id": "C-23", "name": "Musician", "sec": "New regulars", "attach": [], "text": "C-23 — a man in his thirties with long dark hair tied back and a short beard, a faded black band t-shirt"}, {"kind": "asset", "id": "C-24", "name": "Retired teacher", "sec": "New regulars", "attach": [], "text": "C-24 — a woman in her seventies with short silver curls and bright attentive eyes, a soft blue cardigan and reading glasses on a chain"}, {"kind": "asset", "id": "K-01", "name": "Girl, six", "sec": "Children", "attach": [], "text": "K-01 — a cheerful girl of about six with dark hair in two short plaits and a bright yellow t-shirt, two front teeth missing"}, {"kind": "asset", "id": "K-02", "name": "Boy, seven", "sec": "Children", "attach": [], "text": "K-02 — a boy of about seven with close-cropped black hair and large curious eyes, a striped green polo shirt"}, {"kind": "asset", "id": "K-03", "name": "Girl, eleven", "sec": "Children", "attach": [], "text": "K-03 — a girl of about eleven with long dark hair and a serious, slightly wary expression, a plain school uniform"}, {"kind": "asset", "id": "K-04", "name": "Boy, twelve", "sec": "Children", "attach": [], "text": "K-04 — a boy of about twelve with a mop of curly hair and a wide gap-toothed grin, a football shirt"}, {"kind": "asset", "id": "K-05", "name": "Girl, sixteen", "sec": "Children", "attach": [], "text": "K-05 — a teenage girl of about sixteen with hair in a high bun and a confident level gaze, a denim jacket"}, {"kind": "asset", "id": "K-06", "name": "Boy, sixteen", "sec": "Children", "attach": [], "text": "K-06 — a teenage boy of about sixteen, tall and thin with a first shadow of a moustache, a grey hoodie"}, {"kind": "scene", "id": "SET-UP 4", "name": "Ageing the cast", "sec": "Set-up", "attach": [], "text": "Last batch, and the fiddly one. I'll send you a portrait at a time and ask you to age that same person by thirty years.\n\nRules for all of them:\n\n- It must be recognisably the SAME person. Keep the face shape, eye colour, skin tone, nose and smile.\n- Age it naturally: greying or thinning hair, deeper lines around the eyes and mouth, a slightly softer jaw.\n- Same clothing style, worn a little more plainly.\n- Identical art style, lighting, framing and plain flat grey background as the original I send.\n- Square 1:1, head and shoulders, facing forward, no text.\n\nOne portrait per message, and only that portrait attached. Reply \"ready\" and wait."}, {"kind": "asset", "id": "A-01", "name": "Young man with curls → a man in his fifties", "sec": "Ageing", "attach": ["art/sprites/p1.png"], "text": "A-01 — the same person as this image, thirty years older: a man in his fifties. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-02", "name": "Woman with auburn bob → a woman in her sixties, hair faded to sandy grey", "sec": "Ageing", "attach": ["art/sprites/p2.png"], "text": "A-02 — the same person as this image, thirty years older: a woman in her sixties, hair faded to sandy grey. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-03", "name": "Emirati man → a man in his seventies, moustache white", "sec": "Ageing", "attach": ["art/sprites/p3.png"], "text": "A-03 — the same person as this image, thirty years older: a man in his seventies, moustache white. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-04", "name": "Emirati woman → a woman in her sixties", "sec": "Ageing", "attach": ["art/sprites/p4.png"], "text": "A-04 — the same person as this image, thirty years older: a woman in her sixties. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-05", "name": "Student → a woman in her fifties, the same round glasses", "sec": "Ageing", "attach": ["art/sprites/p5.png"], "text": "A-05 — the same person as this image, thirty years older: a woman in her fifties, the same round glasses. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-06", "name": "Older man → a man in his eighties, frailer, still neat", "sec": "Ageing", "attach": ["art/sprites/p6.png"], "text": "A-06 — the same person as this image, thirty years older: a man in his eighties, frailer, still neat. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-07", "name": "Courier → a man in his fifties, the red cap long gone", "sec": "Ageing", "attach": ["art/sprites/p7.png"], "text": "A-07 — the same person as this image, thirty years older: a man in his fifties, the red cap long gone. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-08", "name": "Older woman → a woman in her nineties, very lined, still warm", "sec": "Ageing", "attach": ["art/sprites/p8.png"], "text": "A-08 — the same person as this image, thirty years older: a woman in her nineties, very lined, still warm. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-09", "name": "Office worker → a woman in her seventies, hair fully silver", "sec": "Ageing", "attach": ["art/sprites/p9.png"], "text": "A-09 — the same person as this image, thirty years older: a woman in her seventies, hair fully silver. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-10", "name": "Teenager → a man in his forties, the shyness gone", "sec": "Ageing", "attach": ["art/sprites/p10.png"], "text": "A-10 — the same person as this image, thirty years older: a man in his forties, the shyness gone. Keep the same face, age it naturally."}, {"kind": "asset", "id": "A-11", "name": "Shopkeeper → a man in his sixties, heavier, greying stubble", "sec": "Ageing", "attach": ["art/sprites/p11.png"], "text": "A-11 — the same person as this image, thirty years older: a man in his sixties, heavier, greying stubble. Keep the same face, age it naturally."}]</script>
+<script>
+(function(){
+  var STEPS = JSON.parse(document.getElementById('steps').textContent);
+  var KEY = 'cafelife_artrun_v1';
+  var done = {}, cur = 0;
+
+  try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { done = {}; }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} }
+
+  function firstUndone(){
+    for (var i = 0; i < STEPS.length; i++) if (!done[STEPS[i].id]) return i;
+    return STEPS.length - 1;
+  }
+  cur = firstUndone();
+
+  var TICK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#171310"' +
+             ' stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">' +
+             '<path d="M20 6 9 17l-5-5"/></svg>';
+
+  function esc(s){ return s.replace(/[&<>]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+
+  function drawNow(){
+    var s = STEPS[cur], n = document.getElementById('now');
+    var isScene = s.kind === 'scene';
+    var att = '';
+    if (s.attach && s.attach.length) {
+      att = '<div class="attach"><div class="lbl">Attach ' +
+            (s.attach.length === 1 ? 'this file' : 'these ' + s.attach.length + ' files') +
+            ' to the message</div><ul>' +
+            s.attach.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join('') +
+            '</ul></div>';
+    }
+    var pos = (cur + 1) + ' of ' + STEPS.length;
+    n.className = 'now' + (isScene ? ' scene' : '');
+    n.innerHTML =
+      '<div class="now-head"><span class="chip">' + esc(s.id) + '</span>' +
+      '<span class="lbl">' + (isScene ? 'send this first' : 'message ' + pos) + '</span></div>' +
+      '<h2>' + esc(s.name) + '</h2>' +
+      '<div class="sub">' + (isScene
+        ? 'Send this once, wait for &ldquo;ready&rdquo;, then work down the list.'
+        : esc(s.sec) + ' &middot; paste this as its own message') + '</div>' +
+      att +
+      '<pre class="msg" id="msg">' + esc(s.text) + '</pre>' +
+      '<div class="acts">' +
+      '<button class="primary" id="copy">Copy this message</button>' +
+      '<button class="ghost" id="next">' + (done[s.id] ? 'Next' : 'Sent — next') + '</button>' +
+      (cur > 0 ? '<button class="ghost" id="prev">Back</button>' : '') +
+      '</div>' +
+      (isScene ? '<div class="hint">Keep the same chat open for every message in this set-up. ' +
+       'If the style starts drifting, re-attach the reference images and say &ldquo;match these&rdquo;.</div>' : '');
+
+    document.getElementById('copy').onclick = function(){
+      var btn = this, txt = STEPS[cur].text;
+      var ok = function(){ btn.textContent = 'Copied'; setTimeout(function(){
+        btn.textContent = 'Copy this message'; }, 1200); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(ok, fallback);
+      } else fallback();
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); ok(); }
+        catch (e) { btn.textContent = 'Select the text above'; }
+        document.body.removeChild(ta);
+      }
+    };
+    document.getElementById('next').onclick = function(){
+      done[STEPS[cur].id] = 1; save();
+      if (cur < STEPS.length - 1) cur++;
+      drawAll();
+      document.getElementById('now').scrollIntoView({ block: 'start',
+        behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth' });
+    };
+    var pv = document.getElementById('prev');
+    if (pv) pv.onclick = function(){ if (cur > 0) cur--; drawAll(); };
+  }
+
+  function drawList(){
+    var html = '', sec = null, counts = {};
+    STEPS.forEach(function(s){ counts[s.sec] = (counts[s.sec] || 0) + 1; });
+    STEPS.forEach(function(s, i){
+      if (s.sec !== sec) {
+        sec = s.sec;
+        var d = STEPS.filter(function(x){ return x.sec === sec && done[x.id]; }).length;
+        html += '<div class="secrow"><div class="lbl">' + esc(sec) + '</div>' +
+                '<div class="rule"></div><div class="n">' + d + '/' + counts[sec] + '</div></div>';
+      }
+      html += '<button class="step' + (done[s.id] ? ' done' : '') + (i === cur ? ' cur' : '') +
+              (s.kind === 'scene' ? ' scene' : '') + '" data-i="' + i + '">' +
+              '<span class="tick">' + TICK + '</span>' +
+              '<span class="id">' + esc(s.id) + '</span>' +
+              '<span class="nm">' + esc(s.name) + '</span></button>';
+    });
+    var L = document.getElementById('list');
+    L.innerHTML = html;
+    L.querySelectorAll('.step').forEach(function(b){
+      b.onclick = function(){ cur = +b.dataset.i; drawAll();
+        document.getElementById('now').scrollIntoView({ block: 'start',
+          behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth' }); };
+    });
+  }
+
+  function drawAll(){
+    var d = STEPS.filter(function(s){ return done[s.id]; }).length;
+    document.getElementById('c-done').textContent = d;
+    document.getElementById('c-all').textContent = STEPS.length;
+    document.getElementById('track').style.width = (d / STEPS.length * 100) + '%';
+    drawNow(); drawList();
+  }
+
+  document.getElementById('reset').onclick = function(){
+    done = {}; save(); cur = 0; drawAll();
+  };
+
+  drawAll();
+})();
+</script>
