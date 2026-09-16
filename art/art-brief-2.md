@@ -291,6 +291,12 @@ Upload the adult portrait and ask for the child.
 **16:9, scene stem, no people.** The same café at different stages of its life and different
 times of day. R-04 matters most: it is the first thing a new player sees.
 
+**Do R-04 before the rest of §A.** Found while placing the first fittings: the two room
+plates that already exist are *fully furnished* — chairs, tables, a banquette, plants, all
+painted in. You cannot lay a bought stool on top of a room that already has chairs, so the
+build-from-scratch loop has no backdrop until the bare shop exists. R-04 is a dependency of
+every asset in §A, not breadth.
+
 | # | Name | Subject line |
 |---|---|---|
 | R-04 | **The bare shop** | an almost empty small shop unit, bare concrete floor, one plain wooden counter, two stools, a single small coffee machine, blank walls, a shuttered window, cold flat morning light, nothing on the shelves, faintly sad and full of potential |

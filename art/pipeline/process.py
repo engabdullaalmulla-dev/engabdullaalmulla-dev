@@ -18,6 +18,7 @@ MASTER = 512          # one master per asset; everything downscales from this
 MARGIN = 0.08         # padding inside the square, so a row of sprites reads at one size
 GAME_SIZES = [34, 20] # what the bins and the order chips actually draw
 FACE_SIZES = [40, 30]  # what an order ticket and a seat draw a customer at
+FIT_SIZES  = [64, 44] # what the room and a shop row draw a fitting at
 THRESH = 34           # how far from the sampled backdrop still counts as backdrop
 
 # Asset id -> the sprite name the game already references.
@@ -34,6 +35,24 @@ NAMES = {
 for i in range(1, 13):
     NAMES["c-%02d" % i] = "p%d" % i
 
+# §A fittings -- everything the player can buy, so it can appear in the room
+FITTINGS = {
+    "f-01": "f_stool",     "f-02": "f_stool_pad", "f-03": "f_table_sm",
+    "f-04": "f_table_lg",  "f-05": "f_banquette",
+}
+NAMES.update(FITTINGS)
+
+# How big each fitting is IN THE ROOM, relative to a stool.
+#
+# Squaring every asset into one box is right for a shop row -- a grid of equal tiles is
+# what a list wants -- and wrong for the room, where it draws a stool the size of a
+# banquette. Food never needed this because every cup is cup-sized. Furniture does.
+# The room multiplies its base draw size by this; the shop row ignores it.
+ROOM_SCALE = {
+    "f_stool": 1.00, "f_stool_pad": 1.08, "f_table_sm": 1.26,
+    "f_table_lg": 1.85, "f_banquette": 2.55,
+}
+
 # Fallback when the file was not named by id.
 KEYWORDS = [
     ("espresso", "espresso"), ("latte", "latte"), ("karak", "karak"), ("mint", "mint"),
@@ -46,7 +65,7 @@ KEYWORDS = [
 
 def target_name(fn):
     stem = os.path.splitext(os.path.basename(fn))[0].lower()
-    m = re.search(r"\b([idmrc])[-_ ]?(\d{1,2})\b", stem)
+    m = re.search(r"\b([idmrcf])[-_ ]?(\d{1,2})\b", stem)
     if m:
         key = "%s-%02d" % (m.group(1), int(m.group(2)))
         if key in NAMES:
@@ -176,7 +195,9 @@ def main():
                 im = fade_bottom(im)
             im = trim_and_square(im, margin=0.04 if face else MARGIN)
         im.save(os.path.join(out, name + ".png"))
-        for s in ([] if wide else (FACE_SIZES if face else GAME_SIZES)):
+        sizes = [] if wide else (FACE_SIZES if face else
+                 (FIT_SIZES if name.startswith("f_") else GAME_SIZES))
+        for s in sizes:
             im.resize((s * 3, s * 3), Image.LANCZOS).save(
                 os.path.join(out, "%s@%d.png" % (name, s)))
         done.append((name, im))
@@ -200,6 +221,26 @@ def main():
                 sheet.paste(th, (cx + (cell - s) // 2, cy + j * cell + (cell - s) // 2), th)
         sheet.save(sheet_path)
         print("\ncontact sheet ->", sheet_path, "(top row 34px, bottom row 20px)")
+
+    fits = [n for n, _ in done if n.startswith("f_")]
+    if fits:
+        import json
+        man = os.path.join(out, "fittings.json")
+        data = {}
+        if os.path.exists(man):
+            try:
+                data = json.load(open(man))
+            except Exception:
+                data = {}
+        for n in fits:
+            data[n] = round(ROOM_SCALE.get(n, 1.0), 2)
+        missing = [n for n in fits if n not in ROOM_SCALE]
+        with open(man, "w") as fh:
+            json.dump(dict(sorted(data.items())), fh, indent=2)
+            fh.write("\n")
+        print("\nfittings.json -> %d room scales" % len(data))
+        if missing:
+            print("  no ROOM_SCALE for: %s (defaulted to 1.0 -- add them)" % ", ".join(missing))
 
     print("\n%d sprites written to %s" % (len(done), os.path.normpath(out)))
 
