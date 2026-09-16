@@ -50,6 +50,13 @@ FITTINGS = {
     "f-31": "f_sign",      "f-32": "f_planter",
 }
 
+# small props the interface leans on. S-01 is deliberately absent: it duplicated F-31,
+# which is the same blank hanging sign, and was cut from the brief rather than generated.
+NAMES.update({
+    "s-02": "p_ledger", "s-03": "p_keys", "s-04": "p_cashbox",
+    "s-05": "p_clock",  "s-06": "p_card",
+})
+
 # the second dish set, joining the twelve already on the menu
 NAMES.update({
     "d-13": "chai",    "d-14": "qahwa",   "d-15": "kunafa",  "d-16": "balaleet",
@@ -88,7 +95,7 @@ KEYWORDS = [
 
 def target_name(fn):
     stem = os.path.splitext(os.path.basename(fn))[0].lower()
-    m = re.search(r"\b([idmrcf])[-_ ]?(\d{1,2})\b", stem)
+    m = re.search(r"\b([idmrcfs])[-_ ]?(\d{1,2})\b", stem)
     if m:
         key = "%s-%02d" % (m.group(1), int(m.group(2)))
         if key in NAMES:

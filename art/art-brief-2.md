@@ -357,24 +357,24 @@ premium ends of it.
 
 ---
 
-## §F — System objects · 6 assets
+## §F — System objects · 5 assets
 
 Object stem. Small things the interface leans on. Lowest priority — skip if you are tired.
 
 | # | Name | Subject line |
 |---|---|---|
-| S-01 | Open sign | a small hanging wooden shop sign with a brass chain, blank faced, **no writing** |
+| ~~S-01~~ | ~~Open sign~~ | **Cut.** This is the same object as F-31, which is already made. A duplicate in the original brief, spotted when both were generated side by side |
 | S-02 | Ledger | a worn hardback accounts ledger lying closed, dark green cloth cover with a brass corner, **hand-painted game art and not a photograph**, square 1:1 |
 | S-03 | Keys | a small ring of three worn brass door keys with a leather fob |
 | S-04 | Cash box | an open metal cash tin with neatly stacked banknotes and loose coins |
 | S-05 | Wall clock | a round wall clock with a plain cream face, brass rim and simple black hands |
-| S-06 | Recipe card | a single blank handwritten-looking recipe card, aged cream paper, **no writing on it** |
+| S-06 | Recipe card | a single blank recipe card, aged cream paper, **no writing on it**, **hand-painted game art and not a photograph**, square 1:1 |
 
 ---
 
 ## 6. Batches
 
-Ninety-five images. Five per message for everything except the ageing pass, which is one at a
+Ninety-four images. Five per message for everything except the ageing pass, which is one at a
 time — twenty-eight messages in all. Keep each batch inside one section so the reference
 images stay constant.
 
