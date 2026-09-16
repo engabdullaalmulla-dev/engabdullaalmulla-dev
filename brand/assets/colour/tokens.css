@@ -1,0 +1,30 @@
+/* Cafe Rush brand tokens */
+:root {
+  /* ink */
+  --ink-900: #171310;   /* App ground, the counter at night */
+  --ink-800: #231C18;   /* Panels and cards */
+  --ink-700: #2E2521;   /* Inset wells, chips */
+  --ink-600: #3B302A;   /* Edges and dividers */
+  --ink-outline: #2A1D16;   /* The one outline colour on art */
+  /* cream */
+  --cream-50: #F7EFE3;   /* Primary text on dark */
+  --cream-400: #A8988A;   /* Secondary text */
+  --cream-600: #6F6058;   /* Labels and micro-copy */
+  /* accent */
+  --amber-500: #F2A03D;   /* The brand colour. Primary action, the e in Cafe */
+  --amber-400: #FFBC63;   /* Hover and lift */
+  --amber-700: #C97C22;   /* Pressed, and amber on light grounds */
+  --brass-400: #E8C36B;   /* Money. AED figures, coins, tips */
+  --terracotta-600: #A8452A;   /* Environment only. Never a state */
+  /* state */
+  --state-calm: #5B9DD9;   /* Patience, plenty of time */
+  --state-soon: #F2A03D;   /* Patience, getting tight */
+  --state-urgent: #E24B2E;   /* Patience gone, walkouts, failure */
+  --ok-500: #4FBF7B;   /* Money earned and targets met. Nothing else */
+  /* room */
+  --wood-600: #7A4A2B;   /* Counter front */
+  --wood-400: #A9704A;   /* Counter top edge */
+  --tile-500: #3E6E6B;   /* Cafe wall */
+  --street-900: #1C2430;   /* The street through the window */
+  --sun-200: #F4D9A8;   /* Daylight */
+}
