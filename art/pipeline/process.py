@@ -81,6 +81,11 @@ def cut_background(im):
         for x in range(w):
             if src[x, y] == KEY:
                 ap[x, y] = 0
+    # NOTE: the generator bakes a soft drop shadow onto the backdrop and it survives this
+    # cut. Stripping it by colour was tried and reverted: a shadow and an object's own
+    # neutral mid-greys are indistinguishable, so it ate the milk pitcher's body and the
+    # shaded sides of the cup and bowl. At 34px the baked shadow is invisible, and at
+    # larger sizes it grounds the object, so it stays.
     alpha = alpha.filter(ImageFilter.GaussianBlur(0.6))   # antialias the cut edge
     out = im.convert("RGBA")
     out.putalpha(alpha)
