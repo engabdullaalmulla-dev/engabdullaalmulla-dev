@@ -40,7 +40,8 @@ FITTINGS = {
     "f-01": "f_stool",     "f-02": "f_stool_pad", "f-03": "f_table_sm",
     "f-04": "f_table_lg",  "f-05": "f_banquette",  "f-06": "f_outdoor",
     "f-07": "f_case",      "f-08": "f_menuboard",  "f-09": "f_till",
-    "f-10": "f_cupshelf",
+    "f-10": "f_cupshelf",  "f-11": "f_water",      "f-12": "f_grinder",
+    "f-13": "f_blender",   "f-14": "f_dallah",     "f-15": "f_juicer",
 }
 NAMES.update(FITTINGS)
 
@@ -54,6 +55,8 @@ ROOM_SCALE = {
     "f_stool": 1.00, "f_stool_pad": 1.08, "f_table_sm": 1.26,
     "f_table_lg": 1.85, "f_banquette": 2.55, "f_outdoor": 2.20,
     "f_case": 1.70, "f_menuboard": 1.45, "f_till": 1.05, "f_cupshelf": 1.60,
+    "f_water": 1.30, "f_grinder": 1.15, "f_blender": 1.15, "f_dallah": 1.00,
+    "f_juicer": 1.20,
 }
 
 # Fallback when the file was not named by id.

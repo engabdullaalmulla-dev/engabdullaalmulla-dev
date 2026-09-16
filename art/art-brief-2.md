@@ -173,7 +173,7 @@ These extend the six machines that already exist. Match `m_espresso.png` exactly
 |---|---|---|
 | F-12 | Coffee grinder | a chrome and black conical burr coffee grinder with a glass bean hopper on top |
 | F-13 | Blender | a heavy countertop blender with a thick glass jug and a brushed steel base |
-| F-14 | Dallah set | a traditional Arabic brass coffee dallah with a long curved spout, beside three small handleless finjan cups |
+| F-14 | Dallah set | a traditional Arabic brass coffee dallah with a long curved spout, beside three small **plain undecorated white** handleless finjan cups with a single thin gold rim and **no crest, emblem, badge or pattern of any kind on them** |
 | F-15 | Citrus juicer | a cast metal manual citrus press with a long lever arm, painted deep red |
 | F-16 | Sahlab urn | a polished steel heated drinks urn with a brass tap and a domed lid, gently steaming |
 | F-17 | Saj griddle | a domed black cast iron saj griddle on a low burner, used for thin regag bread |
@@ -394,6 +394,9 @@ images stay constant.
 - [ ] One object only, nothing extra in frame
 - [ ] Light from upper left, one soft contact shadow beneath
 - [ ] No text anywhere, including on signs and boards that are meant to be blank
+- [ ] **No national emblem, flag, crest or state insignia.** F-14 came back with the Saudi
+      emblem — a palm above crossed swords — on every cup, in a game set in the UAE. Generators
+      reach for it whenever an asset is "traditional Arabic"; the crockery in this café is plain
 - [ ] Readable as a silhouette at 50 px — shrink it and check
 - [ ] Sits convincingly beside the existing forty-one when viewed as a row
 - [ ] **§B2 only:** recognisably the same person as the original
