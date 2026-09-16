@@ -38,7 +38,9 @@ for i in range(1, 13):
 # §A fittings -- everything the player can buy, so it can appear in the room
 FITTINGS = {
     "f-01": "f_stool",     "f-02": "f_stool_pad", "f-03": "f_table_sm",
-    "f-04": "f_table_lg",  "f-05": "f_banquette",
+    "f-04": "f_table_lg",  "f-05": "f_banquette",  "f-06": "f_outdoor",
+    "f-07": "f_case",      "f-08": "f_menuboard",  "f-09": "f_till",
+    "f-10": "f_cupshelf",
 }
 NAMES.update(FITTINGS)
 
@@ -50,7 +52,8 @@ NAMES.update(FITTINGS)
 # The room multiplies its base draw size by this; the shop row ignores it.
 ROOM_SCALE = {
     "f_stool": 1.00, "f_stool_pad": 1.08, "f_table_sm": 1.26,
-    "f_table_lg": 1.85, "f_banquette": 2.55,
+    "f_table_lg": 1.85, "f_banquette": 2.55, "f_outdoor": 2.20,
+    "f_case": 1.70, "f_menuboard": 1.45, "f_till": 1.05, "f_cupshelf": 1.60,
 }
 
 # Fallback when the file was not named by id.

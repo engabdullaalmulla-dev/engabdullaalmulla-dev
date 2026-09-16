@@ -1,7 +1,11 @@
 {
   "f_banquette": 2.55,
+  "f_case": 1.7,
+  "f_menuboard": 1.45,
+  "f_outdoor": 2.2,
   "f_stool": 1.0,
   "f_stool_pad": 1.08,
   "f_table_lg": 1.85,
-  "f_table_sm": 1.26
+  "f_table_sm": 1.26,
+  "f_till": 1.05
 }

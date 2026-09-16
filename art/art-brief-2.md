@@ -162,7 +162,7 @@ becomes a grey rectangle; a bookshelf with six bold shapes still reads.
 | F-07 | Pastry case | a curved glass countertop pastry display case with two brass-edged shelves, empty and lit from within |
 | F-08 | Menu board | a freestanding wooden A-frame chalkboard, the slate surface blank and softly dusty |
 | F-09 | Till | a vintage brass and enamel cash register with round keys and a pull lever |
-| F-10 | Cup shelf | a small wooden wall shelf stacked with neat rows of white porcelain cups and saucers |
+| F-10 | Cup shelf | a small wooden wall shelf stacked with neat rows of white porcelain cups and saucers, shown on its own as a floating object with **no wall behind it and no shadow cast onto the background** |
 | F-11 | Water station | a tall glass water dispenser with a brass tap on a small wooden stand, a stack of glasses beside it |
 
 ### Equipment — 6
@@ -177,6 +177,11 @@ These extend the six machines that already exist. Match `m_espresso.png` exactly
 | F-15 | Citrus juicer | a cast metal manual citrus press with a long lever arm, painted deep red |
 | F-16 | Sahlab urn | a polished steel heated drinks urn with a brass tap and a domed lid, gently steaming |
 | F-17 | Saj griddle | a domed black cast iron saj griddle on a low burner, used for thin regag bread |
+
+**Anything wall-mounted — F-10, F-18, F-19, F-23 — must be drawn floating, with no wall and no
+shadow cast onto the backdrop.** The cut keys out a flat grey by flooding in from the edges, so
+a shadow on the wall is not background: it survives as a grey slab welded to the object. F-10
+came back this way and had to be redone.
 
 ### Atmosphere — 8
 
