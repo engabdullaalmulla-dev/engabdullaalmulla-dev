@@ -35,6 +35,8 @@ NAMES = {
     "r-07": "room_large",  "r-08": "room_back",    "r-09": "room_night",
     "r-10": "room_rain",   "r-11": "room_summer",  "r-12": "room_1990s",
     "r-13": "room_2030s",
+    "b-01": "br_jumeirah", "b-02": "br_satwa",    "b-03": "br_deira",
+    "b-04": "br_karama",   "b-05": "br_mall",     "b-06": "br_airport",
 }
 for i in range(1, 13):
     NAMES["c-%02d" % i] = "p%d" % i
@@ -99,7 +101,7 @@ KEYWORDS = [
 
 def target_name(fn):
     stem = os.path.splitext(os.path.basename(fn))[0].lower()
-    m = re.search(r"\b([idmrcfs])[-_ ]?(\d{1,2})\b", stem)
+    m = re.search(r"\b([idmrcfsb])[-_ ]?(\d{1,2})\b", stem)
     if m:
         key = "%s-%02d" % (m.group(1), int(m.group(2)))
         if key in NAMES:
@@ -219,7 +221,9 @@ def main():
         if not name:
             unnamed.append(f); continue
         src = Image.open(os.path.join(raw, f))
-        wide = name.startswith("room_")
+        # a scene plate is never cut, trimmed or squared -- branches are scenes too,
+        # and matching only "room_" silently squared the first three to 512x512
+        wide = name.startswith(("room_", "br_"))
         face = re.match(r"^p\d+$", name) is not None
         if wide:
             im = src.convert("RGBA")
