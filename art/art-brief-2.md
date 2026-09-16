@@ -307,7 +307,17 @@ Upload the adult portrait and ask for the child.
 > *"the street outside the window is a UAE shopping street — low sand-coloured buildings, date
 > palms, a hot white sky — not a European street, no deciduous trees, no pastel townhouses"*
 >
-> **All ten plates are now generated and all ten carry the European street.** That is at least
+> **UPDATE.** R-04 to R-07 have been redone and the street is right — palms, sand-coloured
+> arched buildings, a hot white sky. But the redo also changed the interior: the counter is now
+> a **teal-painted front with a pale marble top**, where R-09 to R-13 still have a **wood front
+> and a wood top**. The counter is the largest object in the frame, so the set is split until
+> R-09 to R-13 are regenerated from the new R-07. Attach `room_large` to every one of them.
+>
+> R-08 was rejected separately: legible English text baked in — a "A Quieter Place" sign and
+> three book spines — plus 1536x1024 instead of 1672x941 and a photoreal rather than painted
+> treatment. Text in a plate cannot be localised, and this game ships in Arabic.
+>
+> ~~**All ten plates are now generated and all ten carry the European street.**~~ That is at least
 > uniform: it is one decision to make rather than a split set. Redoing them is ten images in
 > one conversation with R-04 attached, and nothing in the game is blocked while they stand.
 
