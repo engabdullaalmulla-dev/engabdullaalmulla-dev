@@ -1,9 +1,12 @@
 {
   "f_aircon": 1.4,
+  "f_awning": 2.1,
   "f_banquette": 2.55,
   "f_blender": 1.15,
+  "f_bookshelf": 1.5,
   "f_case": 1.7,
   "f_grinder": 1.15,
+  "f_heater": 1.1,
   "f_juicer": 1.2,
   "f_menuboard": 1.45,
   "f_outdoor": 2.2,

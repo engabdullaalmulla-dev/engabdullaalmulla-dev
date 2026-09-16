@@ -45,7 +45,9 @@ FITTINGS = {
     "f-16": "f_urn",       "f-17": "f_saj",        "f-18": "f_pendant",
     "f-19": "f_sconce",    "f-20": "f_rug",       "f-21": "f_plant_sm",
     "f-22": "f_plant_lg",  "f-23": "f_pictures",  "f-24": "f_bookshelf",
-    "f-25": "f_radio",     "f-26": "f_aircon",
+    "f-25": "f_radio",     "f-26": "f_aircon",    "f-27": "f_heater",
+    "f-28": "f_fridge",    "f-29": "f_sink",      "f-30": "f_awning",
+    "f-31": "f_sign",      "f-32": "f_planter",
 }
 NAMES.update(FITTINGS)
 
@@ -63,6 +65,8 @@ ROOM_SCALE = {
     "f_juicer": 1.20, "f_urn": 1.20, "f_saj": 1.10, "f_pendant": 1.35,
     "f_sconce": 0.95, "f_rug": 2.00, "f_plant_sm": 0.90, "f_plant_lg": 1.70,
     "f_pictures": 1.30, "f_bookshelf": 1.50, "f_radio": 0.90, "f_aircon": 1.40,
+    "f_heater": 1.10, "f_fridge": 1.45, "f_sink": 1.60, "f_awning": 2.10,
+    "f_sign": 1.35, "f_planter": 1.55,
 }
 
 # Fallback when the file was not named by id.
