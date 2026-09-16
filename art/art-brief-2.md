@@ -351,7 +351,7 @@ premium ends of it.
 | D-19 | Basbousa | a diamond-cut square of golden semolina cake soaked in syrup with an almond pressed into the top |
 | D-20 | Jallab | a tall glass of dark jallab with crushed ice, pine nuts and raisins floating on top |
 | D-21 | Rose lemonade | a tall frosted glass of pale pink rose lemonade with mint and a thin lemon slice |
-| D-22 | Camel milk cappuccino | a wide ceramic cup of cappuccino with dense pale foam and a simple leaf pattern |
+| D-22 | Camel milk cappuccino | a wide ceramic cup of cappuccino with dense pale foam and a simple leaf pattern *(near-duplicate of `latte` by design — acceptable, see the checklist)* |
 | D-23 | Sahlab | a warm cup of thick white sahlab dusted with cinnamon and chopped pistachio |
 | D-24 | Date maamoul | three small pale shortbread maamoul biscuits with a pressed pattern, one broken open to show a dark date centre |
 
@@ -364,7 +364,7 @@ Object stem. Small things the interface leans on. Lowest priority — skip if yo
 | # | Name | Subject line |
 |---|---|---|
 | S-01 | Open sign | a small hanging wooden shop sign with a brass chain, blank faced, **no writing** |
-| S-02 | Ledger | a worn hardback accounts ledger lying closed, dark green cloth cover with a brass corner |
+| S-02 | Ledger | a worn hardback accounts ledger lying closed, dark green cloth cover with a brass corner, **hand-painted game art and not a photograph**, square 1:1 |
 | S-03 | Keys | a small ring of three worn brass door keys with a leather fob |
 | S-04 | Cash box | an open metal cash tin with neatly stacked banknotes and loose coins |
 | S-05 | Wall clock | a round wall clock with a plain cream face, brass rim and simple black hands |
@@ -402,6 +402,11 @@ images stay constant.
       crossed swords, in a game set in the UAE. Generators reach for ornate Gulf crockery on any
       prompt with regional character, and at 34px the decoration is noise whatever it depicts
 - [ ] Readable as a silhouette at 50 px — shrink it and check
+- [ ] **Dish silhouettes no longer need to be mutually distinct.** That rule came from the rush
+      build, where a player triaged bins at 20 px against a clock. In the management sim every
+      dish sprite is drawn beside its own name — on the board, in the shop and in the service
+      row — so two similar dishes cost nothing. Measured at 20 px, the closest pair in the set is
+      `iced` and `dateshake`, both of which already ship
 - [ ] Sits convincingly beside the existing forty-one when viewed as a row
 - [ ] **§B2 only:** recognisably the same person as the original
 
