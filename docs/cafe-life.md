@@ -277,3 +277,43 @@ choice but not an informed one while the real plate has never been compared agai
 
 The ranking is by what the player loses: invented dishes first (it is the forever loop and it
 degrades to emoji), branches second, era and weather plates third, fittings fourth.
+
+## The wall at year 13
+
+`tools/sim.js` plays the game to the end of a dynasty. Three play styles were run sixteen
+times each over thirty years: a greedy bot, one that plays the board to the season and taps
+guests, and a saver that follows a build order and holds cash for the next tier instead of
+spraying it at stools. All three end in the same place.
+
+| year | cash | net/season | take | rent | wages | seats |
+|---|---|---|---|---|---|---|
+| 1 | 481 | 19 | 289 | 124 | 0 | 2 |
+| 5 | 452 | **149** | 612 | 167 | 0 | 3 |
+| 10 | 1,181 | 91 | 788 | 217 | 144 | 5 |
+| 13 | 336 | **−99** | 530 | 249 | 151 | 8 |
+| 20 | −906 | −89 | 604 | 277 | 168 | 8 |
+| 30 | −2,865 | −84 | 654 | 315 | 192 | 8 |
+
+**Never affordable in any run, under any play style: `upstairs`, `manager`, `freehold`,
+`branch`.**
+
+The café peaks at about **150 a season around year 5**, and the median season starts losing
+money in **2008**. Upstairs costs 1,800 — twelve good seasons of spending nothing at all,
+during which rent keeps climbing. A branch is 4,200 and the freehold is 9,000. They are not
+expensive; they are unreachable.
+
+It is a deadlock, and each half is load-bearing. Takings are capped by `seats*3 + 6`, so the
+only way to earn more is more seats. Seats cost money and every seat raises rent
+(`80 + seats*11 + branches*130`, inflated, plus 7% of last season's take until the freehold).
+The one large seat unlock is the thing you can never save for. So the café stalls at eight
+seats and slowly bleeds.
+
+This is the other side of a fix that worked. Cash used to reach 751,000 by year 30 and was
+brought down with scaling rent and wages, percentage rent, a seat-capped queue and uncapped
+sinks. That killed the runaway, and overshot: it now cannot reach its own late game. Branches,
+the freehold, the manager, the second floor, `room_large`, and any succession that hands over
+a real business are all content that no player will ever see.
+
+**Adding to the shop while this holds makes it worse, not better.** Sixteen of thirty-two
+fittings have no shop entry; wiring the other sixteen in would add things to buy to an economy
+that cannot afford the ones it has.
