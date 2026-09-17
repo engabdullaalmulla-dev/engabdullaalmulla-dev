@@ -337,7 +337,54 @@ written to kill, and it does not overshoot into the stall that fix caused.
 never tapping anyone — ends year 30 at −2,225 with reputation at −58 and reaches none of the
 late game. Demanding, as asked for.
 
-### Still not wired
+### Three more items that did nothing
 
-Sixteen of thirty-two fittings have no shop entry. That is the next job, and it is now a
-reasonable one: there is an economy to spend in.
+The barista was not alone. `G.mood` and `G.ac` were written by the radio, the plants and the
+air conditioning and **read by nothing at all** — 1,140 AED of shop items with no effect, and
+`G.margin` was a dead field besides. A room people like is a room they sit in longer, so mood
+now feeds dwell. Air conditioning needed summer to be worth escaping first, so summer now cuts
+footfall to 72%, or 88% with an awning, and not at all with cooling. The awning's card always
+said *"Summer stops being a dead season"*; now there is a dead season for it to stop.
+
+### The fittings, and why only six went in the shop
+
+Sixteen fittings had no shop entry. Six became things you buy, each doing one thing the shop
+did not already do — a second item that adds mood is padding, not depth:
+
+| | effect |
+|---|---|
+| Padded stools | dwell +0.08 |
+| A long table ×2 | +2 seats, mood |
+| Tables outside | +3 seats, footfall |
+| A juicer | cold drinks worth 25% more |
+| A dallah | hot drinks worth 6% more |
+| Pendant lights | mood +2 |
+
+The other ten are **dressing**: they are not for sale and appear when the café has earned
+them — a rug once there are six seats, a sink once somebody else is working the counter, a
+planter once there is an awning outside. A café accumulates things nobody decided to buy.
+Every fitting is now drawn.
+
+### The real runaway engine, found at last
+
+Adding the invention sink to the bot made sixty years reach **1.19 million**. The cause was in
+`invent()`: the base recipe was picked from everything you know, **including previous
+inventions**. Each invention is priced at 1.35+ times its base, so a chain of them compounds
+geometrically and a café that keeps inventing ends up selling a 400 AED cup of tea.
+
+This is almost certainly the engine behind the original 751,000-by-year-30. The earlier fix
+went after rent, wages and trade caps — all linear, and no linear fix can catch a geometric
+series. Inventions now take their base from the book only, never from another invention, and
+sixty years lands around 100,000 with the invention cost curve absorbing the surplus.
+
+### Where it lands
+
+| unlock | affordable | target |
+|---|---|---|
+| upstairs | 2006 | 2003 |
+| manager | 2004 | 2005 |
+| branch | 2011 | 2010 |
+| freehold | 2015 | 2017 |
+
+All four in 16/16 runs. A careless player — never matching the board to the season, never
+tapping — still ends year 30 at −6,550 with reputation at −62 and reaches none of it.

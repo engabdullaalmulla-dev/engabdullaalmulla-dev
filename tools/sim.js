@@ -19,9 +19,9 @@ const pad = (s, n) => String(s).padStart(n);
    the k-th copy of an item only when it has reached the k-th mention, so listing "stool"
    once quietly capped the bot at one stool and made the café look poorer than the game is. */
 const ORDER = [
-  "sign", "stool", "case_", "stool", "grinder", "slot", "table", "stool",
-  "radio", "plant", "stool", "awning", "table", "stool", "aircon", "slot",
-  "stool", "barista", "backroom", "stool", "table", "stool", "plant", "slot",
+  "sign", "stool", "case_", "stool", "grinder", "slot", "table", "stool", "dallah",
+  "radio", "plant", "stool", "awning", "stool_pad", "table", "stool", "aircon", "slot", "juicer",
+  "stool", "barista", "backroom", "stool", "table_lg", "pendant", "outdoor", "table", "stool", "plant", "slot",
   "stool", "upstairs", "stool", "barista", "manager", "plant", "slot", "slot",
   "branch", "freehold", "branch", "branch", "branch", "branch", "branch"
 ];
@@ -76,7 +76,19 @@ const ORDER = [
     for(let run = 0; run < RUNS; run++){
       G = NEW(); const track = [], bought = {}, first = {}, afford = {};
       for(let s = 0; s < YEARS*4; s++){
-        spend(bought, first); setBoard();
+        spend(bought, first);
+        /* Invention is the other uncapped sink and it lives in the shop screen rather than
+           in ITEMS, so a bot that only walks ITEMS never spends on it and the late game looks
+           far richer than it is. A player with money and nothing left to buy invents. */
+        if(POLICY !== "greedy"){
+          for(let g3 = 0; g3 < 3; g3++){
+            const n = G.cookbook.filter(c => c.invented).length;
+            const cost = Math.round(900 * Math.pow(1.45, n) * infl());
+            if(cost > G.cash - 1500) break;
+            G.cash -= cost; invent(); bought.invent = (bought.invent||0) + 1;
+          }
+        }
+        setBoard();
         const before = G.cash;
         runService(true);
         if(POLICY !== "greedy"){ G.cash += Math.round(G.lastTake*0.04); G.rep += 1; }

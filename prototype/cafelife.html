@@ -161,7 +161,29 @@ const money = n => Math.round(n).toLocaleString("en-GB");
 
 /* ---------- recipes. tags are what a season or a person is in the mood for ---------- */
 const SPRITE = {"karak": "karak", "mint": "mint", "espresso": "espresso", "latte": "latte", "iced": "iced", "shake": "dateshake", "luqaimat": "luqaimat", "regag": "regag", "croissant": "almond", "saffron": "saffron", "affogato": "affogato", "chai": "chai"};
-const ITEM_SPRITE = {"stool": "f_stool", "table": "f_table_sm", "sign": "f_sign", "awning": "f_awning", "case_": "f_case", "grinder": "f_grinder", "radio": "f_radio", "plant": "f_plant_lg", "aircon": "f_aircon", "slot": "f_menuboard", "backroom": "f_banquette", "upstairs": "f_bookshelf", "barista": "f_urn", "manager": "p_ledger", "branch": "f_till", "freehold": "p_keys"};
+const ITEM_SPRITE = {"stool": "f_stool", "table": "f_table_sm", "sign": "f_sign", "awning": "f_awning", "case_": "f_case", "grinder": "f_grinder", "radio": "f_radio", "plant": "f_plant_lg", "aircon": "f_aircon", "slot": "f_menuboard", "backroom": "f_banquette", "upstairs": "f_bookshelf", "barista": "f_urn", "manager": "p_ledger", "branch": "f_till", "freehold": "p_keys",
+  "stool_pad": "f_stool_pad", "table_lg": "f_table_lg", "outdoor": "f_outdoor",
+  "juicer": "f_juicer", "dallah": "f_dallah", "pendant": "f_pendant"};
+
+/* The last ten fittings are not for sale. A café accumulates things nobody decided to buy --
+   a rug once there are enough chairs to need one, a sink once somebody else is working the
+   counter, a second plant because the first one did well. They appear when the café has
+   earned them, which is the only way to use this art without padding the shop with ten more
+   ways to add mood. */
+const DRESSING = [
+  {sp:"f_rug",      when:() => G.seats >= 6},
+  {sp:"f_pictures", when:() => G.mood >= 2},
+  {sp:"f_sconce",   when:() => own("upstairs") > 0},
+  {sp:"f_plant_sm", when:() => own("plant") > 0},
+  {sp:"f_planter",  when:() => own("awning") > 0},
+  {sp:"f_water",    when:() => G.seats >= 10},
+  {sp:"f_cupshelf", when:() => own("grinder") > 0},
+  {sp:"f_sink",     when:() => baristas() >= 1},
+  {sp:"f_fridge",   when:() => own("aircon") > 0},
+  {sp:"f_blender",  when:() => own("juicer") > 0},
+  {sp:"f_saj",      when:() => own("case_") > 0},
+  {sp:"f_heater",   when:() => own("outdoor") > 0}
+];
 const REG_FACE = {"noor": "p5", "haddad": "p6", "dana": "p9", "samir": "p11", "aisha": "p4", "khalid": "p3"};
 const ART = "../art/sprites/";
 const RECIPES = {
@@ -241,7 +263,22 @@ const ITEMS = {
             f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda"]),role:"barista",wage:120})},
   manager: {nm:"Hire a manager", ic:"🗂️", cost:1050, max:1, d:"Can run a season without you. Wages every season.",
             f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager",wage:260}); g.canSkip=true}},
-  freehold:{nm:"Buy the building",ic:"🏠", cost:4200, max:1,
+  /* Six of the sixteen unsold fittings become things you buy. Each does one thing the shop
+     did not already do, because a second item that adds mood is padding, not depth. The other
+     ten are dressing: see DRESSING below, where they appear as the café earns them. */
+  stool_pad:{nm:"Padded stools", ic:"💺", cost:420,  max:1, d:"People stop perching and start staying.",
+            f:g=>g.dwell+=0.08},
+  table_lg:{nm:"A long table",   ic:"🪵", cost:760,  max:2, d:"Strangers end up sitting together.",
+            f:g=>{g.seats+=2; g.mood++}},
+  outdoor: {nm:"Tables outside", ic:"🌤️", cost:980,  max:1, d:"The pavement becomes part of the café.",
+            f:g=>{g.seats+=3; g.foot+=0.08}},
+  juicer:  {nm:"A juicer",       ic:"🍋", cost:620,  max:1, d:"Everything cold is worth more.",
+            f:g=>g.coldLift+=0.25},
+  dallah:  {nm:"A dallah",       ic:"🫖", cost:520,  max:1, d:"Coffee served the old way. Everything hot is worth a little more.",
+            f:g=>g.warmLift+=0.06},
+  pendant: {nm:"Pendant lights", ic:"💡", cost:380,  max:1, d:"The room stops being lit like a shop.",
+            f:g=>g.mood+=2},
+  freehold:{nm:"Buy the building",ic:"🏠", cost:5600, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
   branch:  {nm:"Open a branch",  ic:"🏪", cost:1900, max:99, pow:1.7, d:"Another café, another street, its own regulars.",
@@ -382,7 +419,8 @@ function NEW(){
     cash:420, rent:90,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
-    sweetLift:0, coffeeLift:0, ac:false, quiet:false, canSkip:false, appCut:0,
+    sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
+    ac:false, quiet:false, canSkip:false, appCut:0,
     staff:[], branches:[], regs:{}, cookbook:[], log:[], dynasty:[],
     lastTake:0, seenIntro:false
   };
@@ -400,6 +438,19 @@ const own = k => G.owned[k] || 0;
    squeeze that compounded for thirty years and it is why the café slid backwards however
    well it was run. The two rates now match. */
 const infl = () => 1 + (G.year - 1996) * 0.018;
+/* G.mood and G.ac were set by the radio, the plants and the air conditioning and then read
+   by nothing at all -- 1,140 AED of shop items that did exactly what the barista did before
+   it was fixed, which is nothing. A room people like is a room they sit in longer, so mood
+   feeds dwell; and the air conditioning now does what its card promises, which needs summer
+   to have been worth escaping in the first place. */
+const dwellNow = () => G.dwell + G.mood * 0.015;
+/* Summer is forty degrees. Without shade or cooling the street simply does not stop, and
+   that is the season the awning and the air conditioning are sold against. */
+function heatNow(){
+  if(G.season % 4 !== 1) return 1;
+  if(G.ac) return 1;
+  return own("awning") ? 0.88 : 0.72;
+}
 /* rent and wages track the size of the thing you built, so profit stays a margin
    and never becomes a fountain. Flat rent was why cash hit six figures by year ten. */
 /* Seats were 11 a season each. A seat buys trade, so it has to be worth more than it costs
@@ -424,6 +475,8 @@ function priceOf(k){
   let p = r.price * (1 + G.priceLift) * (1 + (G.year-1996)*0.018);
   if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
   if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
+  if(r.tags.indexOf("cold")>=0) p *= (1 + G.coldLift);
+  if(r.tags.indexOf("warm")>=0) p *= (1 + G.warmLift);
   return Math.round(p);
 }
 
@@ -468,7 +521,15 @@ const SLOTS = {
   f_grinder:[0.80,0.57,1.15],   f_radio:[0.64,0.56,0.90],    f_menuboard:[0.58,0.88,1.45],
   f_awning:[0.10,0.16,2.10],    f_sign:[0.30,0.12,1.35],     f_aircon:[0.62,0.10,1.40],
   f_urn:[0.68,0.58,1.20],       f_bookshelf:[0.94,0.80,1.50], p_keys:[0.50,0.55,0.70],
-  p_ledger:[0.56,0.56,0.80]
+  p_ledger:[0.56,0.56,0.80],
+  /* bought */
+  f_stool_pad:[0.53,0.83,1.08], f_table_lg:[0.16,0.85,1.85],  f_outdoor:[0.01,0.72,2.20],
+  f_juicer:[0.76,0.57,1.20],    f_dallah:[0.72,0.56,1.00],    f_pendant:[0.44,0.20,1.35],
+  /* dressing */
+  f_rug:[0.30,0.93,2.00],       f_pictures:[0.22,0.34,1.30],  f_sconce:[0.86,0.30,0.95],
+  f_plant_sm:[0.20,0.78,0.90],  f_planter:[0.06,0.90,1.55],   f_water:[0.60,0.60,1.30],
+  f_cupshelf:[0.90,0.36,1.60],  f_sink:[0.84,0.58,1.60],      f_fridge:[0.96,0.62,1.45],
+  f_blender:[0.82,0.56,1.15],   f_saj:[0.70,0.54,1.10],       f_heater:[0.02,0.96,1.10]
 };
 function drawRoom(host, dusk){
   const name = roomPlate();
@@ -494,6 +555,18 @@ function drawRoom(host, dusk){
       im.onerror = function(){ im.remove(); };
       r.appendChild(im);
     }
+  });
+  DRESSING.forEach(function(d){
+    const slot = SLOTS[d.sp];
+    if(!slot || !d.when()) return;
+    const px = Math.round(BASE * slot[2]);
+    const im = document.createElement("img");
+    im.src = ART + d.sp + ".png"; im.alt = "";
+    im.style.cssText = "position:absolute;width:" + px + "px;height:" + px +
+      "px;object-fit:contain;left:" + Math.round(slot[0]*100) + "%;top:" +
+      Math.round(slot[1]*H - px) + "px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.5))";
+    im.onerror = function(){ im.remove(); };
+    r.appendChild(im);
   });
   r.appendChild(el("div","glow")); r.appendChild(el("div","night"));
   if(roomPlate() === "room_bare")
@@ -659,7 +732,7 @@ function buildQueue(){
      formula below never got to say anything. It is a backstop against runaway trade, not
      the thing that should be setting the day's custom, so it sits above the formula now. */
   const n = Math.max(6, Math.min(G.seats*5 + 6,
-            Math.round((8 + G.seats*2 + baristas()*9) * G.foot * (1 + G.rep*0.012))));
+            Math.round((8 + G.seats*2 + baristas()*9) * G.foot * heatNow() * (1 + G.rep*0.012))));
   const q = [];
   /* regulars come first -- they are the reason the place works */
   REGULARS.forEach(r => {
@@ -688,7 +761,7 @@ function serveOne(c){
   }
   if(!k) return {k:null, pay:0, visits:0};
   const n = visitsFor(c), p = priceOf(k);
-  const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut) * (1 + G.dwell));
+  const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut) * (1 + dwellNow()));
   return {k:k, pay:p*n, visits:n, profit:profit};
 }
 
@@ -999,7 +1072,15 @@ const INVENTABLE = [
 ];
 function invent(){
   const n = G.cookbook.filter(c => c.invented).length;
-  const base = pick(Object.keys(RECIPES).filter(k => G.recipes.indexOf(k) >= 0));
+  /* The base has to be a recipe from the book, never another invention. Inventing on top of
+     an invention compounds: each one is priced at 1.35+ times its base, so a chain of them
+     multiplies without bound, and a café that keeps inventing ends up selling a 400 AED cup
+     of tea. This is the engine behind the old 751,000-by-year-30 runaway -- the earlier fix
+     went at rent and wages, which are linear, and could never catch a geometric series. */
+  const invented = {};
+  G.cookbook.forEach(c => { if(c.invented) invented[c.k] = 1; });
+  const stock = G.recipes.filter(k => !invented[k]);
+  const base = pick(stock.length ? stock : G.recipes);
   const src = RECIPES[base];
   const k = "own" + n + "_" + G.gen;
   const inv = INVENTABLE[n % INVENTABLE.length];
