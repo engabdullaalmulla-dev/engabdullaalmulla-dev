@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 dist/
 site/
+
+# generated native bundle
+native/src/webapp/html.js

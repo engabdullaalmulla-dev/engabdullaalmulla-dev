@@ -30,9 +30,14 @@
 > loaded over `file://` or through `expo-asset` instead. That is a solved problem, but it is
 > a different mechanism and it has not been built or tested here.
 >
-> Until an Expo shell exists, the route that needs nothing from Apple is
-> `.github/workflows/pages.yml` — the same game, installable from a phone browser.
-
+> **The Expo shell now exists**, in [`native/`](../native/), mirroring that architecture.
+> `native/README.md` is the build route. In short: `npm run webapp`, the release gate, then
+> `eas build --platform ios --profile testflight`. Two placeholders in `native/eas.json` need
+> the account's real App Store Connect app id and team id, which are in the other repository
+> and not copied here.
+>
+> The Capacitor pipeline and its eight secrets are kept below for reference. They are not the
+> route to take.
 ---
 
 ## Before any of the secrets

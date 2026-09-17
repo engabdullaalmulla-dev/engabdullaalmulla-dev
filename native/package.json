@@ -1,0 +1,20 @@
+{
+  "name": "cafe-life-native",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "webapp": "python3 ../tools/build-native.py",
+    "start": "npm run webapp && expo start",
+    "ios": "npm run webapp && expo run:ios",
+    "build:testflight": "npm run webapp && npx eas-cli build --platform ios --profile testflight",
+    "submit": "npx eas-cli submit --platform ios --profile production"
+  },
+  "dependencies": {
+    "expo": "~57.0.23",
+    "expo-status-bar": "~57.0.3",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-webview": "13.16.1"
+  }
+}
