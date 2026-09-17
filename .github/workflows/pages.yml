@@ -1,0 +1,69 @@
+# Publish Café Life as a site testers can install on a phone.
+#
+# This exists because TestFlight needs an Apple Developer account, and a playtest should not
+# wait on one. The result is the same game, installable from Safari or Chrome via
+# "Add to Home Screen": it launches full screen with its own icon, and the service worker
+# caches all 7.6MB on first open, so it runs afterwards with no signal at all.
+name: Pages · playable build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "prototype/cafelife.html"
+      - "art/sprites/**"
+      - "app/resources/**"
+      - "tools/build-web.py"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never two deploys at once, but let a newer commit overtake a queued one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          python3 -m pip install --quiet --break-system-packages Pillow
+          python3 tools/build-web.py
+          test -f site/index.html
+          test -f site/sw.js
+          test -f site/manifest.webmanifest
+          echo "Built $(ls site/sprites | wc -l | tr -d ' ') sprites."
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Say where it is
+        run: |
+          {
+            echo "### Café Life is live"
+            echo ""
+            echo "${{ steps.deployment.outputs.page_url }}"
+            echo ""
+            echo "On a phone: open it, then Share → **Add to Home Screen**. It launches full"
+            echo "screen with its own icon and works offline after the first open."
+          } >> $GITHUB_STEP_SUMMARY
