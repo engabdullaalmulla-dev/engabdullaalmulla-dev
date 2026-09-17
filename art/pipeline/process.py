@@ -38,7 +38,7 @@ NAMES = {
     "b-01": "br_jumeirah", "b-02": "br_satwa",    "b-03": "br_deira",
     "b-04": "br_karama",   "b-05": "br_mall",     "b-06": "br_airport",
 }
-for i in range(1, 13):
+for i in range(1, 25):
     NAMES["c-%02d" % i] = "p%d" % i
 
 # §A fittings -- everything the player can buy, so it can appear in the room
@@ -267,7 +267,6 @@ def main():
 
     fits = [n for n, _ in done if n.startswith("f_")]
     if fits:
-        import json
         man = os.path.join(out, "fittings.json")
         data = {}
         if os.path.exists(man):
@@ -285,19 +284,25 @@ def main():
         if missing:
             print("  no ROOM_SCALE for: %s (defaulted to 1.0 -- add them)" % ", ".join(missing))
 
+    # Placeholder guard. This must fail CLOSED: a run that touches nothing should leave
+    # the manifest exactly as it found it, and the file is never deleted -- an empty list
+    # is how "all replaced" is recorded. An earlier version removed the file and a run
+    # over unrelated art cleared it while every placeholder was still on disk.
     ph = os.path.join(out, "PLACEHOLDERS.json")
     if os.path.exists(ph):
-        try:
-            left = json.load(open(ph))
-        except Exception:
-            left = []
-        left = [n for n in left if n not in [d for d, _ in done]]
+        with open(ph) as fh:
+            left = json.load(fh)                    # a corrupt manifest must raise, not pass
+        made = set(n for n, _ in done)
+        replaced = [n for n in left if n in made]
+        left = [n for n in left if n not in made]
+        with open(ph, "w") as fh:
+            json.dump(sorted(left), fh, indent=2); fh.write("\n")
+        if replaced:
+            print("\nreplaced by generated art: %s" % ", ".join(sorted(replaced)))
         if left:
-            json.dump(sorted(left), open(ph, "w"), indent=2)
-            print("\nSTILL PLACEHOLDER, do not ship: %s" % ", ".join(sorted(left)))
+            print("\nSTILL PLACEHOLDER, do not ship (%d): %s" % (len(left), ", ".join(sorted(left))))
         else:
-            os.remove(ph)
-            print("\nevery placeholder has been replaced by generated art")
+            print("\nno placeholders left")
 
     print("\n%d sprites written to %s" % (len(done), os.path.normpath(out)))
 
