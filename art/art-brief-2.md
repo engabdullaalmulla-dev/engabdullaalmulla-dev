@@ -250,11 +250,11 @@ player grows fond of over decades, not caricatures. Use the **character stem**.
 > happen to. The other five rows below are marked *not drawn*: pleasant to have, but no part
 > of the game is waiting on them.
 >
-> `art/pipeline/age.py` derives a stand-in for each so the prototype runs, and
-> `art/sprites/PLACEHOLDERS.json` lists what has not been replaced yet, so nothing filtered
-> can ship by accident. The filter greys the hair, which is the only signal that reads at the
-> 40 px a service row draws — and visibly is a filter at the 150 px a story screen can reach.
-> Dropping a generated portrait in overwrites the stand-in and clears the manifest entry.
+> **This batch is finished.** All eleven are generated; `art/sprites/PLACEHOLDERS.json` is an
+> empty list, which is how the pipeline records "nothing left to replace". `art/pipeline/age.py`
+> still derives a hair-greying stand-in and stays in the tree for any character added later —
+> it reads acceptably at the 40 px a service row draws and visibly as a filter at the 150 px a
+> story screen reaches, so it is a scaffold, never a shipped asset.
 >
 
 
@@ -278,17 +278,33 @@ recognises them in 2028.
 | A-03 | Emirati man → a man in his seventies, moustache white | `p3.png` | **khalid** | done |
 | A-04 | Emirati woman → a woman in her sixties | `p4.png` | **aisha** | done |
 | A-05 | Student → a woman in her fifties, the same round glasses | `p5.png` | **noor** | done |
-| A-06 | Older man → a man in his eighties, frailer, still neat | `p6.png` | **haddad** | **needed** |
+| A-06 | Older man → a man in his eighties, frailer, still neat | `p6.png` | **haddad** | done |
 | A-07 | Courier → a man in his fifties, the red cap long gone | `p7.png` | not drawn | done |
 | A-08 | Older woman → a woman in her nineties, very lined, still warm | `p8.png` | not drawn | done |
 | A-09 | Office worker → a woman in her seventies, hair fully silver | `p9.png` | **dana** | done |
-| A-10 | Teenager → a man in his forties, the shyness gone | `p10.png` | not drawn | not needed |
-| A-11 | Shopkeeper → a man in his sixties, heavier, greying stubble | `p11.png` | **samir** | **needed** |
+| A-10 | Teenager → a man in his forties, the shyness gone | `p10.png` | not drawn | done, weakest of the set |
+| A-11 | Shopkeeper → a man in his sixties, heavier, greying stubble | `p11.png` | **samir** | done |
 | A-12 | Grandmother → *skip.* She does not get thirty more years. | — | — | — |
 
 **A-12 is deliberately not generated.** In a game about a café that outlives people, one of the
 twelve has to be the one who stops coming in, and the absence of the asset is the point.
 Eleven images in this batch, not twelve.
+
+> An A-12 was generated anyway and is held, unprocessed, at
+> `art/raw-aged-held/grandmother-older.png`. It is a good image. It is out of the sprite set
+> because the beat above is the reason the row says *skip*, and an asset sitting in
+> `art/sprites` is an invitation to wire it up and lose that. `NAMES` only maps `a-01`..`a-11`,
+> so the pipeline will not pick it up even by accident. Renaming it `a-12-*.png` and widening
+> that range is all it would take to change the decision.
+
+### The unwired bench — p13 to p24
+
+`art/sprites` holds twelve further portraits, p13 to p24, and **the prototype references none
+of them.** `REG_FACE` names six people and `WALKIN` names six more; p13 upward appear in
+neither, so no code path can draw them. An aged nurse (p14) is held at
+`art/raw-aged-held/nurse-older.png` for the same reason — ageing a portrait the game cannot
+draw in the first place is work spent one step too early. Wiring the bench in is a design
+decision about how wide the street's cast should be, not an art gap.
 
 ### ~~§B3 — Six children · K-01 to K-06~~ — CUT
 
