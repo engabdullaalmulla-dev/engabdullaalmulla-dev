@@ -10,20 +10,31 @@ backdrop sitting behind a dark wash.
 The @NN variants the pipeline exports are not referenced by the game at all; sprite() builds
 its own URL from the base name. They are skipped.
 """
-import os, shutil, re
+import os, shutil, re, json, hashlib
 from PIL import Image
+
+def icons(into):
+    """The home-screen icon, at the sizes iOS and Android each ask for."""
+    src = Image.open("app/resources/icon.png").convert("RGB")
+    for px in (180, 192, 512):
+        src.resize((px, px), Image.LANCZOS).save(os.path.join(into, "icon-%d.png" % px))
 
 SRC  = "art/sprites"
 OUT  = "dist"          # the web build, wrapped by the artifact platform
 APP  = "app/www"      # the same game as a whole document, for the native shell
+SITE = "site"         # the same document again, installable from a phone browser
 SQ, WIDE = 128, 900
+# the service worker cache name: changes whenever the game does, so a deploy replaces it
+BUILD_ID = "cafe-life-" + hashlib.sha1(
+    open("prototype/cafelife.html", "rb").read()).hexdigest()[:10]
 
 def main():
-    for d in (OUT, APP):
+    for d in (OUT, APP, SITE):
         if os.path.isdir(d):
             shutil.rmtree(d)
     os.makedirs(os.path.join(OUT, "sprites"))
     os.makedirs(APP)
+    os.makedirs(SITE)
 
     n = 0
     for f in sorted(os.listdir(SRC)):
@@ -73,9 +84,56 @@ def main():
            + head.strip() + '</head><body>' + body.strip() + '</body></html>')
     open(os.path.join(APP, "index.html"), "w", encoding="utf-8").write(doc)
 
+    # A third copy of the same game, as a site a phone can install to its home screen.
+    # This is the only way to hand the game to a tester without an Apple account, so it is
+    # not a lesser build: same sprites, same document, plus the manifest and the worker that
+    # make it launch full-screen and run with no signal.
+    shutil.copytree(os.path.join(OUT, "sprites"), os.path.join(SITE, "sprites"))
+    icons(SITE)
+    site_doc = doc.replace("</head>",
+        '<link rel="manifest" href="manifest.webmanifest">'
+        '<link rel="apple-touch-icon" href="icon-180.png">'
+        '<script>if("serviceWorker" in navigator)'
+        'addEventListener("load",function(){navigator.serviceWorker.register("sw.js")});</script>'
+        "</head>")
+    open(os.path.join(SITE, "index.html"), "w", encoding="utf-8").write(site_doc)
+    open(os.path.join(SITE, "manifest.webmanifest"), "w", encoding="utf-8").write(json.dumps({
+        "name": "Caf\u00e9 Life", "short_name": "Caf\u00e9 Life",
+        "description": "A caf\u00e9 on a UAE shopping street, run one season at a time.",
+        "start_url": ".", "scope": ".", "display": "standalone",
+        "orientation": "portrait", "background_color": "#171310", "theme_color": "#171310",
+        "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+                  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+                  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png",
+                   "purpose": "maskable"}]}, indent=2))
+    # Everything is cached on install, so a tester on a bad connection still gets a game.
+    names = ["index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png",
+             "icon-512.png"] + ["sprites/" + f for f in sorted(os.listdir(
+                 os.path.join(SITE, "sprites")))]
+    open(os.path.join(SITE, "sw.js"), "w", encoding="utf-8").write(
+        "/* Cache the whole game on install. It is 7.6MB and it never changes between\n"
+        "   deploys, so a version bump is the only thing that refetches it. */\n"
+        "const V = %r;\n" % BUILD_ID
+        + "const FILES = " + json.dumps(names) + ";\n"
+        + """self.addEventListener("install", e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).catch(() => {}));
+});
+self.addEventListener("activate", e => {
+  e.waitUntil(caches.keys().then(ks =>
+    Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() =>
+      self.clients.claim()));
+});
+self.addEventListener("fetch", e => {
+  if(e.request.method !== "GET") return;
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+});
+""")
+
     total = sum(os.path.getsize(os.path.join(dp, f))
                 for dp, _, fs in os.walk(OUT) for f in fs)
     print("%d sprites, %.1f MB -> %s (artifact) and %s (native shell)"
           % (n, total/1e6, OUT, APP))
+    print("     and %s (installable site, %s)" % (SITE, BUILD_ID))
 
 main()
