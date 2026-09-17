@@ -315,10 +315,11 @@ false positive the eye rejects instantly — a bleached-blond young man with a n
 a grey man with a moustache. The metric over-scores on brow and nose geometry, so it is a
 shortlist for looking, never the verdict.
 
-The real repair is more faces. C-25 and C-26 are the first two, and the §B1 prompt needs a
-variety clause it never had: a named, specific face per character — jaw, nose, brow, eye
-spacing — rather than a job title and an age, which is what produced one man and one woman
-re-dressed eleven times.
+The real repair is more faces. C-25 and C-26 are the first two. **§B1b at the end of this
+document has the other nine written out**, each with a named facial geometry — jaw, nose,
+brow, eye spacing — instead of the job title and age that produced one man and one woman
+re-dressed eleven times, plus the style-reference rule that five rejected photographs showed
+was needed.
 
 **Do not generate A-13.** p13 is haddad's face; ageing it would produce a second haddad.
 
@@ -547,3 +548,46 @@ cuts the grey background, trims, squares and exports the game sizes.
 Assets that are meant to be blank — F-31, S-01, S-06 — will often come back with invented
 writing on them. Regenerate rather than accepting; text baked into art cannot be translated
 into Arabic later, and this game ships in both.
+
+---
+
+## §B1b — Nine faces, each one specific · C-13r to C-28
+
+**Why this section exists.** §B1 asked for a job title and an age — *"a taxi driver in his
+fifties"* — and a generator given that will hand back its default face for that description
+every time. It did: five characters came back as one man and five as one woman. This section
+replaces the job-title prompt with a **named facial geometry** per person, because a face is
+the only thing here that has to be unrepeatable.
+
+**Two rules before any prompt below.**
+
+1. **Attach `p1.png` or `p3.png` and open with:** *"Match the art style of the attached image
+   exactly — hand-painted stylised game art, smooth skin, no photographic skin texture, no
+   depth of field."* Five images this session came back as photographs with the words
+   *hand-painted game art and not a photograph* already in the prompt. The adjective does not
+   hold; a reference image does. The four rejects are kept in `art/raw-aged-held/` as
+   examples of exactly what not to return.
+2. **Never send two of these in one conversation.** Shared context is what makes two faces
+   converge.
+
+**Close every prompt with:** *"Plain flat neutral grey background, head and shoulders,
+three-quarter view from slightly above, single warm key light from upper left, square 1:1,
+no text of any kind."*
+
+| # | Replaces | The face — this is the part that must not be reused |
+|---|---|---|
+| C-13r | p13 taxi | **Long narrow face, deep-set close-set eyes under a heavy single brow ridge, a long straight nose with a slight bump at the bridge, hollow cheeks, a thin mouth.** Late fifties, deeply weathered brown skin, cropped grey hair receding at the temples, clean-shaven. Wiry, not heavy. |
+| C-14r | p14 nurse | **Round full face, wide-set large eyes, short upturned nose, high round cheeks, a small full mouth, a soft undefined jaw.** Late thirties, warm mid-brown skin, black hair pulled into a low tight bun, no fringe. A small dark mole below the left eye. |
+| C-15r | p15 builder | **Broad square face, small eyes set wide, a flat broad nose that has been broken once, a heavy square jaw, thick neck.** Forties, dark tanned skin, black hair shaved close to the skull, thick black moustache only. |
+| C-17r | p17 lawyer | **Narrow angular face, high sharp cheekbones, straight fine brows, almond eyes set close, a thin aquiline nose, a pointed chin.** Fifties, pale olive skin, black hair in a sharp chin-length bob with a centre parting. |
+| C-19r | p19 imam | **Wide face with a broad forehead, heavy-lidded gentle eyes set far apart, a short broad nose, a wide mouth.** Seventies, very dark brown skin, a full white beard and no moustache, round wire glasses. |
+| C-21r | p21 tailor | **Small delicate face, a pointed chin, a small thin nose, arched brows, deep laugh lines from nose to mouth.** Sixties, light brown skin, fine white hair swept back from a high forehead, a neat white pencil moustache. Slight build. |
+| C-22r | p22 cabin crew | **Heart-shaped face, a wide forehead narrowing to a small chin, very large round eyes, a short straight nose, a wide expressive mouth with a gap between the front teeth.** Thirties, deep brown skin, black hair in a high sleek ponytail. |
+| C-27 | new | **Emirati man, fifties. Square face, a strong straight nose, thick straight brows almost meeting, a close-trimmed grey beard, deep-set dark eyes.** White kandura and ghutra with a black agal. *Not* p3's face — p3 is narrower with a moustache only. |
+| C-28 | new | **Young man, nineteen. Long oval face, a high forehead, wide-set dark eyes, a long straight nose, a sparse first moustache, prominent ears.** Loose dark curls, olive skin, grey hoodie. *Not* p1's face — p1 is rounder with tighter curls and a broader nose. |
+
+**Check before accepting.** Put the new face beside the regular it must not resemble — C-13r,
+C-15r, C-19r and C-21r against **p6 haddad**; C-14r against **p4 aisha**; C-17r and C-22r
+against **p9 dana**; C-27 against **p3 khalid**; C-28 against **p1**. If you hesitate for even
+a moment about whether they are the same person, regenerate. That hesitation is the whole
+defect this section exists to fix.
