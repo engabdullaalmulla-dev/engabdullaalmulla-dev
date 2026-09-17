@@ -1,14 +1,43 @@
 # Getting Café Life onto TestFlight
 
-The repository builds and uploads the app itself. What it cannot do is *be you at Apple* —
-eight secrets have to come from your developer account, and no CI can generate them. This is
-the list, in the order it is least annoying to do them.
-
-The workflow is `.github/workflows/ios-testflight.yml`. It runs on a pushed tag (`v0.2.0`) or
-from **Actions → iOS · TestFlight → Run workflow**. Its first step checks all eight secrets
-exist and stops with a list of what is missing, rather than failing later inside `xcodebuild`
-with something unreadable.
-
+> **Read this first: the pipeline in `.github/workflows/ios-testflight.yml` is the wrong
+> shape for this account.**
+>
+> `marble-ultimate-football` has already shipped to TestFlight — build 28, with an Apple
+> readback of `VALID` / `IN_BETA_TESTING`. Its route is **Expo + EAS**, not Capacitor +
+> `xcodebuild` + `altool`, and `docs/11-ios-release.md` in that repository is authoritative.
+>
+> That route is better in every way that matters here. **EAS manages the signing**, so none
+> of the certificate, `.p12`, provisioning-profile or keychain machinery below is needed —
+> and it builds on Expo's servers, so no Mac is needed either. Where this document asks for
+> eight secrets, that route asks for an `eas login`.
+>
+> **What already exists on that account** (in `marble-ultimate-football/native/eas.json` and
+> `app.json`, which is a private repository — deliberately not copied here, because this one
+> is public):
+>
+> - an Apple Team ID, under `submit.production.ios.appleTeamId`
+> - an Expo account owner, under `expo.owner`
+> - the bundle convention `com.almulla.<slug>` — which `app/capacitor.config.json` already
+>   matches with `com.almulla.cafelife`
+> - EAS build profiles `development` / `preview` / `testflight` / `production`, where
+>   `testflight` extends production signing on its own update channel
+>
+> **The one thing that does not transfer.** That game embeds itself as a single HTML string
+> (`native/src/webapp/html.js`, 1.26 MB) because a WebView given `source={{ html }}` has no
+> origin and cannot fetch siblings. Café Life is **7.6 MB of PNG sprites**, which base64
+> encodes to about 10 MB in one JavaScript string. The sprites have to be bundled assets
+> loaded over `file://` or through `expo-asset` instead. That is a solved problem, but it is
+> a different mechanism and it has not been built or tested here.
+>
+> **The Expo shell now exists**, in [`native/`](../native/), mirroring that architecture.
+> `native/README.md` is the build route. In short: `npm run webapp`, the release gate, then
+> `eas build --platform ios --profile testflight`. Two placeholders in `native/eas.json` need
+> the account's real App Store Connect app id and team id, which are in the other repository
+> and not copied here.
+>
+> The Capacitor pipeline and its eight secrets are kept below for reference. They are not the
+> route to take.
 ---
 
 ## Before any of the secrets
