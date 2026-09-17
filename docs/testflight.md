@@ -70,8 +70,24 @@
 > `info@barmajja.com`. Its Pages workflow assembles a `dist/` and refuses to deploy if
 > anything private lands in it.
 >
-> Café Life has no such pair. Writing one means a change to `barmajja`, which is outside the
-> branch this work is scoped to — so it needs your say-so before I touch it.
+> **Café Life's pair is written** and waiting on a commit in that repository, on the branch
+> `claude/cafe-life-store-pages`. Once it reaches `main` (a push to `main` there is a
+> production deploy), the two URLs to give App Store Connect are:
+>
+> - `https://www.barmajja.com/games/cafe-life/privacy.html`
+> - `https://www.barmajja.com/games/cafe-life/support.html`
+>
+> **The policy makes a claim this repository has to keep true.** It states that the app makes
+> no network requests of any kind, and says so as verified fact rather than intent, on the
+> strength of `tools/check-native.js` failing the build on a single attempted request. So that
+> gate is not optional tidiness any more — if anything ever makes the app reach the network,
+> the privacy page has to change *before* that build is distributed. The page commits us to
+> that in writing.
+>
+> Two things the pages state plainly, because a policy describing a feature the build lacks is
+> what a review rejects: this build has **no in-app reset** (`NEW()` exists but nothing calls
+> it after a save loads), so reinstalling is how a player starts over; and there are no
+> purchases of any kind.
 >
 > The Capacitor pipeline and its eight secrets are kept below for reference. They are not the
 > route to take.
