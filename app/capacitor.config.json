@@ -1,0 +1,13 @@
+{
+  "appId": "com.almulla.cafelife",
+  "appName": "Café Life",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#171310",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

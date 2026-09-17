@@ -14,13 +14,16 @@ import os, shutil, re
 from PIL import Image
 
 SRC  = "art/sprites"
-OUT  = "dist"
+OUT  = "dist"          # the web build, wrapped by the artifact platform
+APP  = "app/www"      # the same game as a whole document, for the native shell
 SQ, WIDE = 128, 900
 
 def main():
-    if os.path.isdir(OUT):
-        shutil.rmtree(OUT)
+    for d in (OUT, APP):
+        if os.path.isdir(d):
+            shutil.rmtree(d)
     os.makedirs(os.path.join(OUT, "sprites"))
+    os.makedirs(APP)
 
     n = 0
     for f in sorted(os.listdir(SRC)):
@@ -48,14 +51,31 @@ def main():
 
     head, body = html.split("</head><body>", 1)
     head = re.sub(r"^<!doctype html><html[^>]*><head>", "", head, flags=re.I)
-    head = re.sub(r"<meta[^>]*>", "", head, flags=re.I)      # the skeleton supplies these
+    head_no_meta = re.sub(r"<meta[^>]*>", "", head, flags=re.I)   # the artifact supplies these
     body = body.rsplit("</body></html>", 1)[0]
-    page = head.strip() + "\n" + body.strip() + "\n"
+    page = head_no_meta.strip() + "\n" + body.strip() + "\n"
     assert "<!doctype" not in page.lower() and "<body" not in page.lower(), "wrapper not stripped"
     open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(page)
 
+    # The native shell needs a whole document, not the artifact's stripped body, plus the
+    # viewport and status-bar bits a phone app wants. Same sprites, same game, different wrap.
+    shutil.copytree(os.path.join(OUT, "sprites"), os.path.join(APP, "sprites"),
+                    dirs_exist_ok=True)
+    doc = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+           '<meta name="viewport" content="width=device-width,initial-scale=1,'
+           'maximum-scale=1,user-scalable=no,viewport-fit=cover">'
+           '<meta name="apple-mobile-web-app-capable" content="yes">'
+           '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">'
+           '<meta name="theme-color" content="#171310">'
+           '<style>html,body{background:#171310}'
+           ':root{padding-top:env(safe-area-inset-top,0px);'
+           'padding-bottom:env(safe-area-inset-bottom,0px)}</style>'
+           + head.strip() + '</head><body>' + body.strip() + '</body></html>')
+    open(os.path.join(APP, "index.html"), "w", encoding="utf-8").write(doc)
+
     total = sum(os.path.getsize(os.path.join(dp, f))
                 for dp, _, fs in os.walk(OUT) for f in fs)
-    print("%d sprites + index.html, %.1f MB" % (n, total/1e6))
+    print("%d sprites, %.1f MB -> %s (artifact) and %s (native shell)"
+          % (n, total/1e6, OUT, APP))
 
 main()

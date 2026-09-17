@@ -1,0 +1,188 @@
+# Build Café Life as an iOS app and upload it to TestFlight.
+#
+# This needs an Apple Developer account and eight secrets (see docs/testflight.md).
+# Without them it stops at the first step with a list of what is missing, rather than
+# failing later inside xcodebuild with something unreadable.
+#
+# It does not run on every push -- TestFlight has a review queue and a build number
+# sequence, so builds are deliberate: push a tag, or run it by hand.
+name: iOS · TestFlight
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "What testers should look at in this build"
+        required: false
+        default: "Café Life test build"
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Xcode only exists on macOS runners. macos-15 carries Xcode 16, which Capacitor 8 needs.
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Check the Apple secrets are present
+        # Each is read into its own variable, because a secret is only substituted where it is
+        # named. An earlier version tried to loop over a JSON blob of them and silently
+        # reported everything missing.
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          missing=""
+          for k in APPLE_TEAM_ID BUILD_CERTIFICATE_BASE64 P12_PASSWORD \
+                   PROVISIONING_PROFILE_BASE64 KEYCHAIN_PASSWORD \
+                   APPSTORE_API_KEY_ID APPSTORE_API_ISSUER_ID APPSTORE_API_PRIVATE_KEY; do
+            eval "v=\${$k}"
+            [ -z "$v" ] && missing="$missing $k"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Cannot build for TestFlight. Missing repository secrets:$missing"
+            {
+              echo "### Not built"
+              echo "These repository secrets are not set:"
+              for m in $missing; do echo "- \`$m\`"; done
+              echo ""
+              echo "docs/testflight.md says where each one comes from."
+            } >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "All eight Apple secrets present."
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Build the web game
+        run: |
+          python3 -m pip install --quiet --break-system-packages Pillow
+          python3 tools/build-web.py
+          test -f app/www/index.html
+
+      - name: Install Capacitor and generate the Xcode project
+        working-directory: app
+        run: |
+          npm ci
+          npx cap add ios          # not committed: regenerated from capacitor.config.json
+          npx cap sync ios
+
+      - name: App Store settings Capacitor does not write itself
+        working-directory: app/ios/App/App
+        run: |
+          P=Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Café Life" $P
+          # a tag of v0.2.0 is a marketing version of 0.2.0; Apple rejects the leading v
+          VER="${{ github.ref_type == 'tag' && github.ref_name || '0.1.0' }}"
+          VER="${VER#v}"
+          case "$VER" in ''|*[!0-9.]*) VER=0.1.0 ;; esac
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VER" $P
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ github.run_number }}" $P
+          # the game is a phone game, held upright
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations~ipad" $P 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations" $P 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations array" $P
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" $P
+          /usr/libexec/PlistBuddy -c "Add :UIRequiresFullScreen bool true" $P 2>/dev/null || true
+          plutil -lint $P
+
+      - name: Icons and launch screen
+        working-directory: app
+        run: npx @capacitor/assets generate --ios --assetPath resources
+
+      - name: Import the signing certificate and profile
+        env:
+          CERT_B64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          PROFILE_B64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          KEYCHAIN=$RUNNER_TEMP/build.keychain-db
+          echo "$CERT_B64"    | base64 --decode > $RUNNER_TEMP/cert.p12
+          echo "$PROFILE_B64" | base64 --decode > $RUNNER_TEMP/profile.mobileprovision
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN
+          security set-keychain-settings -lut 21600 $KEYCHAIN
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN
+          security import $RUNNER_TEMP/cert.p12 -P "$P12_PASSWORD" -A \
+            -t cert -f pkcs12 -k $KEYCHAIN
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN
+          security list-keychain -d user -s $KEYCHAIN
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' \
+            /dev/stdin <<< "$(security cms -D -i $RUNNER_TEMP/profile.mobileprovision)")
+          cp $RUNNER_TEMP/profile.mobileprovision \
+            ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+          echo "PROFILE_UUID=$UUID" >> $GITHUB_ENV
+
+      - name: Archive
+        working-directory: app/ios/App
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -configuration Release -sdk iphoneos -archivePath $RUNNER_TEMP/App.xcarchive \
+            CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=$TEAM_ID \
+            PROVISIONING_PROFILE_SPECIFIER=$PROFILE_UUID \
+            CODE_SIGNING_ALLOWED=YES archive
+
+      - name: Export the ipa
+        working-directory: app/ios/App
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cat > $RUNNER_TEMP/export.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>uploadSymbols</key><true/>
+            <key>signingStyle</key><string>manual</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath $RUNNER_TEMP/App.xcarchive \
+            -exportOptionsPlist $RUNNER_TEMP/export.plist \
+            -exportPath $RUNNER_TEMP/export
+
+      - name: Upload to TestFlight
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+          IPA=$(ls $RUNNER_TEMP/export/*.ipa | head -1)
+          xcrun altool --upload-app -f "$IPA" -t ios \
+            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+          echo "Uploaded build ${{ github.run_number }} to TestFlight." >> $GITHUB_STEP_SUMMARY
+          echo "It has to finish processing in App Store Connect before testers see it." >> $GITHUB_STEP_SUMMARY
+
+      - name: Keep the ipa on the run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cafe-life-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: ignore
+
+      - name: Tear the keychain down
+        if: always()
+        run: security delete-keychain $RUNNER_TEMP/build.keychain-db || true

@@ -1,0 +1,18 @@
+{
+  "name": "cafe-life",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Café Life — a café on a UAE shopping street, run one season at a time.",
+  "scripts": {
+    "build": "python3 ../tools/build-web.py",
+    "sync": "cap sync ios"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.2"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  }
+}
