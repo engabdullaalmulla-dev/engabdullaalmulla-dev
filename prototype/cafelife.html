@@ -885,25 +885,59 @@ function screenShop(from){
 }
 
 const INV_A = ["House","Corner","Morning","Street","Family","Late","Old","Second"];
-const INV_B = ["karak","blend","cup","plate","special","pour","tea"];
+/* Eleven dishes were drawn and never put on a menu. Invention is one of the two uncapped
+   sinks -- the thing a player keeps doing forever -- so it was also the one part of the game
+   that ran out of art and fell back to the emoji. Each invention now takes the next unused
+   plate and is named for it: "House kunafa" reads as your version of a real thing, which is
+   what inventing a recipe in a cafe actually is. Past the eleventh the list wraps, so a
+   long dynasty does repeat a dish -- but the name and the picture never disagree, which
+   a fallback to the base recipe's sprite could not promise: it happily served a qahwa
+   plate under the name "Street pour".
+
+   The tags are the dish's own, not the base recipe's. That is a balance change as well as
+   a cosmetic one: inheriting meant an owner who only knew hot drinks could never invent a
+   cold one, so Summer -- the one season that wants ["cold","cold"] -- could only ever be
+   answered by something bought from the shop. Now jallab and rose lemonade are reachable
+   by inventing, which is the point of an uncapped sink. It also stops the board printing
+   WARM under a picture of an iced drink, which the emoji was hiding. */
+const INVENTABLE = [
+  {sp:"kunafa",   n:"kunafa",                 tags:["sweet","share"]},
+  {sp:"balaleet", n:"balaleet",               tags:["sweet","fill"]},
+  {sp:"chebab",   n:"chebab",                 tags:["warm","sweet"]},
+  {sp:"khameer",  n:"khameer",                tags:["savoury","fill"]},
+  {sp:"basbousa", n:"basbousa",               tags:["sweet","share"]},
+  {sp:"jallab",   n:"jallab",                 tags:["cold","sweet"]},
+  {sp:"roselem",  n:"rose lemonade",          tags:["cold","light"]},
+  {sp:"camelcap", n:"camel-milk cappuccino",  tags:["warm","slow"]},
+  {sp:"sahlab",   n:"sahlab",                 tags:["warm","sweet"]},
+  {sp:"maamoul",  n:"maamoul",                tags:["sweet","quick"]},
+  {sp:"qahwa",    n:"qahwa",                  tags:["warm","light"]}
+];
 function invent(){
   const n = G.cookbook.filter(c => c.invented).length;
   const base = pick(Object.keys(RECIPES).filter(k => G.recipes.indexOf(k) >= 0));
   const src = RECIPES[base];
   const k = "own" + n + "_" + G.gen;
-  RECIPES[k] = {nm: pick(INV_A) + " " + pick(INV_B), ic: src.ic,
+  const inv = INVENTABLE[n % INVENTABLE.length];
+  RECIPES[k] = {nm: pick(INV_A) + " " + inv.n, ic: src.ic,
                 cost: Math.round(src.cost * 1.1),
                 price: Math.round(src.price * (1.35 + n*0.06)),
-                tags: src.tags.slice(), buy:0};
+                tags: inv.tags.slice(), buy:0};
+  SPRITE[k] = inv.sp;
   G.recipes.push(k);
   G.cookbook.push({k:k, nm:RECIPES[k].nm, by:G.owner.nm, year:G.year, gen:G.gen,
                    invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
-                   tags:RECIPES[k].tags, ic:RECIPES[k].ic});
+                   tags:RECIPES[k].tags, ic:RECIPES[k].ic, sp:SPRITE[k]});
 }
 /* recipes invented by earlier generations have to be put back on load */
 function rehydrate(){
-  (G.cookbook||[]).forEach(c => { if(c.invented && !RECIPES[c.k])
-    RECIPES[c.k] = {nm:c.nm, ic:c.ic, cost:c.cost, price:c.price, tags:c.tags, buy:0}; });
+  (G.cookbook||[]).forEach(c => {
+    if(c.invented && !RECIPES[c.k])
+      RECIPES[c.k] = {nm:c.nm, ic:c.ic, cost:c.cost, price:c.price, tags:c.tags, buy:0};
+    // a save from before inventions had plates has no c.sp; those keep the emoji, which is
+    // what that save always drew, rather than being silently given someone else's dish
+    if(c.invented && c.sp) SPRITE[c.k] = c.sp;
+  });
 }
 
 /* ============================== the regulars =============================== */
