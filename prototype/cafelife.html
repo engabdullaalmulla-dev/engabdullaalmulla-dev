@@ -96,6 +96,14 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
 .g .pay{margin-left:auto;font-family:"DM Mono",monospace;font-weight:500;font-size:14px}
 .g.miss{opacity:.62}
 .g.tapped{border-color:var(--green)}
+/* the three visits you have today, spent left to right */
+.visits{display:flex;align-items:center;gap:6px;padding:2px 16px 8px;flex:none}
+.visits i{width:9px;height:9px;border-radius:50%;background:var(--panel-2);
+          border:1px solid var(--edge-2);transition:background .2s}
+.visits i.on{background:var(--amber);border-color:var(--amber)}
+.visits .lbl{margin-left:4px}
+.g.nudge{animation:nudge .4s ease}
+@keyframes nudge{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .float{position:absolute;font-family:"DM Mono",monospace;font-weight:500;font-size:14px;
        pointer-events:none;animation:up 1s ease-out forwards}
 @keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-38px)}}
@@ -257,11 +265,11 @@ const ITEMS = {
   /* Repriced against what the café actually earns. At 1800 / 1400 / 4200 / 9000 a bot
      playing well never once reached upstairs, a manager, a branch or the freehold in
      thirty years, in any of sixteen runs -- see tools/sim.js. */
-  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:1200, max:1, d:"Twice the room. A different kind of café.",
+  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:2600, max:1, d:"Twice the room. A different kind of café.",
             f:g=>{g.seats+=6; g.dwell+=0.2}},
   barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:2, d:"Serves alongside you. Wages every season.",
             f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda"]),role:"barista",wage:120})},
-  manager: {nm:"Hire a manager", ic:"🗂️", cost:1050, max:1, d:"Can run a season without you. Wages every season.",
+  manager: {nm:"Hire a manager", ic:"🗂️", cost:3200, max:1, d:"Can run a season without you. Wages every season.",
             f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager",wage:260}); g.canSkip=true}},
   /* Six of the sixteen unsold fittings become things you buy. Each does one thing the shop
      did not already do, because a second item that adds mood is padding, not depth. The other
@@ -278,10 +286,10 @@ const ITEMS = {
             f:g=>g.warmLift+=0.06},
   pendant: {nm:"Pendant lights", ic:"💡", cost:380,  max:1, d:"The room stops being lit like a shop.",
             f:g=>g.mood+=2},
-  freehold:{nm:"Buy the building",ic:"🏠", cost:5600, max:1,
+  freehold:{nm:"Buy the building",ic:"🏠", cost:95000, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
-  branch:  {nm:"Open a branch",  ic:"🏪", cost:1900, max:99, pow:1.7, d:"Another café, another street, its own regulars.",
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:9000, max:99, pow:1.9, d:"Another café, another street, its own regulars.",
             f:g=>g.branches.push(newBranch(g, g.branches.length))}
 };
 
@@ -718,7 +726,12 @@ function branchTake(br){
 }
 
 function visitsFor(c){
-  if(c.reg) return Math.min(80, 22 + regState(c.reg.k).warmth*4);
+  /* One shown face is that person's whole season, so a regular is worth many cups. It was
+     up to eighty, and four of the six have a premium usual -- Khalid drinks saffron karak --
+     so six faces could turn over more than the hundred and sixty strangers behind them, and
+     the café's income stopped having anything to do with how many seats it had. Thirty is
+     still most weeks of a season and still worth far more than a passer-by. */
+  if(c.reg) return Math.min(30, 9 + regState(c.reg.k).warmth*2);
   return 1 + Math.floor(Math.random()*3);
 }
 /* A barista's card says "Serves alongside you" and for a long time that was simply untrue:
@@ -760,36 +773,86 @@ function serveOne(c){
     else if(G.board.length && Math.random() < 0.45) k = pick(G.board);
   }
   if(!k) return {k:null, pay:0, visits:0};
-  const n = visitsFor(c), p = priceOf(k);
+  /* A regular comes in for their usual. Served something else they still come, but nowhere
+     near as often. Without this the board is not a choice at all -- it is a sort by price,
+     because six regulars at up to eighty visits each will happily buy whatever the dearest
+     thing on it happens to be, and they were: that is 788,000 by year thirty, and it is the
+     same runaway an earlier fix went after from the rent side and never reached. Their
+     usual is the point of them. */
+  const offUsual = !!(c.reg && c.want && k !== c.want);
+  const n = Math.max(1, Math.round(visitsFor(c) * (offUsual ? 0.28 : 1)));
+  const p = priceOf(k);
   const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut) * (1 + dwellNow()));
-  return {k:k, pay:p*n, visits:n, profit:profit};
+  return {k:k, pay:p*n, visits:n, profit:profit, offUsual:offUsual};
 }
+
+/* A season run by the manager returns less than one you work yourself. That was already true
+   -- the two paths quietly differed by this much -- but it was a bare 0.72 sitting in one of
+   them, so it read as a typo rather than a rule. It is a rule: she is good, she is not you. */
+const MANAGER_CUT = 0.72;
+
+/* How many people you actually watch come in. The rest of the day's custom is resolved off
+   screen and counted the same, because a season of 164 faces at two thirds of a second each
+   is a hundred seconds of watching a list, and the café was punished for doing well: the
+   better it did, the longer you sat there. Nine is a scene. The regulars are always in it --
+   with a queue of 133 there was one regular in it, which is the exact opposite of a game
+   about coming to know six people. */
+const CAST = 9;
 
 function runService(auto){
   const q = buildQueue();
-  SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null};
+  SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null,
+        visits:VISITS, offstage:0};
   if(auto){
     q.forEach(c => { const r = serveOne(c);
-      if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*0.72); SV.served++;
+      if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*MANAGER_CUT); SV.served++;
                if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
       else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
     closeSeason(true); return;
   }
+
+  /* every regular who came, then enough walk-ins to fill the scene */
+  const regs = q.filter(c => c.reg), walk = q.filter(c => !c.reg);
+  const fill = Math.max(2, CAST - regs.length);
+  const shown = regs.concat(walk.slice(0, fill));
+  for(let i = shown.length - 1; i > 0; i--){                 // don't deal the regulars first
+    const j = Math.floor(Math.random()*(i+1)); const t = shown[i]; shown[i] = shown[j]; shown[j] = t;
+  }
+  walk.slice(fill).forEach(c => {                            // the rest of the day, off screen
+    const r = serveOne(c);
+    SV.offstage++;
+    if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; }
+    else SV.missed++;
+  });
+  SV.q = shown;
   const v = $("s-serve"); v.textContent = "";
   const top = el("div","svc-top");
   top.appendChild(el("div","lbl", season().nm + " " + G.year));
   const take = el("div","mid-t cash","0 AED"); take.id = "sv-take"; top.appendChild(take);
   v.appendChild(top);
+  const vis = el("div","visits"); vis.id = "sv-visits"; v.appendChild(vis);
+  paintVisits();
   const tick = el("div","tick"); const ti = el("i"); ti.id = "sv-tick"; tick.appendChild(ti);
   v.appendChild(tick);
   const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
   const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
-  foot.appendChild(el("div","hint","Tap someone to go over and say something. It is worth "
-    + "nothing on the till and everything to them."));
+  foot.appendChild(el("div","hint","You have time to go over to " + VISITS + " people this "
+    + "season. It is worth almost nothing on the till and it is the only thing that moves "
+    + "anyone's story."));
   v.appendChild(foot);
   show("serve");
-  SV.timer = setInterval(step, 620);
+  SV.timer = setInterval(step, 780);
   step();
+}
+
+/* Three, because two is not a choice and five is everyone. */
+const VISITS = 3;
+function paintVisits(){
+  const el2 = $("sv-visits"); if(!el2) return;
+  el2.textContent = "";
+  for(let i = 0; i < VISITS; i++)
+    el2.appendChild(el("i", i < SV.visits ? "on" : ""));
+  el2.appendChild(el("span","lbl", SV.visits ? SV.visits + " left to visit" : "no time left today"));
 }
 
 function step(){
@@ -807,6 +870,7 @@ function step(){
   const mid = el("div"); mid.style.flex = "1"; mid.style.minWidth = "0";
   mid.appendChild(el("div","nm", c.reg ? c.reg.nm : "Someone"));
   mid.appendChild(el("div","want", r.k ? RECIPES[r.k].nm + " ×" + r.visits
+    + (r.offUsual ? " — settled for it" : "")
     : (c.reg ? "wanted " + RECIPES[c.reg.usual].nm + " — not on the board"
              : "wanted something " + c.tag + " — walked")));
   g.appendChild(mid);
@@ -818,6 +882,8 @@ function step(){
 
   g.onclick = () => {
     if(g.classList.contains("tapped")) return;
+    if(SV.visits <= 0){ g.classList.add("nudge"); setTimeout(()=>g.classList.remove("nudge"), 400); return; }
+    SV.visits--; paintVisits();
     g.classList.add("tapped");
     const tip = r.k ? Math.round(r.pay*0.04)+2 : 0;
     SV.tips += tip; SV.take += tip;
@@ -830,7 +896,7 @@ function step(){
   };
 
   list.insertBefore(g, list.firstChild);
-  while(list.children.length > 7) list.lastChild.remove();
+  while(list.children.length > CAST) list.lastChild.remove();
   $("sv-take").textContent = money(SV.take) + " AED";
   $("sv-tick").style.width = Math.round(SV.i/SV.q.length*100) + "%";
 
@@ -918,6 +984,9 @@ function closeSeason(auto){
   const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
     r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
   st("Served", String(SV.served), "good");
+  /* the till counts everyone, so say plainly that most of them came and went while you
+     were busy -- otherwise the takings look larger than the nine people you watched */
+  if(SV.offstage) st("Of those, came and went while you worked", String(SV.offstage));
   if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
   if(SV.tips) st("Tips", "+" + money(SV.tips), "cash");
   st("Takings", money(SV.take) + " AED", "cash");

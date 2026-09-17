@@ -37,7 +37,22 @@ const ORDER = [
   await p.waitForTimeout(300);
 
   const res = await p.evaluate(([YEARS, RUNS, POLICY, ORDER]) => {
+    /* Recipes are bought on the shop screen, not out of ITEMS, so a bot that only walks ITEMS
+       never buys one and the café sells karak, mint and its own inventions forever. That is
+       not a café anyone runs, and it also means five of the six regulars can never appear:
+       their usuals are espresso, iced, regag, shake and saffron, all of which cost money. */
+    function buyRecipes(bought){
+      for(let guard = 0; guard < 8; guard++){
+        const next = Object.keys(RECIPES)
+          .filter(k => RECIPES[k].buy > 0 && G.recipes.indexOf(k) < 0)
+          .sort((a,b) => RECIPES[a].buy - RECIPES[b].buy)[0];
+        if(!next || RECIPES[next].buy > G.cash - 250) return;
+        G.cash -= RECIPES[next].buy; G.recipes.push(next);
+        bought["recipe:" + next] = 1;
+      }
+    }
     function spend(bought, first){
+      buyRecipes(bought);
       if(POLICY === "saver"){
         for(let guard = 0; guard < 30; guard++){
           let target = null, seen = {};
@@ -91,7 +106,17 @@ const ORDER = [
         setBoard();
         const before = G.cash;
         runService(true);
-        if(POLICY !== "greedy"){ G.cash += Math.round(G.lastTake*0.04); G.rep += 1; }
+        /* runService(true) is the manager running the season, and she returns MANAGER_CUT of
+           the profit. Everything here was measured on that path, which quietly understated a
+           person playing by about 39%. A "good" or "saver" bot is a person at the counter, so
+           it takes the rest back, and earns the three visits' worth of tips a season now
+           allows rather than a flat 4% of everything. */
+        if(POLICY !== "greedy"){
+          G.cash += Math.round(SV.profit * (1/MANAGER_CUT - 1));
+          const perHead = SV.served ? SV.take / SV.served : 0;
+          G.cash += Math.round(VISITS * (perHead*0.04 + 2));
+          G.rep += 1;
+        }
         // "affordable" is the honest target: the first year the cash on hand would cover it,
         // whatever this bot's build order happens to be reaching for at the time
         for(const k of ["upstairs","manager","branch","freehold"])

@@ -388,3 +388,56 @@ sixty years lands around 100,000 with the invention cost curve absorbing the sur
 
 All four in 16/16 runs. A careless player — never matching the board to the season, never
 tapping — still ends year 30 at −6,550 with reputation at −62 and reaches none of it.
+
+## The service is a scene now — and two measurements that were worthless
+
+### What changed
+
+A season was up to 164 guests at 620ms each: **102 seconds of watching a list**, and the
+better the café did the longer you sat there. Three changes:
+
+- **Nine people, not a hundred and sixty.** Every regular who came, plus enough walk-ins to
+  fill the scene. The rest of the day is resolved off screen and counted the same; the close
+  screen says how many came and went while you worked. A season is about seven seconds.
+- **Three visits a season.** Tapping had no limit and no cost, so the optimal play was to tap
+  all 12,892 people across a dynasty. A choice with one dominant option is a chore with a
+  heart on it. Three is a decision.
+- **The regulars are always in the scene.** At a queue of 133 there was one regular in it,
+  which is the exact opposite of a game about coming to know six people.
+
+Also named `MANAGER_CUT`. A season run by the manager returned 72% of the profit and a season
+you worked returned all of it — true, and reasonable, but it was a bare `0.72` in one of two
+paths that otherwise looked identical.
+
+### Two measurements that were worthless
+
+**The bot never bought a recipe.** Recipes are bought on the shop screen, not out of `ITEMS`,
+so every economy number in this document above was measured on a café selling karak, mint and
+its own inventions — for thirty years. With the shop actually used, takings go from about
+2,000 a season to **over 20,000**, and the entire cost side is priced for the wrong game.
+**Year 30 lands at 520,000–780,000: the 751,000 runaway was never fixed, only hidden.**
+
+**And five of the six regulars could never appear.** A regular only comes in when their usual
+is on the board, and four usuals — espresso, iced, shake, saffron — are recipes you buy. A bot
+that never bought one met Noor and nobody else. Every claim above about stories was made
+against a café one person visited.
+
+With recipes bought, all six are met and **all six stories finish by 2001**. Each regular has
+five beats, gated on `warmth < (beat+1)*2`, and warmth climbs two or three a season — so
+thirty beats of writing are consumed in five years of a game meant to run for thirty, and
+after that the arcs recycle with a new face and a cycle number.
+
+### What is actually fixed, and what is not
+
+Fixed, and both were real design faults rather than numbers: a regular served something other
+than their usual now comes far less often, so the board is a choice about people instead of a
+sort by price; and a regular's season is capped at 30 visits rather than 80, so six faces can
+no longer out-earn the hundred and sixty strangers behind them.
+
+**Not fixed: the economy.** The late-game prices were moved again (upstairs 2,600, manager
+3,200, branch 9,000, freehold 95,000 — the freehold removes 7% of takings forever and at
+18,000 paid for itself in three years) but they are provisional. The cost side needs deriving
+against a café that sells real recipes, not nudging. **Do not trust any number in the sections
+above this one.**
+
+**Not fixed: story pacing.** Thirty beats will not carry a thirty-year game.
