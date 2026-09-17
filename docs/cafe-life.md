@@ -489,3 +489,43 @@ The gate is `(beat+1)*35` now. A beat lands every eight or nine years, so a stor
 length of a working life. Measured over twelve runs: all six regulars are met, median first
 meeting 2001 as the menu grows wide enough for them to come in, **five of six stories finish
 inside thirty years, median 2022** — and one is still going when the generation turns over.
+
+## The growth curve
+
+Measured year by year rather than at five-year checkpoints, the shape was three phases and
+only one of them was a game:
+
+| | years | growth | what was happening |
+|---|---|---|---|
+| crawl | 1996–2000 | ×1.0 | two seats, rent and running costs taking half of everything |
+| takeoff | 2001–2005 | ×1.6 to ×2.3 | the seat ladder, bought all at once the moment money appeared |
+| **flat** | **2006–2022** | **×1.0** | thirty-two seats, 166 guests, seventeen years of nothing |
+
+The flat stretch was the real problem — more than half the game, and nothing moving. The cause
+was that **a branch earned a flat 180 a season** whatever the business had become, so opening
+one on takings of 34,000 moved the books by half a per cent. There was simply nothing left to
+grow once the room was full.
+
+A branch is the same café on another street, so it now earns a share of what you have learned
+to earn — 10% of the season's takings, each one after the first doing a little worse because
+you are not standing in it. That makes expansion carry the second half of the game, which is
+what an uncapped sink is supposed to do. At 30% it was a new runaway (8.4 million by year 60);
+at 10%, with a branch at 48,000, the payback is about three years and year 60 lands near a
+million on takings of 60,000.
+
+The crawl was rent: a flat 80 a season for having a door, which a two-stool café taking 245
+could not carry. It is 34 now, with more of the charge on the size of the room.
+
+| | years | growth |
+|---|---|---|
+| climb | 1996–2000 | ×1.5 to ×1.6 |
+| takeoff | 2001–2004 | ×1.9 to ×2.7 |
+| the long middle | 2005–2022 | ×1.05 average, never flat |
+
+The takeoff is still steep, and that is left alone on purpose: four years where the café
+suddenly works is a thing happening, not a fault. The old shape's problem was the seventeen
+years of nothing after it.
+
+Unlocks after the change, 16/16 runs: upstairs 2002 (target 2003), manager 2002 (2005),
+branch 2008 (2010), freehold 2016 (2017). Stories: all six met, **all six finished inside
+thirty years**, median 2021. A careless bot still ends year 30 at −390 on five seats.

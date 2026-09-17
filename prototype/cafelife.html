@@ -286,10 +286,10 @@ const ITEMS = {
             f:g=>g.warmLift+=0.06},
   pendant: {nm:"Pendant lights", ic:"💡", cost:380,  max:1, d:"The room stops being lit like a shop.",
             f:g=>g.mood+=2},
-  freehold:{nm:"Buy the building",ic:"🏠", cost:95000, max:1,
+  freehold:{nm:"Buy the building",ic:"🏠", cost:150000, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
-  branch:  {nm:"Open a branch",  ic:"🏪", cost:34000, max:99, pow:1.95, d:"Another café, another street, its own regulars.",
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:48000, max:99, pow:1.9, d:"Another café, another street, its own regulars.",
             f:g=>g.branches.push(newBranch(g, g.branches.length))}
 };
 
@@ -463,7 +463,11 @@ function heatNow(){
    and never becomes a fountain. Flat rent was why cash hit six figures by year ten. */
 /* Seats were 11 a season each. A seat buys trade, so it has to be worth more than it costs
    to keep, and at 11 the ladder to a full room barely paid for itself. */
-const rentNow = () => Math.round((80 + G.seats*9 + G.branches.length*130) * infl()
+/* The base was 80 a season, which a two-stool café taking 245 could not carry: rent and
+   running costs ate half of everything and the first five years went nowhere. Rent belongs
+   mostly on the size of the room and the trade going through it, not on a flat charge for
+   having a door. */
+const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl()
                         + (own("freehold") ? 0 : G.lastTake * 0.07));
 /* A wage was a fixed 120 or 260 a season whatever the café had become, so by 2020 the whole
    payroll was 716 against takings of 35,664 -- two per cent, where a real café spends about a
@@ -739,8 +743,14 @@ function screenPlan(){
 
 /* ============================== service ============================== */
 function branchTake(br){
+  /* A branch used to be a flat 180 a season however big the business got, so by 2006 -- with
+     the main room maxed at thirty-two seats and the queue capped -- opening one moved the
+     books by about one per cent and the next seventeen years were flat. A branch is the same
+     café on another street: it earns a share of what you have learned to earn, which is what
+     makes expansion the thing that carries a thirty-year game after the room itself is full.
+     Each one after the first does a little worse, because you are not standing in it. */
   const i = G.branches.indexOf(br);
-  return Math.round(180 * br.yield * infl() * Math.pow(0.88, i) * (1 + G.rep*0.006));
+  return Math.round(G.lastTake * 0.10 * br.yield * Math.pow(0.80, i) * (1 + G.rep*0.004));
 }
 
 function visitsFor(c){
