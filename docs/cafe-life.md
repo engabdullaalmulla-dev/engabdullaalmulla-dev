@@ -441,3 +441,51 @@ against a café that sells real recipes, not nudging. **Do not trust any number 
 above this one.**
 
 **Not fixed: story pacing.** Thirty beats will not carry a thirty-year game.
+
+
+## The economy, derived rather than guessed
+
+Measured against a café that actually buys recipes. Four faults, in the order they mattered:
+
+**Profit exceeded takings.** `dwell` multiplied the margin and not the till, so by 2006 the
+café made 25,517 on takings of 17,709 — money that never crossed the counter. Dwell is people
+staying longer and buying more, so it belongs on the *number of cups*. It does now, and it
+shows up in both figures.
+
+**Staff were optional and nearly free.** The whole payroll was 716 a season against takings of
+35,664 — two per cent, where a real café spends about a third — and nothing forced you to hire
+anyone, because throughput was capped by seats. Now one person serves 42 customers a season
+and everyone past that walks: you, plus each barista, plus the manager. A wage also scales
+with the room, because a barista in a thirty-two seat café is not doing the job a barista in a
+room with two stools is doing. Baristas go to six.
+
+**Nothing paid for the lights.** Rent, wages and what went in the cup were the only money
+leaving, so the café kept 56% of everything it took. Real ones keep five to fifteen. Running
+costs — power, water, gas, cleaning, licences, the things that break — are 15% of takings plus
+a little per seat, and they are on the close screen by name.
+
+**The freehold paid for itself in three years.** It removes 7% of takings forever; at 18,000
+against takings of 20,000 a season that was the best purchase in the game by an order of
+magnitude. A building costs 95,000 now, and a branch 34,000.
+
+| unlock | affordable | target |
+|---|---|---|
+| upstairs | 2004 | 2003 |
+| manager | 2004 | 2005 |
+| branch | 2009 | 2010 |
+| freehold | 2017 | 2017 |
+
+All four in 16/16 runs. Year 30 ends near 130,000 against takings of 34,000 a season — about
+four seasons of trade in the bank, where the old runaway was 751,000 against takings of 2,000.
+A careless bot still ends year 30 at −2,511, stuck at four seats.
+
+## Thirty beats across thirty years
+
+Each regular has five beats, gated on `warmth < (beat+1)*2`. Warmth climbs about two a season,
+so every story finished by 2001 and the arcs then recycled with a new face and a cycle number
+— the whole of the writing spent in five years of a thirty-year game.
+
+The gate is `(beat+1)*35` now. A beat lands every eight or nine years, so a story runs the
+length of a working life. Measured over twelve runs: all six regulars are met, median first
+meeting 2001 as the menu grows wide enough for them to come in, **five of six stories finish
+inside thirty years, median 2022** — and one is still going when the generation turns over.

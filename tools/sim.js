@@ -21,8 +21,8 @@ const pad = (s, n) => String(s).padStart(n);
 const ORDER = [
   "sign", "stool", "case_", "stool", "grinder", "slot", "table", "stool", "dallah",
   "radio", "plant", "stool", "awning", "stool_pad", "table", "stool", "aircon", "slot", "juicer",
-  "stool", "barista", "backroom", "stool", "table_lg", "pendant", "outdoor", "table", "stool", "plant", "slot",
-  "stool", "upstairs", "stool", "barista", "manager", "plant", "slot", "slot",
+  "stool", "barista", "barista", "backroom", "stool", "table_lg", "pendant", "outdoor", "table", "stool", "plant", "slot",
+  "stool", "upstairs", "stool", "barista", "manager", "barista", "barista", "plant", "slot", "slot",
   "branch", "freehold", "branch", "branch", "branch", "branch", "branch"
 ];
 

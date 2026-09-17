@@ -267,10 +267,10 @@ const ITEMS = {
      thirty years, in any of sixteen runs -- see tools/sim.js. */
   upstairs:{nm:"Open upstairs",  ic:"🪜", cost:2600, max:1, d:"Twice the room. A different kind of café.",
             f:g=>{g.seats+=6; g.dwell+=0.2}},
-  barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:2, d:"Serves alongside you. Wages every season.",
-            f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda"]),role:"barista",wage:120})},
+  barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:6, d:"Another pair of hands. Nobody can serve a full room alone. Wages every season.",
+            f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda","Noura","Bilal"]),role:"barista"})},
   manager: {nm:"Hire a manager", ic:"🗂️", cost:3200, max:1, d:"Can run a season without you. Wages every season.",
-            f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager",wage:260}); g.canSkip=true}},
+            f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager"}); g.canSkip=true}},
   /* Six of the sixteen unsold fittings become things you buy. Each does one thing the shop
      did not already do, because a second item that adds mood is padding, not depth. The other
      ten are dressing: see DRESSING below, where they appear as the café earns them. */
@@ -289,7 +289,7 @@ const ITEMS = {
   freehold:{nm:"Buy the building",ic:"🏠", cost:95000, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
-  branch:  {nm:"Open a branch",  ic:"🏪", cost:9000, max:99, pow:1.9, d:"Another café, another street, its own regulars.",
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:34000, max:99, pow:1.95, d:"Another café, another street, its own regulars.",
             f:g=>g.branches.push(newBranch(g, g.branches.length))}
 };
 
@@ -465,7 +465,25 @@ function heatNow(){
    to keep, and at 11 the ladder to a full room barely paid for itself. */
 const rentNow = () => Math.round((80 + G.seats*9 + G.branches.length*130) * infl()
                         + (own("freehold") ? 0 : G.lastTake * 0.07));
-const staffWage = () => Math.round(G.staff.reduce((a,s)=>a+s.wage,0) * infl());
+/* A wage was a fixed 120 or 260 a season whatever the café had become, so by 2020 the whole
+   payroll was 716 against takings of 35,664 -- two per cent, where a real café spends about a
+   third. A barista in a thirty-two seat room is not doing the same job as a barista in a room
+   with two stools, and is not paid the same either. */
+const wageOf = s => Math.round((s.role === "manager" ? 220 + G.seats*40 : 100 + G.seats*18) * infl());
+const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
+
+/* You can only get to so many people yourself. Everyone past that waits, gives up and walks,
+   which is the entire point of hiring somebody -- and is what makes the wage bill something
+   you cannot simply decline to pay. The manager works the floor too. */
+/* Rent, wages and what goes in the cup were the only money leaving the café, so it kept
+   about fifty-six per cent of everything it took. A real one keeps five to fifteen: the rest
+   goes on power, water, gas, cleaning, licences, insurance and the things that break. It
+   scales with how much you are doing and how big the room is, and it is on the close screen
+   by name, because a player who cannot see a cost cannot plan around it. */
+const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl());
+
+const SERVE_EACH = 42;
+const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
 const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
 /* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
 function costOfItem(k, have){
@@ -744,8 +762,8 @@ function buildQueue(){
   /* The cap was seats*3+6, which bound from the very first season and meant the queue
      formula below never got to say anything. It is a backstop against runaway trade, not
      the thing that should be setting the day's custom, so it sits above the formula now. */
-  const n = Math.max(6, Math.min(G.seats*5 + 6,
-            Math.round((8 + G.seats*2 + baristas()*9) * G.foot * heatNow() * (1 + G.rep*0.012))));
+  const n = Math.max(6, Math.min(G.seats*5 + 6, hands() * SERVE_EACH,
+            Math.round((8 + G.seats*2) * G.foot * heatNow() * (1 + G.rep*0.012))));
   const q = [];
   /* regulars come first -- they are the reason the place works */
   REGULARS.forEach(r => {
@@ -780,9 +798,13 @@ function serveOne(c){
      same runaway an earlier fix went after from the rent side and never reached. Their
      usual is the point of them. */
   const offUsual = !!(c.reg && c.want && k !== c.want);
-  const n = Math.max(1, Math.round(visitsFor(c) * (offUsual ? 0.28 : 1)));
+  /* Dwell is people staying longer and so buying more, which means it belongs on the number
+     of cups, not on the margin of each one. It was multiplying profit and not pay, so a café
+     with comfortable chairs earned money that never crossed the till -- by 2006 profit was
+     25,517 against takings of 17,709, which is not a thing a shop can do. */
+  const n = Math.max(1, Math.round(visitsFor(c) * (offUsual ? 0.28 : 1) * (1 + dwellNow())));
   const p = priceOf(k);
-  const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut) * (1 + dwellNow()));
+  const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut));
   return {k:k, pay:p*n, visits:n, profit:profit, offUsual:offUsual};
 }
 
@@ -925,7 +947,8 @@ function closeSeason(auto){
   const wages = staffWage();
   const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
   const rent = rentNow();                    // charged on LAST season's takings
-  const net = SV.profit + branch - rent - wages;
+  const running = overheads(SV.take);
+  const net = SV.profit + branch - rent - wages - running;
   G.cash += net; G.lastTake = SV.take;
   G.rep += (SV.missed > SV.served*0.4 ? -1 : 1);
   if(SV.tips > 0) G.rep += 1;
@@ -940,7 +963,12 @@ function closeSeason(auto){
       return;
     }
     if(SV.seen.indexOf(r.k) < 0) return;
-    if(st.warmth < (st.beat+1)*2) return;
+    /* Warmth climbs about two a season -- one for coming in, more when you went over -- so a
+       gate of (beat+1)*2 meant five beats in five years. Thirty beats of writing were spent
+       by 2001 in a game meant to run for thirty years, and after that the arcs recycled with
+       a new face and a cycle number. At 35 a beat lands every eight or nine years, so a
+       story runs the length of a working life rather than a season and a half. */
+    if(st.warmth < (st.beat+1)*35) return;
     const b = r.beats[st.beat];
     if(b.need){
       /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant
@@ -991,6 +1019,7 @@ function closeSeason(auto){
   if(SV.tips) st("Tips", "+" + money(SV.tips), "cash");
   st("Takings", money(SV.take) + " AED", "cash");
   if(branch) st("Branches", "+" + money(branch) + " AED", "cash");
+  st("Running costs", "−" + money(running) + " AED", "bad");
   st(own("freehold") ? "Ground rent" : "Rent", "−" + money(rent) + " AED", "bad");
   if(!own("freehold") && G.lastTake > 400)
     st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
