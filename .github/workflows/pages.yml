@@ -46,9 +46,34 @@ jobs:
           test -f site/manifest.webmanifest
           echo "Built $(ls site/sprites | wc -l | tr -d ' ') sprites."
 
+      - name: Check GitHub Pages is switched on
+        # enablement:true was tried and cannot work: turning Pages on for the first time is a
+        # repo-admin action, and the workflow token is not an admin. Left in, it failed with
+        # "Resource not accessible by integration", which says nothing about what to do.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages")
+          if [ "$code" = "404" ]; then
+            echo "::error::GitHub Pages is not switched on for this repository. Settings → Pages → Build and deployment → Source: GitHub Actions. Then run this workflow again."
+            {
+              echo "### Not deployed"
+              echo ""
+              echo "GitHub Pages is off. One switch, and only a repository admin can throw it:"
+              echo ""
+              echo "**Settings → Pages → Build and deployment → Source: _GitHub Actions_**"
+              echo ""
+              echo "Then re-run this workflow. Everything else already works — the build in the"
+              echo "step above produced the whole site."
+            } >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "Pages is on (HTTP $code)."
+
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
