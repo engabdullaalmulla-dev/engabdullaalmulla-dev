@@ -22,10 +22,22 @@ npx eas-cli submit --platform ios --profile production
 ```
 
 `eas.json` carries the same four profiles the other game uses: `development`, `preview`,
-`testflight` and `production`. Two values in `submit.production.ios` are placeholders —
-`ascAppId` is the App Store Connect app's id, created with the app record, and `appleTeamId`
-is the account's team. Both are already in use by the other game and are deliberately not
-copied into this repository, which is public.
+`testflight` and `production`.
+
+`submit.production.ios` is deliberately empty. `ascAppId` and `appleTeamId` live under
+`submit`, not `build`, so neither blocks a TestFlight build — and `eas submit` prompts for
+both when you are logged in and writes them back itself. Fake placeholders would be worse
+than nothing, because they would be sent to a real submission. The team id is also already in
+use by the other game, and this repository is public.
+
+## What has been checked here, and what has not
+
+`expo-doctor` passes all 21 checks, and `npx expo export --platform ios` bundles the app —
+588 modules, an 8.3MB Hermes bundle — so `App.js` compiles, every import resolves, and Metro
+handles the 3.4MB embedded game without complaint.
+
+Not checked: `eas build` itself, the signing, and the app running on a device. Those need the
+Expo and Apple accounts. They are the first real test of this.
 
 ## Why the whole game is one string
 
