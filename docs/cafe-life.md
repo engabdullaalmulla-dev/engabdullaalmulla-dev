@@ -199,3 +199,21 @@ before a human has played this loop is the waste.
 4. **Price.** `docs/target-player.md` flags that AED 29.99 is above what the reference player
    signalled, and that the Kairosoft comparison is the argument for it. A management sim makes
    that comparison much easier to make than a frenzy clone did.
+
+### The cut leaves dirt, and size is the wrong way to find it
+
+The background cut floods in from the edges and stops at anything darker than `THRESH`, so a
+dark fleck sitting in open backdrop is never reached and survives as an island. p22 shipped
+with eight of them hanging in the air beside her head, and almost every sprite in the set had
+a few.
+
+The obvious fix — drop islands under some fraction of the subject's area — is wrong, and a
+dry run over the whole set is what showed it: the wisp of steam above the milk jug is 483 px,
+the steam off the karak glass is 286 px, and a size rule generous enough to catch a 143 px
+fleck erases both. The urn's finial goes the same way.
+
+What separates them is distance, not size. Measured across every sprite, the legitimate
+detached pieces — steam, the finial, stray hair wisps — all sit **2 to 27 px** from the main
+mass. The flecks sit **46 to 120 px** out. Nothing real was found in between, so `despeckle`
+drops an island only when it is both smaller than 0.5% of the subject and more than 40 px
+clear of it. Either condition alone is unsafe.

@@ -12,6 +12,7 @@ threshold alone. That distinction matters: a milk pitcher is the same grey as th
 backdrop, and a threshold would punch a hole straight through it.
 """
 import sys, os, re, io, math, json
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 MASTER = 512          # one master per asset; everything downscales from this
@@ -153,6 +154,69 @@ def cut_background(im):
     out.putalpha(alpha)
     return out
 
+# How far a detached island has to sit from the subject before it counts as dirt rather
+# than art, and how small it has to be. Both conditions, never either alone. The numbers
+# are measured, not guessed: across the whole sprite set the legitimate detached pieces --
+# the steam off the milk jug and the karak glass, the urn's finial, stray hair wisps --
+# all sit 2 to 27 px from the main mass, while the background flecks the flood fill could
+# not reach sit 46 to 120 px out. Nothing real was found in between.
+SPECK_GAP  = 40      # px from the subject
+SPECK_AREA = 0.005   # fraction of the subject's own area
+
+def despeckle(im):
+    """The flood fill works in from the edges and stops at anything darker than THRESH,
+    so a dark fleck sitting in open backdrop survives as an island -- p22 shipped with
+    eight of them hanging in the air beside her head. Drop an island only when it is both
+    small and far away: steam is small but touching, so a size rule alone would erase it,
+    which is exactly what a first attempt here did."""
+    a = np.array(im.split()[3]) > 8
+    if not a.any():
+        return im
+    lab, n = label_islands(a)
+    if n < 2:
+        return im
+    sizes = np.bincount(lab.ravel())
+    sizes[0] = 0
+    main = int(sizes.argmax())
+    near = lab == main
+    for _ in range(SPECK_GAP):                      # grow the subject by SPECK_GAP px
+        near[1:, :] |= near[:-1, :]; near[:-1, :] |= near[1:, :]
+        near[:, 1:] |= near[:, :-1]; near[:, :-1] |= near[:, 1:]
+    drop = np.zeros(len(sizes), dtype=bool)
+    for i in range(1, len(sizes)):
+        if i == main or sizes[i] == 0:
+            continue
+        if sizes[i] < sizes[main] * SPECK_AREA and not (near & (lab == i)).any():
+            drop[i] = True
+    if not drop.any():
+        return im
+    alpha = np.array(im.split()[3])
+    alpha[drop[lab]] = 0
+    out = im.copy()
+    out.putalpha(Image.fromarray(alpha, "L"))
+    return out
+
+def label_islands(a):
+    """Four-connected labelling. Small images, run once per asset, so a plain flood fill
+    is quicker to read than pulling scipy in for it."""
+    h, w = a.shape
+    lab = np.zeros((h, w), dtype=np.int32)
+    cur = 0
+    for y in range(h):
+        for x in range(w):
+            if a[y, x] and lab[y, x] == 0:
+                cur += 1
+                stack = [(y, x)]
+                lab[y, x] = cur
+                while stack:
+                    cy, cx = stack.pop()
+                    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        ny, nx = cy + dy, cx + dx
+                        if 0 <= ny < h and 0 <= nx < w and a[ny, nx] and lab[ny, nx] == 0:
+                            lab[ny, nx] = cur
+                            stack.append((ny, nx))
+    return lab, cur
+
 def head_crop(im, keep=0.60):
     """Characters are busts: the shoulders run off the bottom of the frame, so the
     subject touches the border and the backdrop is no longer a closed region to fill
@@ -238,7 +302,7 @@ def main():
         if wide:
             im = src.convert("RGBA")
         else:
-            im = cut_background(head_crop(src) if face else src)
+            im = despeckle(cut_background(head_crop(src) if face else src))
             if face:
                 im = fade_bottom(im)
             im = trim_and_square(im, margin=0.04 if face else MARGIN)

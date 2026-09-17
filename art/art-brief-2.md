@@ -240,7 +240,7 @@ player grows fond of over decades, not caricatures. Use the **character stem**.
 | C-21 | Tailor | an older South Asian man in his sixties with round wire spectacles and neat white hair, a beige waistcoat with a tape measure round his neck |
 | C-22 | Flight attendant | a poised woman in her twenties with hair in a neat chignon, a deep red uniform jacket and a small scarf |
 | C-23 | Musician | a man in his thirties with long dark hair tied back and a short beard, a faded black band t-shirt |
-| C-24 | Retired teacher | a woman in her seventies with short silver curls and bright attentive eyes, a soft blue cardigan and reading glasses on a chain |
+| C-24 | Retired teacher | a woman in her seventies with short silver curls and bright attentive eyes, a soft blue cardigan and reading glasses on a chain, **hand-painted game art and not a photograph**, matching the other portraits in this set |
 
 ### §B2 — The same twelve, thirty years older · A-01 to A-12
 
@@ -314,10 +314,20 @@ are, and the art no longer blocks it.
 
 | Aged and ready | Still only young |
 |---|---|
-| p14 nurse, p15 builder, p16 fishmonger, p17 lawyer, p18 art student, p19 imam | p13 taxi, p20 gym, p21 tailor, p22 cabin crew, p23 musician |
+| p14 nurse, p15 builder, p16 fishmonger, p17 lawyer, p18 art student, p19 imam, p20 gym, p21 tailor, p22 cabin crew, p23 musician | p13 taxi |
 
-**p24 does not exist yet.** C-24, the retired teacher, is still outstanding from §B1 — the one
-portrait in the cast that came back as a photograph rather than painted.
+**p24 does not exist yet.** C-24, the retired teacher, is the last portrait in the cast and has
+now come back as a photograph twice. The second attempt is kept at
+`art/raw-aged-held/c-24-REJECTED-photograph.png` so the next try has something to beat.
+
+It is a good likeness of the brief — short silver curls, blue cardigan, reading glasses on a
+chain — and it is still unusable, because it is a photograph of a real-looking person sitting
+in a cast of painted ones. Zoomed to the eyes and cheek against any accepted portrait the
+difference is not subtle: real pores and photographic depth of field on one side, smooth
+gradient skin and drawn lashes on the other. Attaching an accepted portrait and asking for
+*"the same painted style as this"* is a stronger instruction than any adjective, because the
+phrase **hand-painted game art and not a photograph** is already in the prompt and did not
+hold on its own.
 
 ### ~~§B3 — Six children · K-01 to K-06~~ — CUT
 
