@@ -529,3 +529,26 @@ years of nothing after it.
 Unlocks after the change, 16/16 runs: upstairs 2002 (target 2003), manager 2002 (2005),
 branch 2008 (2010), freehold 2016 (2017). Stories: all six met, **all six finished inside
 thirty years**, median 2021. A careless bot still ends year 30 at −390 on five seats.
+
+## Making it something you want to come back to
+
+Three changes, all to the same problem: the game knew what mattered and never said so.
+
+**The board is a people decision now.** Who a dish brought in was one line of small grey text
+at the end of a row, so the screen read as a price list and the optimal play was to sort by
+price. The regulars sit at the top of it: face, what this board means for each of them —
+*comes in for Karak chai* in green, or *settles for whatever is up* in grey — and how far
+through their story they are. Tapping a face puts their usual up, which is the move the
+screen exists for.
+
+**There is a next thing.** A season used to end and hand you another one with nothing near
+that you wanted; a game you can put down at any point without losing a thread is one you put
+down. The café screen and the close screen both carry a `Next` card that picks the closest of
+three: a story a chapter from turning, the next seat count that visibly changes the room, and
+whatever you are saving for. It names the move — *Put Regag roll on the board and they will
+come* — rather than only showing a bar.
+
+**The close screen points forward** instead of stopping at a total.
+
+None of it adds a reward it did not already have. The pull was always the six people; it was
+just never on screen at the moment you were making the decision about them.

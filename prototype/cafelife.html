@@ -136,6 +136,23 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
 .br .since{position:absolute;top:8px;right:9px;font-family:"DM Mono",monospace;font-size:10px;
            letter-spacing:.1em;text-transform:uppercase;color:var(--cream);
            background:rgba(12,10,8,.55);border-radius:999px;padding:3px 8px}
+/* a regular, on the board screen: face, what this board means for them, how far in */
+.cw{display:flex;align-items:center;gap:10px;padding:8px 2px;cursor:pointer;
+    border-bottom:1px solid var(--edge)}
+.cw:last-child{border-bottom:0}
+.cw .face{width:34px;height:34px;flex:none;display:grid;place-items:center;font-size:17px}
+.cw .cwn{font-weight:700;font-size:13.5px}
+.cw .cws{font-size:11.5px;color:var(--dimmer);line-height:1.35}
+.cw.on .cws{color:var(--green)}
+.cw .cwc{font-family:"DM Mono",monospace;font-size:11px;color:var(--dimmer);flex:none}
+/* the one thing you are closest to */
+.next{display:flex;align-items:center;gap:12px;background:var(--panel);
+      border:1px solid var(--amber-d);border-radius:14px;padding:12px 14px}
+.next .nxt{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:16px;
+           letter-spacing:-.01em;margin-top:2px}
+.next .hint{margin-top:4px}
+.next .face{width:44px;height:44px;flex:none;display:grid;place-items:center;font-size:22px}
+.next .bars{margin-top:9px}
 .beat{border-left:2px solid var(--amber);padding:2px 0 2px 12px;margin:10px 0;font-size:13.5px;
       line-height:1.55;color:var(--cream-2)}
 .who{display:flex;align-items:center;gap:11px;margin-bottom:10px}
@@ -605,6 +622,40 @@ function drawRoom(host, dusk){
 }
 
 /* ============================== the café ============================== */
+function nextThing(){
+  const out = [];
+  /* a story one chapter from turning -- warmth is the clock, so it is a real proportion */
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(!st.met || st.done) return;
+    const need = (st.beat+1)*35;
+    const f = faceArt(r, 40, G.gen > 1); f.className = "face";
+    f.style.borderRadius = "50%"; f.style.overflow = "hidden"; f.style.background = r.hue + "33";
+    out.push({at: st.warmth/need, title: r.nm + ", chapter " + (st.beat+1),
+              note: G.board.indexOf(r.usual) >= 0
+                ? "Their usual is up. Go over to them when they come in."
+                : "Put " + RECIPES[r.usual].nm + " on the board and they will come.",
+              icon: f, w: 1.0});
+  });
+  /* the next thing that visibly changes the room */
+  const seatGoal = G.seats < 4 ? 4 : G.seats < 8 ? 8 : 0;
+  if(seatGoal) out.push({at: G.seats/seatGoal, title: seatGoal + " seats",
+    note: "The room opens up at " + seatGoal + ". You have " + G.seats + ".",
+    icon: sprite("f_stool", 40, "🪑"), w: 0.8});
+  /* and whatever is worth saving for -- the dearest thing within sight */
+  const want = Object.keys(ITEMS)
+    .map(k => ({k:k, c:costOfItem(k, own(k))}))
+    .filter(o => own(o.k) < ITEMS[o.k].max && o.c > G.cash && o.c < G.cash*4 + 400)
+    .sort((a,b) => b.c - a.c)[0];
+  if(want) out.push({at: G.cash/want.c, title: ITEMS[want.k].nm,
+    note: money(want.c - G.cash) + " AED to go.",
+    icon: sprite(ITEM_SPRITE[want.k], 40, ITEMS[want.k].ic), w: 0.9});
+
+  out.forEach(o => o.score = Math.min(1, o.at) * o.w);
+  out.sort((a,b) => b.score - a.score);
+  return out[0] || null;
+}
+
 function screenCafe(){
   const v = $("s-cafe"); v.textContent = "";
   const bar = el("div","bar");
@@ -621,6 +672,25 @@ function screenCafe(){
   head.appendChild(el("div","big", season().nm));
   head.appendChild(el("div","hint", season().note));
   sc.appendChild(head);
+
+  /* Something to be working towards. A season used to end and simply hand you another one,
+     with no near thing to want, and a game you can put down at any point without losing a
+     thread is one you put down. This picks the closest of three: a story a chapter from
+     turning, the next thing that changes the room, and whatever you are saving for. */
+  const nx = nextThing();
+  if(nx){
+    const n = el("div","next"); n.style.marginTop = "14px";
+    const nt = el("div"); nt.style.flex = "1"; nt.style.minWidth = "0";
+    nt.appendChild(el("div","lbl","Next"));
+    nt.appendChild(el("div","nxt", nx.title));
+    nt.appendChild(el("div","hint", nx.note));
+    const bar2 = el("div","bars"); const bi = el("i");
+    bi.style.width = Math.round(Math.max(0.04, Math.min(1, nx.at)) * 100) + "%";
+    bar2.appendChild(bi); nt.appendChild(bar2);
+    n.appendChild(nt);
+    if(nx.icon) n.appendChild(nx.icon);
+    sc.appendChild(n);
+  }
 
   const c = el("div","card"); c.style.marginTop = "14px";
   c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots));
@@ -704,6 +774,42 @@ function screenPlan(){
   sc.appendChild(el("div","hint","You own more than you can show. " + season().nm
     + " wants " + season().want.filter((x,i,a)=>a.indexOf(x)===i).join(" and ")
     + ". A regular whose usual is missing will notice."));
+
+  /* The board was a list of prices, and who it brought in was a line of small grey text at
+     the end of a row. The people are the game, so they go at the top, with what this board
+     means for each of them and how far through their story they are. Tapping a face puts
+     their usual up, which is the move the screen exists for. */
+  const known = REGULARS.filter(r => regState(r.k).met && !regState(r.k).done);
+  if(known.length){
+    const card = el("div","card"); card.style.marginTop = "14px";
+    card.appendChild(el("div","lbl","Who this brings in"));
+    known.forEach(r => {
+      const st = regState(r.k), on = G.board.indexOf(r.usual) >= 0;
+      const row = el("div","cw" + (on ? " on" : ""));
+      const f = faceArt(r, 34, G.gen > 1); f.className = "face";
+      f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+      f.style.background = r.hue + "33";
+      row.appendChild(f);
+      const mid = el("div"); mid.style.flex = "1"; mid.style.minWidth = "0";
+      mid.appendChild(el("div","cwn", r.nm));
+      mid.appendChild(el("div","cws", on
+        ? "comes in for " + RECIPES[r.usual].nm
+        : "settles for whatever is up — " + RECIPES[r.usual].nm + " is not"));
+      row.appendChild(mid);
+      const ch = el("div","cwc");
+      ch.textContent = (st.beat + 1) + "/" + r.beats.length;
+      ch.title = "chapter " + (st.beat+1) + " of " + r.beats.length;
+      row.appendChild(ch);
+      row.onclick = () => {
+        const i = G.board.indexOf(r.usual);
+        if(i >= 0) G.board.splice(i,1);
+        else if(G.board.length < G.slots) G.board.push(r.usual);
+        save(); screenPlan();
+      };
+      card.appendChild(row);
+    });
+    sc.appendChild(card);
+  }
 
   const wrap = el("div"); wrap.style.marginTop = "14px";
   G.recipes.forEach(k => {
@@ -1034,7 +1140,9 @@ function closeSeason(auto){
   if(!own("freehold") && G.lastTake > 400)
     st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
   if(wages) st("Wages", "−" + money(wages) + " AED", "bad");
-  st("Kept", (net>=0?"+":"") + money(net) + " AED", net>=0 ? "good" : "bad");
+  /* money() carries a hyphen for a negative; the lines above it all use a proper minus */
+  st("Kept", (net>=0 ? "+" + money(net) : "−" + money(-net)) + " AED",
+     net>=0 ? "good" : "bad");
   sc.appendChild(c);
 
   beats.forEach(b => {
@@ -1058,6 +1166,23 @@ function closeSeason(auto){
       + RECIPES[x.r.usual].nm + ". The chair does not stay empty for long."));
     sc.appendChild(card);
   });
+
+  /* Point at the next thing before handing the season back. A close screen that only adds up
+     what happened is a full stop; the season after this one should already be wanted. */
+  const nx = nextThing();
+  if(nx && G.owner.age < G.owner.dies){
+    const n = el("div","next"); n.style.marginTop = "4px";
+    const nt = el("div"); nt.style.flex = "1"; nt.style.minWidth = "0";
+    nt.appendChild(el("div","lbl","Next"));
+    nt.appendChild(el("div","nxt", nx.title));
+    nt.appendChild(el("div","hint", nx.note));
+    const nb = el("div","bars"); const ni = el("i");
+    ni.style.width = Math.round(Math.max(0.04, Math.min(1, nx.at))*100) + "%";
+    nb.appendChild(ni); nt.appendChild(nb);
+    n.appendChild(nt);
+    if(nx.icon) n.appendChild(nx.icon);
+    sc.appendChild(n);
+  }
 
   if(G.owner.age >= G.owner.dies){
     const go = el("button","btn","…"); go.type = "button";
