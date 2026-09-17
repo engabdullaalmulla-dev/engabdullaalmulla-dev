@@ -421,11 +421,36 @@ function priceOf(k){
 
 /* ============================== the room ============================== */
 function roomPlate(){
+  const grown = G.seats >= 8 || own("backroom");
+  /* Nine of the thirteen plates were never chosen. The period, weather and evening ones are
+     all painted as a full room, so none of them can stand in for a café that has not filled
+     out yet -- a thriving room in the first season is a lie the player can see. They apply
+     from the grown tier up; below it the size plates still do all the work.
+
+     The seasons map onto their own flavour text. Summer is the white glare, Winter is the
+     one season it actually rains here, and Autumn's line in SEASONS is literally "the
+     evenings turn", which is what room_night is a picture of. Spring keeps the plain room,
+     because Spring's line is that the weather is unremarkable.
+
+     The period plates carry a different counter from room_large -- wood and terrazzo against
+     teal and marble. The brief logged that as a defect in a split set. It is not one here:
+     these are the same café thirty years apart, and a café that never refits its counter in
+     thirty years is the less believable picture. */
+  if(grown){
+    if(G.year < 2000)  return "room_1990s";
+    if(G.year >= 2030) return "room_2030s";
+    const s = G.season % 4;
+    if(s === 1) return "room_summer";
+    if(s === 2) return "room_night";
+    if(s === 3) return "room_rain";
+  }
   if(own("upstairs")) return "room_large";
-  if(G.seats >= 8 || own("backroom")) return "room_grown";
+  if(grown)           return "room_grown";
   if(G.seats >= 4 || own("table")) return "room_small";
   return "room_bare";
 }
+/* room_night and room_rain are painted dark already; washing them again just makes mud */
+const PLATE_IS_DARK = {room_night:1, room_rain:1};
 /* where a fitting stands on the plate, as a fraction of the frame, and how big it is
    relative to a stool. The third number is its room scale from art/sprites/fittings.json. */
 const SLOTS = {
@@ -438,9 +463,10 @@ const SLOTS = {
   p_ledger:[0.56,0.56,0.80]
 };
 function drawRoom(host, dusk){
-  const r = el("div","room" + (dusk ? " dusk" : ""));
+  const name = roomPlate();
+  const r = el("div","room" + (dusk && !PLATE_IS_DARK[name] ? " dusk" : ""));
   const plate = document.createElement("img");
-  plate.src = ART + roomPlate() + ".png"; plate.alt = "";
+  plate.src = ART + name + ".png"; plate.alt = "";
   plate.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 52%";
   plate.onerror = function(){ r.classList.add("noplate"); plate.remove(); };
   r.appendChild(plate);

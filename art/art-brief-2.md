@@ -407,18 +407,29 @@ Upload the adult portrait and ask for the child.
 > palms, a hot white sky — not a European street, no deciduous trees, no pastel townhouses"*
 >
 > **UPDATE.** R-04 to R-07 have been redone and the street is right — palms, sand-coloured
-> arched buildings, a hot white sky. But the redo also changed the interior: the counter is now
-> a **teal-painted front with a pale marble top**, where R-09 to R-13 still have a **wood front
-> and a wood top**. The counter is the largest object in the frame, so the set is split until
-> R-09 to R-13 are regenerated from the new R-07. Attach `room_large` to every one of them.
+> arched buildings, a hot white sky.
 >
-> R-08 was rejected separately: legible English text baked in — a "A Quieter Place" sign and
-> three book spines — plus 1536x1024 instead of 1672x941 and a photoreal rather than painted
-> treatment. Text in a plate cannot be localised, and this game ships in Arabic.
+> **The counter split is closed, and it was not a defect.** The redo gave R-07 a teal front
+> with a pale marble top where R-09 to R-13 keep a wood front and, in the period plates, a
+> terrazzo section. That was logged here as a split set needing ten regenerations. It is not:
+> those plates are now wired as **periods and seasons**, and the same café having a different
+> counter in 1998 and in 2032 is the more believable picture, not the less. A café that never
+> refits its counter in thirty years is the odd one. `room_night` was checked against
+> `room_large` directly and matches it — teal front, pale top — so the evening plate and the
+> size plate are the same room.
 >
-> ~~**All ten plates are now generated and all ten carry the European street.**~~ That is at least
-> uniform: it is one decision to make rather than a split set. Redoing them is ten images in
-> one conversation with R-04 attached, and nothing in the game is blocked while they stand.
+> **R-10 and R-11 do not need redoing.** They are table-level views where the counter is barely
+> in frame, so there was never much to be split by. Both are in the game.
+>
+> **R-08 still stands rejected**, but only on one count now: it was regenerated at the right
+> 1672×941 and the size complaint is stale. Re-check it for the baked-in English — the
+> "A Quieter Place" sign and the book spines — before using it. Text cannot be localised and
+> this game ships in Arabic. It is also a *different room* rather than a state of the main one,
+> so it needs a screen of its own before it has anywhere to go.
+>
+> **R-01 `room_counter` is not a room plate** and never will be: it is a close crop of an empty
+> counter top with no room behind it. It stays unused, which is the correct outcome rather than
+> a gap.
 
 
 

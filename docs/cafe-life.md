@@ -243,13 +243,18 @@ wiring, and some of it changes how the game reads at the table.
 
 | Family | Made | Never drawn | What that costs |
 |---|---|---|---|
-| Dishes & ingredients | 32 | 19 | See invention, below |
+| Dishes & ingredients | 32 | 19 → **8** | ~~See invention, below~~ **done** |
 | Fittings | 32 | 18 | Half the furniture cannot be bought |
-| Rooms | 13 | 9 | No weather, no era, no time of day |
-| Branches | 6 | **6** | Branches are a text row |
+| Rooms | 13 | 9 → **2** | ~~No weather, no era~~ **done** |
+| Branches | 6 | ~~**6**~~ **0** | ~~Branches are a text row~~ **done** |
 | Machines | 6 | **6** | The whole family is unwired |
 | Aged portraits | 21 | 15 | Expected — only six regulars age |
 | Portraits | 25 | 7 | The face-collision cuts |
+
+The two rooms still unused are right to be: `room_counter` is a close crop of a counter top
+with no room behind it, and `room_back` is a *different room* rather than a state of the main
+one, so it needs a screen before it has anywhere to go. The eight remaining dishes are
+ingredients — milk, ice, dough, a shot — and the game does not model ingredients.
 
 **Invented recipes draw an emoji.** `invent()` mints `own<n>_<gen>` and never writes
 `SPRITE[k]`, so `dishArt` falls through to the recipe's `ic`. Recipe invention is one of the
