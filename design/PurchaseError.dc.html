@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"DM Sans",system-ui,-apple-system,sans-serif;font-size:14px;
+         color:#F7EFE3;background:#171310;-webkit-font-smoothing:antialiased}
+    a{color:#F2A03D} a:hover{color:#FFBC63}
+    .scr{width:390px;height:844px;display:flex;flex-direction:column;background:#171310;overflow:hidden;position:relative}
+    .st{height:47px;flex:none} .sb{height:34px;flex:none}
+    .dsp{font-family:"Bricolage Grotesque","DM Sans",sans-serif;font-weight:800;letter-spacing:-.025em;margin:0}
+    .mono{font-family:"DM Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+    .lbl{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.14em;
+         text-transform:uppercase;color:#6F6058}
+    .panel{background:#231C18;border:1px solid #3B302A;border-radius:14px}
+    .btn{height:56px;border-radius:12px;background:#F2A03D;color:#171310;
+         font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
+         display:flex;align-items:center;justify-content:center;flex:none}
+    .btn2{height:52px;border-radius:12px;background:transparent;border:1px solid #3B302A;
+          color:#F7EFE3;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;
+          font-size:15px;display:flex;align-items:center;justify-content:center;flex:none}
+    .pad{padding-left:20px;padding-right:20px}
+    .row{display:flex;align-items:center}
+    .col{display:flex;flex-direction:column}
+    img{display:block}
+  </style>
+</helmet>
+<div class="scr"><div class="col" style="position:absolute;inset:0;justify-content:center;align-items:center;gap:22px;padding:0 26px"><div style="width:96px;height:96px;border-radius:48px;border:3px solid #F2A03D;display:flex;align-items:center;justify-content:center"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#F2A03D" stroke-width="2.2" stroke-linecap="round"><path d="M12 7v7"/><circle cx="12" cy="17.6" r="1.2" fill="#F2A03D" stroke="none"/></svg></div><div class="col" style="align-items:center;gap:10px"><h1 class="dsp" style="font-size:26px;text-align:center">The store did not answer</h1><span style="color:#A8988A;font-size:14px;text-align:center;line-height:1.55">Nothing was charged. This is usually the connection rather than your account &mdash; try again in a moment.</span></div><div class="col" style="width:100%;gap:10px"><div class="btn">Try again</div><div class="btn2">Not now</div></div></div></div>
+</x-dc>
+</body>
+</html>

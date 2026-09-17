@@ -1,0 +1,1482 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Café Life</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#171310; --panel:#231C18; --panel-2:#2E2521; --edge:#3B302A; --edge-2:#4A3C34;
+  --cream:#F7EFE3; --cream-2:#D9C9B6; --dim:#A8988A; --dimmer:#6F6058;
+  --amber:#F2A03D; --amber-l:#FFBC63; --amber-d:#C97C22; --brass:#E8C36B;
+  --terra:#A8452A; --green:#4FBF7B; --blue:#5B9DD9; --tile:#3E6E6B;
+  --wood:#7A4A2B; --wood-l:#A9704A; --sun:#F4D9A8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,sans-serif;
+     overflow:hidden;display:flex;justify-content:center}
+#app{width:100%;max-width:440px;height:100%;display:flex;flex-direction:column;position:relative}
+.screen{flex:1;display:flex;flex-direction:column;min-height:0}
+.screen[hidden]{display:none}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pad{padding:0 16px}
+
+/* ---------- type ---------- */
+.lbl{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+     color:var(--dimmer)}
+.big{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:27px;
+     letter-spacing:-.02em;line-height:1.1;margin:4px 0 12px}
+.mid-t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.num{font-family:"DM Mono",monospace;font-weight:500;font-variant-numeric:tabular-nums}
+.hint{font-size:13px;line-height:1.5;color:var(--dim);margin-top:8px}
+.good{color:var(--green)} .bad{color:var(--terra)} .cash{color:var(--brass)}
+
+/* ---------- chrome ---------- */
+.bar{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;flex:none}
+.bar .grow{flex:1}
+.pill{background:var(--panel);border:1px solid var(--edge);border-radius:999px;
+      padding:6px 12px;font-family:"DM Mono",monospace;font-size:13px;font-weight:500}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;
+      padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;
+      padding:7px 0;border-bottom:1px solid var(--edge)}
+.stat:last-child{border-bottom:0}
+.stat .k{font-size:13px;color:var(--dim)} .stat .v{font-family:"DM Mono",monospace;font-weight:500}
+
+.btn{width:100%;border:0;border-radius:13px;background:var(--amber);color:#0E0B09;
+     font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:16px;
+     padding:15px;margin-top:10px;cursor:pointer}
+.btn:active{background:var(--amber-d)}
+.btn.sec{background:var(--panel-2);color:var(--cream);border:1px solid var(--edge-2)}
+.btn:disabled{opacity:.4}
+.btn.sm{width:auto;padding:9px 13px;font-size:13px;margin:0;border-radius:10px}
+.tabs{display:flex;gap:6px;padding:0 16px 10px;flex:none}
+.tab{flex:1;padding:9px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);
+     font-size:12px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
+.tab.on{background:var(--amber);color:#0E0B09;border-color:var(--amber)}
+
+/* ---------- the room ---------- */
+.room{position:relative;height:216px;flex:none;overflow:hidden;
+      background:linear-gradient(#20323a 0%, #2b3b3f 38%, #3E6E6B 38%, #3E6E6B 62%, #2E2521 62%);
+      border-bottom:2px solid #120F0C}
+.room.noplate .floor{display:block}
+.room .floor{display:none;position:absolute;left:0;right:0;bottom:0;height:38%;
+             background:repeating-linear-gradient(90deg,#3a2c22 0 22px,#33261d 22px 44px)}
+.room.noplate .wall{display:block}
+.room .wall{display:none;position:absolute;left:0;right:0;top:38%;height:24%;
+            background:repeating-linear-gradient(90deg,#3E6E6B 0 26px,#396663 26px 28px)}
+.room.noplate .win{display:block}
+.room .win{display:none;position:absolute;left:10px;top:12px;width:116px;height:66px;border-radius:5px;
+           background:linear-gradient(#1C2430,#2a3a44);border:3px solid #241a14}
+.room.noplate .counter{display:block}
+.room .counter{display:none;position:absolute;right:8px;bottom:14%;width:150px;height:44px;border-radius:4px;
+               background:linear-gradient(#A9704A,#7A4A2B);border:2px solid #241a14}
+.ob{position:absolute;font-size:22px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
+.room .glow{position:absolute;left:0;right:0;top:0;height:60%;
+            background:radial-gradient(60% 70% at 72% 20%,rgba(244,217,168,.20),transparent 70%)}
+.room .night{position:absolute;inset:0;background:rgba(12,10,8,.45);pointer-events:none;opacity:0}
+.room.dusk .night{opacity:1}
+.empty-note{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11px;
+            color:rgba(247,239,227,.5);font-family:"DM Mono",monospace}
+
+/* ---------- service ---------- */
+.svc{flex:1;display:flex;flex-direction:column;min-height:0}
+.svc-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex:none}
+.tick{height:5px;background:var(--panel-2);border-radius:3px;overflow:hidden;margin:0 16px;flex:none}
+.tick i{display:block;height:100%;background:var(--amber);width:0%}
+.guests{flex:1;overflow:hidden;position:relative;padding:12px 16px}
+.g{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--edge);
+   border-radius:13px;padding:10px 12px;margin-bottom:9px;cursor:pointer;
+   animation:slide .32s cubic-bezier(.2,.9,.3,1) both}
+.g.reg{border-color:var(--amber-d)}
+@keyframes slide{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+.g .face{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:20px;flex:none}
+.g .nm{font-weight:700;font-size:14px}
+.g .want{font-size:12px;color:var(--dim)}
+.g .pay{margin-left:auto;font-family:"DM Mono",monospace;font-weight:500;font-size:14px}
+.g.miss{opacity:.62}
+.g.tapped{border-color:var(--green)}
+/* the three visits you have today, spent left to right */
+.visits{display:flex;align-items:center;gap:6px;padding:2px 16px 8px;flex:none}
+.visits i{width:9px;height:9px;border-radius:50%;background:var(--panel-2);
+          border:1px solid var(--edge-2);transition:background .2s}
+.visits i.on{background:var(--amber);border-color:var(--amber)}
+.visits .lbl{margin-left:4px}
+.g.nudge{animation:nudge .4s ease}
+@keyframes nudge{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.float{position:absolute;font-family:"DM Mono",monospace;font-weight:500;font-size:14px;
+       pointer-events:none;animation:up 1s ease-out forwards}
+@keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-38px)}}
+
+/* ---------- lists ---------- */
+.item{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--edge);
+      border-radius:13px;padding:11px 12px;margin-bottom:9px}
+.item .ic{width:40px;height:40px;border-radius:10px;background:var(--panel-2);display:grid;
+          place-items:center;font-size:20px;flex:none}
+.item .t{font-weight:700;font-size:14px} .item .d{font-size:12px;color:var(--dim);line-height:1.35}
+.item .mid{flex:1;min-width:0}
+.dish{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;
+      border:1px solid var(--edge);background:var(--panel);margin-bottom:8px;cursor:pointer}
+.dish.on{border-color:var(--amber);background:#2b2118}
+.dish .di{font-size:19px} .dish .dn{flex:1;font-size:14px;font-weight:700}
+.dish .dp{font-family:"DM Mono",monospace;font-size:13px;color:var(--brass)}
+.dish .tg{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+          color:var(--dimmer)}
+.dish.hot{box-shadow:inset 0 0 0 1px var(--amber-d)}
+/* a branch is a place, so it gets a picture of the place. 16:9 to match the plates. */
+.br{position:relative;border-radius:12px;overflow:hidden;margin-bottom:10px;
+    background:var(--panel-2);border:1px solid var(--edge)}
+.br img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.br.noplate{height:96px}
+.br .cap{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;
+         justify-content:space-between;gap:8px;padding:22px 11px 9px;
+         background:linear-gradient(transparent,rgba(12,10,8,.86))}
+.br .cap .t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:15px}
+.br .cap .v{font-family:"DM Mono",monospace;font-weight:500;font-size:13px;flex:none}
+.br .since{position:absolute;top:8px;right:9px;font-family:"DM Mono",monospace;font-size:10px;
+           letter-spacing:.1em;text-transform:uppercase;color:var(--cream);
+           background:rgba(12,10,8,.55);border-radius:999px;padding:3px 8px}
+/* a regular, on the board screen: face, what this board means for them, how far in */
+.cw{display:flex;align-items:center;gap:10px;padding:8px 2px;cursor:pointer;
+    border-bottom:1px solid var(--edge)}
+.cw:last-child{border-bottom:0}
+.cw .face{width:34px;height:34px;flex:none;display:grid;place-items:center;font-size:17px}
+.cw .cwn{font-weight:700;font-size:13.5px}
+.cw .cws{font-size:11.5px;color:var(--dimmer);line-height:1.35}
+.cw.on .cws{color:var(--green)}
+.cw .cwc{font-family:"DM Mono",monospace;font-size:11px;color:var(--dimmer);flex:none}
+/* the one thing you are closest to */
+.next{display:flex;align-items:center;gap:12px;background:var(--panel);
+      border:1px solid var(--amber-d);border-radius:14px;padding:12px 14px}
+.next .nxt{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:16px;
+           letter-spacing:-.01em;margin-top:2px}
+.next .hint{margin-top:4px}
+.next .face{width:44px;height:44px;flex:none;display:grid;place-items:center;font-size:22px}
+.next .bars{margin-top:9px}
+.beat{border-left:2px solid var(--amber);padding:2px 0 2px 12px;margin:10px 0;font-size:13.5px;
+      line-height:1.55;color:var(--cream-2)}
+.who{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.who .face{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px}
+.bars{height:4px;background:var(--panel-2);border-radius:2px;overflow:hidden;margin-top:5px}
+.bars i{display:block;height:100%;background:var(--amber)}
+</style></head><body><div id="app">
+  <section class="screen" id="s-cafe" hidden></section>
+  <section class="screen" id="s-plan" hidden></section>
+  <section class="screen" id="s-serve" hidden></section>
+  <section class="screen" id="s-close" hidden></section>
+  <section class="screen" id="s-shop" hidden></section>
+  <section class="screen" id="s-people" hidden></section>
+</div>
+<script>
+/* ============================================================================
+   Café Life -- a café you build, and the people who keep coming back to it.
+
+   There is no timer and nothing to fail. The decision is the board: you own more
+   recipes than you have slots to show, the season moves what people want, and
+   your regulars each have a usual. Service is watched, not fought -- tapping a
+   customer is generosity, not triage, and noticing people is how their stories
+   move. That inversion is the whole design.
+   ========================================================================== */
+
+const $ = id => document.getElementById(id);
+const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c;
+                        if(x!=null)n.textContent=x; return n; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const money = n => Math.round(n).toLocaleString("en-GB");
+
+/* ---------- recipes. tags are what a season or a person is in the mood for ---------- */
+const SPRITE = {"karak": "karak", "mint": "mint", "espresso": "espresso", "latte": "latte", "iced": "iced", "shake": "dateshake", "luqaimat": "luqaimat", "regag": "regag", "croissant": "almond", "saffron": "saffron", "affogato": "affogato", "chai": "chai"};
+const ITEM_SPRITE = {"stool": "f_stool", "table": "f_table_sm", "sign": "f_sign", "awning": "f_awning", "case_": "f_case", "grinder": "f_grinder", "radio": "f_radio", "plant": "f_plant_lg", "aircon": "f_aircon", "slot": "f_menuboard", "backroom": "f_banquette", "upstairs": "f_bookshelf", "barista": "f_urn", "manager": "p_ledger", "branch": "f_till", "freehold": "p_keys",
+  "stool_pad": "f_stool_pad", "table_lg": "f_table_lg", "outdoor": "f_outdoor",
+  "juicer": "f_juicer", "dallah": "f_dallah", "pendant": "f_pendant"};
+
+/* The last ten fittings are not for sale. A café accumulates things nobody decided to buy --
+   a rug once there are enough chairs to need one, a sink once somebody else is working the
+   counter, a second plant because the first one did well. They appear when the café has
+   earned them, which is the only way to use this art without padding the shop with ten more
+   ways to add mood. */
+const DRESSING = [
+  {sp:"f_rug",      when:() => G.seats >= 6},
+  {sp:"f_pictures", when:() => G.mood >= 2},
+  {sp:"f_sconce",   when:() => own("upstairs") > 0},
+  {sp:"f_plant_sm", when:() => own("plant") > 0},
+  {sp:"f_planter",  when:() => own("awning") > 0},
+  {sp:"f_water",    when:() => G.seats >= 10},
+  {sp:"f_cupshelf", when:() => own("grinder") > 0},
+  {sp:"f_sink",     when:() => baristas() >= 1},
+  {sp:"f_fridge",   when:() => own("aircon") > 0},
+  {sp:"f_blender",  when:() => own("juicer") > 0},
+  {sp:"f_saj",      when:() => own("case_") > 0},
+  {sp:"f_heater",   when:() => own("outdoor") > 0}
+];
+const REG_FACE = {"noor": "p5", "haddad": "p6", "dana": "p9", "samir": "p11", "aisha": "p4", "khalid": "p3"};
+const ART = "../art/sprites/";
+const RECIPES = {
+  karak:   {nm:"Karak chai",     ic:"🫖", cost:2,  price:6,  tags:["warm","cheap"],   buy:0},
+  mint:    {nm:"Mint tea",       ic:"🌿", cost:2,  price:7,  tags:["warm","light"],   buy:0},
+  espresso:{nm:"Espresso",       ic:"☕", cost:3,  price:10, tags:["warm","quick"],   buy:140},
+  latte:   {nm:"Latte",          ic:"🥛", cost:5,  price:16, tags:["warm","slow"],    buy:220},
+  iced:    {nm:"Iced latte",     ic:"🧊", cost:6,  price:20, tags:["cold","slow"],    buy:300},
+  shake:   {nm:"Date shake",     ic:"🥤", cost:7,  price:24, tags:["cold","sweet"],   buy:380},
+  luqaimat:{nm:"Luqaimat",       ic:"🍡", cost:6,  price:18, tags:["sweet","share"],  buy:340},
+  regag:   {nm:"Regag roll",     ic:"🌯", cost:7,  price:19, tags:["savoury","fill"], buy:360},
+  croissant:{nm:"Almond croissant",ic:"🥐",cost:6, price:17, tags:["sweet","quick"],  buy:300},
+  saffron: {nm:"Saffron karak",  ic:"✨", cost:9,  price:34, tags:["warm","premium"], buy:700},
+  affogato:{nm:"Affogato",       ic:"🍨", cost:8,  price:28, tags:["cold","sweet"],   buy:640},
+  chai:    {nm:"Adeni chai",     ic:"🍵", cost:3,  price:12, tags:["warm","slow"],    buy:260}
+};
+
+const SEASONS = [
+  {nm:"Spring", want:["light","quick"],   note:"Mild. People sit outside and linger."},
+  {nm:"Summer", want:["cold","cold"],     note:"Forty degrees. Nobody wants anything hot."},
+  {nm:"Autumn", want:["warm","sweet"],    note:"The evenings turn. Sweet things sell."},
+  {nm:"Winter", want:["warm","fill"],     note:"Cold mornings. Everyone wants something hot."}
+];
+
+/* Six plates were drawn for this and none of them was ever shown -- the branch list was a
+   name and a cash figure. The order is the order a café on one street would actually grow:
+   the neighbourhood first, then across town, then the places you need a lease and a lawyer
+   for. Branches are one of the two uncapped sinks, so the list wraps rather than capping at
+   six; a seventh branch is Satwa II, which is what a second shop in the same district would
+   be called anyway. The old code picked a name at random with replacement, so a dynasty
+   could and did end up running two cafés both called Satwa. */
+const BRANCHES = [
+  {sp:"br_satwa",    nm:"Satwa"},      {sp:"br_deira",   nm:"Deira"},
+  {sp:"br_karama",   nm:"Karama"},     {sp:"br_jumeirah",nm:"Jumeirah"},
+  {sp:"br_mall",     nm:"the mall"},   {sp:"br_airport", nm:"the airport"}
+];
+const LAP = ["", " II", " III", " IV", " V", " VI", " VII", " VIII"];
+function branchAt(i){
+  const b = BRANCHES[i % BRANCHES.length], lap = Math.floor(i / BRANCHES.length);
+  return {sp: b.sp, nm: b.nm + (lap < LAP.length ? LAP[lap] : " " + (lap + 1))};
+}
+function newBranch(g, i){
+  const b = branchAt(i);
+  return {nm:b.nm, sp:b.sp, since:g.year, yield:0.9 + Math.random()*0.5};
+}
+
+/* ---------- what you build. every one of these shows up in the room ---------- */
+const ITEMS = {
+  stool:   {nm:"A stool",        ic:"🪑", cost:55,   max:10, d:"One more person can sit down.",
+            f:g=>g.seats++},
+  table:   {nm:"A table",        ic:"🛋️", cost:180,  max:3, d:"People stay longer, and spend more when they do.",
+            f:g=>{g.seats+=2; g.dwell+=0.12}},
+  sign:    {nm:"A painted sign", ic:"🪧", cost:190,  max:1, d:"The street can finally tell what this place is.",
+            f:g=>g.foot+=0.18},
+  awning:  {nm:"An awning",      ic:"⛱️", cost:260,  max:1, d:"Shade out front. Summer stops being a dead season.",
+            f:g=>g.foot+=0.12},
+  case_:   {nm:"A pastry case",  ic:"🍰", cost:240,  max:1, d:"Sweet things sell on sight, not on asking.",
+            f:g=>g.sweetLift=0.35},
+  grinder: {nm:"A proper grinder",ic:"⚙️",cost:300,  max:1, d:"Everything with coffee in it is worth more.",
+            f:g=>g.coffeeLift=0.25},
+  radio:   {nm:"A radio",        ic:"📻", cost:90,  max:1, d:"The room stops being silent.",
+            f:g=>g.mood++},
+  plant:   {nm:"Plants",         ic:"🪴", cost:80,  max:3, d:"Softens the corner by the window.",
+            f:g=>g.mood++},
+  aircon:  {nm:"Air conditioning",ic:"❄️",cost:400,  max:1, d:"Summer afternoons become usable.",
+            f:g=>g.ac=true},
+  slot:    {nm:"A bigger board", ic:"📋", cost:300,  max:6, d:"One more thing can be on the menu at once.",
+            f:g=>g.slots++},
+  backroom:{nm:"Open the back room",ic:"🚪",cost:560,max:1, d:"A quiet corner away from the counter.",
+            f:g=>{g.seats+=3; g.quiet=true}},
+  /* Repriced against what the café actually earns. At 1800 / 1400 / 4200 / 9000 a bot
+     playing well never once reached upstairs, a manager, a branch or the freehold in
+     thirty years, in any of sixteen runs -- see tools/sim.js. */
+  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:1500, max:1, d:"Twice the room. A different kind of café.",
+            f:g=>{g.seats+=6; g.dwell+=0.2}},
+  barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:6, d:"Another pair of hands. Nobody can serve a full room alone. Wages every season.",
+            f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda","Noura","Bilal"]),role:"barista"})},
+  manager: {nm:"Hire a manager", ic:"🗂️", cost:2000, max:1, d:"Can run a season without you. Wages every season.",
+            f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager"}); g.canSkip=true}},
+  /* Six of the sixteen unsold fittings become things you buy. Each does one thing the shop
+     did not already do, because a second item that adds mood is padding, not depth. The other
+     ten are dressing: see DRESSING below, where they appear as the café earns them. */
+  stool_pad:{nm:"Padded stools", ic:"💺", cost:420,  max:1, d:"People stop perching and start staying.",
+            f:g=>g.dwell+=0.08},
+  table_lg:{nm:"A long table",   ic:"🪵", cost:760,  max:2, d:"Strangers end up sitting together.",
+            f:g=>{g.seats+=2; g.mood++}},
+  outdoor: {nm:"Tables outside", ic:"🌤️", cost:980,  max:1, d:"The pavement becomes part of the café.",
+            f:g=>{g.seats+=3; g.foot+=0.08}},
+  juicer:  {nm:"A juicer",       ic:"🍋", cost:620,  max:1, d:"Everything cold is worth more.",
+            f:g=>g.coldLift+=0.25},
+  dallah:  {nm:"A dallah",       ic:"🫖", cost:520,  max:1, d:"Coffee served the old way. Everything hot is worth a little more.",
+            f:g=>g.warmLift+=0.06},
+  pendant: {nm:"Pendant lights", ic:"💡", cost:380,  max:1, d:"The room stops being lit like a shop.",
+            f:g=>g.mood+=2},
+  doup:    {nm:"Do the place up",  ic:"🧹", cost:0, dyn:() => doUpCost(), max:99, hide:() => wearNow() < 0.05,
+            d:"Paint, a floor, the chairs seen to. It all wears out, and people feel it before they say it.",
+            f:g=>{ g.wear = 0; g.rep += 1; }},
+  freehold:{nm:"Buy the building",ic:"🏠", cost:62000, max:1,
+            d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
+            f:g=>g.rep+=5},
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:22000, max:99, pow:1.55, d:"Another café, another street, its own regulars.",
+            f:g=>g.branches.push(newBranch(g, g.branches.length))}
+};
+
+/* ---------- the regulars. this is the forever engine ---------- */
+const REGULARS = [
+{k:"noor", nm:"Noor", ic:"📚", hue:"#C9A0DC", usual:"karak",
+ intro:"A student. Comes in with a laptop and stays four hours on one karak.",
+ beats:[
+  {t:"Noor asks, carefully, whether it is all right that she stays so long. You say it is."},
+  {t:"She is here every day now. Exams. She has started saying good morning to the regulars.",
+   need:"quiet", needT:"She needs somewhere quieter than the counter."},
+  {t:"Noor passed. She brings her mother in to show her the table she sat at."},
+  {t:"She graduates and takes a job two streets away. She still comes on Fridays."},
+  {t:"Noor brings her own daughter, who is four, and who wants the sweet thing in the case.",
+   need:"case_", needT:"There is nothing here a four-year-old wants."}]},
+
+{k:"haddad", nm:"Mr Haddad", ic:"🗞️", hue:"#9BB8E8", usual:"espresso",
+ intro:"Retired. First customer of the day, every day, with a folded newspaper.",
+ beats:[
+  {t:"He tells you your espresso is nearly as good as the place he went to in Cairo in 1971."},
+  {t:"He starts keeping his own cup behind the counter. You let him."},
+  {t:"Mr Haddad is in hospital for a week. The morning is very quiet without him."},
+  {t:"He comes back thinner, and slower, and at the same time every morning."},
+  {t:"He does not come in. His son comes instead, to tell you, and to have one espresso."}]},
+
+{k:"dana", nm:"Dana", ic:"🛵", hue:"#F09B8C", usual:"iced",
+ intro:"A delivery rider. In and out in ninety seconds, always something cold.",
+ beats:[
+  {t:"Dana asks if you can have it ready at 2pm without her asking. You start doing that."},
+  {t:"She brings three other riders. They stand outside and drink and shout at each other."},
+  {t:"Dana is saving for a van. She tells you the number every week.",
+   need:"awning", needT:"There is nowhere for them to stand out of the sun."},
+  {t:"She has the van. She still stops, but now she sits down for it."},
+  {t:"Dana employs four riders of her own and does the accounts at your table on Sundays."}]},
+
+{k:"samir", nm:"Samir", ic:"📱", hue:"#7FC8A9", usual:"regag",
+ intro:"Runs the phone repair shop opposite. Watches your customers like a hawk.",
+ beats:[
+  {t:"Samir says your awning blocks his sign. It does not. You buy him a regag roll."},
+  {t:"He starts sending customers over while they wait for a screen repair."},
+  {t:"Samir's shop is broken into. He sits in here until the police come."},
+  {t:"You and Samir have a running argument about football that the whole street follows."},
+  {t:"He asks whether you would ever want the unit next door. His lease is up."}]},
+
+{k:"aisha", nm:"Aisha", ic:"👜", hue:"#E8B86D", usual:"shake",
+ intro:"Comes on the way back from school with her daughter Mariam.",
+ beats:[
+  {t:"Mariam is six and will only drink the date shake, and only with two straws."},
+  {t:"Aisha asks if you do birthdays. You had not thought about it. You do now.",
+   need:"luqaimat", needT:"You have nothing anyone would want at a birthday."},
+  {t:"Mariam is eleven and comes on her own, with her own money, and orders for both of them."},
+  {t:"Aisha's husband left. She sits in the back for a long time and you do not charge her."},
+  {t:"Mariam is sixteen and asks whether you are hiring."}]},
+
+{k:"khalid", nm:"Khalid", ic:"🔑", hue:"#D9C06B", usual:"saffron",
+ intro:"The landlord's son. Drinks the most expensive thing you have, slowly.",
+ beats:[
+  {t:"Khalid asks what you would do with the place if it were yours."},
+  {t:"He mentions his father is selling three units on this street. He does not say which."},
+  {t:"Khalid stops charging you for the water. He does not explain why."},
+  {t:"He offers you the freehold before it goes to the market. It is not cheap.",
+   need:"cash2500", needT:"You cannot come anywhere near the number."},
+  {t:"Khalid comes in as a customer now, not a landlord. It is a better arrangement."}]}
+];
+
+/* ---------- moments: a service can stop and ask you something ---------- */
+const MOMENTS = [
+{t:"A man asks for the wifi password. There is no wifi.",
+ o:[{l:"Get wifi installed — 180", f:g=>{ g.cash-=180; g.dwell+=0.1; return "People stay longer now."; }},
+    {l:"Apologise", f:g=>"He drinks his coffee and goes."}]},
+{t:"Someone has left a wallet on the table by the window.",
+ o:[{l:"Run after them", f:g=>{ g.rep+=3; return "They tell everyone on the street about it."; }},
+    {l:"Keep it behind the counter", f:g=>{ g.rep+=1; return "They come back for it the next day."; }}]},
+{t:"A delivery app wants to list you. They take thirty per cent.",
+ o:[{l:"Sign up", f:g=>{ g.foot+=0.25; g.appCut=0.3; return "Busier. Thinner."; }},
+    {l:"Stay off it", f:g=>{ g.rep+=1; return "You stay a place people have to walk to."; }}]},
+{t:"A child knocks over a tray. Their mother is mortified.",
+ o:[{l:"Wave it off", f:g=>{ g.rep+=2; return "She becomes a regular on the strength of it."; }},
+    {l:"Ask them to be careful", f:g=>"They leave quickly and do not come back."}]},
+{t:"The coffee supplier has raised prices again.",
+ o:[{l:"Absorb it", f:g=>{ g.margin-=0.04; return "Your margin thins. Nobody notices but you."; }},
+    {l:"Put prices up", f:g=>{ g.priceLift+=0.1; g.rep-=1; return "A few people mention it."; }}]},
+{t:"A food blogger photographs the luqaimat for eleven minutes.",
+ o:[{l:"Let her work", f:g=>{ g.foot+=0.15; return "Saturdays are different after that."; }}]},
+{t:"It is Ramadan. The street is dead until sunset and then it is not.",
+ o:[{l:"Open for iftar", f:g=>{ g.cash+=Math.round(180*g.foot); return "Hard nights, good ones."; }},
+    {l:"Keep normal hours", f:g=>"A quiet month."}]},
+{t:"Someone asks whether you would cater their wedding. Four hundred cups.",
+ o:[{l:"Take it", f:g=>{ g.cash+=Math.round(520*g.foot); return money(520*g.foot)+" AED, and no sleep."; }},
+    {l:"Too big", f:g=>"It goes to the place on the corner."}]}
+];
+
+
+/* Art. The sprites live in ../art/sprites/, so this file is no longer standalone --
+   opened on its own, every img falls back to the emoji it replaced, which is why the
+   emoji stay in the tables. */
+function sprite(name, px, emoji, cls){
+  if(!name) return el("span", cls, emoji);
+  const w = el("span", cls);
+  w.style.cssText = "display:inline-flex;align-items:center;justify-content:center;width:" +
+    px + "px;height:" + px + "px;flex:none;font-size:" + Math.round(px*0.8) + "px";
+  const im = document.createElement("img");
+  im.src = ART + name + ".png"; im.alt = "";
+  im.style.cssText = "width:100%;height:100%;object-fit:contain";
+  im.onerror = function(){ w.textContent = emoji || ""; };
+  w.appendChild(im);
+  return w;
+}
+function dishArt(k, px){ const r = RECIPES[k] || {}; return sprite(SPRITE[k], px, r.ic); }
+function faceArt(r, px, aged){
+  // Only regulars age. Walk-ins are a different person every service, so there is
+  // nobody for the years to happen to -- pick(WALKIN) below never asks for "_old".
+  const f = REG_FACE[r.k];
+  return sprite(f ? (aged ? f + "_old" : f) : null, px, r.ic);
+}
+// Anyone the street might send in once. A walk-in has no story to gate and no name to
+// remember, which is exactly what a passer-by is, so the wider cast belongs here rather
+// than in REG_FACE.
+//
+// What a face may NOT do is belong to a regular as well. The whole premise is that you
+// come to know six people over thirty years, and that collapses the moment dana's face
+// walks in as a stranger who orders once and leaves. Seven of the cast were cut from this
+// list for exactly that: p13, p15, p19 and p21 are haddad's face with different hair, and
+// p14, p17 and p22 are aisha's and dana's. They are still fine portraits, just unusable
+// as strangers. p25 and p26 were added to make up the numbers with faces nobody owns.
+const WALKIN = ["p1","p2","p7","p8","p10","p12",
+                "p16","p18","p20","p23","p25","p26"];
+
+/* ============================== state ============================== */
+function NEW(){
+  return {
+    year:1996, season:0, gen:1, week:0,
+    owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
+           dies:72+Math.floor(Math.random()*18)},
+    cash:640, rent:90,
+    recipes:["karak","mint"], board:["karak","mint"], slots:2,
+    owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
+    sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
+    ac:false, quiet:false, canSkip:false, appCut:0,
+    staff:[], branches:[], regs:{}, cookbook:[], log:[], dynasty:[], wear:0,
+    lastTake:0, seenIntro:false
+  };
+}
+let G = NEW();
+let SV = null;                                     // the live service
+const SAVE = "cafelife_mgmt_1";
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(G)); }catch(e){} }
+function load(){ try{ const r=localStorage.getItem(SAVE); if(!r) return null;
+                      const p=JSON.parse(r); return (p&&p.year)?p:null; }catch(e){ return null; } }
+
+const season = () => SEASONS[G.season % 4];
+const own = k => G.owned[k] || 0;
+/* Rent used to inflate at 2% against prices at 1.8%. Nobody chose that: it was a quiet
+   squeeze that compounded for thirty years and it is why the café slid backwards however
+   well it was run. The two rates now match. */
+const infl = () => 1 + (G.year - 1996) * 0.018;
+/* G.mood and G.ac were set by the radio, the plants and the air conditioning and then read
+   by nothing at all -- 1,140 AED of shop items that did exactly what the barista did before
+   it was fixed, which is nothing. A room people like is a room they sit in longer, so mood
+   feeds dwell; and the air conditioning now does what its card promises, which needs summer
+   to have been worth escaping in the first place. */
+const dwellNow = () => G.dwell + G.mood * 0.015;
+/* Summer is forty degrees. Without shade or cooling the street simply does not stop, and
+   that is the season the awning and the air conditioning are sold against. */
+function heatNow(){
+  if(G.season % 4 !== 1) return 1;
+  if(G.ac) return 1;
+  return own("awning") ? 0.88 : 0.72;
+}
+/* rent and wages track the size of the thing you built, so profit stays a margin
+   and never becomes a fountain. Flat rent was why cash hit six figures by year ten. */
+/* Seats were 11 a season each. A seat buys trade, so it has to be worth more than it costs
+   to keep, and at 11 the ladder to a full room barely paid for itself. */
+/* The base was 80 a season, which a two-stool café taking 245 could not carry: rent and
+   running costs ate half of everything and the first five years went nowhere. Rent belongs
+   mostly on the size of the room and the trade going through it, not on a flat charge for
+   having a door. */
+const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl()
+                        + (own("freehold") ? 0 : G.lastTake * 0.07));
+/* A wage was a fixed 120 or 260 a season whatever the café had become, so by 2020 the whole
+   payroll was 716 against takings of 35,664 -- two per cent, where a real café spends about a
+   third. A barista in a thirty-two seat room is not doing the same job as a barista in a room
+   with two stools, and is not paid the same either. */
+const wageOf = s => Math.round((s.role === "manager" ? 220 + G.seats*40 : 100 + G.seats*18) * infl());
+const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
+
+/* You can only get to so many people yourself. Everyone past that waits, gives up and walks,
+   which is the entire point of hiring somebody -- and is what makes the wage bill something
+   you cannot simply decline to pay. The manager works the floor too. */
+/* Rent, wages and what goes in the cup were the only money leaving the café, so it kept
+   about fifty-six per cent of everything it took. A real one keeps five to fifteen: the rest
+   goes on power, water, gas, cleaning, licences, insurance and the things that break. It
+   scales with how much you are doing and how big the room is, and it is on the close screen
+   by name, because a player who cannot see a cost cannot plan around it. */
+const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl());
+
+/* Everything in here is wearing out: the machine, the chairs, the paint, the floor by the
+   door. A café that is never done up loses people slowly, and the bill for doing it up grows
+   with the place -- which is the sink the late game did not have. Money that sits still stops
+   being a score and becomes the thing that keeps the room alive. */
+const wearNow = () => Math.min(0.34, (G.wear || 0) / 100);
+const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl()
+                                  + G.lastTake * 1.6);
+
+const SERVE_EACH = 42;
+const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
+const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
+/* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
+function costOfItem(k, have){
+  const it = ITEMS[k];
+  /* The step was 0.6, so a sixth stool cost four times the first and the stretch from four
+     seats to eight took fifteen seasons with nothing else happening in them. Filling a room
+     should feel like filling a room. */
+  if(it.dyn) return it.dyn();               // priced off the café it is being spent on
+  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32)) * infl());
+}
+const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
+function show(n){ ["cafe","plan","serve","close","shop","people"]
+  .forEach(v => $("s-"+v).hidden = (v!==n)); }
+
+/* how appealing today's board is to a walk-in wanting `tag` */
+function boardHas(tag){ return G.board.some(k => RECIPES[k].tags.indexOf(tag) >= 0); }
+function priceOf(k){
+  const r = RECIPES[k];
+  let p = r.price * (1 + G.priceLift) * (1 + (G.year-1996)*0.018);
+  if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
+  if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
+  if(r.tags.indexOf("cold")>=0) p *= (1 + G.coldLift);
+  if(r.tags.indexOf("warm")>=0) p *= (1 + G.warmLift);
+  return Math.round(p);
+}
+
+/* ============================== the room ============================== */
+function roomPlate(){
+  const grown = G.seats >= 6 || own("backroom");
+  /* Nine of the thirteen plates were never chosen. The period, weather and evening ones are
+     all painted as a full room, so none of them can stand in for a café that has not filled
+     out yet -- a thriving room in the first season is a lie the player can see. They apply
+     from the grown tier up; below it the size plates still do all the work.
+
+     The seasons map onto their own flavour text. Summer is the white glare, Winter is the
+     one season it actually rains here, and Autumn's line in SEASONS is literally "the
+     evenings turn", which is what room_night is a picture of. Spring keeps the plain room,
+     because Spring's line is that the weather is unremarkable.
+
+     The period plates carry a different counter from room_large -- wood and terrazzo against
+     teal and marble. The brief logged that as a defect in a split set. It is not one here:
+     these are the same café thirty years apart, and a café that never refits its counter in
+     thirty years is the less believable picture. */
+  if(grown){
+    if(G.year < 2000)  return "room_1990s";
+    if(G.year >= 2030) return "room_2030s";
+    const s = G.season % 4;
+    if(s === 1) return "room_summer";
+    if(s === 2) return "room_night";
+    if(s === 3) return "room_rain";
+  }
+  if(own("upstairs")) return "room_large";
+  if(grown)           return "room_grown";
+  if(G.seats >= 4 || own("table")) return "room_small";
+  return "room_bare";
+}
+/* room_night and room_rain are painted dark already; washing them again just makes mud */
+const PLATE_IS_DARK = {room_night:1, room_rain:1};
+/* where a fitting stands on the plate, as a fraction of the frame, and how big it is
+   relative to a stool. The third number is its room scale from art/sprites/fittings.json. */
+const SLOTS = {
+  f_banquette:[0.09,0.86,2.55], f_table_lg:[0.26,0.84,1.85], f_table_sm:[0.38,0.82,1.26],
+  f_stool:[0.47,0.83,1.00],     f_plant_lg:[0.02,0.80,1.70], f_plant_sm:[0.20,0.78,0.90],
+  f_rug:[0.30,0.93,2.00],       f_case:[0.72,0.60,1.70],     f_till:[0.88,0.58,1.05],
+  f_grinder:[0.80,0.57,1.15],   f_radio:[0.64,0.56,0.90],    f_menuboard:[0.58,0.88,1.45],
+  f_awning:[0.10,0.16,2.10],    f_sign:[0.30,0.12,1.35],     f_aircon:[0.62,0.10,1.40],
+  f_urn:[0.68,0.58,1.20],       f_bookshelf:[0.94,0.80,1.50], p_keys:[0.50,0.55,0.70],
+  p_ledger:[0.56,0.56,0.80],
+  /* bought */
+  f_stool_pad:[0.53,0.83,1.08], f_table_lg:[0.16,0.85,1.85],  f_outdoor:[0.01,0.72,2.20],
+  f_juicer:[0.76,0.57,1.20],    f_dallah:[0.72,0.56,1.00],    f_pendant:[0.44,0.20,1.35],
+  /* dressing */
+  f_rug:[0.30,0.93,2.00],       f_pictures:[0.22,0.34,1.30],  f_sconce:[0.86,0.30,0.95],
+  f_plant_sm:[0.20,0.78,0.90],  f_planter:[0.06,0.90,1.55],   f_water:[0.60,0.60,1.30],
+  f_cupshelf:[0.90,0.36,1.60],  f_sink:[0.84,0.58,1.60],      f_fridge:[0.96,0.62,1.45],
+  f_blender:[0.82,0.56,1.15],   f_saj:[0.70,0.54,1.10],       f_heater:[0.02,0.96,1.10]
+};
+function drawRoom(host, dusk){
+  const name = roomPlate();
+  const r = el("div","room" + (dusk && !PLATE_IS_DARK[name] ? " dusk" : ""));
+  const plate = document.createElement("img");
+  plate.src = ART + name + ".png"; plate.alt = "";
+  plate.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 52%";
+  plate.onerror = function(){ r.classList.add("noplate"); plate.remove(); };
+  r.appendChild(plate);
+
+  const H = 216, BASE = 34;
+  Object.keys(G.owned).forEach(function(k){
+    const nm = ITEM_SPRITE[k], slot = SLOTS[nm];
+    if(!nm || !slot || !G.owned[k]) return;
+    const n = Math.min(G.owned[k], 3);
+    for(let i2=0;i2<n;i2++){
+      const px = Math.round(BASE * slot[2]);
+      const im = document.createElement("img");
+      im.src = ART + nm + ".png"; im.alt = "";
+      im.style.cssText = "position:absolute;width:" + px + "px;height:" + px +
+        "px;object-fit:contain;left:" + Math.round(slot[0]*100 + i2*5) + "%;top:" +
+        Math.round(slot[1]*H - px) + "px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.5))";
+      im.onerror = function(){ im.remove(); };
+      r.appendChild(im);
+    }
+  });
+  DRESSING.forEach(function(d){
+    const slot = SLOTS[d.sp];
+    if(!slot || !d.when()) return;
+    const px = Math.round(BASE * slot[2]);
+    const im = document.createElement("img");
+    im.src = ART + d.sp + ".png"; im.alt = "";
+    im.style.cssText = "position:absolute;width:" + px + "px;height:" + px +
+      "px;object-fit:contain;left:" + Math.round(slot[0]*100) + "%;top:" +
+      Math.round(slot[1]*H - px) + "px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.5))";
+    im.onerror = function(){ im.remove(); };
+    r.appendChild(im);
+  });
+  r.appendChild(el("div","glow")); r.appendChild(el("div","night"));
+  if(roomPlate() === "room_bare")
+    r.appendChild(el("div","empty-note","a counter, two stools and one machine"));
+  host.appendChild(r);
+}
+
+/* ============================== the café ============================== */
+function nextThing(){
+  const out = [];
+  /* a story one chapter from turning -- warmth is the clock, so it is a real proportion */
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(!st.met || st.done) return;
+    const need = (st.beat+1)*35;
+    const f = faceArt(r, 40, G.gen > 1); f.className = "face";
+    f.style.borderRadius = "50%"; f.style.overflow = "hidden"; f.style.background = r.hue + "33";
+    out.push({at: st.warmth/need, title: r.nm + ", chapter " + (st.beat+1),
+              note: G.board.indexOf(r.usual) >= 0
+                ? "Their usual is up. Go over to them when they come in."
+                : "Put " + RECIPES[r.usual].nm + " on the board and they will come.",
+              icon: f, w: 1.0});
+  });
+  /* the next thing that visibly changes the room */
+  const seatGoal = G.seats < 4 ? 4 : G.seats < 6 ? 6 : G.seats < 10 ? 10 : 0;
+  if(seatGoal) out.push({at: G.seats/seatGoal, title: seatGoal + " seats",
+    note: "The room opens up at " + seatGoal + ". You have " + G.seats + ".",
+    icon: sprite("f_stool", 40, "🪑"), w: 0.8});
+  if(wearNow() >= 0.10) out.push({at: wearNow()/0.34, title: "Do the place up",
+    note: "It is costing you " + Math.round(wearNow()*100) + "% of the custom coming past.",
+    icon: sprite("f_pictures", 40, "🧹"), w: 1.0});
+  /* and whatever is worth saving for -- the dearest thing within sight */
+  const want = Object.keys(ITEMS)
+    .map(k => ({k:k, c:costOfItem(k, own(k))}))
+    .filter(o => own(o.k) < ITEMS[o.k].max && o.c > G.cash && o.c < G.cash*4 + 400)
+    .sort((a,b) => b.c - a.c)[0];
+  if(want) out.push({at: G.cash/want.c, title: ITEMS[want.k].nm,
+    note: money(want.c - G.cash) + " AED to go.",
+    icon: sprite(ITEM_SPRITE[want.k], 40, ITEMS[want.k].ic), w: 0.9});
+
+  out.forEach(o => o.score = Math.min(1, o.at) * o.w);
+  out.sort((a,b) => b.score - a.score);
+  return out[0] || null;
+}
+
+function screenCafe(){
+  const v = $("s-cafe"); v.textContent = "";
+  const bar = el("div","bar");
+  bar.appendChild(el("div","pill", season().nm + " " + G.year));
+  bar.appendChild(el("div","grow"));
+  bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
+  v.appendChild(bar);
+  drawRoom(v, G.season === 3);
+
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "14px";
+
+  const head = el("div");
+  head.appendChild(el("div","lbl", "Generation " + G.gen + " · " + G.owner.nm + ", " + G.owner.age));
+  head.appendChild(el("div","big", season().nm));
+  head.appendChild(el("div","hint", season().note));
+  sc.appendChild(head);
+
+  /* Something to be working towards. A season used to end and simply hand you another one,
+     with no near thing to want, and a game you can put down at any point without losing a
+     thread is one you put down. This picks the closest of three: a story a chapter from
+     turning, the next thing that changes the room, and whatever you are saving for. */
+  const nx = nextThing();
+  if(nx){
+    const n = el("div","next"); n.style.marginTop = "14px";
+    const nt = el("div"); nt.style.flex = "1"; nt.style.minWidth = "0";
+    nt.appendChild(el("div","lbl","Next"));
+    nt.appendChild(el("div","nxt", nx.title));
+    nt.appendChild(el("div","hint", nx.note));
+    const bar2 = el("div","bars"); const bi = el("i");
+    bi.style.width = Math.round(Math.max(0.04, Math.min(1, nx.at)) * 100) + "%";
+    bar2.appendChild(bi); nt.appendChild(bar2);
+    n.appendChild(nt);
+    if(nx.icon) n.appendChild(nx.icon);
+    sc.appendChild(n);
+  }
+
+  const c = el("div","card"); c.style.marginTop = "14px";
+  c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots));
+  G.board.forEach(k => {
+    const r = RECIPES[k], d = el("div","dish");
+    d.style.cursor = "default";
+    d.appendChild(dishArt(k, 26));
+    d.appendChild(el("div","dn", r.nm));
+    const wanted = r.tags.some(t => season().want.indexOf(t) >= 0);
+    if(wanted) d.appendChild(el("div","tg","in season"));
+    d.appendChild(el("div","dp", priceOf(k) + ""));
+    c.appendChild(d);
+  });
+  if(!G.board.length) c.appendChild(el("div","hint","Nothing on the board. Nobody can order anything."));
+  sc.appendChild(c);
+
+  const met = REGULARS.filter(r => regState(r.k).met);
+  if(met.length){
+    const p = el("div","card");
+    p.appendChild(el("div","lbl","Regulars"));
+    met.forEach(r => {
+      const st = regState(r.k), row = el("div","who");
+      const f = faceArt(r, 48, G.gen > 1); f.className = "face";
+      f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+      f.style.background = r.hue + "33"; row.appendChild(f);
+      const m = el("div"); m.style.flex = "1";
+      m.appendChild(el("div","mid-t", r.nm));
+      m.appendChild(el("div","hint", st.done ? "Their story here is finished."
+        : "Chapter " + (st.beat+1) + " of " + r.beats.length));
+      const b = el("div","bars"); const i = el("i");
+      i.style.width = Math.round(st.beat/r.beats.length*100) + "%"; b.appendChild(i); m.appendChild(b);
+      row.appendChild(m); p.appendChild(row);
+    });
+    sc.appendChild(p);
+  }
+
+  if(G.branches.length){
+    const b = el("div","card");
+    b.appendChild(el("div","lbl","Branches"));
+    G.branches.forEach((br, i) => {
+      const w = el("div","br");
+      const im = document.createElement("img");
+      im.src = ART + (br.sp || branchAt(i).sp) + ".png"; im.alt = "";
+      im.onerror = function(){ w.classList.add("noplate"); im.remove(); };
+      w.appendChild(im);
+      const cap = el("div","cap");
+      cap.appendChild(el("div","t", br.nm));
+      cap.appendChild(el("div","v cash", "+" + money(branchTake(br)) + " / season"));
+      w.appendChild(cap);
+      w.appendChild(el("div","since", "since " + br.since));
+      b.appendChild(w);
+    });
+    sc.appendChild(b);
+  }
+
+  const plan = el("button","btn","Plan the season"); plan.type="button";
+  plan.onclick = screenPlan; sc.appendChild(plan);
+  const shop = el("button","btn sec","Spend " + money(G.cash) + " AED"); shop.type="button";
+  shop.onclick = () => screenShop("build"); sc.appendChild(shop);
+  if(met.length){
+    const pp = el("button","btn sec","The regulars"); pp.type="button";
+    pp.onclick = screenPeople; sc.appendChild(pp);
+  }
+  sc.appendChild(el("div",null," ")).style.height = "10px";
+  v.appendChild(sc);
+  show("cafe");
+}
+
+/* ============================== the board ============================== */
+function screenPlan(){
+  const v = $("s-plan"); v.textContent = "";
+  const bar = el("div","bar");
+  const back = el("div","pill","‹ Café"); back.style.cursor="pointer"; back.onclick = screenCafe;
+  bar.appendChild(back); bar.appendChild(el("div","grow"));
+  bar.appendChild(el("div","pill", G.board.length + " / " + G.slots));
+  v.appendChild(bar);
+
+  const sc = el("div","scroll pad");
+  sc.appendChild(el("div","lbl","The board"));
+  sc.appendChild(el("div","big","What is on today"));
+  sc.appendChild(el("div","hint","You own more than you can show. " + season().nm
+    + " wants " + season().want.filter((x,i,a)=>a.indexOf(x)===i).join(" and ")
+    + ". A regular whose usual is missing will notice."));
+
+  /* The board was a list of prices, and who it brought in was a line of small grey text at
+     the end of a row. The people are the game, so they go at the top, with what this board
+     means for each of them and how far through their story they are. Tapping a face puts
+     their usual up, which is the move the screen exists for. */
+  const known = REGULARS.filter(r => regState(r.k).met && !regState(r.k).done);
+  if(known.length){
+    const card = el("div","card"); card.style.marginTop = "14px";
+    card.appendChild(el("div","lbl","Who this brings in"));
+    known.forEach(r => {
+      const st = regState(r.k), on = G.board.indexOf(r.usual) >= 0;
+      const row = el("div","cw" + (on ? " on" : ""));
+      const f = faceArt(r, 34, G.gen > 1); f.className = "face";
+      f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+      f.style.background = r.hue + "33";
+      row.appendChild(f);
+      const mid = el("div"); mid.style.flex = "1"; mid.style.minWidth = "0";
+      mid.appendChild(el("div","cwn", r.nm));
+      mid.appendChild(el("div","cws", on
+        ? "comes in for " + RECIPES[r.usual].nm
+        : "settles for whatever is up — " + RECIPES[r.usual].nm + " is not"));
+      row.appendChild(mid);
+      const ch = el("div","cwc");
+      ch.textContent = (st.beat + 1) + "/" + r.beats.length;
+      ch.title = "chapter " + (st.beat+1) + " of " + r.beats.length;
+      row.appendChild(ch);
+      row.onclick = () => {
+        const i = G.board.indexOf(r.usual);
+        if(i >= 0) G.board.splice(i,1);
+        else if(G.board.length < G.slots) G.board.push(r.usual);
+        save(); screenPlan();
+      };
+      card.appendChild(row);
+    });
+    sc.appendChild(card);
+  }
+
+  const wrap = el("div"); wrap.style.marginTop = "14px";
+  G.recipes.forEach(k => {
+    const r = RECIPES[k], on = G.board.indexOf(k) >= 0;
+    const d = el("div","dish" + (on ? " on" : ""));
+    const wanted = r.tags.some(t => season().want.indexOf(t) >= 0);
+    if(wanted) d.classList.add("hot");
+    d.appendChild(dishArt(k, 26));
+    const mid = el("div"); mid.style.flex = "1";
+    mid.appendChild(el("div","dn", r.nm));
+    const whoWants = REGULARS.filter(x => x.usual === k && regState(x.k).met).map(x => x.nm);
+    mid.appendChild(el("div","tg",
+      r.tags.join(" · ") + (whoWants.length ? "  ·  " + whoWants.join(", ") + "'s usual" : "")));
+    d.appendChild(mid);
+    d.appendChild(el("div","dp", priceOf(k) + ""));
+    d.onclick = () => {
+      const i = G.board.indexOf(k);
+      if(i >= 0) G.board.splice(i,1);
+      else if(G.board.length < G.slots) G.board.push(k);
+      save(); screenPlan();
+    };
+    wrap.appendChild(d);
+  });
+  sc.appendChild(wrap);
+
+  const go = el("button","btn","Open for the season"); go.type = "button";
+  go.disabled = !G.board.length;
+  go.onclick = () => runService(false);
+  sc.appendChild(go);
+  if(G.canSkip){
+    const sk = el("button","btn sec","Let the manager run it"); sk.type = "button";
+    sk.onclick = () => runService(true); sc.appendChild(sk);
+  }
+  v.appendChild(sc);
+  show("plan");
+}
+
+/* ============================== service ============================== */
+function branchTake(br){
+  /* A branch used to be a flat 180 a season however big the business got, so by 2006 -- with
+     the main room maxed at thirty-two seats and the queue capped -- opening one moved the
+     books by about one per cent and the next seventeen years were flat. A branch is the same
+     café on another street: it earns a share of what you have learned to earn, which is what
+     makes expansion the thing that carries a thirty-year game after the room itself is full.
+     Each one after the first does a little worse, because you are not standing in it. */
+  /* This is what the branch SENDS you, after it has paid its own rent, its own staff and its
+     own lights -- it is a café, not an annuity. At 0.10 it was sending a tenth of your whole
+     turnover with no costs of any kind against it, so by 2055 branches were handing over
+     53,527 a season expense-free and the business kept four fifths of everything it earned.
+     A café keeps about a tenth of what goes through the till, and you are not standing in
+     this one. */
+  const i = G.branches.indexOf(br);
+  return Math.round(G.lastTake * 0.045 * br.yield * Math.pow(0.80, i) * (1 + G.rep*0.004));
+}
+
+function visitsFor(c){
+  /* One shown face is that person's whole season, so a regular is worth many cups. It was
+     up to eighty, and four of the six have a premium usual -- Khalid drinks saffron karak --
+     so six faces could turn over more than the hundred and sixty strangers behind them, and
+     the café's income stopped having anything to do with how many seats it had. Thirty is
+     still most weeks of a season and still worth far more than a passer-by. */
+  if(c.reg) return Math.min(30, 9 + regState(c.reg.k).warmth*2);
+  return 1 + Math.floor(Math.random()*3);
+}
+/* A barista's card says "Serves alongside you" and for a long time that was simply untrue:
+   nothing read G.staff except the wage bill, so hiring one cost 120 a season, rising with
+   inflation, and bought nothing at all. Two baristas and a manager were a 500-a-season hole
+   that turned a café clearing +341 into one losing 291. A pair of hands on the counter means
+   more people through the door in a season, so that is what they do now. */
+const baristas = () => G.staff.filter(s => s.role === "barista").length;
+function buildQueue(){
+  /* The cap was seats*3+6, which bound from the very first season and meant the queue
+     formula below never got to say anything. It is a backstop against runaway trade, not
+     the thing that should be setting the day's custom, so it sits above the formula now. */
+  const n = Math.max(6, Math.min(G.seats*5 + 6, hands() * SERVE_EACH,
+            Math.round((8 + G.seats*2) * G.foot * heatNow() * (1 - wearNow())
+                       * (1 + G.rep*0.012))));
+  const q = [];
+  /* regulars come first -- they are the reason the place works */
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(st.met || (G.board.indexOf(r.usual) >= 0 && Math.random() < 0.55))
+      q.push({reg:r, want:r.usual});
+  });
+  for(let i=q.length;i<n;i++){
+    const tag = Math.random() < 0.62 ? pick(season().want) : pick(["warm","cold","sweet","savoury","quick"]);
+    q.push({reg:null, want:null, tag:tag});
+  }
+  for(let i=q.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [q[i],q[j]]=[q[j],q[i]]; }
+  return q;
+}
+
+function serveOne(c){
+  /* a guest buys the first thing on the board that suits them */
+  let k = null;
+  if(c.want && G.board.indexOf(c.want) >= 0) k = c.want;
+  else {
+    const fits = G.board.filter(b => c.tag ? RECIPES[b].tags.indexOf(c.tag) >= 0
+                                           : true);
+    if(fits.length) k = pick(fits);
+    else if(c.reg) k = null;
+    else if(G.board.length && Math.random() < 0.45) k = pick(G.board);
+  }
+  if(!k) return {k:null, pay:0, visits:0};
+  /* A regular comes in for their usual. Served something else they still come, but nowhere
+     near as often. Without this the board is not a choice at all -- it is a sort by price,
+     because six regulars at up to eighty visits each will happily buy whatever the dearest
+     thing on it happens to be, and they were: that is 788,000 by year thirty, and it is the
+     same runaway an earlier fix went after from the rent side and never reached. Their
+     usual is the point of them. */
+  const offUsual = !!(c.reg && c.want && k !== c.want);
+  /* Dwell is people staying longer and so buying more, which means it belongs on the number
+     of cups, not on the margin of each one. It was multiplying profit and not pay, so a café
+     with comfortable chairs earned money that never crossed the till -- by 2006 profit was
+     25,517 against takings of 17,709, which is not a thing a shop can do. */
+  const n = Math.max(1, Math.round(visitsFor(c) * (offUsual ? 0.28 : 1) * (1 + dwellNow())));
+  const p = priceOf(k);
+  const profit = Math.round((p - costOf(k)) * n * (1 - G.appCut));
+  return {k:k, pay:p*n, visits:n, profit:profit, offUsual:offUsual};
+}
+
+/* A season run by the manager returns less than one you work yourself. That was already true
+   -- the two paths quietly differed by this much -- but it was a bare 0.72 sitting in one of
+   them, so it read as a typo rather than a rule. It is a rule: she is good, she is not you. */
+const MANAGER_CUT = 0.72;
+
+/* How many people you actually watch come in. The rest of the day's custom is resolved off
+   screen and counted the same, because a season of 164 faces at two thirds of a second each
+   is a hundred seconds of watching a list, and the café was punished for doing well: the
+   better it did, the longer you sat there. Nine is a scene. The regulars are always in it --
+   with a queue of 133 there was one regular in it, which is the exact opposite of a game
+   about coming to know six people. */
+const CAST = 9;
+
+function runService(auto){
+  const q = buildQueue();
+  SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null,
+        visits:VISITS, offstage:0};
+  if(auto){
+    q.forEach(c => { const r = serveOne(c);
+      if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*MANAGER_CUT); SV.served++;
+               if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
+      else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
+    closeSeason(true); return;
+  }
+
+  /* every regular who came, then enough walk-ins to fill the scene */
+  const regs = q.filter(c => c.reg), walk = q.filter(c => !c.reg);
+  const fill = Math.max(2, CAST - regs.length);
+  const shown = regs.concat(walk.slice(0, fill));
+  for(let i = shown.length - 1; i > 0; i--){                 // don't deal the regulars first
+    const j = Math.floor(Math.random()*(i+1)); const t = shown[i]; shown[i] = shown[j]; shown[j] = t;
+  }
+  walk.slice(fill).forEach(c => {                            // the rest of the day, off screen
+    const r = serveOne(c);
+    SV.offstage++;
+    if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; }
+    else SV.missed++;
+  });
+  SV.q = shown;
+  const v = $("s-serve"); v.textContent = "";
+  const top = el("div","svc-top");
+  top.appendChild(el("div","lbl", season().nm + " " + G.year));
+  const take = el("div","mid-t cash","0 AED"); take.id = "sv-take"; top.appendChild(take);
+  v.appendChild(top);
+  const vis = el("div","visits"); vis.id = "sv-visits"; v.appendChild(vis);
+  paintVisits();
+  const tick = el("div","tick"); const ti = el("i"); ti.id = "sv-tick"; tick.appendChild(ti);
+  v.appendChild(tick);
+  const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
+  const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
+  foot.appendChild(el("div","hint","You have time to go over to " + VISITS + " people this "
+    + "season. It is worth almost nothing on the till and it is the only thing that moves "
+    + "anyone's story."));
+  v.appendChild(foot);
+  show("serve");
+  SV.timer = setInterval(step, 620);
+  step();
+}
+
+/* Three, because two is not a choice and five is everyone. */
+const VISITS = 3;
+function paintVisits(){
+  const el2 = $("sv-visits"); if(!el2) return;
+  el2.textContent = "";
+  for(let i = 0; i < VISITS; i++)
+    el2.appendChild(el("i", i < SV.visits ? "on" : ""));
+  el2.appendChild(el("span","lbl", SV.visits ? SV.visits + " left to visit" : "no time left today"));
+}
+
+function step(){
+  if(SV.moment) return;
+  if(SV.i >= SV.q.length){ clearInterval(SV.timer); setTimeout(() => closeSeason(false), 700); return; }
+  const c = SV.q[SV.i++];
+  const r = serveOne(c);
+  const list = $("sv-list");
+  const g = el("div","g" + (c.reg ? " reg" : "") + (r.k ? "" : " miss"));
+  const f = c.reg ? faceArt(c.reg, 40, G.gen > 1) : sprite(pick(WALKIN), 40, "🧑");
+  f.className = "face";
+  f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+  f.style.background = (c.reg ? c.reg.hue : "#6F6058") + "33";
+  g.appendChild(f);
+  const mid = el("div"); mid.style.flex = "1"; mid.style.minWidth = "0";
+  mid.appendChild(el("div","nm", c.reg ? c.reg.nm : "Someone"));
+  mid.appendChild(el("div","want", r.k ? RECIPES[r.k].nm + " ×" + r.visits
+    + (r.offUsual ? " — settled for it" : "")
+    : (c.reg ? "wanted " + RECIPES[c.reg.usual].nm + " — not on the board"
+             : "wanted something " + c.tag + " — walked")));
+  g.appendChild(mid);
+  g.appendChild(el("div","pay" + (r.k ? " cash" : " bad"), r.k ? "+" + r.pay : "—"));
+
+  if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++;
+           if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
+  else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; }
+
+  g.onclick = () => {
+    if(g.classList.contains("tapped")) return;
+    if(SV.visits <= 0){ g.classList.add("nudge"); setTimeout(()=>g.classList.remove("nudge"), 400); return; }
+    SV.visits--; paintVisits();
+    g.classList.add("tapped");
+    const tip = r.k ? Math.round(r.pay*0.04)+2 : 0;
+    SV.tips += tip; SV.take += tip;
+    if(c.reg){ regState(c.reg.k).warmth += 2; if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k); }
+    const fl = el("div","float good", c.reg ? "♥ " + c.reg.nm : (tip ? "+" + tip : "♥"));
+    const b = g.getBoundingClientRect(), p = $("sv-list").getBoundingClientRect();
+    fl.style.left = (b.width - 92) + "px"; fl.style.top = (b.top - p.top) + "px";
+    $("sv-list").appendChild(fl); setTimeout(() => fl.remove(), 1000);
+    $("sv-take").textContent = money(SV.take) + " AED";
+  };
+
+  list.insertBefore(g, list.firstChild);
+  while(list.children.length > CAST) list.lastChild.remove();
+  $("sv-take").textContent = money(SV.take) + " AED";
+  $("sv-tick").style.width = Math.round(SV.i/SV.q.length*100) + "%";
+
+  if(SV.i === Math.floor(SV.q.length*0.45) && Math.random() < 0.75) doMoment();
+}
+
+function doMoment(){
+  const m = pick(MOMENTS);
+  SV.moment = m;
+  const list = $("sv-list");
+  const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
+  card.appendChild(el("div","lbl","A moment"));
+  card.appendChild(el("div","hint", m.t));
+  m.o.forEach((o,i) => {
+    const b = el("button","btn" + (i ? " sec" : "")); b.type = "button"; b.textContent = o.l;
+    b.onclick = () => { const out = o.f(G); card.remove(); SV.moment = null;
+      const n = el("div","card"); n.appendChild(el("div","hint", out));
+      list.insertBefore(n, list.firstChild); save(); };
+    card.appendChild(b);
+  });
+  list.insertBefore(card, list.firstChild);
+}
+
+/* ============================== closing the season ============================== */
+function closeSeason(auto){
+  const wages = staffWage();
+  const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
+  const rent = rentNow();                    // charged on LAST season's takings
+  const running = overheads(SV.take);
+  const net = SV.profit + branch - rent - wages - running;
+  G.cash += net; G.lastTake = SV.take;
+  G.rep += (SV.missed > SV.served*0.4 ? -1 : 1);
+  if(SV.tips > 0) G.rep += 1;
+
+  /* whose story moved */
+  const beats = [];
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(st.done) return;
+    if(!st.met){
+      if(SV.seen.indexOf(r.k) >= 0){ st.met = true; beats.push({r:r, intro:true}); }
+      return;
+    }
+    if(SV.seen.indexOf(r.k) < 0) return;
+    /* Warmth climbs about two a season -- one for coming in, more when you went over -- so a
+       gate of (beat+1)*2 meant five beats in five years. Thirty beats of writing were spent
+       by 2001 in a game meant to run for thirty years, and after that the arcs recycled with
+       a new face and a cycle number. At 35 a beat lands every eight or nine years, so a
+       story runs the length of a working life rather than a season and a half. */
+    /* Front-loaded on purpose. A flat (beat+1)*35 put the first chapter thirteen seasons in,
+       which is four minutes of a café where nothing happens to anybody -- and the people are
+       the whole reason to be here. The first one lands almost at once and the rest spread
+       out, so you are told what this is within a minute and still have somewhere to go. */
+    if(st.warmth < 4 + st.beat*17) return;
+    const b = r.beats[st.beat];
+    if(b.need){
+      /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant
+         a recipe gate could never open, and the story sat there forever. */
+      const ok = b.need === "quiet" ? G.quiet
+               : b.need === "cash2500" ? G.cash >= 2500
+               : (own(b.need) > 0 || G.recipes.indexOf(b.need) >= 0);
+      if(!ok){ beats.push({r:r, blocked:b.needT}); return; }
+    }
+    beats.push({r:r, beat:b});
+    st.beat++;
+    if(st.beat >= r.beats.length) st.done = true;
+  });
+
+  /* a finished story does not empty a seat forever -- a few seasons later somebody
+     new is sitting in it. In the shipped game this cast is assembled procedurally
+     from a role, a usual and a beat set; here it recycles the arcs with a new face. */
+  const arrivals = [];
+  REGULARS.forEach(r => {
+    const st = regState(r.k);
+    if(!st.done) return;
+    st.rest = (st.rest || 0) + 1;
+    if(st.rest >= 4){
+      const nth = (st.cycle || 1) + 1;
+      G.regs[r.k] = {met:false, beat:0, warmth:0, done:false, cycle:nth, rest:0};
+      arrivals.push({r:r, nth:nth});
+    }
+  });
+
+  /* Wear comes from use, not from the calendar. A flat charge per season would land hardest
+     on a two-stool café that has served eleven people, which is exactly backwards: it is the
+     busy years that take the floor and the chairs apart. */
+  G.wear = (G.wear || 0) + SV.served/70;
+  G.season++;
+  if(G.season % 4 === 0){ G.year++; G.owner.age++; }
+  save();
+
+  const v = $("s-close"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", SEASONS[(G.season+3)%4].nm + " " + (G.season%4===0 ? G.year-1 : G.year)
+    + (auto ? " · run by the manager" : "")));
+  sc.appendChild(el("div","big", net >= 0 ? "A good season" : "A thin season"));
+
+  const c = el("div","card");
+  const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
+  st("Served", String(SV.served), "good");
+  /* the till counts everyone, so say plainly that most of them came and went while you
+     were busy -- otherwise the takings look larger than the nine people you watched */
+  if(SV.offstage) st("Of those, came and went while you worked", String(SV.offstage));
+  if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
+  if(SV.tips) st("Tips", "+" + money(SV.tips), "cash");
+  st("Takings", money(SV.take) + " AED", "cash");
+  if(branch) st("Branches", "+" + money(branch) + " AED", "cash");
+  st("Running costs", "−" + money(running) + " AED", "bad");
+  if(wearNow() >= 0.05)
+    st("The place is looking tired", "−" + Math.round(wearNow()*100) + "% custom", "bad");
+  st(own("freehold") ? "Ground rent" : "Rent", "−" + money(rent) + " AED", "bad");
+  if(!own("freehold") && G.lastTake > 400)
+    st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
+  if(wages) st("Wages", "−" + money(wages) + " AED", "bad");
+  /* money() carries a hyphen for a negative; the lines above it all use a proper minus */
+  st("Kept", (net>=0 ? "+" + money(net) : "−" + money(-net)) + " AED",
+     net>=0 ? "good" : "bad");
+  sc.appendChild(c);
+
+  beats.forEach(b => {
+    const card = el("div","card");
+    const row = el("div","who");
+    const f = faceArt(b.r, 44, G.gen > 1); f.className = "face";
+    f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+    f.style.background = b.r.hue + "33"; row.appendChild(f);
+    const m = el("div"); m.appendChild(el("div","mid-t", b.r.nm));
+    m.appendChild(el("div","lbl", b.intro ? ((regState(b.r.k).cycle||1) > 1 ? "someone new" : "a new regular") : b.blocked ? "waiting" : "their story"));
+    row.appendChild(m); card.appendChild(row);
+    card.appendChild(el("div","beat", b.intro ? b.r.intro : b.blocked ? b.blocked : b.beat.t));
+    if(b.blocked) card.appendChild(el("div","hint","Their story is held here until the café can hold it."));
+    sc.appendChild(card);
+  });
+
+  arrivals.forEach(x => {
+    const card = el("div","card");
+    card.appendChild(el("div","lbl","the corner table"));
+    card.appendChild(el("div","beat","Somebody new has started coming in and ordering "
+      + RECIPES[x.r.usual].nm + ". The chair does not stay empty for long."));
+    sc.appendChild(card);
+  });
+
+  /* Point at the next thing before handing the season back. A close screen that only adds up
+     what happened is a full stop; the season after this one should already be wanted. */
+  const nx = nextThing();
+  if(nx && G.owner.age < G.owner.dies){
+    const n = el("div","next"); n.style.marginTop = "4px";
+    const nt = el("div"); nt.style.flex = "1"; nt.style.minWidth = "0";
+    nt.appendChild(el("div","lbl","Next"));
+    nt.appendChild(el("div","nxt", nx.title));
+    nt.appendChild(el("div","hint", nx.note));
+    const nb = el("div","bars"); const ni = el("i");
+    ni.style.width = Math.round(Math.max(0.04, Math.min(1, nx.at))*100) + "%";
+    nb.appendChild(ni); nt.appendChild(nb);
+    n.appendChild(nt);
+    if(nx.icon) n.appendChild(nx.icon);
+    sc.appendChild(n);
+  }
+
+  if(G.owner.age >= G.owner.dies){
+    const go = el("button","btn","…"); go.type = "button";
+    go.textContent = G.owner.nm + " is getting old";
+    go.onclick = succession; sc.appendChild(go);
+  } else {
+    const go = el("button","btn","Spend, and open " + SEASONS[G.season%4].nm);
+    go.type = "button"; go.onclick = () => screenShop("close");
+    sc.appendChild(go);
+  }
+  sc.appendChild(el("div")).style.height = "14px";
+  v.appendChild(sc);
+  show("close");
+}
+
+/* ============================== the shop ============================== */
+function screenShop(from){
+  const v = $("s-shop"); v.textContent = "";
+  const bar = el("div","bar");
+  const back = el("div","pill","‹ Café"); back.style.cursor="pointer"; back.onclick = screenCafe;
+  bar.appendChild(back); bar.appendChild(el("div","grow"));
+  bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
+  v.appendChild(bar);
+
+  let tab = screenShop.tab || "build";
+  const tabs = el("div","tabs");
+  [["build","Build"],["menu","Recipes"]].forEach(([k,nm]) => {
+    const t = el("div","tab" + (tab===k?" on":""), nm);
+    t.onclick = () => { screenShop.tab = k; screenShop(from); }; tabs.appendChild(t);
+  });
+  v.appendChild(tabs);
+
+  const sc = el("div","scroll pad");
+  if(tab === "build"){
+    /* Doing the place up is the most urgent thing in here the moment it appears -- it is
+       custom walking past the door -- so it goes to the top rather than sitting between the
+       plants and the menu board in declaration order. */
+    const keys = Object.keys(ITEMS).sort((a,b) =>
+      (ITEMS[b].dyn ? 1 : 0) - (ITEMS[a].dyn ? 1 : 0));
+    keys.forEach(k => {
+      const it = ITEMS[k], have = own(k);
+      if(have >= it.max) return;
+      if(it.hide && it.hide()) return;       // nothing to repair yet
+      const cost = costOfItem(k, have);
+      const row = el("div","item");
+      if(it.dyn) row.style.borderColor = "var(--terra)";
+      row.appendChild(sprite(ITEM_SPRITE[k], 34, it.ic, "ic"));
+      const mid = el("div","mid");
+      mid.appendChild(el("div","t", it.nm + (it.max>1 && have ? " ×"+have : "")));
+      mid.appendChild(el("div","d", it.d
+        + (it.dyn ? "  Losing " + Math.round(wearNow()*100) + "% of the custom coming past." : "")));
+      row.appendChild(mid);
+      const b = el("button","btn sm", money(cost)); b.type = "button";
+      b.disabled = cost > G.cash;
+      b.onclick = () => { G.cash -= cost; G.owned[k] = have+1; it.f(G); save(); screenShop(from); };
+      row.appendChild(b); sc.appendChild(row);
+    });
+  } else {
+    Object.keys(RECIPES).forEach(k => {
+      if(G.recipes.indexOf(k) >= 0) return;
+      const r = RECIPES[k], row = el("div","item");
+      row.appendChild(sprite(SPRITE[k], 34, r.ic, "ic"));
+      const mid = el("div","mid");
+      mid.appendChild(el("div","t", r.nm));
+      mid.appendChild(el("div","d", r.tags.join(" · ") + " · sells for " + r.price + " AED"));
+      const wants = REGULARS.filter(x => x.usual === k).map(x => x.nm);
+      if(wants.length) mid.appendChild(el("div","d", "Somebody on this street drinks this."));
+      row.appendChild(mid);
+      const b = el("button","btn sm", money(r.buy)); b.type = "button";
+      b.disabled = r.buy > G.cash;
+      b.onclick = () => { G.cash -= r.buy; G.recipes.push(k);
+        G.cookbook.push({k:k, by:G.owner.nm, year:G.year, gen:G.gen});
+        save(); screenShop(from); };
+      row.appendChild(b); sc.appendChild(row);
+    });
+    if(!sc.children.length) sc.appendChild(el("div","hint","You have learned everything there is here."));
+  }
+  if(tab === "menu"){
+    const n = G.cookbook.filter(c => c.invented).length;
+    const cost = Math.round(900 * Math.pow(1.45, n) * infl());
+    const row = el("div","item"); row.style.borderColor = "var(--amber-d)";
+    row.appendChild(sprite("p_card", 34, "📓", "ic"));
+    const mid = el("div","mid");
+    mid.appendChild(el("div","t","Work out something of your own"));
+    mid.appendChild(el("div","d","A season of evenings. It goes on the board and into the "
+      + "cookbook under your name, and it is still there for whoever comes after you."));
+    row.appendChild(mid);
+    const b2 = el("button","btn sm", money(cost)); b2.type = "button";
+    b2.disabled = cost > G.cash;
+    b2.onclick = () => { G.cash -= cost; invent(); save(); screenShop(from); };
+    row.appendChild(b2); sc.appendChild(row);
+  }
+  const go = el("button","btn", from === "close" ? "Open " + SEASONS[G.season%4].nm : "Back to the café");
+  go.type = "button"; go.onclick = screenCafe; sc.appendChild(go);
+  sc.appendChild(el("div")).style.height = "14px";
+  v.appendChild(sc);
+  show("shop");
+}
+
+const INV_A = ["House","Corner","Morning","Street","Family","Late","Old","Second"];
+/* Eleven dishes were drawn and never put on a menu. Invention is one of the two uncapped
+   sinks -- the thing a player keeps doing forever -- so it was also the one part of the game
+   that ran out of art and fell back to the emoji. Each invention now takes the next unused
+   plate and is named for it: "House kunafa" reads as your version of a real thing, which is
+   what inventing a recipe in a cafe actually is. Past the eleventh the list wraps, so a
+   long dynasty does repeat a dish -- but the name and the picture never disagree, which
+   a fallback to the base recipe's sprite could not promise: it happily served a qahwa
+   plate under the name "Street pour".
+
+   The tags are the dish's own, not the base recipe's. That is a balance change as well as
+   a cosmetic one: inheriting meant an owner who only knew hot drinks could never invent a
+   cold one, so Summer -- the one season that wants ["cold","cold"] -- could only ever be
+   answered by something bought from the shop. Now jallab and rose lemonade are reachable
+   by inventing, which is the point of an uncapped sink. It also stops the board printing
+   WARM under a picture of an iced drink, which the emoji was hiding. */
+const INVENTABLE = [
+  {sp:"kunafa",   n:"kunafa",                 tags:["sweet","share"]},
+  {sp:"balaleet", n:"balaleet",               tags:["sweet","fill"]},
+  {sp:"chebab",   n:"chebab",                 tags:["warm","sweet"]},
+  {sp:"khameer",  n:"khameer",                tags:["savoury","fill"]},
+  {sp:"basbousa", n:"basbousa",               tags:["sweet","share"]},
+  {sp:"jallab",   n:"jallab",                 tags:["cold","sweet"]},
+  {sp:"roselem",  n:"rose lemonade",          tags:["cold","light"]},
+  {sp:"camelcap", n:"camel-milk cappuccino",  tags:["warm","slow"]},
+  {sp:"sahlab",   n:"sahlab",                 tags:["warm","sweet"]},
+  {sp:"maamoul",  n:"maamoul",                tags:["sweet","quick"]},
+  {sp:"qahwa",    n:"qahwa",                  tags:["warm","light"]}
+];
+function invent(){
+  const n = G.cookbook.filter(c => c.invented).length;
+  /* The base has to be a recipe from the book, never another invention. Inventing on top of
+     an invention compounds: each one is priced at 1.35+ times its base, so a chain of them
+     multiplies without bound, and a café that keeps inventing ends up selling a 400 AED cup
+     of tea. This is the engine behind the old 751,000-by-year-30 runaway -- the earlier fix
+     went at rent and wages, which are linear, and could never catch a geometric series. */
+  const invented = {};
+  G.cookbook.forEach(c => { if(c.invented) invented[c.k] = 1; });
+  const stock = G.recipes.filter(k => !invented[k]);
+  const base = pick(stock.length ? stock : G.recipes);
+  const src = RECIPES[base];
+  const k = "own" + n + "_" + G.gen;
+  const inv = INVENTABLE[n % INVENTABLE.length];
+  RECIPES[k] = {nm: pick(INV_A) + " " + inv.n, ic: src.ic,
+                cost: Math.round(src.cost * 1.1),
+                price: Math.round(src.price * (1.35 + n*0.06)),
+                tags: inv.tags.slice(), buy:0};
+  SPRITE[k] = inv.sp;
+  G.recipes.push(k);
+  G.cookbook.push({k:k, nm:RECIPES[k].nm, by:G.owner.nm, year:G.year, gen:G.gen,
+                   invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
+                   tags:RECIPES[k].tags, ic:RECIPES[k].ic, sp:SPRITE[k]});
+}
+/* recipes invented by earlier generations have to be put back on load */
+function rehydrate(){
+  (G.cookbook||[]).forEach(c => {
+    if(c.invented && !RECIPES[c.k])
+      RECIPES[c.k] = {nm:c.nm, ic:c.ic, cost:c.cost, price:c.price, tags:c.tags, buy:0};
+    // a save from before inventions had plates has no c.sp; those keep the emoji, which is
+    // what that save always drew, rather than being silently given someone else's dish
+    if(c.invented && c.sp) SPRITE[c.k] = c.sp;
+  });
+  // branches from a save written before they had plates: give them one by position, which
+  // is the order they were opened in and so the order this build would have assigned
+  (G.branches||[]).forEach((br, i) => { if(!br.sp) br.sp = branchAt(i).sp; });
+}
+
+/* ============================== the regulars =============================== */
+function screenPeople(){
+  const v = $("s-people"); v.textContent = "";
+  const bar = el("div","bar");
+  const back = el("div","pill","‹ Café"); back.style.cursor="pointer"; back.onclick = screenCafe;
+  bar.appendChild(back); v.appendChild(bar);
+  const sc = el("div","scroll pad");
+  sc.appendChild(el("div","lbl","The regulars"));
+  sc.appendChild(el("div","big","Who keeps coming back"));
+  REGULARS.forEach(r => {
+    const st = regState(r.k); if(!st.met) return;
+    const card = el("div","card");
+    const row = el("div","who");
+    const f = faceArt(r, 44, G.gen > 1); f.className = "face";
+    f.style.borderRadius = "50%"; f.style.overflow = "hidden";
+    f.style.background = r.hue + "33"; row.appendChild(f);
+    const m = el("div"); m.style.flex="1";
+    m.appendChild(el("div","mid-t", r.nm));
+    m.appendChild(el("div","lbl","usual — " + RECIPES[r.usual].nm));
+    row.appendChild(m); card.appendChild(row);
+    card.appendChild(el("div","hint", r.intro));
+    for(let i=0;i<st.beat;i++) card.appendChild(el("div","beat", r.beats[i].t));
+    if(st.done) card.appendChild(el("div","lbl","— their story here is finished"));
+    sc.appendChild(card);
+  });
+  v.appendChild(sc);
+  show("people");
+}
+
+/* ============================== succession ============================== */
+function succession(){
+  G.dynasty.push({gen:G.gen, nm:G.owner.nm, to:G.year, age:G.owner.age});
+  const v = $("s-close"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl","Generation " + G.gen + " · " + G.year));
+  sc.appendChild(el("div","big", G.owner.nm + " hands it over"));
+  const done = REGULARS.filter(r => regState(r.k).done).length;
+  const c = el("div","card");
+  [["Ran the café for", (G.owner.age-26) + " years"],
+   ["Recipes learned", String(G.cookbook.length)],
+   ["Stories seen through", done + " of " + REGULARS.length],
+   ["Branches", String(G.branches.length)],
+   ["Left behind", money(G.cash) + " AED"]].forEach(([k,val]) => {
+     const r = el("div","stat"); r.appendChild(el("div","k",k));
+     r.appendChild(el("div","v",val)); c.appendChild(r); });
+  sc.appendChild(c);
+  sc.appendChild(el("div","hint","The room stays exactly as you built it. So does the cookbook, "
+    + "and so do the regulars — though the ones who were old when you started will not be here "
+    + "for your daughter, and the children who came in with their mothers will be the ones "
+    + "propping up the counter."));
+  const go = el("button","btn","Hand over the keys"); go.type = "button";
+  go.onclick = () => {
+    G.gen++;
+    /* The café passes whole. The money does not: there are other children, and they take
+       their share. Without this a dynasty simply accumulates -- two million by year sixty,
+       with nothing left to want. */
+    G.cash = Math.round(G.cash * 0.45);
+    G.owner = {nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid"]),
+               age:26, dies:72+Math.floor(Math.random()*18)};
+    /* the regulars who finished their arc move on; a new generation meets new people */
+    REGULARS.forEach(r => { const st = regState(r.k);
+      if(st.done){ G.regs[r.k] = {met:false, beat:0, warmth:0, done:false}; } });
+    save(); screenCafe();
+  };
+  sc.appendChild(go);
+  v.appendChild(sc);
+  show("close");
+}
+
+/* ============================== boot ============================== */
+function intro(){
+  const v = $("s-cafe"); v.textContent = "";
+  const bar = el("div","bar"); bar.appendChild(el("div","pill","Spring 1996"));
+  v.appendChild(bar);
+  drawRoom(v, false);
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";
+  sc.appendChild(el("div","lbl","Café Life"));
+  sc.appendChild(el("div","big","A counter and two stools"));
+  [ "You have one machine, two recipes and four hundred and twenty dirhams. There is no "
+    + "clock and nothing here can be failed.",
+    "Each season you choose what goes on the board — you will always own more recipes than "
+    + "you have room to show, and the season moves what people want. Then you open, and you "
+    + "watch who comes in.",
+    "Some of them will come back. Tap someone while they are here and you go over and say "
+    + "something; it is worth almost nothing on the till, and it is the only way anyone's "
+    + "story moves."
+  ].forEach(t => sc.appendChild(el("div","hint", t)));
+  const go = el("button","btn","Open the shutters"); go.type = "button";
+  go.onclick = () => { G.seenIntro = true; save(); screenCafe(); };
+  sc.appendChild(go);
+  v.appendChild(sc); show("cafe");
+}
+const prior = load();
+if(prior){ G = prior; rehydrate(); }
+G.seenIntro ? screenCafe() : intro();
+</script></body></html>

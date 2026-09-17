@@ -1,0 +1,381 @@
+#!/usr/bin/env python3
+"""
+Turn raw generated art into game sprites.
+
+    python3 process.py <raw-folder> [--out ../sprites] [--sheet contact.png]
+
+For each image: keys out the flat grey background, trims to content, re-centres on a
+common optical size, and writes the master plus the sizes the game draws at.
+
+The background is removed by flood-filling inward from the edges rather than by colour
+threshold alone. That distinction matters: a milk pitcher is the same grey as the
+backdrop, and a threshold would punch a hole straight through it.
+"""
+import sys, os, re, io, math, json
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter
+
+MASTER = 512          # one master per asset; everything downscales from this
+MARGIN = 0.08         # padding inside the square, so a row of sprites reads at one size
+GAME_SIZES = [34, 20] # what the bins and the order chips actually draw
+FACE_SIZES = [40, 30]  # what an order ticket and a seat draw a customer at
+FIT_SIZES  = [64, 44] # what the room and a shop row draw a fitting at
+THRESH = 34           # how far from the sampled backdrop still counts as backdrop
+
+# Asset id -> the sprite name the game already references.
+NAMES = {
+    "i-01": "ice",      "i-02": "syrup",  "i-03": "datepaste", "i-04": "milk",
+    "i-05": "shot",     "i-06": "tea",    "i-07": "pastry",    "i-08": "dough",
+    "d-01": "espresso", "d-02": "mint",   "d-03": "latte",     "d-04": "karak",
+    "d-05": "almond",   "d-06": "iced",   "d-07": "dateshake", "d-08": "luqaimat",
+    "d-09": "regag",    "d-10": "saffron","d-11": "affogato",  "d-12": "cortado",
+    "m-01": "m_espresso","m-02": "m_kettle","m-03": "m_syrup",
+    "m-04": "m_steamer","m-05": "m_oven", "m-06": "m_ice",
+    "r-01": "room_counter", "r-02": "room_day", "r-03": "room_evening",
+    "r-04": "room_bare",   "r-05": "room_small",   "r-06": "room_grown",
+    "r-07": "room_large",  "r-08": "room_back",    "r-09": "room_night",
+    "r-10": "room_rain",   "r-11": "room_summer",  "r-12": "room_1990s",
+    "r-13": "room_2030s",
+    "b-01": "br_jumeirah", "b-02": "br_satwa",    "b-03": "br_deira",
+    "b-04": "br_karama",   "b-05": "br_mall",     "b-06": "br_airport",
+}
+# c-25 upward are faces added to break up the cast's sameness -- the first twenty-four came
+# back with one male face and one female face re-dressed several times over (see docs).
+for i in range(1, 33):
+    NAMES["c-%02d" % i] = "p%d" % i
+
+# §A fittings -- everything the player can buy, so it can appear in the room
+FITTINGS = {
+    "f-01": "f_stool",     "f-02": "f_stool_pad", "f-03": "f_table_sm",
+    "f-04": "f_table_lg",  "f-05": "f_banquette",  "f-06": "f_outdoor",
+    "f-07": "f_case",      "f-08": "f_menuboard",  "f-09": "f_till",
+    "f-10": "f_cupshelf",  "f-11": "f_water",      "f-12": "f_grinder",
+    "f-13": "f_blender",   "f-14": "f_dallah",     "f-15": "f_juicer",
+    "f-16": "f_urn",       "f-17": "f_saj",        "f-18": "f_pendant",
+    "f-19": "f_sconce",    "f-20": "f_rug",       "f-21": "f_plant_sm",
+    "f-22": "f_plant_lg",  "f-23": "f_pictures",  "f-24": "f_bookshelf",
+    "f-25": "f_radio",     "f-26": "f_aircon",    "f-27": "f_heater",
+    "f-28": "f_fridge",    "f-29": "f_sink",      "f-30": "f_awning",
+    "f-31": "f_sign",      "f-32": "f_planter",
+}
+
+# Ageing portraits. The range deliberately skips 12: A-12 is p12, the grandmother, and the
+# brief marks her the one who does not get thirty more years -- leaving her unmapped means
+# the pipeline cannot quietly undo that beat by picking up a file someone dropped in.
+# A-08 is p8, who is already old and does get them.
+NAMES.update({"a-%02d" % i: "p%d_old" % i for i in list(range(1, 12)) + list(range(13, 25))})
+
+# small props the interface leans on. S-01 is deliberately absent: it duplicated F-31,
+# which is the same blank hanging sign, and was cut from the brief rather than generated.
+NAMES.update({
+    "s-02": "p_ledger", "s-03": "p_keys", "s-04": "p_cashbox",
+    "s-05": "p_clock",  "s-06": "p_card",
+})
+
+# the second dish set, joining the twelve already on the menu
+NAMES.update({
+    "d-13": "chai",    "d-14": "qahwa",   "d-15": "kunafa",  "d-16": "balaleet",
+    "d-17": "chebab",  "d-18": "khameer", "d-19": "basbousa","d-20": "jallab",
+    "d-21": "roselem", "d-22": "camelcap","d-23": "sahlab",  "d-24": "maamoul",
+})
+NAMES.update(FITTINGS)
+
+# How big each fitting is IN THE ROOM, relative to a stool.
+#
+# Squaring every asset into one box is right for a shop row -- a grid of equal tiles is
+# what a list wants -- and wrong for the room, where it draws a stool the size of a
+# banquette. Food never needed this because every cup is cup-sized. Furniture does.
+# The room multiplies its base draw size by this; the shop row ignores it.
+ROOM_SCALE = {
+    "f_stool": 1.00, "f_stool_pad": 1.08, "f_table_sm": 1.26,
+    "f_table_lg": 1.85, "f_banquette": 2.55, "f_outdoor": 2.20,
+    "f_case": 1.70, "f_menuboard": 1.45, "f_till": 1.05, "f_cupshelf": 1.60,
+    "f_water": 1.30, "f_grinder": 1.15, "f_blender": 1.15, "f_dallah": 1.00,
+    "f_juicer": 1.20, "f_urn": 1.20, "f_saj": 1.10, "f_pendant": 1.35,
+    "f_sconce": 0.95, "f_rug": 2.00, "f_plant_sm": 0.90, "f_plant_lg": 1.70,
+    "f_pictures": 1.30, "f_bookshelf": 1.50, "f_radio": 0.90, "f_aircon": 1.40,
+    "f_heater": 1.10, "f_fridge": 1.45, "f_sink": 1.60, "f_awning": 2.10,
+    "f_sign": 1.35, "f_planter": 1.55,
+}
+
+# Fallback when the file was not named by id.
+KEYWORDS = [
+    ("espresso", "espresso"), ("latte", "latte"), ("karak", "karak"), ("mint", "mint"),
+    ("almond", "almond"), ("croissant", "almond"), ("iced", "iced"), ("shake", "dateshake"),
+    ("luqaimat", "luqaimat"), ("regag", "regag"), ("saffron", "saffron"),
+    ("affogato", "affogato"), ("cortado", "cortado"), ("datepaste", "datepaste"),
+    ("date-paste", "datepaste"), ("dough", "dough"), ("pastry", "pastry"),
+    ("syrup", "syrup"), ("milk", "milk"), ("shot", "shot"), ("tea", "tea"), ("ice", "ice"),
+]
+
+def target_name(fn):
+    stem = os.path.splitext(os.path.basename(fn))[0].lower()
+    m = re.search(r"\b([idmrcfsba])[-_ ]?(\d{1,2})\b", stem)
+    if m:
+        key = "%s-%02d" % (m.group(1), int(m.group(2)))
+        if key in NAMES:
+            return NAMES[key]
+    for kw, name in KEYWORDS:
+        if kw in stem:
+            return name
+    return None
+
+def cut_background(im):
+    """Flood-fill inward from every edge pixel, so interior greys survive."""
+    im = im.convert("RGB")
+    w, h = im.size
+    # sample the four corners; a flat backdrop makes these agree
+    corners = [im.getpixel(p) for p in ((0,0), (w-1,0), (0,h-1), (w-1,h-1))]
+    bg = tuple(sum(c[i] for c in corners) // 4 for i in range(3))
+
+    work = im.copy()
+    KEY = (255, 0, 255)
+    seeds = [(x, 0) for x in range(0, w, 8)] + [(x, h-1) for x in range(0, w, 8)] \
+          + [(0, y) for y in range(0, h, 8)] + [(w-1, y) for y in range(0, h, 8)]
+    for s in seeds:
+        px = work.getpixel(s)
+        if px == KEY:
+            continue
+        if max(abs(px[i] - bg[i]) for i in range(3)) <= THRESH:
+            ImageDraw.floodfill(work, s, KEY, thresh=THRESH)
+
+    src = work.load()
+    alpha = Image.new("L", (w, h), 255)
+    ap = alpha.load()
+    for y in range(h):
+        for x in range(w):
+            if src[x, y] == KEY:
+                ap[x, y] = 0
+    # NOTE: the generator bakes a soft drop shadow onto the backdrop and it survives this
+    # cut. Stripping it by colour was tried and reverted: a shadow and an object's own
+    # neutral mid-greys are indistinguishable, so it ate the milk pitcher's body and the
+    # shaded sides of the cup and bowl. At 34px the baked shadow is invisible, and at
+    # larger sizes it grounds the object, so it stays.
+    alpha = alpha.filter(ImageFilter.GaussianBlur(0.6))   # antialias the cut edge
+    out = im.convert("RGBA")
+    out.putalpha(alpha)
+    return out
+
+# How far a detached island has to sit from the subject before it counts as dirt rather
+# than art, and how small it has to be. Both conditions, never either alone. The numbers
+# are measured, not guessed: across the whole sprite set the legitimate detached pieces --
+# the steam off the milk jug and the karak glass, the urn's finial, stray hair wisps --
+# all sit 2 to 27 px from the main mass, while the background flecks the flood fill could
+# not reach sit 46 to 120 px out. Nothing real was found in between.
+SPECK_GAP  = 40      # px from the subject
+SPECK_AREA = 0.005   # fraction of the subject's own area
+
+def despeckle(im):
+    """The flood fill works in from the edges and stops at anything darker than THRESH,
+    so a dark fleck sitting in open backdrop survives as an island -- p22 shipped with
+    eight of them hanging in the air beside her head. Drop an island only when it is both
+    small and far away: steam is small but touching, so a size rule alone would erase it,
+    which is exactly what a first attempt here did."""
+    a = np.array(im.split()[3]) > 8
+    if not a.any():
+        return im
+    lab, n = label_islands(a)
+    if n < 2:
+        return im
+    sizes = np.bincount(lab.ravel())
+    sizes[0] = 0
+    main = int(sizes.argmax())
+    near = lab == main
+    for _ in range(SPECK_GAP):                      # grow the subject by SPECK_GAP px
+        near[1:, :] |= near[:-1, :]; near[:-1, :] |= near[1:, :]
+        near[:, 1:] |= near[:, :-1]; near[:, :-1] |= near[:, 1:]
+    drop = np.zeros(len(sizes), dtype=bool)
+    for i in range(1, len(sizes)):
+        if i == main or sizes[i] == 0:
+            continue
+        if sizes[i] < sizes[main] * SPECK_AREA and not (near & (lab == i)).any():
+            drop[i] = True
+    if not drop.any():
+        return im
+    alpha = np.array(im.split()[3])
+    alpha[drop[lab]] = 0
+    out = im.copy()
+    out.putalpha(Image.fromarray(alpha, "L"))
+    return out
+
+def label_islands(a):
+    """Four-connected labelling. Small images, run once per asset, so a plain flood fill
+    is quicker to read than pulling scipy in for it."""
+    h, w = a.shape
+    lab = np.zeros((h, w), dtype=np.int32)
+    cur = 0
+    for y in range(h):
+        for x in range(w):
+            if a[y, x] and lab[y, x] == 0:
+                cur += 1
+                stack = [(y, x)]
+                lab[y, x] = cur
+                while stack:
+                    cy, cx = stack.pop()
+                    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        ny, nx = cy + dy, cx + dx
+                        if 0 <= ny < h and 0 <= nx < w and a[ny, nx] and lab[ny, nx] == 0:
+                            lab[ny, nx] = cur
+                            stack.append((ny, nx))
+    return lab, cur
+
+def head_crop(im, keep=0.60):
+    """Characters are busts: the shoulders run off the bottom of the frame, so the
+    subject touches the border and the backdrop is no longer a closed region to fill
+    from. Cropping to the head fixes that AND fixes legibility — a whole bust drawn at
+    40px leaves a 16px face, which is not a face."""
+    w, h = im.size
+    im = im.crop((0, 0, w, int(h * keep)))
+    # re-centre horizontally on the head: find the widest non-backdrop run near the top
+    px = im.convert("RGB").load()
+    bg = px[2, 2]
+    cols = []
+    for x in range(im.size[0]):
+        hit = 0
+        for y in range(4, im.size[1], 7):
+            c = px[x, y]
+            if max(abs(c[i] - bg[i]) for i in range(3)) > THRESH:
+                hit += 1
+        cols.append(hit)
+    live = [i for i, c in enumerate(cols) if c > 2]
+    if live:
+        cx = (live[0] + live[-1]) // 2
+        half = min(cx, im.size[0] - cx)
+        if half > im.size[0] * 0.28:
+            im = im.crop((cx - half, 0, cx + half, im.size[1]))
+    return im
+
+def fade_bottom(im, band=0.14):
+    """The head crop leaves a hard horizontal slice where it cut through the collar.
+    Fading the last band of alpha turns that slice into a vignette."""
+    w, h = im.size
+    a = im.split()[3].load()
+    y0 = int(h * (1 - band))
+    for y in range(y0, h):
+        k = 1.0 - (y - y0) / float(h - y0)
+        k = k * k
+        for x in range(w):
+            v = a[x, y]
+            if v:
+                a[x, y] = int(v * k)
+    return im
+
+def trim_and_square(im, margin=MARGIN, size=MASTER):
+    bbox = im.getbbox()
+    if not bbox:
+        return im.resize((size, size), Image.LANCZOS)
+    im = im.crop(bbox)
+    inner = int(size * (1 - 2 * margin))
+    w, h = im.size
+    scale = inner / max(w, h)
+    im = im.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
+    canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    canvas.paste(im, ((size - im.size[0]) // 2, (size - im.size[1]) // 2), im)
+    return canvas
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__); sys.exit(1)
+    raw = sys.argv[1]
+    out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv \
+          else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sprites")
+    sheet_path = sys.argv[sys.argv.index("--sheet") + 1] if "--sheet" in sys.argv else None
+    os.makedirs(out, exist_ok=True)
+
+    files = sorted(f for f in os.listdir(raw)
+                   if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")))
+    if not files:
+        print("no images found in", raw); sys.exit(1)
+
+    done, unnamed = [], []
+    for f in files:
+        name = target_name(f)
+        if not name:
+            unnamed.append(f); continue
+        src = Image.open(os.path.join(raw, f))
+        # a scene plate is never cut, trimmed or squared -- branches are scenes too,
+        # and matching only "room_" silently squared the first three to 512x512
+        wide = name.startswith(("room_", "br_"))
+        # p3 and p3_old are both portraits: both need the head crop, the bottom fade
+        # and the face export sizes. Matching only ^p\d+$ sent every aged portrait down
+        # the object path, where nothing crops the shoulders, so the backdrop was never
+        # closed and the cut left the whole grey frame behind.
+        face = re.match(r"^p\d+(_old)?$", name) is not None
+        if wide:
+            im = src.convert("RGBA")
+        else:
+            im = despeckle(cut_background(head_crop(src) if face else src))
+            if face:
+                im = fade_bottom(im)
+            im = trim_and_square(im, margin=0.04 if face else MARGIN)
+        im.save(os.path.join(out, name + ".png"))
+        sizes = [] if wide else (FACE_SIZES if face else
+                 (FIT_SIZES if name.startswith("f_") else GAME_SIZES))
+        for s in sizes:
+            im.resize((s * 3, s * 3), Image.LANCZOS).save(
+                os.path.join(out, "%s@%d.png" % (name, s)))
+        done.append((name, im))
+        print("  %-22s <- %s" % (name + ".png", f))
+
+    if unnamed:
+        print("\ncould not match a sprite name (rename with its asset id, e.g. d-03-latte.png):")
+        for f in unnamed:
+            print("   ", f)
+
+    if sheet_path and done:
+        # the row-at-real-size check: anything unreadable here needs a bolder silhouette
+        cols, pad = 8, 14
+        rows = math.ceil(len(done) / cols)
+        cell = 34 + pad * 2
+        sheet = Image.new("RGBA", (cols * cell, rows * cell * 2), (23, 19, 16, 255))
+        for i, (name, im) in enumerate(done):
+            cx, cy = (i % cols) * cell, (i // cols) * cell * 2
+            for j, s in enumerate(GAME_SIZES):
+                th = im.resize((s, s), Image.LANCZOS)
+                sheet.paste(th, (cx + (cell - s) // 2, cy + j * cell + (cell - s) // 2), th)
+        sheet.save(sheet_path)
+        print("\ncontact sheet ->", sheet_path, "(top row 34px, bottom row 20px)")
+
+    fits = [n for n, _ in done if n.startswith("f_")]
+    if fits:
+        man = os.path.join(out, "fittings.json")
+        data = {}
+        if os.path.exists(man):
+            try:
+                data = json.load(open(man))
+            except Exception:
+                data = {}
+        for n in fits:
+            data[n] = round(ROOM_SCALE.get(n, 1.0), 2)
+        missing = [n for n in fits if n not in ROOM_SCALE]
+        with open(man, "w") as fh:
+            json.dump(dict(sorted(data.items())), fh, indent=2)
+            fh.write("\n")
+        print("\nfittings.json -> %d room scales" % len(data))
+        if missing:
+            print("  no ROOM_SCALE for: %s (defaulted to 1.0 -- add them)" % ", ".join(missing))
+
+    # Placeholder guard. This must fail CLOSED: a run that touches nothing should leave
+    # the manifest exactly as it found it, and the file is never deleted -- an empty list
+    # is how "all replaced" is recorded. An earlier version removed the file and a run
+    # over unrelated art cleared it while every placeholder was still on disk.
+    ph = os.path.join(out, "PLACEHOLDERS.json")
+    if os.path.exists(ph):
+        with open(ph) as fh:
+            left = json.load(fh)                    # a corrupt manifest must raise, not pass
+        made = set(n for n, _ in done)
+        replaced = [n for n in left if n in made]
+        left = [n for n in left if n not in made]
+        with open(ph, "w") as fh:
+            json.dump(sorted(left), fh, indent=2); fh.write("\n")
+        if replaced:
+            print("\nreplaced by generated art: %s" % ", ".join(sorted(replaced)))
+        if left:
+            print("\nSTILL PLACEHOLDER, do not ship (%d): %s" % (len(left), ", ".join(sorted(left))))
+        else:
+            print("\nno placeholders left")
+
+    print("\n%d sprites written to %s" % (len(done), os.path.normpath(out)))
+
+if __name__ == "__main__":
+    main()

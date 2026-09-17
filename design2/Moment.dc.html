@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+  <style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"DM Sans",system-ui,-apple-system,sans-serif;font-size:14px;
+     color:#F7EFE3;background:#171310;-webkit-font-smoothing:antialiased}
+a{color:#F2A03D} a:hover{color:#FFBC63}
+.scr{width:390px;height:844px;display:flex;flex-direction:column;background:#171310;
+     overflow:hidden;position:relative}
+.st{height:47px;flex:none}          /* status bar space -- left empty on purpose */
+.sb{height:34px;flex:none}          /* home indicator space */
+.pad{padding-left:20px;padding-right:20px}
+.grow{flex:1;min-height:0}
+.dsp{font-family:"Bricolage Grotesque","DM Sans",sans-serif;font-weight:800;
+     letter-spacing:-.025em;margin:0;line-height:1.08}
+.mono{font-family:"DM Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.lbl{font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.14em;
+     text-transform:uppercase;color:#6F6058}
+.panel{background:#231C18;border:1px solid #3B302A;border-radius:14px}
+.btn{height:56px;border-radius:13px;background:#F2A03D;color:#171310;
+     font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
+     display:flex;align-items:center;justify-content:center;flex:none}
+.btn2{height:52px;border-radius:13px;background:transparent;border:1px solid #4A3C34;
+      color:#F7EFE3;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;
+      font-size:15px;display:flex;align-items:center;justify-content:center;flex:none}
+.pill{border:1px solid #3B302A;background:#231C18;border-radius:999px;padding:7px 13px;
+      font-family:"DM Mono",ui-monospace,monospace;font-size:13px;font-weight:500}
+.row{display:flex;align-items:center}
+.col{display:flex;flex-direction:column}
+.cash{color:#E8C36B} .good{color:#4FBF7B} .bad{color:#A8452A} .amb{color:#F2A03D}
+.face{border-radius:50%;object-fit:cover;flex:none;background:#2E2521}
+.sprite{object-fit:contain;flex:none}
+.hair{height:1px;background:#3B302A;flex:none}
+</style>
+</helmet>
+<div class="scr"><div class="st"></div><div class="row pad" style="justify-content:space-between;align-items:center;padding-bottom:10px;flex:none"><div class="lbl">Autumn 2004</div><div class="dsp cash" style="font-size:20px">842 AED</div></div><div class="pad" style="flex:none"><div style="height:5px;border-radius:3px;background:#2E2521;overflow:hidden"><div style="width:45%;height:100%;background:#F2A03D"></div></div></div><div class="grow pad" style="padding-top:14px;overflow:hidden"><div class="panel" style="padding:16px;border-color:#C97C22;margin-bottom:9px"><div class="lbl" style="color:#F2A03D">A moment</div><div style="font-size:15.5px;line-height:1.55;margin-top:9px;color:#F7EFE3">Someone has left a wallet on the table by the window.</div><div style="height:14px"></div><div class="btn" style="height:50px;font-size:15px">Run after them</div><div style="height:9px"></div><div class="btn2">Keep it behind the counter</div></div><div class="row" style="gap:11px;background:#231C18;border:1px solid #C97C22;border-radius:13px;padding:10px 12px;margin-bottom:9px;"><img class="face" src="p9.png" style="width:40px;height:40px"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">Dana</div><div style="font-size:12px;color:#A8988A;margin-top:1px">Iced latte &times;40</div></div><div class="mono cash" style="font-weight:500;font-size:14px">+920</div></div><div class="row" style="gap:11px;background:#231C18;border:1px solid #3B302A;border-radius:13px;padding:10px 12px;margin-bottom:9px;"><img class="face" src="p7.png" style="width:40px;height:40px"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">Someone</div><div style="font-size:12px;color:#A8988A;margin-top:1px">Luqaimat &times;2</div></div><div class="mono cash" style="font-weight:500;font-size:14px">+42</div></div></div><div class="sb"></div></div></x-dc>
+<script data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<title>Café Rush Art Prompts</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --sheet:#F1F0EC; --card:#FFFFFF; --ink:#1A1B18; --ink-2:#5B5E58; --ink-3:#8B8E87;
+  --rule:#DCDBD4; --code:#221F1B; --code-ink:#F2ECE1; --accent:#A8611E; --ok:#2F6B4A; --warn:#9A4A2C;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --sheet:#131412; --card:#1B1D19; --ink:#ECEBE4; --ink-2:#9DA098; --ink-3:#757870;
+  --rule:#2A2C27; --code:#0F100E; --code-ink:#EFE8DC; --accent:#D89149; --ok:#6FB088; --warn:#D2825F;
+}}
+:root[data-theme="dark"]{
+  --sheet:#131412; --card:#1B1D19; --ink:#ECEBE4; --ink-2:#9DA098; --ink-3:#757870;
+  --rule:#2A2C27; --code:#0F100E; --code-ink:#EFE8DC; --accent:#D89149; --ok:#6FB088; --warn:#D2825F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sheet);color:var(--ink);
+  font-family:"DM Sans",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.6}
+.wrap{max-width:820px;margin:0 auto;padding-block:40px 72px;padding-left:16px;padding-right:16px}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(30px,7.5vw,44px);
+   letter-spacing:-.03em;margin:0;text-wrap:balance;line-height:1.02}
+h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:21px;
+   letter-spacing:-.02em;margin:0}
+h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:600;font-size:15px;margin:0}
+.eyebrow{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.lede{color:var(--ink-2);max-width:64ch;margin:12px 0 0}
+section{margin-top:52px}
+.head{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+p{margin:0 0 12px} p:last-child{margin-bottom:0}
+strong{font-weight:700}
+code{font-family:"DM Mono",ui-monospace,monospace;font-size:.88em;background:var(--rule);
+  padding:1px 5px;border-radius:4px}
+
+.steps{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);
+  border-radius:6px;overflow:hidden}
+.step{background:var(--card);padding:15px 17px;display:grid;grid-template-columns:26px 1fr;gap:13px}
+.step .n{font-family:"DM Mono",monospace;font-size:12px;color:var(--accent);padding-top:2px}
+.step b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:14.5px;margin-bottom:3px}
+.step span{color:var(--ink-2);font-size:13.5px;line-height:1.55}
+
+.block{background:var(--code);color:var(--code-ink);border-radius:8px;padding:15px 16px;
+  font-family:"DM Mono",ui-monospace,monospace;font-size:12.5px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word;position:relative}
+.copy{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.1);color:var(--code-ink);
+  border:0;border-radius:6px;padding:6px 11px;font-family:"DM Mono",monospace;font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.2)}
+.copy.done{background:var(--ok);color:#fff}
+.block.cp{padding-top:42px}
+
+.assets{display:flex;flex-direction:column;gap:9px}
+.asset{background:var(--card);border:1px solid var(--rule);border-radius:7px;overflow:hidden}
+.asset .top{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer}
+.asset .id{font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-3);min-width:30px}
+.asset .nm{font-weight:500;flex:1;font-size:14.5px}
+.asset .meta{font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-3)}
+.asset .chev{color:var(--ink-3);font-size:11px;font-family:"DM Mono",monospace}
+.asset .body{padding:0 14px 14px;display:none}
+.asset.open .body{display:block}
+.asset.open .chev{transform:rotate(90deg)}
+.chev{display:inline-block;transition:transform .15s}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:400;padding:0 10px 8px 0;border-bottom:1px solid var(--rule)}
+td{padding:10px 10px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+.scroll{overflow-x:auto}
+
+.note{border-left:2px solid var(--accent);padding:2px 0 2px 15px;color:var(--ink-2);font-size:14px;margin:16px 0}
+.note b{color:var(--ink)}
+.warn{border-left-color:var(--warn)}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px}
+.tool{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:14px 15px}
+.tool b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;margin-bottom:5px}
+.tool p{font-size:13px;color:var(--ink-2);margin:0 0 9px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.btn{background:var(--ink);color:var(--sheet);border:0;border-radius:7px;padding:11px 16px;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:13.5px;cursor:pointer}
+.btn.alt{background:none;border:1px solid var(--rule);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Café Rush · art generation</div>
+  <h1>Prompts for the whole set</h1>
+  <p class="lede">Forty-one assets, each written so the set holds together rather than looking like
+  forty-one separate pictures. The prompts matter less than the method — read the six steps first,
+  because getting consistency is the entire difficulty here, and no prompt alone solves it.</p>
+
+  <section>
+    <div class="head"><h2>The method</h2>
+      <div class="lede">Follow this order. Generating assets one by one in any order is exactly how you
+      end up with twelve drinks that do not belong on the same counter.</div></div>
+    <div class="steps">
+      <div class="step"><span class="n">01</span><div><b>Make the anchor first, and only the anchor</b>
+        <span>Generate the <b>Latte</b> and nothing else. Iterate on it until you would ship it. Every
+        other asset in the game is going to be matched to this one image, so a mediocre anchor
+        contaminates all forty-one. Budget most of your time here.</span></div></div>
+      <div class="step"><span class="n">02</span><div><b>Lock the style stem, never edit it</b>
+        <span>The long block below is invariant. Copy it once. From then on the only thing that changes
+        between prompts is the short subject clause. If you find yourself improving the stem halfway
+        through the set, you have to regenerate everything before it.</span></div></div>
+      <div class="step"><span class="n">03</span><div><b>Feed the anchor back as a style reference</b>
+        <span>This is the step that actually produces consistency. Midjourney: upload the anchor and
+        pass <code>--sref &lt;url&gt; --sw 100</code> on every later prompt. Stable Diffusion: IP-Adapter
+        with the anchor as the reference image, weight ~0.6. Without this the stem alone will drift.</span></div></div>
+      <div class="step"><span class="n">04</span><div><b>Generate the whole set in one sitting</b>
+        <span>Model versions change under you. A set produced across three weeks will not match a set
+        produced in one afternoon, even with identical prompts.</span></div></div>
+      <div class="step"><span class="n">05</span><div><b>Judge them as a row, never one at a time</b>
+        <span>Put all twelve dishes side by side at 64px before you accept any of them. An asset that
+        looks good alone but sits at a different scale or light angle is the failure this whole
+        procedure exists to prevent.</span></div></div>
+      <div class="step"><span class="n">06</span><div><b>Characters last, and expect them to hurt</b>
+        <span>Faces are where generators are least consistent and most obviously wrong. Do the food
+        first so you have a working set before you spend patience here.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>The style stem</h2>
+      <div class="lede">Every food and object prompt is this block followed by one subject clause. It
+      fixes the rendering style, the camera, the light and the background — the four things that must
+      never vary.</div></div>
+    <div class="block stem" id="stem-block"></div>
+    <div class="note"><b>Why a grey background rather than transparent:</b> image generators are
+    unreliable at true alpha. A flat mid-grey with no gradient keys out cleanly in any background
+    remover, and it keeps the generator from inventing a scene behind the object.</div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Ingredients</h2>
+      <div class="lede">Eight. These appear in the machine bins at 34px and inside order chips at 20px,
+      so the silhouette has to survive being small. Tap any row for the full prompt.</div></div>
+    <div class="assets" id="ing"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Dishes</h2>
+      <div class="lede">Twelve — the six built plus the six that unlock across chapters two to five.
+      Each one should read as visibly made from its ingredients.</div></div>
+    <div class="assets" id="dish"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Customers</h2>
+      <div class="lede">Twelve heads, paired arbitrarily with twenty-four names. A different stem — the
+      camera is front-on and the framing is a bust, not a three-quarter object.</div></div>
+    <div class="block stem" id="char-stem"></div>
+    <div class="assets" id="char"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Machines and room</h2>
+      <div class="lede">Six machines for the bin grid, plus the counter and the two backgrounds. The
+      backgrounds use a wide aspect rather than a square.</div></div>
+    <div class="assets" id="env"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Negative prompt</h2>
+      <div class="lede">For Stable Diffusion, Flux and anything else that takes one. Midjourney users:
+      append the <code>--no</code> line instead.</div></div>
+    <div class="block stem" id="neg"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Tool settings</h2></div>
+    <div class="tools">
+      <div class="tool"><b>Midjourney</b>
+        <p>Best match for this painted casual style out of the box. Style reference is the whole game.</p>
+        <div class="block" style="font-size:11.5px;padding:11px 12px">--ar 1:1 --style raw --sref &lt;anchor url&gt; --sw 100 --s 180</div>
+      </div>
+      <div class="tool"><b>Stable Diffusion / ComfyUI</b>
+        <p>More work, more control, and the only route that gets genuinely repeatable results — train a
+        LoRA on your first six accepted assets and the rest become easy.</p>
+        <div class="block" style="font-size:11.5px;padding:11px 12px">IP-Adapter @ 0.6 · fixed seed · 1024×1024 · CFG 6–7</div>
+      </div>
+      <div class="tool"><b>Flux / Ideogram / Firefly</b>
+        <p>Use the stem as written. Weaker style-reference tooling, so expect more drift and more
+        regeneration. Firefly's licensing terms are the friendliest of the three for commercial use.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>After generation</h2>
+      <div class="lede">The game already references every asset by name at a known size, so this is a
+      file drop once the images exist.</div></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Step</th><th>What to do</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td>Cut out</td><td>Remove the grey background. Keep a soft contact shadow if the generator baked one in — it stops icons floating.</td><td>PNG with alpha</td></tr>
+        <tr><td>Trim and centre</td><td>Crop to content, then pad back to square so every asset sits on the same optical centre.</td><td>Square, 8% margin</td></tr>
+        <tr><td>Master size</td><td>One master per asset. Everything downscales from this.</td><td>512 × 512</td></tr>
+        <tr><td>Game sizes</td><td>Ingredients and dishes render at 34 and 20; customers at 40; machines at 34.</td><td>@1× / @2× / @3×</td></tr>
+        <tr><td>Check small</td><td>View the whole set at 20px in a row. Anything unidentifiable gets its silhouette simplified and regenerated.</td><td>—</td></tr>
+        <tr><td>Drop in</td><td>Name each file to match the existing sprite names and replace the folder.</td><td><code>art/sprites/</code></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>What to expect, honestly</h2></div>
+    <div class="note warn"><b>Consistency is the whole problem, not the prompts.</b> Expect to generate
+    five to ten candidates per asset and keep one. Forty-one assets is realistically a few hundred
+    generations and one to two weeks of iteration, not an afternoon.</div>
+    <div class="note warn"><b>Characters will be the worst of it.</b> Food is rigid and describable;
+    faces are neither. If after a day the twelve heads still do not look like one artist drew them,
+    the pragmatic answer is to simplify the character style deliberately — flatter, less rendered,
+    fewer facial details — rather than keep fighting for painted portraits.</div>
+    <div class="note warn"><b>Check the licensing before you build on it.</b> Two separate questions:
+    what your generator's terms permit commercially, and what Apple's and Google's policies require you
+    to disclose about AI-generated content. Both change; check them at the time, not from memory.</div>
+    <div class="note"><b>A generated set will still read as less coherent than one artist's hand.</b>
+    That is the trade you are making for not commissioning anyone, and it is a reasonable one — but go
+    in expecting "good enough that nobody comments" rather than a match for the screenshots you
+    showed me.</div>
+  </section>
+
+  <div class="bar" style="margin-top:36px">
+    <button class="btn" id="copy-all">Copy every prompt</button>
+    <button class="btn alt" id="expand-all">Expand all</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STEM = "mobile casual game asset, hand-painted digital illustration, glossy stylised realism, "
+    + "rich saturated colour, soft airbrushed shading with crisp specular highlights, subtle dark "
+    + "outline, appetising and clean, three-quarter view from 30 degrees above, single warm key light "
+    + "from the upper left with a soft cool fill from the lower right, one soft contact shadow beneath, "
+    + "object centred and filling 80 percent of the frame, plain flat neutral grey background, "
+    + "no text, no labels, no logo, no hands, no props";
+
+  var CHAR_STEM = "mobile casual game character portrait, hand-painted digital illustration, glossy "
+    + "stylised realism, warm friendly face, large expressive eyes, soft airbrushed skin shading, "
+    + "gentle smile, head and shoulders only, facing forward, single warm key light from the upper "
+    + "left, plain flat neutral grey background, no text, no logo, no hands";
+
+  var NEG = "photograph, photorealistic, 3d render, cgi, low quality, blurry, watermark, signature, "
+    + "text, letters, numbers, logo, hands, fingers, cutlery, table setting, busy background, "
+    + "gradient background, drop shadow, harsh rim light, flat vector, cel shading, outline sketch, "
+    + "duplicate objects, cropped, off-centre";
+
+  var ING = [
+    ["Ice", "0.9s", "a small cluster of three clear ice cubes, faceted and wet, catching light"],
+    ["Syrup", "1.0s", "a small glass squeeze bottle of golden amber date syrup with a narrow nozzle cap and one glossy drip at the tip"],
+    ["Date paste", "1.4s", "a small white ceramic bowl of glossy dark brown date paste with one whole medjool date resting beside it"],
+    ["Milk", "2.0s", "a polished stainless steel milk pitcher filled with white frothed milk, steam curling from the surface"],
+    ["Shot", "2.2s", "a single shot of espresso in a small white porcelain demitasse cup, thick golden crema on top, no saucer"],
+    ["Tea", "2.6s", "a slim waisted Gulf istikana tea glass filled with clear amber brewed tea"],
+    ["Pastry", "4.0s", "one plain golden butter croissant, crisp flaky laminated layers, freshly baked"],
+    ["Dough", "5.0s", "a smooth pale ball of raw bread dough resting on a lightly floured wooden board"]
+  ];
+
+  var DISH = [
+    ["Espresso", "12 AED · day 1", "a shot of espresso in a small white porcelain demitasse on a matching saucer, thick golden crema, a tiny silver spoon on the saucer"],
+    ["Mint tea", "10 AED · day 1", "a waisted Gulf istikana glass of clear amber tea with a fresh green mint sprig resting on the rim"],
+    ["Latte", "20 AED · day 2", "a latte in a wide white ceramic cup on a saucer, a clean white rosetta latte-art leaf in the foam"],
+    ["Karak chai", "16 AED · day 3", "a small waisted glass of milky tan karak chai, two green cardamom pods beside the base, faint steam"],
+    ["Almond croissant", "18 AED · day 4", "a golden croissant on a small white plate, white icing drizzled across it and toasted flaked almonds scattered on top"],
+    ["Iced latte", "26 AED · day 5", "a tall clear glass of iced latte, distinct layers of white milk below and brown espresso above, ice cubes visible, a red and white striped straw"],
+    ["Date shake", "24 AED · day 7", "a tall clear glass of thick creamy beige date milkshake, a swirl of whipped cream on top and one whole date on the rim"],
+    ["Luqaimat", "22 AED · day 9", "a small white bowl piled with golden crisp fried dough dumplings, glossy dark date syrup drizzled over them, a scatter of sesame seeds"],
+    ["Regag roll", "26 AED · day 11", "a thin crisp Emirati regag flatbread rolled into a cone on a small plate, dark date filling visible at the open end"],
+    ["Saffron karak", "34 AED · day 14", "a small waisted glass of rich golden-tan saffron karak chai, a few red saffron threads on the surface, a cardamom pod at the base"],
+    ["Affogato", "30 AED · day 17", "a short clear glass holding a scoop of white vanilla ice cream with dark espresso poured over it, melting at the edges"],
+    ["Cardamom cortado", "30 AED · day 21", "a small clear cortado glass with two distinct layers of espresso and steamed milk, a pinch of ground cardamom dusted on the foam"]
+  ];
+
+  var CHAR = [
+    ["Young man, short curls", "a young man in his twenties with short dark curls, light brown skin, a plain green zip jacket"],
+    ["Woman, short bob", "a woman in her thirties with a short auburn bob, fair skin, a red top and a single string of pearls"],
+    ["Emirati man, ghutra", "an Emirati man in his forties wearing a white kandura with a white ghutra and black agal, neat dark moustache"],
+    ["Emirati woman, shayla", "an Emirati woman in her thirties wearing a black abaya and a soft black shayla framing her face, warm smile"],
+    ["Student, glasses", "a young woman in her early twenties with long dark hair tied back and round glasses, a grey university hoodie"],
+    ["Older man, moustache", "a man in his fifties with greying hair and a full moustache, a navy suit jacket, white shirt and blue tie"],
+    ["Delivery courier", "a young man in his twenties with a red cap worn backwards and a teal courier jacket, cheerful open expression"],
+    ["Older woman, headscarf", "a woman in her sixties with a patterned soft headscarf and kind lined eyes, a warm mustard cardigan"],
+    ["Office worker", "a woman in her forties with dark hair in a low bun, olive skin, a crisp white blouse and a lanyard"],
+    ["Teenager, hoodie", "a teenage boy with straight black hair and a grey hoodie, slightly shy half-smile"],
+    ["Shopkeeper", "a South Asian man in his thirties with short black hair and stubble, a plain blue work shirt with rolled sleeves"],
+    ["Grandmother", "an elderly woman with silver hair pinned up, deep smile lines, a soft lilac shawl over her shoulders"]
+  ];
+
+  var ENV = [
+    ["Espresso machine", "square", "a compact chrome and black espresso machine seen from the front, one group head and a portafilter, red power light"],
+    ["Kettle", "square", "a polished stainless steel stovetop tea kettle with a black handle, gently steaming"],
+    ["Syrup dispenser", "square", "a countertop glass syrup dispenser with a brass pump top, filled with dark amber syrup"],
+    ["Steamer", "square", "a chrome milk steaming wand and jug rest unit, a small pressure dial on the front"],
+    ["Oven", "square", "a small stainless steel countertop bakery oven with a glass door, warm light glowing inside"],
+    ["Ice well", "square", "a stainless steel countertop ice well filled with crushed ice, a metal scoop resting in it"],
+    ["Counter surface", "wide", "a warm polished wooden café counter top seen straight on, subtle grain, a brushed steel front edge, empty and clean, horizontal band composition --ar 16:5"],
+    ["Café interior, day", "wide", "the interior of a small warm café seen from behind the counter, a window onto a sunlit shopping street, wooden shelves with cups and jars, tiled teal wall, soft daylight, no people, background plate for a game --ar 16:9"],
+    ["Café interior, evening", "wide", "the same small warm café interior at dusk, the street outside dark blue with warm shop lights, pendant lamps lit inside, no people, background plate for a game --ar 16:9"]
+  ];
+
+  function el(t, c, x){ var n = document.createElement(t); if(c) n.className = c; if(x != null) n.textContent = x; return n; }
+
+  function block(text, big){
+    var b = el("div", "block cp");
+    b.appendChild(document.createTextNode(text));
+    var btn = el("button", "copy", "Copy");
+    btn.type = "button";
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      copy(text, btn);
+    });
+    b.appendChild(btn);
+    return b;
+  }
+
+  function copy(text, btn){
+    var done = function(){
+      var old = btn.textContent;
+      btn.textContent = "Copied"; btn.classList.add("done");
+      setTimeout(function(){ btn.textContent = old; btn.classList.remove("done"); }, 1400);
+    };
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ fallback(text, done); });
+      }else{ fallback(text, done); }
+    }catch(e){ fallback(text, done); }
+  }
+  function fallback(text, done){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+      document.body.removeChild(ta); done();
+    }catch(e){}
+  }
+
+  var ALL = [];
+
+  function row(host, idx, name, meta, prompt){
+    ALL.push("### " + name + "\n" + prompt);
+    var a = el("div", "asset");
+    var top = el("div", "top");
+    top.appendChild(el("span", "id", (idx < 9 ? "0" : "") + (idx + 1)));
+    top.appendChild(el("span", "nm", name));
+    top.appendChild(el("span", "meta", meta));
+    top.appendChild(el("span", "chev", "›"));
+    top.addEventListener("click", function(){ a.classList.toggle("open"); });
+    a.appendChild(top);
+    var body = el("div", "body");
+    body.appendChild(block(prompt));
+    a.appendChild(body);
+    host.appendChild(a);
+  }
+
+  document.getElementById("stem-block").replaceWith(block(STEM, true));
+  document.getElementById("char-stem").replaceWith(block(CHAR_STEM, true));
+  document.getElementById("neg").replaceWith(block(NEG, true));
+
+  var ingHost = document.getElementById("ing");
+  ING.forEach(function(a, i){ row(ingHost, i, a[0], a[1], STEM + ", " + a[2]); });
+  var dishHost = document.getElementById("dish");
+  DISH.forEach(function(a, i){ row(dishHost, i, a[0], a[1], STEM + ", " + a[2]); });
+  var charHost = document.getElementById("char");
+  CHAR.forEach(function(a, i){ row(charHost, i, a[0], "head " + (i + 1), CHAR_STEM + ", " + a[1]); });
+  var envHost = document.getElementById("env");
+  ENV.forEach(function(a, i){ row(envHost, i, a[0], a[1], (a[1] === "wide" ? STEM.replace(", object centred and filling 80 percent of the frame", "") : STEM) + ", " + a[2]); });
+
+  document.getElementById("copy-all").addEventListener("click", function(){
+    var txt = "CAFÉ RUSH — ART PROMPTS\n\n## STYLE STEM (food, objects, machines)\n" + STEM
+      + "\n\n## CHARACTER STEM\n" + CHAR_STEM + "\n\n## NEGATIVE PROMPT\n" + NEG
+      + "\n\n" + ALL.join("\n\n");
+    copy(txt, this);
+  });
+  document.getElementById("expand-all").addEventListener("click", function(){
+    var open = document.querySelectorAll(".asset.open").length;
+    var all = document.querySelectorAll(".asset");
+    for(var i = 0; i < all.length; i++){
+      if(open > all.length / 2) all[i].classList.remove("open"); else all[i].classList.add("open");
+    }
+    this.textContent = open > all.length / 2 ? "Expand all" : "Collapse all";
+  });
+})();
+</script>
