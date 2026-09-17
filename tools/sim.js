@@ -19,7 +19,7 @@ const pad = (s, n) => String(s).padStart(n);
    the k-th copy of an item only when it has reached the k-th mention, so listing "stool"
    once quietly capped the bot at one stool and made the café look poorer than the game is. */
 const ORDER = [
-  "sign", "stool", "case_", "stool", "grinder", "slot", "table", "stool", "dallah",
+  "doup", "sign", "stool", "case_", "stool", "grinder", "slot", "table", "stool", "dallah",
   "radio", "plant", "stool", "awning", "stool_pad", "table", "stool", "aircon", "slot", "juicer",
   "stool", "barista", "barista", "backroom", "stool", "table_lg", "pendant", "outdoor", "table", "stool", "plant", "slot",
   "stool", "upstairs", "stool", "barista", "manager", "barista", "barista", "plant", "slot", "slot",

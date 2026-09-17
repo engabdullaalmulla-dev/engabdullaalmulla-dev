@@ -303,6 +303,9 @@ const ITEMS = {
             f:g=>g.warmLift+=0.06},
   pendant: {nm:"Pendant lights", ic:"💡", cost:380,  max:1, d:"The room stops being lit like a shop.",
             f:g=>g.mood+=2},
+  doup:    {nm:"Do the place up",  ic:"🧹", cost:0, dyn:() => doUpCost(), max:99, hide:() => wearNow() < 0.05,
+            d:"Paint, a floor, the chairs seen to. It all wears out, and people feel it before they say it.",
+            f:g=>{ g.wear = 0; g.rep += 1; }},
   freehold:{nm:"Buy the building",ic:"🏠", cost:62000, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
@@ -446,7 +449,7 @@ function NEW(){
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
     ac:false, quiet:false, canSkip:false, appCut:0,
-    staff:[], branches:[], regs:{}, cookbook:[], log:[], dynasty:[],
+    staff:[], branches:[], regs:{}, cookbook:[], log:[], dynasty:[], wear:0,
     lastTake:0, seenIntro:false
   };
 }
@@ -503,6 +506,14 @@ const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
    by name, because a player who cannot see a cost cannot plan around it. */
 const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl());
 
+/* Everything in here is wearing out: the machine, the chairs, the paint, the floor by the
+   door. A café that is never done up loses people slowly, and the bill for doing it up grows
+   with the place -- which is the sink the late game did not have. Money that sits still stops
+   being a score and becomes the thing that keeps the room alive. */
+const wearNow = () => Math.min(0.34, (G.wear || 0) / 100);
+const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl()
+                                  + G.lastTake * 1.6);
+
 const SERVE_EACH = 42;
 const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
 const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
@@ -512,6 +523,7 @@ function costOfItem(k, have){
   /* The step was 0.6, so a sixth stool cost four times the first and the stretch from four
      seats to eight took fifteen seasons with nothing else happening in them. Filling a room
      should feel like filling a room. */
+  if(it.dyn) return it.dyn();               // priced off the café it is being spent on
   return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32)) * infl());
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
@@ -645,6 +657,9 @@ function nextThing(){
   if(seatGoal) out.push({at: G.seats/seatGoal, title: seatGoal + " seats",
     note: "The room opens up at " + seatGoal + ". You have " + G.seats + ".",
     icon: sprite("f_stool", 40, "🪑"), w: 0.8});
+  if(wearNow() >= 0.10) out.push({at: wearNow()/0.34, title: "Do the place up",
+    note: "It is costing you " + Math.round(wearNow()*100) + "% of the custom coming past.",
+    icon: sprite("f_pictures", 40, "🧹"), w: 1.0});
   /* and whatever is worth saving for -- the dearest thing within sight */
   const want = Object.keys(ITEMS)
     .map(k => ({k:k, c:costOfItem(k, own(k))}))
@@ -858,8 +873,14 @@ function branchTake(br){
      café on another street: it earns a share of what you have learned to earn, which is what
      makes expansion the thing that carries a thirty-year game after the room itself is full.
      Each one after the first does a little worse, because you are not standing in it. */
+  /* This is what the branch SENDS you, after it has paid its own rent, its own staff and its
+     own lights -- it is a café, not an annuity. At 0.10 it was sending a tenth of your whole
+     turnover with no costs of any kind against it, so by 2055 branches were handing over
+     53,527 a season expense-free and the business kept four fifths of everything it earned.
+     A café keeps about a tenth of what goes through the till, and you are not standing in
+     this one. */
   const i = G.branches.indexOf(br);
-  return Math.round(G.lastTake * 0.10 * br.yield * Math.pow(0.80, i) * (1 + G.rep*0.004));
+  return Math.round(G.lastTake * 0.045 * br.yield * Math.pow(0.80, i) * (1 + G.rep*0.004));
 }
 
 function visitsFor(c){
@@ -882,7 +903,8 @@ function buildQueue(){
      formula below never got to say anything. It is a backstop against runaway trade, not
      the thing that should be setting the day's custom, so it sits above the formula now. */
   const n = Math.max(6, Math.min(G.seats*5 + 6, hands() * SERVE_EACH,
-            Math.round((8 + G.seats*2) * G.foot * heatNow() * (1 + G.rep*0.012))));
+            Math.round((8 + G.seats*2) * G.foot * heatNow() * (1 - wearNow())
+                       * (1 + G.rep*0.012))));
   const q = [];
   /* regulars come first -- they are the reason the place works */
   REGULARS.forEach(r => {
@@ -1121,6 +1143,10 @@ function closeSeason(auto){
     }
   });
 
+  /* Wear comes from use, not from the calendar. A flat charge per season would land hardest
+     on a two-stool café that has served eleven people, which is exactly backwards: it is the
+     busy years that take the floor and the chairs apart. */
+  G.wear = (G.wear || 0) + SV.served/70;
   G.season++;
   if(G.season % 4 === 0){ G.year++; G.owner.age++; }
   save();
@@ -1143,6 +1169,8 @@ function closeSeason(auto){
   st("Takings", money(SV.take) + " AED", "cash");
   if(branch) st("Branches", "+" + money(branch) + " AED", "cash");
   st("Running costs", "−" + money(running) + " AED", "bad");
+  if(wearNow() >= 0.05)
+    st("The place is looking tired", "−" + Math.round(wearNow()*100) + "% custom", "bad");
   st(own("freehold") ? "Ground rent" : "Rent", "−" + money(rent) + " AED", "bad");
   if(!own("freehold") && G.lastTake > 400)
     st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
@@ -1224,15 +1252,23 @@ function screenShop(from){
 
   const sc = el("div","scroll pad");
   if(tab === "build"){
-    Object.keys(ITEMS).forEach(k => {
+    /* Doing the place up is the most urgent thing in here the moment it appears -- it is
+       custom walking past the door -- so it goes to the top rather than sitting between the
+       plants and the menu board in declaration order. */
+    const keys = Object.keys(ITEMS).sort((a,b) =>
+      (ITEMS[b].dyn ? 1 : 0) - (ITEMS[a].dyn ? 1 : 0));
+    keys.forEach(k => {
       const it = ITEMS[k], have = own(k);
       if(have >= it.max) return;
+      if(it.hide && it.hide()) return;       // nothing to repair yet
       const cost = costOfItem(k, have);
       const row = el("div","item");
+      if(it.dyn) row.style.borderColor = "var(--terra)";
       row.appendChild(sprite(ITEM_SPRITE[k], 34, it.ic, "ic"));
       const mid = el("div","mid");
       mid.appendChild(el("div","t", it.nm + (it.max>1 && have ? " ×"+have : "")));
-      mid.appendChild(el("div","d", it.d));
+      mid.appendChild(el("div","d", it.d
+        + (it.dyn ? "  Losing " + Math.round(wearNow()*100) + "% of the custom coming past." : "")));
       row.appendChild(mid);
       const b = el("button","btn sm", money(cost)); b.type = "button";
       b.disabled = cost > G.cash;
@@ -1401,6 +1437,10 @@ function succession(){
   const go = el("button","btn","Hand over the keys"); go.type = "button";
   go.onclick = () => {
     G.gen++;
+    /* The café passes whole. The money does not: there are other children, and they take
+       their share. Without this a dynasty simply accumulates -- two million by year sixty,
+       with nothing left to want. */
+    G.cash = Math.round(G.cash * 0.45);
     G.owner = {nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid"]),
                age:26, dies:72+Math.floor(Math.random()*18)};
     /* the regulars who finished their arc move on; a new generation meets new people */

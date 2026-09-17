@@ -590,3 +590,38 @@ rather than assuming. Cash does pile up late — about 2 million by year 60 agai
 That is a year-40 problem, not a first-session one.
 
 A careless player still fails, harder than before: −4,737 by year 30 on seven seats.
+
+## Where the late-game money was coming from
+
+Tracing income against costs year by year showed costs falling from **54% of income in 2005 to
+21% by 2055**, and one line explained most of it: **branches had no costs at all.** By 2055
+they were sending 53,527 a season with nothing charged against it — a branch was an annuity,
+not a café. It is a café: it pays its own rent, its own staff and its own lights before it
+sends anything, so what it sends is a margin. 0.10 of turnover became 0.045.
+
+The other half of the problem was that there was nothing left to buy. Three things now take
+money on an ongoing basis:
+
+**The place wears out.** Wear comes from *use*, not from the calendar — a flat charge per
+season would land hardest on a two-stool café that served eleven people, which is backwards;
+it is the busy years that take the floor and the chairs apart. Above 5% it costs custom, and
+the close screen says so by name. *Do the place up* is priced off the café it is being spent
+on, sits at the top of the shop in red the moment it appears, and comes round every dozen
+seasons or so once the room is full.
+
+**The estate is divided.** The café passes whole; the money does not. There are other
+children, and they take their share — 55% of it. A dynasty used to simply accumulate.
+
+Together: year 60 went from **2.0 million to 0.7–1.4 million** depending on the run, and the
+curve stops climbing monotonically — it peaks around year 50 and comes back down as repairs
+and branches absorb it. The sim does not model succession, so real play is lower again.
+
+**Not claiming it is solved.** A sixty-year business still ends up with more money than it can
+spend, because the room maxes at thirty-two seats and only branches scale past that. Money
+stops being the binding constraint somewhere around year 20. Fixing that properly means the
+late game being gated by something other than cash — time, people, or reputation — and that
+is a design change, not a number.
+
+The fast start is unharmed: somebody met in season 1, a first chapter in season 2, four seats
+by season 4, a second chapter by season 8. Beats still arrive at 13 to 19 per five-year block
+out to thirty years.
