@@ -257,36 +257,36 @@ function newBranch(g, i){
 
 /* ---------- what you build. every one of these shows up in the room ---------- */
 const ITEMS = {
-  stool:   {nm:"A stool",        ic:"🪑", cost:90,   max:10, d:"One more person can sit down.",
+  stool:   {nm:"A stool",        ic:"🪑", cost:55,   max:10, d:"One more person can sit down.",
             f:g=>g.seats++},
-  table:   {nm:"A table",        ic:"🛋️", cost:260,  max:3, d:"People stay longer, and spend more when they do.",
+  table:   {nm:"A table",        ic:"🛋️", cost:180,  max:3, d:"People stay longer, and spend more when they do.",
             f:g=>{g.seats+=2; g.dwell+=0.12}},
-  sign:    {nm:"A painted sign", ic:"🪧", cost:300,  max:1, d:"The street can finally tell what this place is.",
+  sign:    {nm:"A painted sign", ic:"🪧", cost:190,  max:1, d:"The street can finally tell what this place is.",
             f:g=>g.foot+=0.18},
-  awning:  {nm:"An awning",      ic:"⛱️", cost:420,  max:1, d:"Shade out front. Summer stops being a dead season.",
+  awning:  {nm:"An awning",      ic:"⛱️", cost:260,  max:1, d:"Shade out front. Summer stops being a dead season.",
             f:g=>g.foot+=0.12},
-  case_:   {nm:"A pastry case",  ic:"🍰", cost:380,  max:1, d:"Sweet things sell on sight, not on asking.",
+  case_:   {nm:"A pastry case",  ic:"🍰", cost:240,  max:1, d:"Sweet things sell on sight, not on asking.",
             f:g=>g.sweetLift=0.35},
-  grinder: {nm:"A proper grinder",ic:"⚙️",cost:460,  max:1, d:"Everything with coffee in it is worth more.",
+  grinder: {nm:"A proper grinder",ic:"⚙️",cost:300,  max:1, d:"Everything with coffee in it is worth more.",
             f:g=>g.coffeeLift=0.25},
-  radio:   {nm:"A radio",        ic:"📻", cost:140,  max:1, d:"The room stops being silent.",
+  radio:   {nm:"A radio",        ic:"📻", cost:90,  max:1, d:"The room stops being silent.",
             f:g=>g.mood++},
-  plant:   {nm:"Plants",         ic:"🪴", cost:120,  max:3, d:"Softens the corner by the window.",
+  plant:   {nm:"Plants",         ic:"🪴", cost:80,  max:3, d:"Softens the corner by the window.",
             f:g=>g.mood++},
-  aircon:  {nm:"Air conditioning",ic:"❄️",cost:640,  max:1, d:"Summer afternoons become usable.",
+  aircon:  {nm:"Air conditioning",ic:"❄️",cost:400,  max:1, d:"Summer afternoons become usable.",
             f:g=>g.ac=true},
-  slot:    {nm:"A bigger board", ic:"📋", cost:520,  max:6, d:"One more thing can be on the menu at once.",
+  slot:    {nm:"A bigger board", ic:"📋", cost:300,  max:6, d:"One more thing can be on the menu at once.",
             f:g=>g.slots++},
-  backroom:{nm:"Open the back room",ic:"🚪",cost:900,max:1, d:"A quiet corner away from the counter.",
+  backroom:{nm:"Open the back room",ic:"🚪",cost:560,max:1, d:"A quiet corner away from the counter.",
             f:g=>{g.seats+=3; g.quiet=true}},
   /* Repriced against what the café actually earns. At 1800 / 1400 / 4200 / 9000 a bot
      playing well never once reached upstairs, a manager, a branch or the freehold in
      thirty years, in any of sixteen runs -- see tools/sim.js. */
-  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:2600, max:1, d:"Twice the room. A different kind of café.",
+  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:1500, max:1, d:"Twice the room. A different kind of café.",
             f:g=>{g.seats+=6; g.dwell+=0.2}},
   barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:6, d:"Another pair of hands. Nobody can serve a full room alone. Wages every season.",
             f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda","Noura","Bilal"]),role:"barista"})},
-  manager: {nm:"Hire a manager", ic:"🗂️", cost:3200, max:1, d:"Can run a season without you. Wages every season.",
+  manager: {nm:"Hire a manager", ic:"🗂️", cost:2000, max:1, d:"Can run a season without you. Wages every season.",
             f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager"}); g.canSkip=true}},
   /* Six of the sixteen unsold fittings become things you buy. Each does one thing the shop
      did not already do, because a second item that adds mood is padding, not depth. The other
@@ -303,10 +303,10 @@ const ITEMS = {
             f:g=>g.warmLift+=0.06},
   pendant: {nm:"Pendant lights", ic:"💡", cost:380,  max:1, d:"The room stops being lit like a shop.",
             f:g=>g.mood+=2},
-  freehold:{nm:"Buy the building",ic:"🏠", cost:150000, max:1,
+  freehold:{nm:"Buy the building",ic:"🏠", cost:62000, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
-  branch:  {nm:"Open a branch",  ic:"🏪", cost:48000, max:99, pow:1.9, d:"Another café, another street, its own regulars.",
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:22000, max:99, pow:1.55, d:"Another café, another street, its own regulars.",
             f:g=>g.branches.push(newBranch(g, g.branches.length))}
 };
 
@@ -441,7 +441,7 @@ function NEW(){
     year:1996, season:0, gen:1, week:0,
     owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
            dies:72+Math.floor(Math.random()*18)},
-    cash:420, rent:90,
+    cash:640, rent:90,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
@@ -509,7 +509,10 @@ const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
 /* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
 function costOfItem(k, have){
   const it = ITEMS[k];
-  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.6)) * infl());
+  /* The step was 0.6, so a sixth stool cost four times the first and the stretch from four
+     seats to eight took fifteen seasons with nothing else happening in them. Filling a room
+     should feel like filling a room. */
+  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32)) * infl());
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
 function show(n){ ["cafe","plan","serve","close","shop","people"]
@@ -529,7 +532,7 @@ function priceOf(k){
 
 /* ============================== the room ============================== */
 function roomPlate(){
-  const grown = G.seats >= 8 || own("backroom");
+  const grown = G.seats >= 6 || own("backroom");
   /* Nine of the thirteen plates were never chosen. The period, weather and evening ones are
      all painted as a full room, so none of them can stand in for a café that has not filled
      out yet -- a thriving room in the first season is a lie the player can see. They apply
@@ -638,7 +641,7 @@ function nextThing(){
               icon: f, w: 1.0});
   });
   /* the next thing that visibly changes the room */
-  const seatGoal = G.seats < 4 ? 4 : G.seats < 8 ? 8 : 0;
+  const seatGoal = G.seats < 4 ? 4 : G.seats < 6 ? 6 : G.seats < 10 ? 10 : 0;
   if(seatGoal) out.push({at: G.seats/seatGoal, title: seatGoal + " seats",
     note: "The room opens up at " + seatGoal + ". You have " + G.seats + ".",
     icon: sprite("f_stool", 40, "🪑"), w: 0.8});
@@ -979,7 +982,7 @@ function runService(auto){
     + "anyone's story."));
   v.appendChild(foot);
   show("serve");
-  SV.timer = setInterval(step, 780);
+  SV.timer = setInterval(step, 620);
   step();
 }
 
@@ -1084,7 +1087,11 @@ function closeSeason(auto){
        by 2001 in a game meant to run for thirty years, and after that the arcs recycled with
        a new face and a cycle number. At 35 a beat lands every eight or nine years, so a
        story runs the length of a working life rather than a season and a half. */
-    if(st.warmth < (st.beat+1)*35) return;
+    /* Front-loaded on purpose. A flat (beat+1)*35 put the first chapter thirteen seasons in,
+       which is four minutes of a café where nothing happens to anybody -- and the people are
+       the whole reason to be here. The first one lands almost at once and the rest spread
+       out, so you are told what this is within a minute and still have somewhere to go. */
+    if(st.warmth < 4 + st.beat*17) return;
     const b = r.beats[st.beat];
     if(b.need){
       /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant

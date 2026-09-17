@@ -552,3 +552,41 @@ come* — rather than only showing a bar.
 
 None of it adds a reward it did not already have. The pull was always the six people; it was
 just never on screen at the moment you were making the decision about them.
+
+## Fast, from the first minute
+
+The brief was instant fun and fast progress — no long waits, no long hours. Measured as
+*seasons until something happens*, at roughly fifteen seconds a season:
+
+| | before | after |
+|---|---|---|
+| meet somebody | s1 | s2 |
+| **first story beat** | **s13 · 3.3 min** | **s3 · 0.8 min** |
+| four seats | s9 | s4 |
+| second beat | s25 | s9 |
+| the room grows a tier | s23 | s14 |
+| third beat | — | s15 |
+| the back room | s26 | s20 |
+| upstairs | s28 | s22 |
+| a first branch | s39 | s28 |
+| a story finishes | — | s29 |
+| the freehold | s56 · 14 min | s36 · 9 min |
+
+Everything the café can become is now inside the first ten minutes, and something lands every
+two to five seasons throughout. The first chapter of somebody's story arrives in under a
+minute, where it used to take three and a half — and that chapter is the whole reason to be
+here, so it should not be the last thing to show up.
+
+What moved: the story gate is front-loaded (`4 + beat*17` rather than a flat `(beat+1)*35`),
+starting cash is 640, the early shop is about a third cheaper, the stool escalator is 0.32
+rather than 0.6 — a sixth stool cost four times the first — the room grows a tier at six seats
+rather than eight, and a season plays in **5.6 seconds** rather than 102.
+
+**The long game survives it.** Beats keep arriving because finished stories recycle with a new
+face: 12.5 beats in the first five years and 15 to 19 in every five-year block after, out to
+thirty years. The worry that front-loading would empty the game was wrong, and worth checking
+rather than assuming. Cash does pile up late — about 2 million by year 60 against takings of
+62,000 a season, with ten branches open — because the sinks thin out once the room is full.
+That is a year-40 problem, not a first-session one.
+
+A careless player still fails, harder than before: −4,737 by year 30 on seven seats.

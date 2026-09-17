@@ -23,7 +23,7 @@ const ORDER = [
   "radio", "plant", "stool", "awning", "stool_pad", "table", "stool", "aircon", "slot", "juicer",
   "stool", "barista", "barista", "backroom", "stool", "table_lg", "pendant", "outdoor", "table", "stool", "plant", "slot",
   "stool", "upstairs", "stool", "barista", "manager", "barista", "barista", "plant", "slot", "slot",
-  "branch", "freehold", "branch", "branch", "branch", "branch", "branch"
+  "branch", "freehold", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch", "branch"
 ];
 
 (async () => {
