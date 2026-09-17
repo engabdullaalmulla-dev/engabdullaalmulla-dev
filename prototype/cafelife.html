@@ -50,6 +50,9 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
 .btn.sec{background:var(--panel-2);color:var(--cream);border:1px solid var(--edge-2)}
 .btn:disabled{opacity:.4}
 .btn.sm{width:auto;padding:9px 13px;font-size:13px;margin:0;border-radius:10px}
+.btn.quiet{background:none;border:0;color:var(--dim);font-size:13px;text-decoration:underline;
+  text-underline-offset:3px}
+.btn.quiet:active{background:none;color:var(--cream)}
 .tabs{display:flex;gap:6px;padding:0 16px 10px;flex:none}
 .tab{flex:1;padding:9px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);
      font-size:12px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
@@ -772,6 +775,16 @@ function screenCafe(){
     const pp = el("button","btn sec","The regulars"); pp.type="button";
     pp.onclick = screenPeople; sc.appendChild(pp);
   }
+
+  /* A café you can run for thirty years with no way to begin another one is a dead end, and
+     the public support page had to say so. Kept quiet and deliberately awkward to reach: it
+     is the last thing on the hub, it does not exist until a season has closed, and the first
+     tap only asks. */
+  if(G.year > 1996 || G.season > 0){
+    const again = el("button","btn quiet","Start a new café"); again.type = "button";
+    again.onclick = () => askWipe(again);
+    sc.appendChild(again);
+  }
   sc.appendChild(el("div",null," ")).style.height = "10px";
   v.appendChild(sc);
   show("cafe");
@@ -1370,6 +1383,43 @@ function invent(){
                    invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
                    tags:RECIPES[k].tags, ic:RECIPES[k].ic, sp:SPRITE[k]});
 }
+/* Starting again. Two taps, and the first one only asks -- confirm() is not used because a
+   WebView is allowed to suppress it, and a dynasty lost to a dialog that never appeared is
+   the one failure this must not have. */
+function askWipe(btn){
+  const box = el("div","card"); box.style.marginTop = "10px";
+  box.appendChild(el("div","lbl","Start again"));
+  const bits = [G.cookbook.length + (G.cookbook.length === 1 ? " recipe" : " recipes"),
+                G.seats + (G.seats === 1 ? " seat" : " seats")];
+  if(G.branches.length) bits.push(G.branches.length
+    + (G.branches.length === 1 ? " branch" : " branches"));
+  box.appendChild(el("div","hint",
+    "This deletes the café you have built since 1996 — " + bits.join(", ")
+    + ", and everyone in it — and opens an empty room again. It cannot be undone."));
+  /* Keeping is the prominent one. The player has already reached past the bottom of the hub
+     for an underlined link, so intent is not in doubt -- but one costs nothing and the other
+     cannot be undone, and the emphasis should follow the harm, not the intent. */
+  const no = el("button","btn","Keep my café"); no.type = "button";
+  no.onclick = screenCafe;
+  const yes = el("button","btn sec","Delete it and start again"); yes.type = "button";
+  yes.onclick = wipe;
+  box.appendChild(no); box.appendChild(yes);
+  btn.replaceWith(box);
+}
+function wipe(){
+  /* invent() writes into the global RECIPES and SPRITE under "own<n>_<gen>", and those are
+     not part of G, so clearing the save does not clear them. Left alone, the next café
+     carries the last one's inventions in both tables -- and because gen is back to 1 its
+     first invention lands on a key that already exists and quietly overwrites it. */
+  Object.keys(RECIPES).forEach(k => {
+    if(/^own\d+_\d+$/.test(k)){ delete RECIPES[k]; delete SPRITE[k]; }
+  });
+  try{ localStorage.removeItem(SAVE); }catch(e){}
+  G = NEW(); SV = null;
+  save();
+  intro();
+}
+
 /* recipes invented by earlier generations have to be put back on load */
 function rehydrate(){
   (G.cookbook||[]).forEach(c => {
@@ -1462,7 +1512,7 @@ function intro(){
   const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";
   sc.appendChild(el("div","lbl","Café Life"));
   sc.appendChild(el("div","big","A counter and two stools"));
-  [ "You have one machine, two recipes and four hundred and twenty dirhams. There is no "
+  [ "You have one machine, two recipes and six hundred and forty dirhams. There is no "
     + "clock and nothing here can be failed.",
     "Each season you choose what goes on the board — you will always own more recipes than "
     + "you have room to show, and the season moves what people want. Then you open, and you "

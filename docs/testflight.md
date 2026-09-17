@@ -119,10 +119,18 @@
 > the privacy page has to change *before* that build is distributed. The page commits us to
 > that in writing.
 >
-> Two things the pages state plainly, because a policy describing a feature the build lacks is
-> what a review rejects: this build has **no in-app reset** (`NEW()` exists but nothing calls
-> it after a save loads), so reinstalling is how a player starts over; and there are no
-> purchases of any kind.
+> The pages state plainly that there are no purchases of any kind, because a policy describing
+> a feature the build lacks is what a review rejects.
+>
+> **The published pages are now one step behind the code, deliberately.** They say there is no
+> in-app reset and that reinstalling is how a player starts over. That was true when they were
+> written; the café screen now has *Start a new café*. It is not fixed yet on the site because
+> nothing has shipped — no TestFlight build carries it, so for any build a tester could
+> actually hold, the live page is still correct. Understating is safe where overstating is
+> not, so the order matters: **ship the build first, then update
+> `/games/cafe-life/support.html` in the `barmajja` repository.** Two paragraphs change — "Can
+> I start a completely new café?" and "How do I delete game data?" — and the privacy page's
+> retention list mentions it too.
 >
 > The Capacitor pipeline and its eight secrets are kept below for reference. They are not the
 > route to take.
