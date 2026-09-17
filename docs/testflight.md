@@ -32,9 +32,46 @@
 >
 > **The Expo shell now exists**, in [`native/`](../native/), mirroring that architecture.
 > `native/README.md` is the build route. In short: `npm run webapp`, the release gate, then
-> `eas build --platform ios --profile testflight`. Two placeholders in `native/eas.json` need
-> the account's real App Store Connect app id and team id, which are in the other repository
-> and not copied here.
+> `eas build --platform ios --profile testflight`.
+>
+> ### What a second shipped app confirms
+>
+> `kabatin` is a second Expo app on this account that has gone to internal TestFlight, and it
+> agrees with `marble-ultimate-football` on the parts that matter. Both are private
+> repositories; the identifiers below stay in them and are deliberately not copied here.
+>
+> - **`ITSAppUsesNonExemptEncryption: false`** in `ios.infoPlist`. Both set it. Without it
+>   every upload stops in App Store Connect on the export-compliance question before it can
+>   reach a tester. `native/app.json` already has it.
+> - **`autoIncrement: true`** on the production profile. Both set it. Apple rejects a build
+>   number it has already seen, so the second upload fails without it. Already set here.
+> - **The `.p8` is never committed.** Both repositories are clean of `.p8`, `.p12` and
+>   `.mobileprovision`. `kabatin` points `eas submit` at a key kept outside the repository in
+>   the operator's home directory. That is the convention to follow — and it means `eas
+>   submit` is run from your own machine, not from CI.
+> - **Bundle convention.** The games use `com.almulla.<slug>`; the Barmajja products use
+>   `com.barmajja.<slug>`. `com.almulla.cafelife` follows the games.
+> - **The Expo `owner` is not one house value** — the two apps sit under different Expo
+>   accounts. Which one Café Life belongs to is yours to pick at `eas init`.
+>
+> **`channel` was removed from `native/eas.json`.** Both shipped apps depend on
+> `expo-updates`, which is what makes an EAS channel mean anything; Café Life does not, and
+> has no over-the-air update need. With the package absent, EAS only warns
+> (`runBuildAndSubmit.js:407` — a `log.warn`, not a throw), so the keys were never going to
+> fail a build. They were inert, so they are gone rather than dragging in a dependency for a
+> feature nobody asked for.
+>
+> ### The missing piece is not in this repository
+>
+> App Store Connect will not take a build without a **privacy policy URL**, and external
+> TestFlight testing needs a **support URL** too. The house pattern is a page pair on
+> `barmajja.com`, served from the `barmajja` repository — for the other game, at
+> `/games/marble-ultimate-football/privacy.html` and `/support.html`, with support reaching
+> `info@barmajja.com`. Its Pages workflow assembles a `dist/` and refuses to deploy if
+> anything private lands in it.
+>
+> Café Life has no such pair. Writing one means a change to `barmajja`, which is outside the
+> branch this work is scoped to — so it needs your say-so before I touch it.
 >
 > The Capacitor pipeline and its eight secrets are kept below for reference. They are not the
 > route to take.
