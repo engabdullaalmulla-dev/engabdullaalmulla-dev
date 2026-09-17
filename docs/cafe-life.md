@@ -235,3 +235,40 @@ and gained two new ones. The worst score left in the pool is 0.743, and that pai
 positive: the metric reads brow and nose geometry, so it happily scores a bleached-blond young
 man against a grey man with a moustache. It earns a shortlist to look at, never a verdict —
 every cut here was confirmed by eye first.
+
+## What is made but never drawn
+
+140 sprites exist. The prototype can reach 58 of them. This is not an art backlog — it is
+wiring, and some of it changes how the game reads at the table.
+
+| Family | Made | Never drawn | What that costs |
+|---|---|---|---|
+| Dishes & ingredients | 32 | 19 | See invention, below |
+| Fittings | 32 | 18 | Half the furniture cannot be bought |
+| Rooms | 13 | 9 | No weather, no era, no time of day |
+| Branches | 6 | **6** | Branches are a text row |
+| Machines | 6 | **6** | The whole family is unwired |
+| Aged portraits | 21 | 15 | Expected — only six regulars age |
+| Portraits | 25 | 7 | The face-collision cuts |
+
+**Invented recipes draw an emoji.** `invent()` mints `own<n>_<gen>` and never writes
+`SPRITE[k]`, so `dishArt` falls through to the recipe's `ic`. Recipe invention is one of the
+two uncapped sinks — the thing a player does forever — and it is the one part of the game
+that visibly stops being made of art. Eleven finished dish sprites are sitting unused:
+kunafa, balaleet, chebab, khameer, basbousa, jallab, roselem, camelcap, sahlab, maamoul,
+qahwa. Handing the first eleven inventions a real sprite each is a dictionary and a lookup.
+
+**Branches have no art at all.** Six plates exist — Jumeirah, Satwa, Deira, Karama, the mall,
+the airport — and the branch list draws a name and a cash figure. Branches are the other
+uncapped sink and the clearest sign that the café outgrew the street. `branch.f` also picks
+from five name strings that do not correspond to the six plates, so wiring it means pairing
+them up rather than just adding an `<img>`.
+
+**Rooms have seasons and decades that never arrive.** `roomPlate()` returns one of four by
+seat count. `room_rain`, `room_summer`, `room_1990s` and `room_2030s` are never chosen, in a
+game whose premise is that you watch a room change across thirty years. Night is a CSS wash —
+`rgba(12,10,8,.45)` over the day plate — rather than `room_night`, which is a defensible
+choice but not an informed one while the real plate has never been compared against it.
+
+The ranking is by what the player loses: invented dishes first (it is the forever loop and it
+degrades to emoji), branches second, era and weather plates third, fittings fourth.
