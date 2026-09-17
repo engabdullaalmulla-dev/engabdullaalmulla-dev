@@ -61,6 +61,41 @@
 > fail a build. They were inert, so they are gone rather than dragging in a dependency for a
 > feature nobody asked for.
 >
+> ### The build would have failed on the first attempt
+>
+> Checking the two shipped apps turned up a blocker that had nothing to do with credentials.
+> `native/src/webapp/html.js` — the whole 3.4 MB game — was git-ignored, and `native/App.js`
+> imports it on line 4.
+>
+> EAS resolves its upload root with `git rev-parse --show-toplevel` and ships the **tracked**
+> files from there (so `tools/`, `prototype/` and `art/` do travel, even though the project
+> root is `native/`). Its git client consults `.easignore` only to *delete* files from that
+> clone — `vcs/clients/git.js`, "`.easignore` exists, deleting files that should be ignored"
+> — so it cannot add an ignored file back. The bundle would simply not have arrived, and
+> Metro would have failed to resolve the import before signing was even reached.
+>
+> The bundle is now tracked. Verified by reconstructing the upload from tracked files alone
+> and resolving `App.js`'s import against it.
+>
+> `marble-ultimate-football` avoids this from the other side, with an `eas-build-post-install`
+> hook that rebuilds its bundle on the server. That does not port directly: this bundle is
+> built by `tools/build-native.py`, which imports Pillow, and an EAS macOS runner has none.
+> Worth doing later — a server-side rebuild makes a stale bundle impossible — but not as an
+> untested change standing between here and a first build.
+>
+> ### Neither shipped app builds from CI
+>
+> There is no `EXPO_TOKEN` and no `eas build` in any workflow in either repository.
+> `marble-ultimate-football` has one workflow, `release-checks.yml`, and it runs tests.
+> `kabatin` has no workflows at all. Both are built from the operator's own machine, and
+> `kabatin` points `eas submit` at a signing key in a home directory, so submission is local
+> too. There is no CI route to inherit — `eas build` from your machine is the house route.
+>
+> `docs/11-ios-release.md` in that repository also requires physical-device checks against the
+> actual candidate before submitting: a full run and relaunch, background/foreground and
+> memory-pressure recovery, offline launch, and VoiceOver, text size and reduced motion. The
+> harness cannot prove any of those.
+
 > ### The missing piece is not in this repository
 >
 > App Store Connect will not take a build without a **privacy policy URL**, and external
