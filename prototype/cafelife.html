@@ -318,8 +318,10 @@ function sprite(name, px, emoji, cls){
 }
 function dishArt(k, px){ const r = RECIPES[k] || {}; return sprite(SPRITE[k], px, r.ic); }
 function faceArt(r, px, aged){
+  // Only regulars age. Walk-ins are a different person every service, so there is
+  // nobody for the years to happen to -- pick(WALKIN) below never asks for "_old".
   const f = REG_FACE[r.k];
-  return sprite(f ? (aged && f !== "p8" ? f + "_old" : f) : null, px, r.ic);
+  return sprite(f ? (aged ? f + "_old" : f) : null, px, r.ic);
 }
 const WALKIN = ["p1","p2","p7","p10","p12","p8"];
 

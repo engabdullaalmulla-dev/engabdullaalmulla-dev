@@ -244,11 +244,17 @@ player grows fond of over decades, not caricatures. Use the **character stem**.
 
 ### §B2 — The same twelve, thirty years older · A-01 to A-12
 
-> **Placeholders exist; these still need generating.** `art/pipeline/age.py` derives a
-> stand-in for each so the prototype runs, and `art/sprites/PLACEHOLDERS.json` lists them so
-> none can be shipped by accident. The filter greys the hair, which is the only signal that
-> reads at the 40 px a service row draws — and visibly is a filter at the 150 px a story
-> screen can reach. Generate all eleven properly; dropping them in overwrites the stand-ins.
+> **Only six of these are ever drawn.** `faceArt` reaches for an `_old` portrait only for a
+> **regular** — `REG_FACE` names six of them: p3, p4, p5, p6, p9, p11. Everyone else in the
+> cast is a walk-in, a different person every service, so there is nobody for thirty years to
+> happen to. The other five rows below are marked *not drawn*: pleasant to have, but no part
+> of the game is waiting on them.
+>
+> `art/pipeline/age.py` derives a stand-in for each so the prototype runs, and
+> `art/sprites/PLACEHOLDERS.json` lists what has not been replaced yet, so nothing filtered
+> can ship by accident. The filter greys the hair, which is the only signal that reads at the
+> 40 px a service row draws — and visibly is a filter at the 150 px a story screen can reach.
+> Dropping a generated portrait in overwrites the stand-in and clears the manifest entry.
 >
 
 
@@ -265,20 +271,20 @@ recognises them in 2028.
    plainly. Identical art style, lighting, framing and plain grey background."*
 3. Put the two side by side. If a stranger could not tell they are the same person, regenerate.
 
-| # | Ages | From |
-|---|---|---|
-| A-01 | Young man with curls → a man in his fifties | `p1.png` |
-| A-02 | Woman with auburn bob → a woman in her sixties, hair faded to sandy grey | `p2.png` |
-| A-03 | Emirati man → a man in his seventies, moustache white | `p3.png` |
-| A-04 | Emirati woman → a woman in her sixties | `p4.png` |
-| A-05 | Student → a woman in her fifties, the same round glasses | `p5.png` |
-| A-06 | Older man → a man in his eighties, frailer, still neat | `p6.png` |
-| A-07 | Courier → a man in his fifties, the red cap long gone | `p7.png` |
-| A-08 | Older woman → a woman in her nineties, very lined, still warm | `p8.png` |
-| A-09 | Office worker → a woman in her seventies, hair fully silver | `p9.png` |
-| A-10 | Teenager → a man in his forties, the shyness gone | `p10.png` |
-| A-11 | Shopkeeper → a man in his sixties, heavier, greying stubble | `p11.png` |
-| A-12 | Grandmother → *skip.* She does not get thirty more years. | — |
+| # | Ages | From | Drawn? | State |
+|---|---|---|---|---|
+| A-01 | Young man with curls → a man in his fifties | `p1.png` | not drawn | done |
+| A-02 | Woman with auburn bob → a woman in her sixties, hair faded to sandy grey | `p2.png` | not drawn | done |
+| A-03 | Emirati man → a man in his seventies, moustache white | `p3.png` | **khalid** | done |
+| A-04 | Emirati woman → a woman in her sixties | `p4.png` | **aisha** | done |
+| A-05 | Student → a woman in her fifties, the same round glasses | `p5.png` | **noor** | done |
+| A-06 | Older man → a man in his eighties, frailer, still neat | `p6.png` | **haddad** | **needed** |
+| A-07 | Courier → a man in his fifties, the red cap long gone | `p7.png` | not drawn | done |
+| A-08 | Older woman → a woman in her nineties, very lined, still warm | `p8.png` | not drawn | done |
+| A-09 | Office worker → a woman in her seventies, hair fully silver | `p9.png` | **dana** | done |
+| A-10 | Teenager → a man in his forties, the shyness gone | `p10.png` | not drawn | not needed |
+| A-11 | Shopkeeper → a man in his sixties, heavier, greying stubble | `p11.png` | **samir** | **needed** |
+| A-12 | Grandmother → *skip.* She does not get thirty more years. | — | — | — |
 
 **A-12 is deliberately not generated.** In a game about a café that outlives people, one of the
 twelve has to be the one who stops coming in, and the absence of the asset is the point.
