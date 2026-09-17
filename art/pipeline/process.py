@@ -228,7 +228,11 @@ def main():
         # a scene plate is never cut, trimmed or squared -- branches are scenes too,
         # and matching only "room_" silently squared the first three to 512x512
         wide = name.startswith(("room_", "br_"))
-        face = re.match(r"^p\d+$", name) is not None
+        # p3 and p3_old are both portraits: both need the head crop, the bottom fade
+        # and the face export sizes. Matching only ^p\d+$ sent every aged portrait down
+        # the object path, where nothing crops the shoulders, so the backdrop was never
+        # closed and the cut left the whole grey frame behind.
+        face = re.match(r"^p\d+(_old)?$", name) is not None
         if wide:
             im = src.convert("RGBA")
         else:
@@ -237,7 +241,6 @@ def main():
                 im = fade_bottom(im)
             im = trim_and_square(im, margin=0.04 if face else MARGIN)
         im.save(os.path.join(out, name + ".png"))
-        if name.endswith("_old"): face = True
         sizes = [] if wide else (FACE_SIZES if face else
                  (FIT_SIZES if name.startswith("f_") else GAME_SIZES))
         for s in sizes:
