@@ -56,9 +56,11 @@ FITTINGS = {
     "f-31": "f_sign",      "f-32": "f_planter",
 }
 
-# §B2 ageing portraits. A-08 is p8 and does get thirty more years; A-12 is p12, the
-# grandmother, and is the one who does not.
-NAMES.update({"a-%02d" % i: "p%d_old" % i for i in range(1, 12)})
+# Ageing portraits. The range deliberately skips 12: A-12 is p12, the grandmother, and the
+# brief marks her the one who does not get thirty more years -- leaving her unmapped means
+# the pipeline cannot quietly undo that beat by picking up a file someone dropped in.
+# A-08 is p8, who is already old and does get them.
+NAMES.update({"a-%02d" % i: "p%d_old" % i for i in list(range(1, 12)) + list(range(13, 25))})
 
 # small props the interface leans on. S-01 is deliberately absent: it duplicated F-31,
 # which is the same blank hanging sign, and was cut from the brief rather than generated.

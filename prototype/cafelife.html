@@ -323,7 +323,13 @@ function faceArt(r, px, aged){
   const f = REG_FACE[r.k];
   return sprite(f ? (aged ? f + "_old" : f) : null, px, r.ic);
 }
-const WALKIN = ["p1","p2","p7","p10","p12","p8"];
+// Anyone the street might send in once. p13 upward are the wider cast -- taxi driver, nurse,
+// builder, fishmonger, lawyer, art student, imam, gym regular, tailor, cabin crew, musician --
+// and they belong here rather than in REG_FACE: a walk-in has no story to gate and no name to
+// remember, which is exactly what a passer-by is. Widening this list is how the street stops
+// looking like the same six people all afternoon.
+const WALKIN = ["p1","p2","p7","p8","p10","p12",
+                "p13","p14","p15","p16","p17","p18","p19","p20","p21","p22","p23"];
 
 /* ============================== state ============================== */
 function NEW(){

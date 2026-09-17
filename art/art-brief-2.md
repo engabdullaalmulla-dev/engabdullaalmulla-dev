@@ -297,14 +297,27 @@ Eleven images in this batch, not twelve.
 > so the pipeline will not pick it up even by accident. Renaming it `a-12-*.png` and widening
 > that range is all it would take to change the decision.
 
-### The unwired bench — p13 to p24
+### The bench — p13 to p23, now walk-ins
 
-`art/sprites` holds twelve further portraits, p13 to p24, and **the prototype references none
-of them.** `REG_FACE` names six people and `WALKIN` names six more; p13 upward appear in
-neither, so no code path can draw them. An aged nurse (p14) is held at
-`art/raw-aged-held/nurse-older.png` for the same reason — ageing a portrait the game cannot
-draw in the first place is work spent one step too early. Wiring the bench in is a design
-decision about how wide the street's cast should be, not an art gap.
+These eleven used to be drawn by nothing: `REG_FACE` named six people, `WALKIN` named six
+more, and p13 upward appeared in neither. They are now in `WALKIN`, so the walk-in pool is
+seventeen faces rather than six and the street stops looking like the same handful of people
+all afternoon. Nothing else had to change — a walk-in needs no story and no name.
+
+**Their aged portraits are a separate matter.** p14 to p19 have generated `_old` art and
+`NAMES` maps `a-13` to `a-24`, so any of them processes cleanly. But `faceArt` only reaches
+for `_old` on a **regular**, and a walk-in is a different person every service — there is
+nobody for the years to happen to. So the aged bench art sits ready and undrawn until one of
+those people is promoted into `REG_FACE`, which means writing them a story: beats, and the
+café-state gates those beats open on. That is a design decision about who the café's regulars
+are, and the art no longer blocks it.
+
+| Aged and ready | Still only young |
+|---|---|
+| p14 nurse, p15 builder, p16 fishmonger, p17 lawyer, p18 art student, p19 imam | p13 taxi, p20 gym, p21 tailor, p22 cabin crew, p23 musician |
+
+**p24 does not exist yet.** C-24, the retired teacher, is still outstanding from §B1 — the one
+portrait in the cast that came back as a photograph rather than painted.
 
 ### ~~§B3 — Six children · K-01 to K-06~~ — CUT
 
