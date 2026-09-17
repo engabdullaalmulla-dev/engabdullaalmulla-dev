@@ -217,3 +217,21 @@ detached pieces — steam, the finial, stray hair wisps — all sit **2 to 27 px
 mass. The flecks sit **46 to 120 px** out. Nothing real was found in between, so `despeckle`
 drops an island only when it is both smaller than 0.5% of the subject and more than 40 px
 clear of it. Either condition alone is unsafe.
+
+### One man and one woman, re-dressed
+
+The cast came back wearing far fewer faces than it has characters. Comparing only the
+eyes-nose-mouth box, with skin tone and lighting normalised away, p6 and p13 score **0.972**
+where two plainly different people score around **−0.35**. p6, p13, p15, p19 and p21 are one
+man; p4, p9, p14, p17 and p22 are one woman.
+
+This matters here more than it would almost anywhere else. The game's whole claim is that you
+come to know six people across thirty years, and the ageing pass exists so you still recognise
+them at the end. None of that survives haddad's face walking in as a taxi driver who orders
+once and leaves. **A face may belong to a regular or to strangers, never to both.**
+
+So `WALKIN` now excludes every portrait that collides with a regular, which cost seven faces
+and gained two new ones. The worst score left in the pool is 0.743, and that pair is a false
+positive: the metric reads brow and nose geometry, so it happily scores a bleached-blond young
+man against a grey man with a moustache. It earns a shortlist to look at, never a verdict —
+every cut here was confirmed by eye first.

@@ -297,6 +297,31 @@ Eleven images in this batch, not twelve.
 > so the pipeline will not pick it up even by accident. Renaming it `a-12-*.png` and widening
 > that range is all it would take to change the decision.
 
+### The cast wears too few faces
+
+Measured across all twenty-three portraits, comparing only the eyes-nose-mouth box with skin
+tone and lighting normalised out: **p6, p13, p15, p19 and p21 are one man**, and **p4, p9,
+p14, p17 and p22 are one woman.** p6/p13 scores 0.972 where two plainly different people
+score around −0.35. Different hair, different clothes, same face.
+
+For most games this would be a shrug. For this one it is close to fatal, because the premise
+is that you come to know six people over thirty years — and that collapses the moment
+haddad's face walks in as a taxi driver who orders once and leaves. **A face may be a
+regular's or a stranger's, never both.**
+
+The immediate repair is in `WALKIN`, which now excludes every portrait that collides with a
+regular. The worst remaining score in the pool is 0.743, and that pair (p18 against p6) is a
+false positive the eye rejects instantly — a bleached-blond young man with a nose ring against
+a grey man with a moustache. The metric over-scores on brow and nose geometry, so it is a
+shortlist for looking, never the verdict.
+
+The real repair is more faces. C-25 and C-26 are the first two, and the §B1 prompt needs a
+variety clause it never had: a named, specific face per character — jaw, nose, brow, eye
+spacing — rather than a job title and an age, which is what produced one man and one woman
+re-dressed eleven times.
+
+**Do not generate A-13.** p13 is haddad's face; ageing it would produce a second haddad.
+
 ### The bench — p13 to p23, now walk-ins
 
 These eleven used to be drawn by nothing: `REG_FACE` named six people, `WALKIN` named six
@@ -312,9 +337,12 @@ those people is promoted into `REG_FACE`, which means writing them a story: beat
 café-state gates those beats open on. That is a design decision about who the café's regulars
 are, and the art no longer blocks it.
 
-| Aged and ready | Still only young |
-|---|---|
-| p14 nurse, p15 builder, p16 fishmonger, p17 lawyer, p18 art student, p19 imam, p20 gym, p21 tailor, p22 cabin crew, p23 musician | p13 taxi |
+| In the walk-in pool | Cut — wears a regular's face | Aged art exists |
+|---|---|---|
+| p16 fishmonger, p18 art student, p20 gym, p23 musician, p25, p26 | p13 taxi, p14 nurse, p15 builder, p17 lawyer, p19 imam, p21 tailor, p22 cabin crew | all of p14–p23 |
+
+The cut portraits and their aged versions stay in `art/sprites`. They are good art and cost
+nothing to keep; they are simply unusable as strangers while they wear a regular's face.
 
 **p24 does not exist yet.** C-24, the retired teacher, is the last portrait in the cast and has
 now come back as a photograph twice. The second attempt is kept at

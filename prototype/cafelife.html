@@ -323,13 +323,18 @@ function faceArt(r, px, aged){
   const f = REG_FACE[r.k];
   return sprite(f ? (aged ? f + "_old" : f) : null, px, r.ic);
 }
-// Anyone the street might send in once. p13 upward are the wider cast -- taxi driver, nurse,
-// builder, fishmonger, lawyer, art student, imam, gym regular, tailor, cabin crew, musician --
-// and they belong here rather than in REG_FACE: a walk-in has no story to gate and no name to
-// remember, which is exactly what a passer-by is. Widening this list is how the street stops
-// looking like the same six people all afternoon.
+// Anyone the street might send in once. A walk-in has no story to gate and no name to
+// remember, which is exactly what a passer-by is, so the wider cast belongs here rather
+// than in REG_FACE.
+//
+// What a face may NOT do is belong to a regular as well. The whole premise is that you
+// come to know six people over thirty years, and that collapses the moment dana's face
+// walks in as a stranger who orders once and leaves. Seven of the cast were cut from this
+// list for exactly that: p13, p15, p19 and p21 are haddad's face with different hair, and
+// p14, p17 and p22 are aisha's and dana's. They are still fine portraits, just unusable
+// as strangers. p25 and p26 were added to make up the numbers with faces nobody owns.
 const WALKIN = ["p1","p2","p7","p8","p10","p12",
-                "p13","p14","p15","p16","p17","p18","p19","p20","p21","p22","p23"];
+                "p16","p18","p20","p23","p25","p26"];
 
 /* ============================== state ============================== */
 function NEW(){

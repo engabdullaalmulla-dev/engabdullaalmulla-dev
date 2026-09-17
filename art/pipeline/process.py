@@ -39,7 +39,9 @@ NAMES = {
     "b-01": "br_jumeirah", "b-02": "br_satwa",    "b-03": "br_deira",
     "b-04": "br_karama",   "b-05": "br_mall",     "b-06": "br_airport",
 }
-for i in range(1, 25):
+# c-25 upward are faces added to break up the cast's sameness -- the first twenty-four came
+# back with one male face and one female face re-dressed several times over (see docs).
+for i in range(1, 33):
     NAMES["c-%02d" % i] = "p%d" % i
 
 # §A fittings -- everything the player can buy, so it can appear in the room
