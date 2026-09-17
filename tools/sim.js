@@ -15,9 +15,16 @@
 const { chromium } = require('playwright');
 const pad = (s, n) => String(s).padStart(n);
 
-const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","awning",
-               "aircon","barista","backroom","slot","stool","upstairs","manager",
-               "branch","freehold","branch","branch","branch"];
+/* A plausible build order for someone who has played before. Repeats matter: the bot buys
+   the k-th copy of an item only when it has reached the k-th mention, so listing "stool"
+   once quietly capped the bot at one stool and made the café look poorer than the game is. */
+const ORDER = [
+  "sign", "stool", "case_", "stool", "grinder", "slot", "table", "stool",
+  "radio", "plant", "stool", "awning", "table", "stool", "aircon", "slot",
+  "stool", "barista", "backroom", "stool", "table", "stool", "plant", "slot",
+  "stool", "upstairs", "stool", "barista", "manager", "plant", "slot", "slot",
+  "branch", "freehold", "branch", "branch", "branch", "branch", "branch"
+];
 
 (async () => {
   const YEARS  = Number(process.argv[2] || 30);
@@ -30,7 +37,7 @@ const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","
   await p.waitForTimeout(300);
 
   const res = await p.evaluate(([YEARS, RUNS, POLICY, ORDER]) => {
-    function spend(bought){
+    function spend(bought, first){
       if(POLICY === "saver"){
         for(let guard = 0; guard < 30; guard++){
           let target = null, seen = {};
@@ -41,6 +48,7 @@ const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","
           if(c > G.cash - 200) return;                       // save for it
           G.cash -= c; G.owned[target] = (G.owned[target]||0) + 1; ITEMS[target].f(G);
           bought[target] = (bought[target]||0) + 1;
+          if(first[target] === undefined) first[target] = G.year;
         }
         return;
       }
@@ -52,6 +60,7 @@ const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","
         const o = opts[0];
         G.cash -= o.c; G.owned[o.k] = (G.owned[o.k]||0) + 1; ITEMS[o.k].f(G);
         bought[o.k] = (bought[o.k]||0) + 1;
+        if(first[o.k] === undefined) first[o.k] = G.year;
       }
     }
     function setBoard(){
@@ -65,17 +74,21 @@ const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","
     }
     const out = [];
     for(let run = 0; run < RUNS; run++){
-      G = NEW(); const track = [], bought = {};
+      G = NEW(); const track = [], bought = {}, first = {}, afford = {};
       for(let s = 0; s < YEARS*4; s++){
-        spend(bought); setBoard();
+        spend(bought, first); setBoard();
         const before = G.cash;
         runService(true);
         if(POLICY !== "greedy"){ G.cash += Math.round(G.lastTake*0.04); G.rep += 1; }
+        // "affordable" is the honest target: the first year the cash on hand would cover it,
+        // whatever this bot's build order happens to be reaching for at the time
+        for(const k of ["upstairs","manager","branch","freehold"])
+          if(afford[k] === undefined && G.cash >= costOfItem(k, own(k))) afford[k] = G.year;
         track.push({net: Math.round(G.cash - before), cash: Math.round(G.cash), seats: G.seats,
                     rep: G.rep, br: G.branches.length, take: Math.round(G.lastTake),
                     rent: Math.round(rentNow()), wage: staffWage()});
       }
-      out.push({track, bought, seats: G.seats});
+      out.push({track, bought, first, afford, seats: G.seats});
     }
     return out;
   }, [YEARS, RUNS, POLICY, ORDER]);
@@ -85,7 +98,7 @@ const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","
   console.log(`${POLICY} · ${res.length} runs · ${YEARS} years`);
   console.log(pad('year',5)+pad('cash',12)+pad('net/season',12)+pad('take',9)+pad('rent',8)
             + pad('wages',8)+pad('seats',7)+pad('rep',6)+pad('br',5));
-  for(const y of [1,5,10,13,15,20,25,30].filter(y => y <= YEARS))
+  for(const y of [1,5,10,13,15,20,25,30,40,50,60].filter(y => y <= YEARS))
     console.log(pad(y,5)
       + pad(med(res.map(r => yr(r,y).cash)).toLocaleString(),12)
       + pad(med(res.flatMap(r => r.track.slice(y*4-4, y*4).map(t => t.net))),12)
@@ -96,9 +109,16 @@ const ORDER = ["sign","case_","grinder","slot","stool","table","radio","plant","
       + pad(med(res.map(r => yr(r,y).rep)),6)
       + pad(med(res.map(r => yr(r,y).br)),5));
 
-  const all = await p.evaluate(() => Object.keys(ITEMS));
-  const never = all.filter(k => !res.some(r => r.bought[k]));
-  console.log('\nnever affordable in any run:', never.join(', ') || 'none');
+  // the number being tuned: the year the late game actually opens
+  console.log('\n' + pad('unlock',12) + pad('affordable',12) + pad('bought',10) + pad('runs',9) + pad('target',9));
+  const TARGET = {upstairs:2003, manager:2005, branch:2010, freehold:2017};
+  for(const k of ["slot","backroom","upstairs","manager","branch","freehold"]){
+    const aff = res.map(r => r.afford[k]).filter(v => v !== undefined);
+    const got = res.map(r => r.first[k]).filter(v => v !== undefined);
+    console.log(pad(k,12) + pad(aff.length ? med(aff) : 'never',12)
+              + pad(got.length ? med(got) : 'never',10)
+              + pad(got.length + '/' + res.length,9) + pad(TARGET[k] || '-',9));
+  }
   if(errs.length) console.log('PAGE ERRORS:', errs.slice(0,3));
   await b.close();
 })();

@@ -232,16 +232,19 @@ const ITEMS = {
             f:g=>g.slots++},
   backroom:{nm:"Open the back room",ic:"🚪",cost:900,max:1, d:"A quiet corner away from the counter.",
             f:g=>{g.seats+=3; g.quiet=true}},
-  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:1800, max:1, d:"Twice the room. A different kind of café.",
+  /* Repriced against what the café actually earns. At 1800 / 1400 / 4200 / 9000 a bot
+     playing well never once reached upstairs, a manager, a branch or the freehold in
+     thirty years, in any of sixteen runs -- see tools/sim.js. */
+  upstairs:{nm:"Open upstairs",  ic:"🪜", cost:1200, max:1, d:"Twice the room. A different kind of café.",
             f:g=>{g.seats+=6; g.dwell+=0.2}},
   barista: {nm:"Hire a barista", ic:"🧑‍🍳", cost:500, max:2, d:"Serves alongside you. Wages every season.",
             f:g=>g.staff.push({nm:pick(["Faisal","Reem","Jamal","Huda"]),role:"barista",wage:120})},
-  manager: {nm:"Hire a manager", ic:"🗂️", cost:1400, max:1, d:"Can run a season without you. Wages every season.",
+  manager: {nm:"Hire a manager", ic:"🗂️", cost:1050, max:1, d:"Can run a season without you. Wages every season.",
             f:g=>{g.staff.push({nm:pick(["Mona","Tarek","Salma"]),role:"manager",wage:260}); g.canSkip=true}},
-  freehold:{nm:"Buy the building",ic:"🏠", cost:9000, max:1,
+  freehold:{nm:"Buy the building",ic:"🏠", cost:4200, max:1,
             d:"The landlord stops taking seven per cent of everything you sell. Forever, and for whoever comes after you.",
             f:g=>g.rep+=5},
-  branch:  {nm:"Open a branch",  ic:"🏪", cost:4200, max:99, pow:1.8, d:"Another café, another street, its own regulars.",
+  branch:  {nm:"Open a branch",  ic:"🏪", cost:1900, max:99, pow:1.7, d:"Another café, another street, its own regulars.",
             f:g=>g.branches.push(newBranch(g, g.branches.length))}
 };
 
@@ -393,10 +396,15 @@ function load(){ try{ const r=localStorage.getItem(SAVE); if(!r) return null;
 
 const season = () => SEASONS[G.season % 4];
 const own = k => G.owned[k] || 0;
-const infl = () => 1 + (G.year - 1996) * 0.02;
+/* Rent used to inflate at 2% against prices at 1.8%. Nobody chose that: it was a quiet
+   squeeze that compounded for thirty years and it is why the café slid backwards however
+   well it was run. The two rates now match. */
+const infl = () => 1 + (G.year - 1996) * 0.018;
 /* rent and wages track the size of the thing you built, so profit stays a margin
    and never becomes a fountain. Flat rent was why cash hit six figures by year ten. */
-const rentNow = () => Math.round((80 + G.seats*11 + G.branches.length*130) * infl()
+/* Seats were 11 a season each. A seat buys trade, so it has to be worth more than it costs
+   to keep, and at 11 the ladder to a full room barely paid for itself. */
+const rentNow = () => Math.round((80 + G.seats*9 + G.branches.length*130) * infl()
                         + (own("freehold") ? 0 : G.lastTake * 0.07));
 const staffWage = () => Math.round(G.staff.reduce((a,s)=>a+s.wage,0) * infl());
 const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
@@ -640,9 +648,18 @@ function visitsFor(c){
   if(c.reg) return Math.min(80, 22 + regState(c.reg.k).warmth*4);
   return 1 + Math.floor(Math.random()*3);
 }
+/* A barista's card says "Serves alongside you" and for a long time that was simply untrue:
+   nothing read G.staff except the wage bill, so hiring one cost 120 a season, rising with
+   inflation, and bought nothing at all. Two baristas and a manager were a 500-a-season hole
+   that turned a café clearing +341 into one losing 291. A pair of hands on the counter means
+   more people through the door in a season, so that is what they do now. */
+const baristas = () => G.staff.filter(s => s.role === "barista").length;
 function buildQueue(){
-  const n = Math.max(6, Math.min(G.seats*3 + 6,
-            Math.round((8 + G.seats*2) * G.foot * (1 + G.rep*0.012))));
+  /* The cap was seats*3+6, which bound from the very first season and meant the queue
+     formula below never got to say anything. It is a backstop against runaway trade, not
+     the thing that should be setting the day's custom, so it sits above the formula now. */
+  const n = Math.max(6, Math.min(G.seats*5 + 6,
+            Math.round((8 + G.seats*2 + baristas()*9) * G.foot * (1 + G.rep*0.012))));
   const q = [];
   /* regulars come first -- they are the reason the place works */
   REGULARS.forEach(r => {

@@ -278,42 +278,66 @@ choice but not an informed one while the real plate has never been compared agai
 The ranking is by what the player loses: invented dishes first (it is the forever loop and it
 degrades to emoji), branches second, era and weather plates third, fittings fourth.
 
-## The wall at year 13
+## The wall at year 13, and what was behind it
 
-`tools/sim.js` plays the game to the end of a dynasty. Three play styles were run sixteen
-times each over thirty years: a greedy bot, one that plays the board to the season and taps
-guests, and a saver that follows a build order and holds cash for the next tier instead of
-spraying it at stools. All three end in the same place.
+`tools/sim.js` plays the game to the end of a dynasty. It found that `upstairs`, `manager`,
+`branch` and `freehold` were **never affordable in any run under any play style** — the whole
+late game was content nobody would reach.
 
-| year | cash | net/season | take | rent | wages | seats |
-|---|---|---|---|---|---|---|
-| 1 | 481 | 19 | 289 | 124 | 0 | 2 |
-| 5 | 452 | **149** | 612 | 167 | 0 | 3 |
-| 10 | 1,181 | 91 | 788 | 217 | 144 | 5 |
-| 13 | 336 | **−99** | 530 | 249 | 151 | 8 |
-| 20 | −906 | −89 | 604 | 277 | 168 | 8 |
-| 30 | −2,865 | −84 | 654 | 315 | 192 | 8 |
+**A correction to my own first measurement.** The first version of this note said the café went
+bankrupt, 2,865 in the red by year 30. That number was wrong: the bot's build order listed
+`stool` once, so it bought one stool and stalled at eight seats. A bot with a plausible build
+order ends year 30 at **+1,908** and twenty seats. The café stalled; it did not collapse. The
+unreachable late game was real and is what mattered.
 
-**Never affordable in any run, under any play style: `upstairs`, `manager`, `freehold`,
-`branch`.**
+### The cause was a lie in the shop, not a number
 
-The café peaks at about **150 a season around year 5**, and the median season starts losing
-money in **2008**. Upstairs costs 1,800 — twelve good seasons of spending nothing at all,
-during which rent keeps climbing. A branch is 4,200 and the freehold is 9,000. They are not
-expensive; they are unreachable.
+A barista's card says *"Serves alongside you."* Nothing in the game read `G.staff` except the
+wage bill. A barista cost 120 a season, rising with inflation, and did **nothing**. Two of them
+plus a manager was a 500-a-season hole, and it landed exactly when a player was trying to save
+for the second floor:
 
-It is a deadlock, and each half is load-bearing. Takings are capped by `seats*3 + 6`, so the
-only way to earn more is more seats. Seats cost money and every seat raises rent
-(`80 + seats*11 + branches*130`, inflated, plus 7% of last season's take until the freehold).
-The one large seat unlock is the thing you can never save for. So the café stalls at eight
-seats and slowly bleeds.
+| | 2010 (before hiring) | 2015 (after) |
+|---|---|---|
+| profit | 985 | 938 |
+| wages | 150 | 671 |
+| **net** | **+341** | **−291** |
 
-This is the other side of a fix that worked. Cash used to reach 751,000 by year 30 and was
-brought down with scaling rent and wages, percentage rent, a seat-capped queue and uncapped
-sinks. That killed the runaway, and overshot: it now cannot reach its own late game. Branches,
-the freehold, the manager, the second floor, `room_large`, and any succession that hands over
-a real business are all content that no player will ever see.
+Baristas now add to the day's custom, which is what their card always claimed.
 
-**Adding to the shop while this holds makes it worse, not better.** Sixteen of thirty-two
-fittings have no shop entry; wiring the other sixteen in would add things to buy to an economy
-that cannot afford the ones it has.
+### The rest of the retune
+
+- **Rent inflated at 2% against prices at 1.8%.** Nobody chose that; it was a quiet squeeze
+  compounding for thirty years. The rates now match.
+- **A seat cost 11 a season to keep.** A seat buys trade, so it has to be worth more than it
+  costs, and at 11 the ladder to a full room barely paid for itself. Now 9.
+- **The trade cap was `seats*3+6`**, which bound from the first season, so the queue formula
+  never got to say anything. It is a backstop against runaway trade, not the thing that should
+  set the day's custom. Now `seats*5+6`.
+- **The four unlocks were priced for an economy that never existed**: 1800 / 1400 / 4200 / 9000
+  against a café clearing a few hundred a season. Now 1200 / 1050 / 1900 / 4200.
+
+### Where it lands
+
+Sixteen runs, a bot that plays the board to the season, taps guests, and saves for the next
+tier. Every unlock is now reached in **every run**:
+
+| unlock | affordable | target |
+|---|---|---|
+| upstairs | 2004 | 2003 |
+| manager | 2004 | 2005 |
+| branch | 2015 | 2010 |
+| freehold | 2020 | 2017 |
+
+Growth stays linear rather than exponential — year 30 ends around 6,500, year 60 around 65,000
+with six branches. That is a long way from the 751,000-by-year-30 runaway an earlier fix was
+written to kill, and it does not overshoot into the stall that fix caused.
+
+**A careless player still fails.** The greedy bot — never matching the board to the season,
+never tapping anyone — ends year 30 at −2,225 with reputation at −58 and reaches none of the
+late game. Demanding, as asked for.
+
+### Still not wired
+
+Sixteen of thirty-two fittings have no shop entry. That is the next job, and it is now a
+reasonable one: there is an economy to spend in.
