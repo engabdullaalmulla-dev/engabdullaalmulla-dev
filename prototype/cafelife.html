@@ -1098,8 +1098,9 @@ function runService(auto){
   }
   walk.slice(fill).forEach(c => {                            // the rest of the day, off screen
     const r = serveOne(c);
-    SV.offstage++;
-    if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; }
+    /* counted only when they bought: the close screen calls this a share of Served, and a
+       month reported 172 served with 234 "of those", which is not a subset of anything */
+    if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; SV.offstage++; }
     else SV.missed++;
   });
   SV.q = shown;
@@ -1269,9 +1270,11 @@ function dayScreen(auto){
     + "month, so a day you watch and a day you hand over are worth the same."));
 
   const on = el("button","btn","Open tomorrow"); on.type = "button";
-  on.onclick = () => { screenPlan(); }; sc.appendChild(on);
+  on.onclick = () => runService(false); sc.appendChild(on);
   const rest = el("button","btn sec","Run the rest of the month"); rest.type = "button";
   rest.onclick = () => runRestOfMonth(); sc.appendChild(rest);
+  const ch = el("button","btn quiet","Change the board first"); ch.type = "button";
+  ch.onclick = screenPlan; sc.appendChild(ch);
   v.appendChild(sc); show("close");
 }
 
@@ -1282,9 +1285,9 @@ function runRestOfMonth(){
   while(G.day <= MONTH_DAYS && guard++ < 400){
     const q = buildQueue();
     SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
-          moment:null, visits:0, offstage:q.length};
+          moment:null, visits:0, offstage:0};
     q.forEach(c => { const r = serveOne(c);
-      if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++;
+      if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; SV.offstage++;
                if(c.reg){ if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k);
                           regState(c.reg.k).warmth++; } }
       else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
@@ -1298,7 +1301,10 @@ function runRestOfMonth(){
   closeMonth(false);
 }
 
-function closeMonth(auto){
+/* The month's arithmetic, with nothing drawn. Split out so that months can be settled in a
+   loop by "run until something happens" -- which is the difference between a three-hundred
+   year game and twenty-one thousand taps. */
+function settleMonth(){
   const M = G.mo;
   const wages = staffWage();
   const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
@@ -1402,12 +1408,69 @@ function closeMonth(auto){
   G.mo = {take:0, profit:0, served:0, missed:0, tips:0, days:0, offstage:0, seen:[]};
   save();
 
+  const ev = streetEvent();
+  const wonGoals = checkGoals();
+  /* What is worth stopping a fast-forward for. The first cut of this stopped every single
+     month -- six presses bought one year -- for two reasons, both worth naming. `beats`
+     carries blocked entries too, and a regular whose story is waiting on a fitting pushes one
+     every month for years; and an early café runs a thin month often, so `net < 0` was
+     constant. A story that MOVED is an event. A story that is still waiting is wallpaper.
+     And a bad month only matters when it is bad enough to be in trouble over. */
+  const moved = beats.filter(b => b.beat || b.intro).length;
+  const hurts = net < 0 && (G.cash + net < 0 || -net > Math.max(1, M.take) * 0.25);
+  const notable = !!(moved || arrivals.length || ev || wonGoals.length || labMade
+                     || seized || G.arrears || hurts || G.owner.age >= G.owner.dies);
+  return {M:M, net:net, rent:rent, wages:wages, running:running, supply:supply,
+          labBill:labBill, branch:branch, interest:interest, repaid:repaid, seized:seized,
+          labMade:labMade, beats:beats, arrivals:arrivals, ev:ev, wonGoals:wonGoals,
+          notable:notable};
+}
+
+function closeMonth(auto){ monthScreen(settleMonth(), auto); }
+
+/* Six taps a month over three hundred years is twenty-one thousand six hundred taps, and
+   four of the six bought nothing in a month where nothing happened. This runs the café on
+   its own until something actually wants you -- a chapter, the street, an ambition, the
+   bench, the bank, a losing month, or the owner reaching the end -- and stops there. The
+   engine settles a month in well under a millisecond, so the only cost is the years. */
+function runUntil(){
+  let months = 0, last = null;
+  while(months < 600){
+    /* trade the whole month with nobody watching, then settle it */
+    while(G.day <= MONTH_DAYS){
+      const q = buildQueue();
+      SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
+            moment:null, visits:0, offstage:0};
+      q.forEach(c => { const r = serveOne(c);
+        if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; SV.offstage++;
+                 if(c.reg){ if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k);
+                            regState(c.reg.k).warmth += trait().warm; } }
+        else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
+      const m = G.mo;
+      m.take += SV.take; m.profit += SV.profit; m.served += SV.served;
+      m.missed += SV.missed; m.offstage += SV.offstage; m.days++;
+      SV.seen.forEach(k => { if(m.seen.indexOf(k) < 0) m.seen.push(k); });
+      G.wear = (G.wear || 0) + SV.served/70;
+      G.day++;
+    }
+    last = settleMonth(); months++;
+    if(last.notable) break;
+  }
+  last.ranFor = months;
+  monthScreen(last, true);
+}
+
+function monthScreen(R, auto){
+  const {M, net, rent, wages, running, supply, labBill, branch, interest, repaid,
+         seized, labMade, beats, arrivals, ev, wonGoals} = R;
   const v = $("s-close"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
   const mName = MONTHS[(G.month + 11) % 12], mYear = (G.month % 12 === 0) ? G.year - 1 : G.year;
   sc.appendChild(el("div","lbl", mName + " " + mYear + " · " + M.days + " days open"
     + (auto ? " · run by the manager" : "")));
   sc.appendChild(el("div","big", net >= 0 ? "A good month" : "A thin month"));
+  if(R.ranFor > 1) sc.appendChild(el("div","hint", "You let " + (R.ranFor - 1)
+    + (R.ranFor === 2 ? " month" : " months") + " go by before this one."));
 
   const c = el("div","card");
   const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
@@ -1445,7 +1508,6 @@ function closeMonth(auto){
       + ", set against what you owe. What is left of the debt still stands."));
     sc.appendChild(w);
   }
-  const ev = streetEvent();
   if(ev){
     const c = el("div","card"); c.style.borderColor = "var(--amber-d)";
     c.appendChild(el("div","lbl","the street"));
@@ -1460,7 +1522,7 @@ function closeMonth(auto){
       + G.owner.nm + "'s name, and onto the board whenever there is room for it."));
     sc.appendChild(c);
   }
-  checkGoals().forEach(w => {
+  wonGoals.forEach(w => {
     const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
     card.appendChild(el("div","lbl","an ambition"));
     const row = el("div","stat");
@@ -1515,9 +1577,19 @@ function closeMonth(auto){
     go.textContent = G.owner.nm + " is getting old";
     go.onclick = succession; sc.appendChild(go);
   } else {
-    const go = el("button","btn","Spend, and open " + monthName());
+    /* Was one forced route: report -> shop -> plan -> day, four taps to trade a month in
+       which you wanted to change nothing. Opening the next month is the primary button and
+       spending is optional beside it. */
+    const straight = el("button","btn","Open " + monthName()); straight.type = "button";
+    straight.onclick = () => runService(false);
+    sc.appendChild(straight);
+    const skip = el("button","btn sec","Run on until something happens"); skip.type = "button";
+    skip.onclick = runUntil; sc.appendChild(skip);
+    const go = el("button","btn sec","Spend " + money(G.cash) + " AED");
     go.type = "button"; go.onclick = () => screenShop("close");
     sc.appendChild(go);
+    const ch2 = el("button","btn quiet","Change the board first"); ch2.type = "button";
+    ch2.onclick = screenPlan; sc.appendChild(ch2);
   }
   sc.appendChild(el("div")).style.height = "14px";
   v.appendChild(sc);
