@@ -54,7 +54,7 @@ function staticGate() {
   }
   assert(sandbox.BRAND_DATA?.icon && sandbox.BRAND_DATA?.logo, 'Icon and logo are required');
   const modules = {};
-  for (const name of ['content', 'engine', 'audio', 'i18n', 'ui']) {
+  for (const name of ['content', 'engine', 'audio', 'i18n', 'persistence', 'ui']) {
     const script = scripts.find(script => script.attrs.includes('game/' + name + '.js'));
     assert(script, 'Missing bundled game module: ' + name);
     assert(!/\b(?:fetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon\s*\(|import\s*\()/m.test(script.source), 'Network API in authored game module: ' + name);
@@ -73,6 +73,12 @@ function staticGate() {
   const app = read('native/App.js');
   assert(app.includes(ORIGIN) && app.includes('domStorageEnabled'), 'Native save origin/storage configuration regressed');
   assert(app.includes("ar:") && app.includes("en:"), 'Native shell must localise loading and recovery');
+  assert(app.includes('CAFE_NATIVE_CAPABILITIES') && app.includes('SaveBridge.parseMessage'), 'Native bridge must advertise capabilities and validate incoming messages');
+  assert(app.includes('Haptics.impactAsync') && !app.includes('Vibration.vibrate'), 'Native taps must use gentle platform haptics');
+  assert(app.includes("data.type === 'appearance'") && app.includes("'light-content'"), 'Native status bar must follow game appearance');
+  for (const file of ['native/App.js', 'native/src/saveBridge.js']) {
+    assert(!/\b(?:fetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon\s*\(|downloadFileAsync\s*\(|getResolvedSharedPayloadsAsync\s*\()/m.test(read(file)), 'Network API in authored native source: ' + file);
+  }
   const pkg = JSON.parse(read('native/package.json'));
   assert(pkg.scripts['build:testflight'].includes('npm run check'), 'TestFlight build bypasses release gate');
   return { HTML, sprites: expectedSprites.length, buildId: sandbox.CAFE_BUILD_ID };

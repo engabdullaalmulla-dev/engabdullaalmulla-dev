@@ -1,13 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, NativeModules, Platform, Pressable, StatusBar, StyleSheet, Text, Vibration, View } from 'react-native';
+import { ActivityIndicator, AppState, NativeModules, Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+import * as Haptics from 'expo-haptics';
+import { Directory, File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import { HTML } from './src/webapp/html.js';
+import SaveBridge from './src/saveBridge';
 
 // A stable secure origin gives local saves a persistent partition. No request is made to it.
 const ORIGIN = 'https://app.cafelife.local/';
 const COPY = {
-  en: { loading: 'Opening your café…', error: 'Your café could not open. Your saved game is still on this device.', retry: 'Try again' },
-  ar: { loading: 'جارٍ فتح مقهاك…', error: 'تعذّر فتح المقهى. لا تزال لعبتك المحفوظة على هذا الجهاز.', retry: 'حاول مجددًا' },
+  en: { loading: 'Opening your café…', error: 'Your café could not open. Your saved game is still on this device.', retry: 'Try again', export: 'Export your café' },
+  ar: { loading: 'جارٍ فتح مقهاك…', error: 'تعذّر فتح المقهى. لا تزال لعبتك المحفوظة على هذا الجهاز.', retry: 'حاول مجددًا', export: 'تصدير مقهاك' },
+};
+const PALETTES = {
+  light: { backgroundColor: '#f8f3e9', ink: '#30443b', accent: '#1f6259' },
+  dark: { backgroundColor: '#18251f', ink: '#f2eee2', accent: '#b2d6b8' },
 };
 function deviceLanguage() {
   const settings = NativeModules.SettingsManager?.settings;
@@ -22,7 +31,11 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
   const [language, setLanguage] = useState(deviceLanguage);
+  const [theme, setTheme] = useState('light');
+  const fileBusy = useRef(false);
+  const lastHaptic = useRef(0);
   const copy = COPY[language];
+  const palette = PALETTES[theme];
 
   const recover = useCallback(() => {
     setReady(false); setError(false); setKey(value => value + 1);
@@ -35,35 +48,72 @@ export default function App() {
     return () => listener.remove();
   }, []);
 
+  const fileRequest = useCallback(async data => {
+    const reply = result => web.current?.injectJavaScript(SaveBridge.resultScript(result));
+    if (fileBusy.current) { reply(SaveBridge.errorResult(data, { code: 'busy' })); return; }
+    fileBusy.current = true;
+    const io = {
+      sharingAvailable: () => Sharing.isAvailableAsync(),
+      write: (name, text) => {
+        const folder = new Directory(Paths.cache, 'cafelife-exports');
+        folder.create({ intermediates: true, idempotent: true });
+        const file = new File(folder, name);
+        file.create({ overwrite: true });
+        file.write(text);
+        return file;
+      },
+      share: file => Sharing.shareAsync(file.uri, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: copy.export }),
+      pick: () => DocumentPicker.getDocumentAsync({ type: '*/*', multiple: false, copyToCacheDirectory: true, base64: false }),
+      size: asset => new File(asset.uri).size,
+      read: asset => new File(asset.uri).text(),
+      remove: asset => {
+        // Remove temporary app-cache copies only. A player's original file is never deleted.
+        if (!asset.uri.startsWith(Paths.cache.uri)) return;
+        try { const file = new File(asset.uri); if (file.exists) file.delete(); } catch (_) { /* OS cache cleanup can finish later. */ }
+      },
+    };
+    try {
+      reply(await (data.type === 'exportSave' ? SaveBridge.exportSaveFile(data, io) : SaveBridge.pickSaveFile(data, io)));
+    } catch (error) { reply(SaveBridge.errorResult(data, error)); }
+    finally { fileBusy.current = false; }
+  }, [copy.export]);
+
   const message = useCallback(event => {
-    let data;
-    try { data = JSON.parse(event.nativeEvent.data); } catch (_) { return; }
-    if (data.type === 'language' && (data.language === 'en' || data.language === 'ar')) setLanguage(data.language);
+    const data = SaveBridge.parseMessage(event.nativeEvent.data);
+    if (!data) return;
+    if (data.type === 'language') setLanguage(data.language);
+    if (data.type === 'appearance') setTheme(data.theme);
     if (data.type === 'ready') { setReady(true); setError(false); }
-    // Android permits short, unobtrusive vibrations. iOS's generic vibration is much longer,
-    // so we leave it silent instead of turning a light tap into a phone-call buzz.
-    if (data.type === 'haptic' && Platform.OS === 'android') {
-      Vibration.vibrate(data.style === 'success' ? [0, 10, 35, 10] : 8);
+    if (data.type === 'exportSave' || data.type === 'pickSave') { void fileRequest(data); return; }
+    if (data.type === 'haptic' && AppState.currentState === 'active' && Date.now() - lastHaptic.current > 70) {
+      lastHaptic.current = Date.now();
+      const effect = Platform.OS === 'android'
+        ? Haptics.performAndroidHapticsAsync(data.style === 'success' ? Haptics.AndroidHaptics.Confirm : Haptics.AndroidHaptics.Virtual_Key)
+        : data.style === 'success'
+          ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+          : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+      // Silent fallback on simulators, unsupported hardware or system haptics disabled.
+      void effect.catch(() => {});
     }
-  }, []);
+  }, [fileRequest]);
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8f3e9" />
+    <View style={[styles.root, { backgroundColor: palette.backgroundColor }]}>
+      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor={palette.backgroundColor} />
       <WebView
         key={key}
         ref={web}
         originWhitelist={['https://app.cafelife.local', 'about:blank']}
         source={{ html: HTML, baseUrl: ORIGIN }}
-        style={styles.web}
-        containerStyle={styles.web}
+        style={[styles.web, { backgroundColor: palette.backgroundColor }]}
+        containerStyle={[styles.web, { backgroundColor: palette.backgroundColor }]}
         bounces={false}
         overScrollMode="never"
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         domStorageEnabled
         javaScriptEnabled
-        injectedJavaScriptBeforeContentLoaded={`window.CAFE_NATIVE_LANGUAGE=${JSON.stringify(language)}; true;`}
+        injectedJavaScriptBeforeContentLoaded={`window.CAFE_NATIVE_LANGUAGE=${JSON.stringify(language)};window.CAFE_NATIVE_CAPABILITIES={saveFiles:true,haptics:true};true;`}
         onShouldStartLoadWithRequest={request => request.url === 'about:blank' || request.url === ORIGIN || request.url.startsWith(ORIGIN + '#')}
         setSupportMultipleWindows={false}
         allowsInlineMediaPlayback
@@ -77,14 +127,14 @@ export default function App() {
         {...(Platform.OS === 'ios' ? { allowsLinkPreview: false } : {})}
       />
       {!ready && !error ? (
-        <View style={styles.cover} pointerEvents="none" accessibilityLiveRegion="polite">
-          <ActivityIndicator size="large" color="#1f6259" accessibilityLabel={copy.loading} />
-          <Text style={[styles.msg, language === 'ar' && styles.arabic]}>{copy.loading}</Text>
+        <View style={[styles.cover, { backgroundColor: palette.backgroundColor }]} pointerEvents="none" accessibilityLiveRegion="polite">
+          <ActivityIndicator size="large" color={palette.accent} accessibilityLabel={copy.loading} />
+          <Text style={[styles.msg, { color: palette.ink }, language === 'ar' && styles.arabic]}>{copy.loading}</Text>
         </View>
       ) : null}
       {error ? (
-        <View style={styles.cover} accessibilityViewIsModal>
-          <Text style={[styles.msg, language === 'ar' && styles.arabic]} accessibilityRole="alert">{copy.error}</Text>
+        <View style={[styles.cover, { backgroundColor: palette.backgroundColor }]} accessibilityViewIsModal>
+          <Text style={[styles.msg, { color: palette.ink }, language === 'ar' && styles.arabic]} accessibilityRole="alert">{copy.error}</Text>
           <Pressable style={styles.btn} onPress={recover} accessibilityRole="button" accessibilityLabel={copy.retry}>
             <Text style={styles.btnText}>{copy.retry}</Text>
           </Pressable>

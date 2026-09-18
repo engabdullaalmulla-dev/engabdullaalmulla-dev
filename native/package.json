@@ -9,12 +9,16 @@
     "ios": "npm run webapp && expo run:ios",
     "build:testflight": "npm run webapp && npm run check && npx eas-cli build --platform ios --profile testflight",
     "submit": "npx eas-cli submit --platform ios --profile production",
-    "check": "node ../tools/test-engine.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js",
-    "check:static": "node ../tools/test-engine.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js --static",
+    "check": "node ../tools/test-engine.cjs && node ../tools/test-persistence.cjs && node tests/saveBridge.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js",
+    "check:static": "node ../tools/test-engine.cjs && node ../tools/test-persistence.cjs && node tests/saveBridge.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js --static",
     "check:setup": "playwright install chromium"
   },
   "dependencies": {
-    "expo": "~57.0.23",
+    "expo": "~57.0.24",
+    "expo-document-picker": "~57.0.2",
+    "expo-file-system": "~57.0.7",
+    "expo-haptics": "~57.0.3",
+    "expo-sharing": "~57.0.21",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-webview": "13.16.1"

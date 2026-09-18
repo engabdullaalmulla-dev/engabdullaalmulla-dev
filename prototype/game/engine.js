@@ -12,6 +12,16 @@
   const MAX_SAVE_CHARS = 25000000;
   const START_DATE = '1994-01-01';
   const STAFF = {barista: {cost: 180, wage: 8}, host: {cost: 150, wage: 6}};
+  const BRIEF_STAMPS = [
+    {kind: 'warm', name: {en: 'A warm welcome', ar: 'ترحيب دافئ'}, description: {en: 'Made room for a comforting cup.', ar: 'خصصت مكاناً لكوب يمنح الراحة.'}},
+    {kind: 'cool', name: {en: 'A little refreshment', ar: 'انتعاش لطيف'}, description: {en: 'Brought something refreshing to the board.', ar: 'أضفت شيئاً منعشاً إلى القائمة.'}},
+    {kind: 'familiar', name: {en: 'A taste of home', ar: 'مذاق البيت'}, description: {en: 'Kept familiar favourites close.', ar: 'حافظت على الأصناف المألوفة والمحبوبة.'}},
+    {kind: 'sharing', name: {en: 'Better together', ar: 'معاً أجمل'}, description: {en: 'Set the table for sharing.', ar: 'جهزت الطاولة للمشاركة.'}},
+    {kind: 'variety', name: {en: 'Something for everyone', ar: 'لكل شخص ذوق'}, description: {en: 'Found a thoughtful mix for the menu.', ar: 'جمعت أصنافاً متنوعة بعناية.'}},
+    {kind: 'regular', name: {en: 'The usual, please', ar: 'المعتاد من فضلك'}, description: {en: 'Remembered a familiar favourite.', ar: 'تذكرت الطلب المفضل لأحد أهل الحارة.'}},
+    {kind: 'room', name: {en: 'A place to belong', ar: 'مكان يجمعنا'}, description: {en: 'Gave the room a fresh feeling.', ar: 'منحت المكان أجواء جديدة.'}},
+    {kind: 'supplier', name: {en: 'Good ingredients', ar: 'مكونات طيبة'}, description: {en: 'Tried a different way to source the day.', ar: 'جربت طريقة مختلفة لتوريد مكونات اليوم.'}}
+  ];
   const clone = value => JSON.parse(JSON.stringify(value));
   const list = key => Array.isArray(C[key]) ? C[key] : Object.values(C[key] || {});
   const find = (key, id) => list(key).find(item => item.id === id);
@@ -71,6 +81,107 @@
   }
   function allRecipes(state) { return list('recipes').filter(r => state.recipes.includes(r.id)).concat(state.customRecipes); }
   function recipe(state, id) { return find('recipes', id) || state.customRecipes.find(r => r.id === id) || null; }
+  function briefReference(kind, target) { return {id: kind + ':' + target, kind, target}; }
+  function briefOptions(state) {
+    const dishes = allRecipes(state).slice().sort((a, b) => a.id.localeCompare(b.id));
+    const choices = [];
+    ['warm', 'cool', 'familiar', 'sharing'].forEach(kind => {
+      const matching = dishes.filter(r => (r.tags || []).includes(kind));
+      if (matching.length) choices.push(briefReference(kind, Math.min(2, matching.length, state.boardSlots)));
+    });
+    // A constructive greedy mix ensures this target can be met with the existing board.
+    const mix = []; const tags = new Set();
+    for (let i = 0; i < state.boardSlots; i++) {
+      const next = dishes.filter(r => !mix.includes(r.id)).sort((a, b) =>
+        (b.tags || []).filter(tag => !tags.has(tag)).length - (a.tags || []).filter(tag => !tags.has(tag)).length)[0];
+      if (!next) break;
+      mix.push(next.id); (next.tags || []).forEach(tag => tags.add(tag));
+    }
+    if (tags.size) choices.push(briefReference('variety', Math.min(4, tags.size)));
+    const regulars = list('characters').filter(p => dishes.some(r => r.id === p.usual));
+    if (regulars.length) choices.push(briefReference('regular', regulars[hash(state.date + ':regular') % regulars.length].id));
+    const layouts = list('layouts'); const suppliers = list('suppliers');
+    choices.push(briefReference('room', layouts[hash(state.date + ':room') % layouts.length].id));
+    choices.push(briefReference('supplier', suppliers[hash(state.date + ':supplier') % suppliers.length].id));
+    // Rotate by played date, not a clock. Reloading and language changes cannot reroll offers.
+    const offset = (state.day - 1) % choices.length;
+    const stride = choices.length % 3 === 0 ? 1 : 3;
+    return Array.from({length: 3}, (_, index) => choices[(offset + index * stride) % choices.length]);
+  }
+  function resetBriefs(state) {
+    state.briefs = {date: state.date, options: briefOptions(state), selectedId: null};
+  }
+  function briefDefinition(state, option) {
+    if (!option) return null;
+    const base = clone(option);
+    const count = option.target;
+    const noun = {warm: {en: 'warm', ar: 'دافئة'}, cool: {en: 'cool', ar: 'باردة'}, familiar: {en: 'familiar', ar: 'مألوفة'}, sharing: {en: 'sharing', ar: 'للمشاركة'}}[option.kind];
+    const stamp = BRIEF_STAMPS.find(item => item.kind === option.kind);
+    base.title = clone(stamp.name);
+    base.rewardCash = {warm: 25, cool: 25, familiar: 25, sharing: 25, variety: 40, regular: 30, room: 20, supplier: 20}[option.kind];
+    if (noun) {
+      const examples = allRecipes(state).filter(r => (r.tags || []).includes(option.kind)).slice(0, count);
+      base.description = {en: 'Open with ' + count + ' ' + noun.en + (count === 1 ? ' recipe' : ' recipes') + ' on the board.', ar: 'افتح المقهى مع ' + count + ' من الوصفات ' + noun.ar + ' على القائمة.'};
+      base.hint = {en: 'Try ' + examples.map(r => localized(r.name, 'en')).join(' + ') + '.', ar: 'جرب ' + examples.map(r => localized(r.name, 'ar')).join(' + ') + '.'};
+    } else if (option.kind === 'variety') {
+      base.description = {en: 'Give your opening menu ' + count + ' different qualities.', ar: 'اجمع ' + count + ' صفات مختلفة في قائمة الافتتاح.'};
+      base.hint = {en: 'Mix warm, cool, familiar, quick, sharing or special recipes. A recipe can cover more than one.', ar: 'امزج وصفات دافئة وباردة ومألوفة وسريعة وأخرى للمشاركة أو مميزة. قد تحقق الوصفة أكثر من صفة.'};
+    } else if (option.kind === 'regular') {
+      const person = find('characters', option.target); const dish = recipe(state, person.usual);
+      const status = personStatus(state, person.id); const name = status.active ? person.name : status.descendant.name;
+      base.description = {en: 'Keep ' + localized(name, 'en') + '’s usual on the opening board.', ar: 'ضع الطلب المعتاد لدى ' + localized(name, 'ar') + ' على قائمة الافتتاح.'};
+      base.hint = {en: 'Add ' + localized(dish.name, 'en') + ' to the menu.', ar: 'أضف ' + localized(dish.name, 'ar') + ' إلى القائمة.'};
+    } else {
+      const item = find(option.kind === 'room' ? 'layouts' : 'suppliers', option.target);
+      base.description = option.kind === 'room' ? {en: 'Open the day with ' + localized(item.name, 'en') + '.', ar: 'ابدأ اليوم مع ' + localized(item.name, 'ar') + '.'} : {en: 'Let ' + localized(item.name, 'en') + ' supply today’s ingredients.', ar: 'اختر ' + localized(item.name, 'ar') + ' لتوريد مكونات اليوم.'};
+      base.hint = option.kind === 'room' ? {en: 'Change the room in Plan. Every layout is free.', ar: 'غير ترتيب المكان من التخطيط. كل الترتيبات مجانية.'} : {en: 'Choose this supplier in Plan. No payment is needed to switch.', ar: 'اختر هذا المورد من التخطيط. لا تحتاج إلى دفع مبلغ للتبديل.'};
+    }
+    return base;
+  }
+  function dailyBriefs(state) {
+    const offers = state.briefs && state.briefs.date === state.date ? state.briefs.options : briefOptions(state);
+    return offers.map(option => briefDefinition(state, option));
+  }
+  function briefProgress(state, option, plan) {
+    const dishes = plan.menu.map(id => recipe(state, id));
+    const tags = unique(dishes.flatMap(r => r.tags || []));
+    let progress; let targetCount;
+    if (['warm', 'cool', 'familiar', 'sharing'].includes(option.kind)) {
+      targetCount = option.target; progress = dishes.filter(r => (r.tags || []).includes(option.kind)).length;
+    } else if (option.kind === 'variety') { targetCount = option.target; progress = tags.length; }
+    else {
+      targetCount = 1;
+      progress = option.kind === 'regular' ? Number(plan.menu.includes(find('characters', option.target).usual)) :
+        Number(plan[option.kind === 'room' ? 'layout' : 'supplier'] === option.target);
+    }
+    return Object.assign(clone(option), {progress, targetCount, ready: progress >= targetCount, completed: false, settled: false, rewardEarned: 0});
+  }
+  function briefStatus(state) {
+    let snapshot;
+    if (state.phase === 'closed' && state.lastDay && state.lastDay.day === state.day) snapshot = state.lastDay.brief;
+    else if (state.phase === 'open' && state.service) snapshot = state.service.brief;
+    else {
+      const option = state.briefs && state.briefs.options.find(item => item.id === state.briefs.selectedId);
+      if (option) snapshot = briefProgress(state, option, state);
+    }
+    return snapshot ? Object.assign(briefDefinition(state, snapshot), clone(snapshot)) : null;
+  }
+  function settleBrief(state, effects) {
+    const snapshot = state.service.brief;
+    if (!snapshot) return null;
+    snapshot.settled = true; snapshot.completed = snapshot.ready;
+    if (snapshot.completed) {
+      const definition = briefDefinition(state, snapshot);
+      snapshot.rewardEarned = definition.rewardCash;
+      addCash(state, snapshot.rewardEarned);
+      const stamp = state.keepsakes.find(item => item.kind === snapshot.kind);
+      if (stamp) stamp.count = Math.min(MAX_CASH, stamp.count + 1);
+      else state.keepsakes.push({kind: snapshot.kind, date: state.date, count: 1});
+      record(state, 'brief', {id: snapshot.id, amount: snapshot.rewardEarned});
+      effects.push({type: 'brief', id: snapshot.id, kind: snapshot.kind, amount: snapshot.rewardEarned, newStamp: !stamp});
+    }
+    return clone(snapshot);
+  }
   function record(state, type, data) {
     state.history.push(Object.assign({type, date: state.date, day: state.day, generation: state.generation}, data || {}));
     // Detailed transactions are bounded. Collections and story choices remain permanent elsewhere.
@@ -105,11 +216,12 @@
       layout: (list('layouts')[0] || {}).id || 'communal', supplier: (list('suppliers')[0] || {}).id || 'local',
       upgrades: [], venues: home ? [home.id] : [], venue: home ? home.id : 'home', boardSlots: 3, seats: 8, staff: [],
       generation: 1, heir: null, knowledge: [], memories: [], history: [], storiesDone: [], storyChoices: {},
-      pendingStory: null, service: null, lastDay: null, ambitionsDone: [], reputation: 0,
+      pendingStory: null, service: null, lastDay: null, ambitionsDone: [], reputation: 0, briefs: null, keepsakes: [],
       identity: {people: 0, recipe: 0, street: 0}, daysRun: 0, totalServed: 0,
       monthly: {month: '1994-01', days: 0, sales: 0, costs: 0, profit: 0, customers: 0}, accounts: [],
       settings: {music: true, sfx: true, haptics: true, reducedMotion: false, textSize: 'normal', theme: 'light'}, legacy: null
     };
+    resetBriefs(state);
     record(state, 'founded', {origin});
     return state;
   }
@@ -215,7 +327,8 @@
         recommended: state.menu.includes(person.usual) ? person.usual : state.menu[(index + state.day) % state.menu.length], servedRecipe: null};
     });
     state.service = {date: state.date, day: state.day, menu: state.menu.slice(), layout: state.layout,
-      supplier: state.supplier, venue: state.venue, seats: state.seats, guests, index: 0, manual: 0, forecast: planningForecast(state)};
+      supplier: state.supplier, venue: state.venue, seats: state.seats, guests, index: 0, manual: 0, forecast: planningForecast(state),
+      brief: state.briefs.selectedId ? briefProgress(state, state.briefs.options.find(option => option.id === state.briefs.selectedId), state) : null};
     state.phase = 'open';
     effects.push({type: 'open'});
     return true;
@@ -239,6 +352,7 @@
     if (state.phase === 'planning') openDay(state, effects);
     const result = Object.assign(clone(state.service.forecast), {day: state.day, manual: state.service.manual});
     addCash(state, result.profit);
+    result.brief = settleBrief(state, effects);
     state.daysRun++;
     state.totalServed += result.customers;
     state.lastDay = result;
@@ -260,6 +374,7 @@
     state.phase = 'planning';
     state.service = null;
     unlockForDay(state, effects);
+    resetBriefs(state);
     effects.push({type: 'nextDay'});
   }
   function createRecipe(state, action, effects) {
@@ -292,7 +407,16 @@
     try { state = clone(input); } catch (_) { return {state: input, effects, error: 'INVALID_STATE'}; }
     let error = null;
     try {
+      if (!state.briefs || state.briefs.date !== state.date) resetBriefs(state);
+      if (!state.keepsakes) state.keepsakes = [];
       switch (action.type) {
+        case 'SELECT_BRIEF':
+          if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
+          if (!state.briefs.options.some(option => option.id === action.id)) { error = 'INVALID_BRIEF'; break; }
+          state.briefs.selectedId = action.id; effects.push({type: 'briefSelected', id: action.id}); break;
+        case 'CLEAR_BRIEF':
+          if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
+          state.briefs.selectedId = null; break;
         case 'SET_MENU': {
           const ids = action.ids;
           const owned = allRecipes(state).map(r => r.id);
@@ -400,6 +524,7 @@
           if (!state.knowledge.includes(traitId)) state.knowledge.push(traitId);
           if (heir.recipe) grantRecipe(state, heir.recipe, effects);
           unlockForDay(state, effects);
+          resetBriefs(state);
           memory(state, 'generation:' + state.generation, {en: previousOwner + ' passed the café to ' + localized(heir.name, 'en') + '.', ar: 'انتقل المقهى من ' + previousOwner + ' إلى ' + localized(heir.name, 'ar') + '.'}, {kind: 'family', owner: previousOwner, heirId: heir.id});
           record(state, 'succession', {owner: previousOwner, heirId: heir.id});
           effects.push({type: 'succession', id: heir.id}); break;
@@ -479,6 +604,33 @@
       return ['sales', 'costs', 'profit'].every(key => validNumber(a[key])) && validInt(a.days, 31) && validInt(a.customers);
     };
     requireValue(validAccount(raw.monthly) && Array.isArray(raw.accounts) && raw.accounts.length <= 120 && raw.accounts.every(validAccount));
+    // Additive v6 fields: older saves gain an optional board, never a fabricated reward.
+    if (!Object.hasOwn(raw, 'briefs')) resetBriefs(raw);
+    if (!Object.hasOwn(raw, 'keepsakes')) raw.keepsakes = [];
+    const validBriefReference = option => {
+      if (!option || typeof option !== 'object' || Array.isArray(option) || !BRIEF_STAMPS.some(stamp => stamp.kind === option.kind) || option.id !== option.kind + ':' + option.target) return false;
+      if (['warm', 'cool', 'familiar', 'sharing'].includes(option.kind)) return validInt(option.target, 2) && option.target > 0 && allRecipes(raw).filter(r => (r.tags || []).includes(option.kind)).length >= option.target;
+      if (option.kind === 'variety') return validInt(option.target, 4) && option.target > 0 && unique(allRecipes(raw).flatMap(r => r.tags || [])).length >= option.target;
+      if (option.kind === 'regular') { const person = find('characters', option.target); return !!person && raw.recipes.concat(customIds).includes(person.usual); }
+      return !!find(option.kind === 'room' ? 'layouts' : 'suppliers', option.target);
+    };
+    const brief = raw.briefs;
+    requireValue(brief && typeof brief === 'object' && !Array.isArray(brief) && brief.date === raw.date && Object.keys(brief).every(key => ['date', 'options', 'selectedId'].includes(key)));
+    requireValue(Array.isArray(brief.options) && brief.options.length === 3 && unique(brief.options.map(option => option && option.kind)).length === 3 && brief.options.every(option => validBriefReference(option) && Object.keys(option).every(key => ['id', 'kind', 'target'].includes(key))));
+    requireValue(brief.selectedId === null || brief.options.some(option => option.id === brief.selectedId));
+    requireValue(Array.isArray(raw.keepsakes) && raw.keepsakes.length <= BRIEF_STAMPS.length && unique(raw.keepsakes.map(stamp => stamp && stamp.kind)).length === raw.keepsakes.length);
+    raw.keepsakes.forEach(stamp => {
+      requireValue(stamp && BRIEF_STAMPS.some(item => item.kind === stamp.kind) && validInt(stamp.count) && stamp.count > 0 && Object.keys(stamp).every(key => ['kind', 'date', 'count'].includes(key)));
+      parseDate(stamp.date);
+    });
+    const validBriefSnapshot = (snapshot, settled) => {
+      if (snapshot === null) return true;
+      if (!validBriefReference(snapshot) || !validInt(snapshot.progress, 128) || !validInt(snapshot.targetCount, 4) || snapshot.targetCount < 1) return false;
+      if (Object.keys(snapshot).some(key => !['id', 'kind', 'target', 'progress', 'targetCount', 'ready', 'completed', 'settled', 'rewardEarned'].includes(key))) return false;
+      const targetCount = ['warm', 'cool', 'familiar', 'sharing', 'variety'].includes(snapshot.kind) ? snapshot.target : 1;
+      const ready = snapshot.progress >= targetCount;
+      return snapshot.targetCount === targetCount && snapshot.ready === ready && snapshot.settled === settled && snapshot.completed === (settled && ready) && snapshot.rewardEarned === (settled && ready ? briefDefinition(raw, snapshot).rewardCash : 0);
+    };
     const validForecast = f => {
       if (!f || !['sales', 'costs', 'profit'].every(key => validNumber(f[key])) || !validNumber(f.fit, 1) || !validInt(f.customers, 1000) || f.customers < 1) return false;
       try { parseDate(f.date); } catch (_) { return false; }
@@ -499,9 +651,21 @@
       requireValue(service.guests.every(g => g && find('characters', g.characterId) && service.menu.includes(g.recommended) && (g.servedRecipe === null || service.menu.includes(g.servedRecipe))));
       requireValue(service.guests.every((g, index) => index < service.index ? g.servedRecipe !== null : g.servedRecipe === null));
       requireValue(validForecast(service.forecast));
+      if (!Object.hasOwn(service, 'brief')) service.brief = null;
+      requireValue(validBriefSnapshot(service.brief, raw.phase === 'closed'));
+      requireValue(service.brief ? service.brief.id === brief.selectedId : brief.selectedId === null);
+      if (service.brief) {
+        const expected = briefProgress(raw, brief.options.find(option => option.id === brief.selectedId), service);
+        requireValue(expected.progress === service.brief.progress && expected.targetCount === service.brief.targetCount && expected.ready === service.brief.ready);
+      }
       if (raw.phase === 'closed') requireValue(validForecast(raw.lastDay) && raw.lastDay.day === raw.day && service.index === 4);
     } else requireValue(raw.service === null);
-    if (raw.lastDay !== null) requireValue(validForecast(raw.lastDay));
+    if (raw.lastDay !== null) {
+      requireValue(validForecast(raw.lastDay));
+      if (!Object.hasOwn(raw.lastDay, 'brief')) raw.lastDay.brief = null;
+      requireValue(validBriefSnapshot(raw.lastDay.brief, true));
+      if (raw.phase === 'closed') requireValue(JSON.stringify(raw.lastDay.brief) === JSON.stringify(raw.service.brief));
+    }
     // Return only the understood schema, so imported values cannot introduce executable or prototype fields.
     const state = newGame({name: raw.cafeName, owner: raw.owner, lang: raw.lang, origin: raw.origin});
     Object.keys(state).forEach(key => { if (Object.hasOwn(raw, key)) state[key] = raw[key]; });
@@ -575,10 +739,11 @@
     // Unmapped historic possessions remain explicitly preserved, alongside the original save.
     state.legacy = {original, importedDate: date, possessions: clone(owned), branches: clone(legacy.branches || []), cookbook: clone(legacy.cookbook || []), debtRetired: Math.max(0, Number(legacy.debt) || 0)};
     state.monthly = {month: date.slice(0, date.lastIndexOf('-')), days: 0, sales: 0, costs: 0, profit: 0, customers: 0};
+    resetBriefs(state);
     memory(state, 'legacy-import', {en: 'Your original café history and possessions are preserved in the family archive.', ar: 'حُفظ تاريخ مقهاك الأصلي ومقتنياته في أرشيف العائلة.'}, {kind: 'family'});
     record(state, 'imported', {date});
     return validate(state);
   }
-  return Object.freeze({VERSION, SAVE_FORMAT, STAFF, newGame, dispatch, forecast, availableStories, currentGuest, allRecipes, recipe, personStatus,
+  return Object.freeze({VERSION, SAVE_FORMAT, STAFF, BRIEF_STAMPS, dailyBriefs, briefStatus, newGame, dispatch, forecast, availableStories, currentGuest, allRecipes, recipe, personStatus,
     validate, exportSave, importSave, migrateLegacy, advanceDate, seasonFor});
 }));

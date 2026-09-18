@@ -359,4 +359,181 @@ test('thirty years of immediate daily operation remain finite, bounded and playa
   process.stdout.write('  Economy: ' + JSON.stringify(snapshots) + '\n');
 });
 
+
+function prepareBrief(initial, brief) {
+  let state = act(initial, 'SELECT_BRIEF', {id: brief.id});
+  if (brief.kind === 'room') return act(state, 'SET_LAYOUT', {id: brief.target});
+  if (brief.kind === 'supplier') return act(state, 'SET_SUPPLIER', {id: brief.target});
+  const dishes = E.allRecipes(state);
+  if (brief.kind === 'regular') return act(state, 'SET_MENU', {ids: [C.characters.find(p => p.id === brief.target).usual]});
+  if (brief.kind !== 'variety') return act(state, 'SET_MENU', {ids: dishes.filter(r => r.tags.includes(brief.kind)).slice(0, brief.target).map(r => r.id)});
+  // Explore actual menus rather than reproducing the generator's greedy construction.
+  function solve(start, ids) {
+    if (ids.length) {
+      const candidate = act(state, 'SET_MENU', {ids});
+      if (E.briefStatus(candidate).ready) return candidate;
+    }
+    if (ids.length === state.boardSlots) return null;
+    for (let index = start; index < dishes.length; index++) {
+      const result = solve(index + 1, ids.concat(dishes[index].id));
+      if (result) return result;
+    }
+    return null;
+  }
+  return solve(0, []);
+}
+
+test('daily briefs are deterministic, bilingual, optional and free to prepare across a month', () => {
+  let first = E.newGame(); let second = E.newGame(); const kinds = new Set();
+  translated(E.BRIEF_STAMPS, 'brief stamps');
+  for (let day = 0; day < 31; day++) {
+    first.cash = 0;
+    const offers = E.dailyBriefs(first);
+    assert.equal(offers.length, 3);
+    assert.equal(new Set(offers.map(item => item.kind)).size, 3);
+    assert.deepEqual(offers, E.dailyBriefs(second));
+    translated(offers, 'daily briefs');
+    offers.forEach(brief => {
+      kinds.add(brief.kind);
+      assert(brief.hint.en && /[\u0600-\u06ff]/.test(brief.hint.ar));
+      assert(brief.rewardCash >= 20 && brief.rewardCash <= 50);
+      const prepared = prepareBrief(first, brief);
+      assert(prepared, 'No owned-recipe route for ' + brief.id);
+      assert(E.briefStatus(prepared).ready, brief.id + ' did not become ready');
+      assert.equal(prepared.cash, 0, 'Preparation required cash');
+      assert.deepEqual(E.dailyBriefs(prepared), offers, 'Planning changed offered briefs');
+    });
+    assert.equal(E.briefStatus(first), null);
+    first = act(first, 'NEXT_DAY'); second = act(second, 'NEXT_DAY');
+    assert.equal(first.keepsakes.length, 0);
+  }
+  assert.equal(kinds.size, E.BRIEF_STAMPS.length);
+});
+
+test('briefs reward the same day once whether served manually, delegated or skipped', () => {
+  const initial = E.newGame(); const brief = E.dailyBriefs(initial)[0];
+  const planned = prepareBrief(initial, brief);
+  let manual = act(planned, 'OPEN_DAY');
+  assert.equal(E.briefStatus(manual).settled, false);
+  assert.equal(E.briefStatus(manual).rewardEarned, 0);
+  while (E.currentGuest(manual)) manual = act(manual, 'SERVE', {recipeId: manual.service.menu[0]});
+  manual = act(manual, 'CLOSE_DAY');
+  const delegated = act(planned, 'CLOSE_DAY');
+  const skipped = act(planned, 'JUMP', {days: 1});
+  const without = act(act(planned, 'CLEAR_BRIEF'), 'CLOSE_DAY');
+  assert.equal(manual.cash, delegated.cash);
+  assert.equal(skipped.cash, delegated.cash);
+  assert.equal(Math.round((delegated.cash - without.cash) * 100), brief.rewardCash * 100);
+  assert.deepEqual(manual.lastDay.brief, delegated.lastDay.brief);
+  assert.equal(E.briefStatus(delegated).completed, true);
+  assert.equal(E.briefStatus(delegated).rewardEarned, brief.rewardCash);
+  assert.deepEqual(delegated.keepsakes, [{kind: brief.kind, date: initial.date, count: 1}]);
+  assert.deepEqual(act(delegated, 'CLOSE_DAY'), delegated);
+  assert.equal(E.dispatch(delegated, {type: 'SELECT_BRIEF', id: brief.id}).error, 'INVALID_PHASE');
+  assert.equal(E.dispatch(delegated, {type: 'CLEAR_BRIEF'}).error, 'INVALID_PHASE');
+  assert.deepEqual(E.importSave(E.exportSave(delegated)), delegated);
+});
+
+test('opening freezes brief outcomes even if a later menu meets or breaks the condition', () => {
+  const initial = E.newGame(); const brief = E.dailyBriefs(initial).find(item => item.kind === 'warm');
+  let failure = act(initial, 'SELECT_BRIEF', {id: brief.id});
+  failure = act(failure, 'SET_MENU', {ids: ['regag']});
+  assert.equal(E.briefStatus(failure).ready, false);
+  failure = act(failure, 'OPEN_DAY');
+  failure = act(failure, 'SET_MENU', {ids: ['karak', 'mint']});
+  assert.equal(E.briefStatus(failure).ready, false);
+  failure = act(failure, 'CLOSE_DAY');
+  assert.equal(E.briefStatus(failure).rewardEarned, 0);
+  assert.equal(failure.keepsakes.length, 0);
+  let success = act(prepareBrief(initial, brief), 'OPEN_DAY');
+  success = act(success, 'SET_MENU', {ids: ['regag']});
+  assert.equal(E.briefStatus(success).ready, true);
+  assert.deepEqual(E.importSave(E.exportSave(success)), success);
+  success = act(success, 'CLOSE_DAY');
+  assert.equal(E.briefStatus(success).rewardEarned, brief.rewardCash);
+  E.validate(success);
+  const tomorrow = act(failure, 'NEXT_DAY');
+  assert.equal(tomorrow.briefs.selectedId, null);
+  assert.equal(tomorrow.phase, 'planning');
+  assert.equal(E.briefStatus(tomorrow), null);
+});
+
+test('selecting and clearing briefs pays nothing and never blocks continuation', () => {
+  let state = E.newGame(); const cash = state.cash;
+  for (let i = 0; i < 20; i++) {
+    state = act(state, 'SELECT_BRIEF', {id: E.dailyBriefs(state)[i % 3].id});
+    state = act(state, 'CLEAR_BRIEF');
+  }
+  assert.equal(state.cash, cash);
+  assert.equal(state.keepsakes.length, 0);
+  assert.equal(E.dispatch(state, {type: 'SELECT_BRIEF', id: 'fake'}).error, 'INVALID_BRIEF');
+  state = act(state, 'CONTINUE'); state = act(state, 'CONTINUE'); state = act(state, 'CONTINUE');
+  assert.equal(state.day, 2);
+  assert.equal(state.phase, 'planning');
+});
+
+test('keepsake stamps remain permanent through new mornings, saves and inheritance', () => {
+  let state = E.newGame();
+  for (let day = 0; day < 24; day++) {
+    const brief = E.dailyBriefs(state).find(item => !state.keepsakes.some(stamp => stamp.kind === item.kind)) || E.dailyBriefs(state)[0];
+    state = act(prepareBrief(state, brief), 'CLOSE_DAY');
+    state = act(state, 'NEXT_DAY');
+  }
+  assert.equal(state.keepsakes.length, 8);
+  assert.equal(state.keepsakes.reduce((sum, stamp) => sum + stamp.count, 0), 24);
+  const collection = copy(state.keepsakes);
+  state = act(state, 'SUCCESSION', {id: C.heirs[0].id});
+  assert.deepEqual(state.keepsakes, collection);
+  assert.equal(E.briefStatus(state), null);
+  assert.equal(E.dailyBriefs(state).length, 3);
+  assert.deepEqual(E.importSave(E.exportSave(state)), state);
+});
+
+test('older v6 saves gain optional briefs without losing any progress or inventing rewards', () => {
+  let state = E.newGame(); state = act(state, 'JUMP', {days: 4});
+  for (const phase of ['planning', 'open', 'closed']) {
+    let old = copy(state);
+    if (phase !== 'planning') old = act(old, 'OPEN_DAY');
+    if (phase === 'closed') old = act(old, 'CLOSE_DAY');
+    delete old.briefs; delete old.keepsakes;
+    if (old.service) delete old.service.brief;
+    if (old.lastDay) delete old.lastDay.brief;
+    const restored = E.importSave(JSON.stringify({format: E.SAVE_FORMAT, version: 6, state: old}));
+    assert.equal(restored.cash, old.cash);
+    assert.deepEqual(restored.recipes, old.recipes);
+    assert.deepEqual(restored.history, old.history);
+    assert.deepEqual(restored.memories, old.memories);
+    assert.equal(restored.phase, old.phase);
+    assert.equal(E.briefStatus(restored), null);
+    assert.equal(restored.keepsakes.length, 0);
+    assert.equal(E.dailyBriefs(restored).length, 3);
+    assert.deepEqual(E.importSave(E.exportSave(restored)), restored);
+  }
+});
+
+test('malformed brief selections, snapshots and collections are rejected atomically', () => {
+  const initial = E.newGame(); const saved = E.exportSave(initial);
+  const changes = [
+    state => { state.briefs = null; },
+    state => { state.briefs.date = '1994-01-02'; },
+    state => { state.briefs.options[0].target = 100; },
+    state => { state.briefs.options[0].id = 'warm:100'; },
+    state => { state.briefs.options[1] = copy(state.briefs.options[0]); },
+    state => { state.briefs.selectedId = 'missing'; },
+    state => { state.keepsakes = [{kind: 'warm', date: state.date, count: -1}]; },
+    state => { state.keepsakes = [{kind: 'warm', date: '1994-99-01', count: 1}]; },
+    state => { state.keepsakes = [{kind: 'warm', date: state.date, count: 1}, {kind: 'warm', date: state.date, count: 2}]; }
+  ];
+  changes.forEach(change => { const invalid = copy(initial); change(invalid); assert.throws(() => E.importSave(JSON.stringify(invalid))); });
+  const opened = act(prepareBrief(initial, E.dailyBriefs(initial)[0]), 'OPEN_DAY');
+  const closed = act(opened, 'CLOSE_DAY');
+  const tampered = copy(opened); tampered.service.brief.ready = false;
+  assert.throws(() => E.importSave(JSON.stringify(tampered)));
+  const paidEarly = copy(opened); paidEarly.service.brief.rewardEarned = 25;
+  assert.throws(() => E.importSave(JSON.stringify(paidEarly)));
+  const double = copy(closed); double.lastDay.brief.rewardEarned *= 2;
+  assert.throws(() => E.importSave(JSON.stringify(double)));
+  assert.equal(E.exportSave(initial), saved);
+});
+
 process.stdout.write('\n' + passed + ' engine checks passed.\n');

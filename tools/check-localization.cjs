@@ -28,6 +28,11 @@ function visit(value, location) {
   for (const [key, child] of Object.entries(value)) visit(child, location + '.' + key);
 }
 visit(content, 'content');
+const E = require('../prototype/game/engine.js');
+visit(E.BRIEF_STAMPS, 'briefStamps');
+const kinds = new Set();let sample=E.newGame();
+for(let day=0;day<30;day++){for(const brief of E.dailyBriefs(sample)){if(!kinds.has(brief.kind)){visit(brief, 'dailyBrief.'+brief.kind);kinds.add(brief.kind);}}sample=E.dispatch(sample,{type:'JUMP',days:1}).state;}
+assert.equal(kinds.size,E.BRIEF_STAMPS.length,'A brief kind was not covered by localization');
 const ui = fs.readFileSync(path.join(ROOT, 'prototype/game/ui.js'), 'utf8');
 const used = new Set([...ui.matchAll(/\b(?:t|T)\s*\(\s*(['"])([\w.:-]+)\1/g)].map(match => match[2]));
 for (const key of used) assert(Object.hasOwn(strings, key), 'UI uses missing translation: ' + key);
