@@ -114,12 +114,32 @@ Expo + EAS, in `native/`. `app/` is an abandoned Capacitor attempt and
 `.github/workflows/ios-testflight.yml` is its abandoned pipeline — neither is the route;
 `docs/testflight.md` explains why and carries the working commands.
 
-`native/src/webapp/html.js` is **committed deliberately**. EAS ships the tracked files from
-`git rev-parse --show-toplevel`, and `.easignore` only ever *deletes* from that clone — so an
-ignored bundle simply never arrives and Metro fails to resolve `App.js`'s import.
+`native/src/webapp/html.js` is **committed deliberately**. EAS archives the working tree from
+the repository root minus whatever is ignored, so an ignored bundle never arrives and Metro
+fails to resolve `App.js`'s import.
+
+**`.easignore` at the repository root replaces every `.gitignore` for EAS** — while it exists,
+none of them are read. It excludes all but `native/` and restates `native/.gitignore`. Adding
+anything the app needs outside `native/`, or dropping the restated `native/node_modules/`, is
+how the upload goes back to 829 MB or loses a file silently.
+
+Builds run on this Mac with `eas build --local` (the free plan's monthly cloud builds can run
+out). A new app's *first* build cannot be non-interactive, and the Apple team is at its limit
+of three distribution certificates — reuse one, never create one. `docs/testflight.md` has the
+detail, including signing in to Apple with the API key rather than an Apple ID.
 
 `.github/workflows/pages.yml` publishes the installable PWA so a playtest need not wait on an
 Apple account.
+
+## Agents
+
+Three project agents in `.claude/agents/`, each built from something that was done by hand or
+went wrong: **`release-checker`** (the gates, and inspecting a built `.ipa` — including why the
+game looks missing from the Hermes bundle when it is not), **`design-reviewer`** (render and
+look; four defects here were only ever caught by a screenshot) and **`economy-analyst`** (owns
+`tools/sim.js` and the runaway). Building and signing for TestFlight is **`apple-release`**, a
+user-level agent on the operator's Mac, because its constraints — the Apple team's certificate
+limit, the shared Expo build quota, one Mac — are shared with the other apps.
 
 ## Docs that are load-bearing
 

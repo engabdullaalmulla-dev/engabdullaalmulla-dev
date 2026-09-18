@@ -11,7 +11,8 @@
     "submit": "npx eas-cli submit --platform ios --profile production"
   },
   "dependencies": {
-    "expo": "~57.0.23",
+    "expo": "~57.0.24",
+    "expo-system-ui": "~57.0.4",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-webview": "13.16.1"

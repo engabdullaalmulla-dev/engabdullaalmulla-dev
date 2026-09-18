@@ -5,8 +5,9 @@ The shipping iOS app. It presents the game in a `react-native-webview`;
 
 This mirrors the architecture of `marble-ultimate-football/native/`, which has delivered
 TestFlight builds from this account, rather than the Capacitor + `xcodebuild` route in
-[`../app/`](../app/). EAS manages the signing and builds on Expo's servers, so no
-certificates, provisioning profiles or Mac are needed.
+[`../app/`](../app/). EAS manages the signing, so no certificates or provisioning profiles
+are handled by hand. It builds on Expo's servers or, with `--local`, on a Mac — which is how
+both marble and the first Café Life build actually shipped. See `../docs/testflight.md`.
 
 ## Build and ship
 
@@ -54,12 +55,16 @@ as lossy. WebP has been supported in WKWebView since iOS 14 and this targets iOS
 and run `npm run webapp`.
 
 **It is committed, deliberately, and it must stay committed.** It used to be git-ignored, which
-would have broken `eas build` on the very first attempt. EAS resolves the upload root with
-`git rev-parse --show-toplevel` and ships the *tracked* files from there; its git client uses
-`.easignore` only to delete files from that clone, never to add one back (`vcs/clients/git.js`
-— "`.easignore` exists, deleting files that should be ignored"). So an ignored, untracked file
-simply never arrives, and `App.js` imports this one on line 4. Metro would have failed to
-resolve it and the build would have died before signing.
+would have broken `eas build` on the very first attempt. EAS archives the working tree from
+the repository root, minus whatever is ignored, so an ignored bundle never arrives — and
+`App.js` imports this one on line 4. Metro would have failed to resolve it and the build would
+have died before signing. (An earlier version of this said EAS ships only *tracked* files.
+It ships the working tree: the first build carried a build number that existed only in an
+uncommitted `app.json`.)
+
+The root `.easignore` decides what is ignored, and while it exists **no `.gitignore` is read
+at all**. It excludes everything but `native/` and restates `native/.gitignore` — without that
+restatement `native/node_modules` would ship again.
 
 Marble avoids the same trap from the other direction, with an `eas-build-post-install` hook
 that regenerates its bundle on the build server. That does not port cleanly here: this

@@ -8,8 +8,9 @@
 > `xcodebuild` + `altool`, and `docs/11-ios-release.md` in that repository is authoritative.
 >
 > That route is better in every way that matters here. **EAS manages the signing**, so none
-> of the certificate, `.p12`, provisioning-profile or keychain machinery below is needed —
-> and it builds on Expo's servers, so no Mac is needed either. Where this document asks for
+> of the certificate, `.p12`, provisioning-profile or keychain machinery below is needed.
+> It can build on Expo's servers or on a Mac with `eas build --local`; see "Building on this
+> Mac" below for why that choice is not as free as it sounds. Where this document asks for
 > eight secrets, that route asks for an `eas login`.
 >
 > **What already exists on that account** (in `marble-ultimate-football/native/eas.json` and
@@ -73,15 +74,21 @@
 > `native/src/webapp/html.js` — the whole 3.4 MB game — was git-ignored, and `native/App.js`
 > imports it on line 4.
 >
-> EAS resolves its upload root with `git rev-parse --show-toplevel` and ships the **tracked**
-> files from there (so `tools/`, `prototype/` and `art/` do travel, even though the project
-> root is `native/`). Its git client consults `.easignore` only to *delete* files from that
-> clone — `vcs/clients/git.js`, "`.easignore` exists, deleting files that should be ignored"
-> — so it cannot add an ignored file back. The bundle would simply not have arrived, and
-> Metro would have failed to resolve the import before signing was even reached.
+> EAS archives the project from the repository root (`git rev-parse --show-toplevel`), so
+> `tools/`, `prototype/` and `art/` travel too, even though the project root is `native/`.
 >
-> The bundle is now tracked. Verified by reconstructing the upload from tracked files alone
-> and resolving `App.js`'s import against it.
+> **Correction, 18 Sep 2026.** This section used to say EAS ships only the *tracked* files.
+> That is wrong, and the first real build proved it: the `.ipa` carries build number 3, a
+> value that existed only in the uncommitted working copy of `native/app.json` — the
+> committed file said 1. EAS ships **the working tree, minus whatever is ignored**. The
+> conclusion that followed from the wrong premise still holds, for the right reason: an
+> ignored `html.js` is excluded, so it never arrives, and Metro fails to resolve the import
+> before signing is reached. So the bundle stays committed.
+>
+> Which ignore file counts is the part that bites. With no `.easignore`, every `.gitignore`
+> applies. **With an `.easignore`, none of them do** (`vcs/local.js`: "if .easignore exists,
+> .gitignore files are not used"). The repository now has one — see below — and it restates
+> what `native/.gitignore` kept out, `native/node_modules` above all.
 >
 > `marble-ultimate-football` avoids this from the other side, with an `eas-build-post-install`
 > hook that rebuilds its bundle on the server. That does not port directly: this bundle is
@@ -99,10 +106,36 @@
 > npx eas-cli build --platform ios --profile testflight
 > ```
 >
-> No `--local` flag — it appears nowhere in that repository except a `.gitignore` line. The
-> audit's phrase "Local EAS build" means the build was *invoked* from the operator's machine
-> against EAS's cloud builders, not built on the Mac. So no Mac is needed for the build
-> itself, only an Expo login.
+> **Correction, 18 Sep 2026.** This used to say marble builds in the cloud, on the grounds
+> that `--local` appears nowhere in its repository. It builds on the Mac: a marble build was
+> caught running on the operator's machine as `eas build --profile testflight --platform ios
+> --local --non-interactive --output …/testflight-2.0.ipa`. The flag is typed, not
+> committed, which is why reading the repository could not find it. "Local EAS build" in its
+> audits means exactly what it says.
+>
+> ### Building on this Mac
+>
+> The first Café Life build had to go the same way, and not by preference. The Expo free
+> plan's monthly iOS cloud builds were already spent on `am33ma` — they reset on the 1st —
+> so a cloud build stops after the upload. `eas build --local` uses no
+> quota: Xcode, fastlane and CocoaPods on the Mac do the work, and EAS still supplies the
+> signing. Build 3 took about five minutes that way.
+>
+> Two things a first build on a new app needs that later builds do not:
+>
+> - **It cannot run non-interactively.** With no distribution certificate assigned to the
+>   app yet, `--non-interactive` throws (`SetUpDistributionCertificate.js`, whose own comment
+>   says the validation is unimplemented). Run it once interactively; afterwards the answers
+>   live on Expo and everything can run unattended.
+> - **Reuse the distribution certificate; do not create one.** The Barmajja team already
+>   holds three, which is Apple's limit, so a new one is refused. Reusing the one marble
+>   already uses is what worked.
+>
+> Signing in to Apple needs no Apple ID or 2FA when `EXPO_ASC_API_KEY_PATH`,
+> `EXPO_ASC_KEY_ID` and `EXPO_ASC_ISSUER_ID` are set — EAS switches to API-key mode
+> (`AppStoreApi.js`). Set them, with `EXPO_APPLE_TEAM_ID` and
+> `EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION`, from the key the other apps already use,
+> in the shell — never in this repository, which is public.
 >
 > Two rules from that document that are not obvious and cost a failed run each:
 >

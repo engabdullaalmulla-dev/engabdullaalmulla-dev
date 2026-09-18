@@ -2,3 +2,12 @@ __pycache__/
 *.pyc
 dist/
 site/
+
+# local Python for the build tools (Homebrew Python refuses global installs)
+.venv/
+
+# signed builds -- local artefacts, never committed
+*.ipa
+
+# isolated copies of the repository that agents work in
+.claude/worktrees/
