@@ -1,65 +1,60 @@
-# Putting Café Life in front of people
+# Café Life — test whether people want another day
 
-The loop has been played by a bot and by two people who built it. Every number in
-`docs/cafe-life.md` came from simulation. None of it tells you whether the game is any good,
-and no amount of further tuning will.
+Updated for build 8 and the proposed hosting redesign, 18 September 2026. The current build passes automated rules and local StoreKit checks. These do not establish enjoyment, accessibility on a real phone or willingness to pay.
 
-This is the cheapest it will ever be to find out: there is a link, it opens on a phone, it
-needs no install and no account, and a café can be started and abandoned in four minutes.
+Use the exact build under test and record its commit. Keep current-build findings separate from proposed features in [the product plan](product-fun-plan.md). Do not describe proposed hosting, placement or venue features as already playable.
 
-## What to send
+## First session
 
-The artifact link, and nothing else. **Do not explain the game first.** Whatever you say in
-the message is the tutorial you will not be able to ship, and the first thing worth learning
-is what somebody does when nobody has told them anything.
+Recruit eight people outside the team, including Arabic-first players and at least two who do not usually play management games. Do not send invitations without the owner's explicit instruction. Ask for consent to observe or record their feedback; no analytics or tracking are added to the game.
 
-Five to eight people. They do not need to like management games — two who do not are worth
-more here than five who do, because a genre player will forgive things a normal person will
-not.
+Give them the private preview or a signed TestFlight build they are authorised to access. The current phone preview is owner-private and cannot simply be sent to outside testers without arranging appropriate access. Do not silently publish it or widen its audience.
 
-Suggested message, in full:
+Suggested invitation once access is ready:
 
-> Here's a café game I've been building. No instructions on purpose — play for ten minutes and
-> tell me what you thought. It saves, so you can come back to it.
+> Here is a café game I am making. Please try it without instructions for up to ten minutes, or stop earlier whenever you want. Tell me where you stopped, what you were trying to do, and what made you want to continue or leave.
 
-## What to watch for
+Do not coach them through the opening. Record the time to their first meaningful action, first completed day and first visible change they chose. Record confusion before explaining anything.
 
-You will be tempted to ask "did you like it". That gets you politeness. Ask instead:
+Ask afterwards:
 
-1. **Where did you stop?** Not *did you finish* — nobody finishes. The month they put it down
-   is the number that matters, and it is the only one that predicts anything.
-2. **What were you trying to do?** If they cannot name a goal, the Next card and the Ambitions
-   are not doing their job.
-3. **Did you widen the board?** This is the game's central tension and it has now been missed
-   twice — once by the design, once by my first fix. If a player reaches their second year on
-   a two-slot board, it is still broken.
-4. **Who did you recognise?** Six regulars have names, usual orders and stories. If nobody can
-   name one, the people are decoration and the game is a spreadsheet with a nice room.
-5. **What did you think the money was for?** Cash with nothing to want is the failure mode
-   this build has had twice, in both directions.
-6. **Did anything feel slow?** A watched day is 2.9 seconds and a month can be handed over in
-   one tap. If it still drags, it is not the clock — it is that nothing is at stake.
+1. What were you trying to make or achieve?
+2. Which decision changed what happened? Show me the consequence.
+3. Did you choose a different approach the next time? Why?
+4. Which person, recipe or part of the café felt like yours?
+5. Where did the game become repetitive, unclear or slow?
+6. What specifically would you do if you opened it again?
+7. Would you pay AED 19.99 once for this exact game after its free in-game year? What is missing at that price?
 
-## What not to do with the answers
+A proposed internal opening gate is at least six of eight completing a day without help, explaining a consequence, and naming a next goal. Separately note whether they deliberately replay an activity differently. These thresholds are product decision aids, not statistical proof.
 
-Do not fix the first thing five people mention. Five people mentioning the same thing on the
-same screen is a signal; one person's idea for a feature is not. The useful output of a
-playtest is **where they stopped and what they were confused by**, not a feature list.
+## Seven real days, with unrestricted play
 
-And do not tune the economy off it. That is what the bot is for; people cannot feel a 4%
-margin change, and they will blame the wrong thing when they do notice.
+After the opening is understandable, run a voluntary diary/interview test covering at least 168 hours from each person's first play. Players may play for as long or as little as they want. Do not send return reminders, reward attendance or lock activities until tomorrow. Count a day-seven return only at or after the 168-hour point.
 
-## What this build cannot tell you
+Ask players to make a brief note when they choose to play: approximate session length, what brought them back, what they did, and why they stopped. An end-of-test interview can collect those notes. This is explicit user feedback outside the game, not hidden analytics. Do not collect personal details unnecessary for the test.
 
-It is the web build. Nobody is testing the native shell: app launch, backgrounding,
-memory-pressure recovery, how it sits in the hand as an installed app. Those need a TestFlight
-build and physical devices, and `docs/11-ios-release.md` in `marble-ultimate-football` lists
-the checks that repository requires before a submission.
+Report actual participant counts, returns on separate days, activities repeated voluntarily, where novelty ran out, confusion and willingness to pay. Distinguish “played again” from “wanted to see a new consequence.” Include people who stopped. Avoid presenting a small convenience sample as a guaranteed retention rate.
 
-## The one thing not to add
+If players exhaust the interesting decisions in one sitting, add different worthwhile activities and consequences. Do not stretch prices or impose waits to make the duration look longer.
 
-**No analytics.** Not for a playtest, not temporarily. `games/cafe-life/privacy.html` on
-barmajja.com states as verified fact that the app makes no network requests of any kind, and
-`tools/check-native.js` enforces it per build. Watching over someone's shoulder and asking the
-six questions above is better data anyway — it tells you *why* they stopped, which a funnel
-never will.
+## The purchase boundary
+
+Tell testers truthfully that the browser development preview cannot take money. Use a signed sandbox/TestFlight build for the real Apple flows. Check that they understand:
+
+- The first year means in-game 1994, not twelve real months.
+- The full game is one purchase, not a subscription.
+- Their café remains saved if they cancel or cannot buy.
+- Restore Purchases restores access; a café save file restores progress.
+
+See [the release plan](premium-release-plan.md) and native StoreKit test notes for the transaction cases. Never ask testers to spend real money as part of an unannounced purchase test.
+
+## Physical iPhone checks
+
+Test cold launch, background/process recovery, large text, VoiceOver order and labels, Arabic/RTL, save-file sharing, mute/interruption behaviour, music/effects controls and haptics on actual supported phones. The browser preview cannot verify those native behaviours.
+
+## Turning feedback into changes
+
+Prioritise repeated observed problems over a long feature wish list. A person who stops tapping matters more than a polite “looks nice.” Preserve findings before fixing them, so the next build can be compared with the same opening task.
+
+Do not add analytics. The privacy update for Apple purchase services does not authorise gameplay tracking. Keep play-value evidence separate from automated correctness and compilation evidence.

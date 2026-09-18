@@ -26,6 +26,8 @@ The private browser development preview remains freely playable and cannot take 
 
 ## What still determines whether this is worth selling
 
+The concrete gameplay sequence and examples are in [the product fun plan](product-fun-plan.md); the matching outside-test protocol is in [playtest.md](playtest.md). These planned features are not part of build 8.
+
 ### Play value — release gate, not a content-count claim
 
 Run an uncoached first-session test and an unrestricted seven-real-day playtest before calling this a premium finished game. A test harness cannot establish enjoyment or willingness to pay.
