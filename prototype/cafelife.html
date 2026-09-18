@@ -50,6 +50,19 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
 .btn.sec{background:var(--panel-2);color:var(--cream);border:1px solid var(--edge-2)}
 .btn:disabled{opacity:.4}
 .btn.sm{width:auto;padding:9px 13px;font-size:13px;margin:0;border-radius:10px}
+.btn.quiet{background:none;border:0;color:var(--dim);font-size:13px;text-decoration:underline;
+  text-underline-offset:3px}
+.btn.quiet:active{background:none;color:var(--cream)}
+.tin{width:100%;box-sizing:border-box;background:var(--panel-2);border:1px solid var(--edge-2);
+  border-radius:12px;color:var(--cream);font:600 17px/1.3 inherit;padding:13px 14px;margin:8px 0 2px}
+.tin:focus{outline:2px solid var(--amber);outline-offset:1px}
+.pickr{border:1px solid var(--edge);border-radius:14px;background:var(--panel);padding:13px 14px;
+  margin-top:9px;cursor:pointer}
+.pickr.on{border-color:var(--amber);background:var(--panel-2)}
+.pickr .t{font-weight:700;font-size:15px}
+.pickr .d{color:var(--dim);font-size:12.5px;line-height:1.5;margin-top:4px}
+.pickr .m{color:var(--amber);font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin-top:7px}
 .tabs{display:flex;gap:6px;padding:0 16px 10px;flex:none}
 .tab{flex:1;padding:9px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);
      font-size:12px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
@@ -166,6 +179,9 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
   <section class="screen" id="s-close" hidden></section>
   <section class="screen" id="s-shop" hidden></section>
   <section class="screen" id="s-people" hidden></section>
+  <section class="screen" id="s-goals" hidden></section>
+  <section class="screen" id="s-bank" hidden></section>
+  <section class="screen" id="s-supply" hidden></section>
 </div>
 <script>
 /* ============================================================================
@@ -438,13 +454,79 @@ function faceArt(r, px, aged){
 const WALKIN = ["p1","p2","p7","p8","p10","p12",
                 "p16","p18","p20","p23","p25","p26"];
 
+/* ---- the clock -------------------------------------------------------------------------
+   The unit used to be a season: four a year, and one watched service was three months of
+   trade. buildQueue makes a day's custom, not three months of it, so the calendar was
+   mislabelling what you were watching -- and because the owner aged once every four services,
+   the family-legacy system sat 184 services away and nobody ever saw it.
+
+   A trading DAY is what you watch, hour by hour. A MONTH is the accounting period: rent,
+   wages and the spending round. Twelve months make a year and a dynasty runs three hundred.
+   You can watch every day of a month or hand the rest to the counter; either way the trade
+   is counted the same, so nobody is taxed for going faster.
+
+   Ten trading hours, and an hour takes 2.4 seconds, so a day runs 24 seconds -- long enough
+   to be a day you sat through rather than a list that flickered past. The clock is driven by
+   the clock and not by the queue: it advances a fixed slice of an hour each tick and serves
+   whoever turns up in that slice. A quiet Tuesday and a heaving Friday both take a day, and
+   the busy one feels busy because more people come through the same hours. */
+const OPEN = 7, CLOSE = 17;                  // shutters up at seven, down at five
+const HOUR_MS = 2400;                        // what an hour of trading takes to watch
+const DAY_TICKS = 60;                        // the day is drawn in sixty slices
+const TICK_MS = Math.round((CLOSE - OPEN) * HOUR_MS / DAY_TICKS);   // 400ms = ten minutes
+
+/* The calendar is the real one. February is 28 days, or 29 in a leap year, and a leap year
+   is every fourth except a century that is not a fourth century -- so 2000 was one and 2100,
+   2200 and 2300 are not. All three of those fall inside a three-hundred-year dynasty that
+   starts in 1994, which is why the rule has to be the real rule and not "every four years". */
+const MONTH_LEN = [31,28,31,30,31,30,31,31,30,31,30,31];
+const isLeap = y => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+const daysIn = (y, m) => (m === 1 && isLeap(y)) ? 29 : MONTH_LEN[m];
+const monthDays = () => daysIn(G.year, G.month % 12);
+
+/* What a standing charge, a shop price or an ambition is worth against a month of trade.
+   Deliberately a constant and NOT the length of the month in hand: rent may be lighter in
+   February, but a stool costing less in February than in July is a bug, not a season. */
+const MONTH_SCALE = 30;
+/* The fixed costs do not ride the month's takings the way the proportional ones do, so
+   multiplying them by a full day count charged for the same thing twice and bankrupted the
+   café by 1999 however well it traded. Derived from the early months instead. */
+const FIXED = 5;
+
+const YEAR0 = 1994, LEGACY_YEARS = 300;
+const MONTHS = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+const DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const seasonIdx = () => Math.floor((G.month % 12) / 3) % 4;
+const season = () => SEASONS[seasonIdx()];
+const monthName = () => MONTHS[G.month % 12];
+/* Zeller, so the weekday shown is the one it really was: 1 January 1994 was a Saturday. */
+function weekdayOf(y, m, d){
+  const t = [0,3,2,5,0,3,5,1,4,6,2,4];
+  const yy = m < 2 ? y - 1 : y;
+  return (((yy + Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) + t[m] + d) % 7) + 7) % 7;
+}
+const dayName = () => DAYNAMES[weekdayOf(G.year, G.month % 12, G.day)];
+const dateLine = () => dayName().slice(0,3) + " " + G.day + " " + monthName().slice(0,3)
+                     + " " + G.year;
+const pad2 = n => (n < 10 ? "0" : "") + n;
+const clockAt = frac => {
+  const h = OPEN + (CLOSE - OPEN) * Math.min(1, Math.max(0, frac));
+  return pad2(Math.floor(h)) + ":" + pad2(Math.floor((h % 1) * 60 / 5) * 5);
+};
+
 /* ============================== state ============================== */
 function NEW(){
   return {
-    year:1996, season:0, gen:1, week:0,
+    year:YEAR0, month:0, day:1, gen:1,
+    /* the month in progress: days already traded, and what they took */
+    mo:{take:0, profit:0, served:0, missed:0, tips:0, days:0, offstage:0, seen:[]},
     owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
            dies:72+Math.floor(Math.random()*18)},
-    cash:640, rent:90,
+    cash:640*MONTH_SCALE, rent:90,
+    setup:false, cafeName:"", tenure:null, debt:0, debtRate:0, heirs:null,
+    goals:{}, best:{take:0}, arrears:0, street:[],
+    supplier:"cc", lab:null, labDone:0,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
@@ -455,17 +537,16 @@ function NEW(){
 }
 let G = NEW();
 let SV = null;                                     // the live service
-const SAVE = "cafelife_mgmt_1";
+const SAVE = "cafelife_mgmt_2";
 function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(G)); }catch(e){} }
 function load(){ try{ const r=localStorage.getItem(SAVE); if(!r) return null;
                       const p=JSON.parse(r); return (p&&p.year)?p:null; }catch(e){ return null; } }
 
-const season = () => SEASONS[G.season % 4];
 const own = k => G.owned[k] || 0;
 /* Rent used to inflate at 2% against prices at 1.8%. Nobody chose that: it was a quiet
    squeeze that compounded for thirty years and it is why the café slid backwards however
    well it was run. The two rates now match. */
-const infl = () => 1 + (G.year - 1996) * 0.018;
+const infl = () => 1 + (G.year - YEAR0) * 0.018;
 /* G.mood and G.ac were set by the radio, the plants and the air conditioning and then read
    by nothing at all -- 1,140 AED of shop items that did exactly what the barista did before
    it was fixed, which is nothing. A room people like is a room they sit in longer, so mood
@@ -475,7 +556,7 @@ const dwellNow = () => G.dwell + G.mood * 0.015;
 /* Summer is forty degrees. Without shade or cooling the street simply does not stop, and
    that is the season the awning and the air conditioning are sold against. */
 function heatNow(){
-  if(G.season % 4 !== 1) return 1;
+  if(seasonIdx() !== 1) return 1;
   if(G.ac) return 1;
   return own("awning") ? 0.88 : 0.72;
 }
@@ -487,13 +568,18 @@ function heatNow(){
    running costs ate half of everything and the first five years went nowhere. Rent belongs
    mostly on the size of the room and the trade going through it, not on a flat charge for
    having a door. */
-const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl()
+/* Every fixed cost below was written against one service. One service is a trading day, and
+   the bill is now settled monthly against a month of them, so the standing charges carry
+   that factor. The shares taken off takings (the landlord's 7%, the 15% of running costs)
+   need no factor at all -- they scale with the month because the takings do. */
+const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl() * FIXED * (G.rentCut || 1)
                         + (own("freehold") ? 0 : G.lastTake * 0.07));
 /* A wage was a fixed 120 or 260 a season whatever the café had become, so by 2020 the whole
    payroll was 716 against takings of 35,664 -- two per cent, where a real café spends about a
    third. A barista in a thirty-two seat room is not doing the same job as a barista in a room
    with two stools, and is not paid the same either. */
-const wageOf = s => Math.round((s.role === "manager" ? 220 + G.seats*40 : 100 + G.seats*18) * infl());
+const wageOf = s => Math.round((s.role === "manager" ? 220 + G.seats*40 : 100 + G.seats*18)
+                               * infl() * FIXED);
 const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
 
 /* You can only get to so many people yourself. Everyone past that waits, gives up and walks,
@@ -504,19 +590,21 @@ const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
    goes on power, water, gas, cleaning, licences, insurance and the things that break. It
    scales with how much you are doing and how big the room is, and it is on the close screen
    by name, because a player who cannot see a cost cannot plan around it. */
-const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl());
+const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl() * FIXED);
 
 /* Everything in here is wearing out: the machine, the chairs, the paint, the floor by the
    door. A café that is never done up loses people slowly, and the bill for doing it up grows
    with the place -- which is the sink the late game did not have. Money that sits still stops
    being a score and becomes the thing that keeps the room alive. */
 const wearNow = () => Math.min(0.34, (G.wear || 0) / 100);
-const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl()
-                                  + G.lastTake * 1.6);
+/* lastTake is a month now rather than a day, so the share of it here drops by the same
+   factor it gained -- otherwise doing the place up costs more than a branch. */
+const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl() * FIXED
+                                  + G.lastTake * 1.6 / MONTH_SCALE * 8);
 
 const SERVE_EACH = 42;
-const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
-const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
+const hands = () => 1 + baristas() + (own("manager") ? 1 : 0) + trait().hands;
+const costOf = k => RECIPES[k].cost * (1 + (G.year-YEAR0)*0.016) * supplier().cost * trait().cost;
 /* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
 function costOfItem(k, have){
   const it = ITEMS[k];
@@ -524,17 +612,25 @@ function costOfItem(k, have){
      seats to eight took fifteen seasons with nothing else happening in them. Filling a room
      should feel like filling a room. */
   if(it.dyn) return it.dyn();               // priced off the café it is being spent on
-  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32)) * infl());
+  /* Priced against what the café earns, and it now earns a month at a time.
+
+     The step used to be linear (1 + have*0.32), which was tuned against four spending rounds
+     a year. There are twelve now, and a month's profit compounds, so the whole ladder -- every
+     seat, every board slot -- was bought out by 1998 and the next three hundred years had
+     nothing left to want. A geometric step keeps the far end of the ladder out of reach for
+     as long as the near end is worth climbing. */
+  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : Math.pow(1.42, have))
+                    * infl() * MONTH_SCALE);
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
-function show(n){ ["cafe","plan","serve","close","shop","people"]
+function show(n){ ["cafe","plan","serve","close","shop","people","goals","bank","supply"]
   .forEach(v => $("s-"+v).hidden = (v!==n)); }
 
 /* how appealing today's board is to a walk-in wanting `tag` */
 function boardHas(tag){ return G.board.some(k => RECIPES[k].tags.indexOf(tag) >= 0); }
 function priceOf(k){
   const r = RECIPES[k];
-  let p = r.price * (1 + G.priceLift) * (1 + (G.year-1996)*0.018);
+  let p = r.price * (1 + G.priceLift) * (1 + (G.year-YEAR0)*0.018) * (1 + supplier().qual) * trait().price;
   if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
   if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
   if(r.tags.indexOf("cold")>=0) p *= (1 + G.coldLift);
@@ -562,7 +658,7 @@ function roomPlate(){
   if(grown){
     if(G.year < 2000)  return "room_1990s";
     if(G.year >= 2030) return "room_2030s";
-    const s = G.season % 4;
+    const s = seasonIdx();
     if(s === 1) return "room_summer";
     if(s === 2) return "room_night";
     if(s === 3) return "room_rain";
@@ -652,6 +748,23 @@ function nextThing(){
                 : "Put " + RECIPES[r.usual].nm + " on the board and they will come.",
               icon: f, w: 1.0});
   });
+  /* The board is the whole game -- you own more than you can show -- and nothing ever said it
+     could grow. "On the board, 2 of 2" reads as a fact about the world rather than an
+     invitation, and "A bigger board" sat ninth in the shop behind stools, plants and the
+     radio, while this card steered everyone at seats instead. A player could reach the second
+     decade having never once widened it, which is the central tension of the game never
+     firing. It outranks everything else the moment there is something in the book that cannot
+     fit on the board. */
+  if(G.board.length >= G.slots && own("slot") < ITEMS.slot.max){
+    const c = costOfItem("slot", own("slot"));
+    const over = G.recipes.length - G.slots;
+    out.push({at: Math.min(1, G.cash/c), title: "A bigger board",
+      note: (over > 0 ? over + (over === 1 ? " recipe you own will not fit on it. "
+                                           : " recipes you own will not fit on it. ")
+                      : "It is full, and there are more recipes to be had. ")
+            + (G.cash >= c ? "You can widen it now." : money(c - G.cash) + " AED to go."),
+      icon: sprite(ITEM_SPRITE["slot"], 40, ITEMS.slot.ic), w: 1.25});
+  }
   /* the next thing that visibly changes the room */
   const seatGoal = G.seats < 4 ? 4 : G.seats < 6 ? 6 : G.seats < 10 ? 10 : 0;
   if(seatGoal) out.push({at: G.seats/seatGoal, title: seatGoal + " seats",
@@ -677,16 +790,18 @@ function nextThing(){
 function screenCafe(){
   const v = $("s-cafe"); v.textContent = "";
   const bar = el("div","bar");
-  bar.appendChild(el("div","pill", season().nm + " " + G.year));
+  bar.appendChild(el("div","pill", dateLine() + " · day " + G.day));
+  if(G.cafeName) bar.appendChild(el("div","pill", G.cafeName));
   bar.appendChild(el("div","grow"));
   bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
   v.appendChild(bar);
-  drawRoom(v, G.season === 3);
+  drawRoom(v, seasonIdx() === 3);
 
   const sc = el("div","scroll pad"); sc.style.paddingTop = "14px";
 
   const head = el("div");
-  head.appendChild(el("div","lbl", "Generation " + G.gen + " · " + G.owner.nm + ", " + G.owner.age));
+  head.appendChild(el("div","lbl", "Generation " + G.gen + " · " + G.owner.nm + ", " + G.owner.age
+    + (G.owner.traitT ? " · " + G.owner.traitT : "")));
   head.appendChild(el("div","big", season().nm));
   head.appendChild(el("div","hint", season().note));
   sc.appendChild(head);
@@ -711,7 +826,8 @@ function screenCafe(){
   }
 
   const c = el("div","card"); c.style.marginTop = "14px";
-  c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots));
+  c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots
+    + (G.recipes.length > G.slots ? " · " + (G.recipes.length - G.slots) + " waiting" : "")));
   G.board.forEach(k => {
     const r = RECIPES[k], d = el("div","dish");
     d.style.cursor = "default";
@@ -769,8 +885,30 @@ function screenCafe(){
   const shop = el("button","btn sec","Spend " + money(G.cash) + " AED"); shop.type="button";
   shop.onclick = () => screenShop("build"); sc.appendChild(shop);
   if(met.length){
-    const pp = el("button","btn sec","The regulars"); pp.type="button";
+    const pp = el("button","btn sec", G.staff.length ? "The regulars and the staff" : "The regulars"); pp.type="button";
     pp.onclick = screenPeople; sc.appendChild(pp);
+  }
+  const amb = el("button","btn sec","Ambitions — " + GOALS.filter(g=>G.goals[g.k]).length
+    + " of " + GOALS.length); amb.type="button";
+  amb.onclick = screenGoals; sc.appendChild(amb);
+  const bk = el("button","btn sec", G.debt > 0
+    ? "The bank — " + money(G.debt) + " owed" : "The bank"); bk.type="button";
+  bk.onclick = screenBank; sc.appendChild(bk);
+  const sup = el("button","btn sec", G.lab
+    ? "Sourcing — the bench, " + G.lab.months + " to go"
+    : "Sourcing — " + supplier().t.replace(/^(The|A) /,"")); sup.type="button";
+  sup.onclick = screenSupply; sc.appendChild(sup);
+
+  /* A café you can run for thirty years with no way to begin another one is a dead end, and
+     the public support page had to say so. Kept quiet and deliberately awkward to reach: it
+     is the last thing on the hub, it does not exist until a season has closed, and the first
+     tap only asks. */
+  if(G.year > YEAR0 || G.month > 0 || G.day > 1){
+    const keep = el("button","btn quiet","Keep or restore this café"); keep.type = "button";
+    keep.onclick = screenSave; sc.appendChild(keep);
+    const again = el("button","btn quiet","Start a new café"); again.type = "button";
+    again.onclick = () => askWipe(again);
+    sc.appendChild(again);
   }
   sc.appendChild(el("div",null," ")).style.height = "10px";
   v.appendChild(sc);
@@ -884,13 +1022,17 @@ function branchTake(br){
 }
 
 function visitsFor(c){
-  /* One shown face is that person's whole season, so a regular is worth many cups. It was
-     up to eighty, and four of the six have a premium usual -- Khalid drinks saffron karak --
-     so six faces could turn over more than the hundred and sixty strangers behind them, and
-     the café's income stopped having anything to do with how many seats it had. Thirty is
-     still most weeks of a season and still worth far more than a passer-by. */
-  if(c.reg) return Math.min(30, 9 + regState(c.reg.k).warmth*2);
-  return 1 + Math.floor(Math.random()*3);
+  /* A shown face used to stand for that person's whole season, so a regular was worth up to
+     thirty cups. The unit is a day now. Nobody drinks thirty karaks between seven and ten at
+     night, and pretending they did is what made the takings run away: trade went from 3,918
+     a month to 120,000 inside two years, six faces out-earning the hundred and sixty
+     strangers behind them, and the whole thirty-year ladder was bought out by 1998.
+
+     A day is a day. A regular comes in, has one, and on a good terms has another or brings
+     somebody. Warmth still pays -- it just pays in people coming back tomorrow, which is
+     what buildQueue already counts, rather than in one person drinking a month's worth. */
+  if(c.reg) return 1 + Math.min(2, Math.floor(regState(c.reg.k).warmth / 45));
+  return Math.random() < 0.22 ? 2 : 1;
 }
 /* A barista's card says "Serves alongside you" and for a long time that was simply untrue:
    nothing read G.staff except the wage bill, so hiring one cost 120 a season, rising with
@@ -963,15 +1105,19 @@ const MANAGER_CUT = 0.72;
 const CAST = 9;
 
 function runService(auto){
+  /* A second tap on "open" while a day was already running started another one on top of it:
+     two tick chains, two sets of customers, and a day that took twice as long and counted
+     everything twice. Cheap to do by accident on a phone. */
+  if(!auto && SV && !SV.done && SV.q){ return; }
   const q = buildQueue();
   SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null,
-        visits:VISITS, offstage:0};
+        visits:visitsToday(), maxVisits:visitsToday(), offstage:0};
   if(auto){
     q.forEach(c => { const r = serveOne(c);
       if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*MANAGER_CUT); SV.served++;
-               if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
+               if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth += trait().warm; } }
       else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
-    closeSeason(true); return;
+    closeDay(true); return;
   }
 
   /* every regular who came, then enough walk-ins to fill the scene */
@@ -983,44 +1129,111 @@ function runService(auto){
   }
   walk.slice(fill).forEach(c => {                            // the rest of the day, off screen
     const r = serveOne(c);
-    SV.offstage++;
-    if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; }
+    /* counted only when they bought: the close screen calls this a share of Served, and a
+       month reported 172 served with 234 "of those", which is not a subset of anything */
+    if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; SV.offstage++; }
     else SV.missed++;
   });
   SV.q = shown;
+  /* When each of them comes through the door, as a fraction of the trading day. A café is
+     not a uniform stream: it is busy when the offices open, quiet after lunch, and busy
+     again before the shutters come down. */
+  SV.at = shown.map(() => {
+    const r = Math.random();
+    const u = r < 0.42 ? Math.pow(Math.random(), 1.7) * 0.34          // the morning rush
+            : r < 0.72 ? 0.34 + Math.random() * 0.34                  // through the middle
+            : 0.68 + Math.pow(Math.random(), 0.7) * 0.32;             // the evening
+    return Math.min(0.99, u);
+  }).sort((x,y) => x - y);
+  /* Left purely to chance, a quiet café can deal nine people none of whom arrive in the first
+     third of the day: eight seconds of an empty room with the shutters up, which reads as
+     broken rather than quiet. Somebody is always waiting when a café opens, and no gap runs
+     longer than about four seconds -- a slow day should feel slow, not stopped. */
+  if(SV.at.length){
+    SV.at[0] = Math.min(SV.at[0], 0.03);
+    for(let i = 1; i < SV.at.length; i++)
+      SV.at[i] = Math.min(SV.at[i], SV.at[i-1] + 0.17);
+  }
+  SV.tick = 0;
   const v = $("s-serve"); v.textContent = "";
   const top = el("div","svc-top");
-  top.appendChild(el("div","lbl", season().nm + " " + G.year));
+  top.appendChild(el("div","lbl", dateLine()));
+  const cl = el("div","lbl"); cl.id = "sv-clock"; cl.textContent = clockAt(0); top.appendChild(cl);
   const take = el("div","mid-t cash","0 AED"); take.id = "sv-take"; top.appendChild(take);
   v.appendChild(top);
   const vis = el("div","visits"); vis.id = "sv-visits"; v.appendChild(vis);
   paintVisits();
   const tick = el("div","tick"); const ti = el("i"); ti.id = "sv-tick"; tick.appendChild(ti);
   v.appendChild(tick);
+  const mslot = el("div"); mslot.id = "sv-moment"; mslot.style.padding = "0 16px";
+  v.appendChild(mslot);
   const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
   const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
-  foot.appendChild(el("div","hint","You have time to go over to " + VISITS + " people this "
-    + "season. It is worth almost nothing on the till and it is the only thing that moves "
+  foot.appendChild(el("div","hint","You have time to go over to " + visitsToday() + " people this "
+    + "day. It is worth almost nothing on the till and it is the only thing that moves "
     + "anyone's story."));
+  /* You open the day and you close it. Pulling the shutters down early ends trade where it
+     stands -- whoever had not come in yet does not, and that is the cost. Worth having
+     because a day you have already read is a day you should be able to end, and because a
+     café that can only ever run to closing time is not one you are running. */
+  const shut = el("button","btn quiet","Pull the shutters down"); shut.type = "button";
+  shut.onclick = ev => {
+    ev.stopPropagation();
+    if(!SV || SV.done) return;
+    SV.done = true; clearTimeout(SV.timer);
+    SV.shutAt = clockAt(Math.min(1, (SV.tick || 0) / DAY_TICKS));
+    SV.lost = SV.q.length - SV.i;
+    closeDay(false);
+  };
+  foot.appendChild(shut);
   v.appendChild(foot);
+  /* tapping the day itself hurries it; tapping a guest is still going over to them */
+  v.onclick = ev => { if(ev.target.closest(".g") || ev.target.closest("#sv-moment")) return;
+                      pump(true); };
   show("serve");
-  SV.timer = setInterval(step, 620);
-  step();
+  pump(false);
 }
 
 /* Three, because two is not a choice and five is everyone. */
+/* Three was three whatever the café had become, so the one thing you actually do in a day
+   never grew with the place. It is the hands on the floor: a room with staff can spare more
+   of them for going over to people. */
+const visitsToday = () => Math.min(7, 2 + hands());
+
 const VISITS = 3;
 function paintVisits(){
   const el2 = $("sv-visits"); if(!el2) return;
   el2.textContent = "";
-  for(let i = 0; i < VISITS; i++)
+  for(let i = 0; i < (SV.maxVisits || visitsToday()); i++)
     el2.appendChild(el("i", i < SV.visits ? "on" : ""));
   el2.appendChild(el("span","lbl", SV.visits ? SV.visits + " left to visit" : "no time left today"));
 }
 
+/* The day is driven by the clock. Each tick is ten minutes of trading and the queue is laid
+   out across the opening hours beforehand, so the day always takes its 24 seconds whether
+   eleven people come or a hundred and sixty -- and the busy one feels busy because more of
+   them arrive in the same ten minutes. Tapping hurries the clock, not the queue. */
+function pump(now){
+  clearTimeout(SV.timer);
+  if(!SV || SV.done) return;
+  SV.timer = setTimeout(() => { tock(); pump(false); }, now ? 55 : TICK_MS);
+}
+
+/* one slice of the day: advance the clock, serve whoever is due in it */
+function tock(){
+  SV.tick = (SV.tick || 0) + 1;
+  const through = Math.min(1, SV.tick / DAY_TICKS);
+  while(SV.i < SV.q.length && (SV.at[SV.i] <= through || SV.tick >= DAY_TICKS)) step();
+  $("sv-clock").textContent = clockAt(through);
+  $("sv-tick").style.width = Math.round(through*100) + "%";
+  if(SV.tick >= DAY_TICKS && SV.i >= SV.q.length){
+    SV.done = true; clearTimeout(SV.timer);
+    setTimeout(() => closeDay(false), 520);
+  }
+  if(!SV.momentDone && through >= 0.4 && Math.random() < 0.5){ SV.momentDone = true; doMoment(); }
+}
 function step(){
-  if(SV.moment) return;
-  if(SV.i >= SV.q.length){ clearInterval(SV.timer); setTimeout(() => closeSeason(false), 700); return; }
+  if(SV.i >= SV.q.length) return;
   const c = SV.q[SV.i++];
   const r = serveOne(c);
   const list = $("sv-list");
@@ -1061,38 +1274,178 @@ function step(){
   list.insertBefore(g, list.firstChild);
   while(list.children.length > CAST) list.lastChild.remove();
   $("sv-take").textContent = money(SV.take) + " AED";
-  $("sv-tick").style.width = Math.round(SV.i/SV.q.length*100) + "%";
-
-  if(SV.i === Math.floor(SV.q.length*0.45) && Math.random() < 0.75) doMoment();
 }
 
+/* A moment used to stop the day dead until it was answered. That was tolerable when a
+   customer took 620ms and a day ran a quarter of a minute; a day is 2.9 seconds now, so a
+   full-stop modal is most of it, and it interrupted the one thing the retiming was for.
+
+   It sits above the counter instead and the day carries on underneath. Answer it while the
+   room fills, or do not -- an unanswered moment is a thing you let pass, which is a real
+   answer and costs nothing. It lives outside the guest list so the crowd cannot scroll it
+   away, and tapping it never counts as hurrying the day along. */
 function doMoment(){
   const m = pick(MOMENTS);
   SV.moment = m;
-  const list = $("sv-list");
+  const slot = $("sv-moment"); if(!slot) return;
+  slot.textContent = "";
   const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
-  card.appendChild(el("div","lbl","A moment"));
+  card.style.marginBottom = "8px";
+  card.appendChild(el("div","lbl","A moment · while you work"));
   card.appendChild(el("div","hint", m.t));
   m.o.forEach((o,i) => {
-    const b = el("button","btn" + (i ? " sec" : "")); b.type = "button"; b.textContent = o.l;
-    b.onclick = () => { const out = o.f(G); card.remove(); SV.moment = null;
-      const n = el("div","card"); n.appendChild(el("div","hint", out));
-      list.insertBefore(n, list.firstChild); save(); };
+    const b = el("button","btn sm" + (i ? " sec" : "")); b.type = "button"; b.textContent = o.l;
+    b.style.marginRight = "6px"; b.style.marginTop = "6px";
+    b.onclick = ev => { ev.stopPropagation();
+      const out = o.f(G); SV.moment = null;
+      slot.textContent = "";
+      const n = el("div","card"); n.style.marginBottom = "8px";
+      n.appendChild(el("div","hint", out)); slot.appendChild(n);
+      setTimeout(() => { if(slot) slot.textContent = ""; }, 2200);
+      save(); };
     card.appendChild(b);
   });
-  list.insertBefore(card, list.firstChild);
+  slot.appendChild(card);
 }
 
 /* ============================== closing the season ============================== */
-function closeSeason(auto){
-  const wages = staffWage();
-  const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
-  const rent = rentNow();                    // charged on LAST season's takings
-  const running = overheads(SV.take);
-  const net = SV.profit + branch - rent - wages - running;
-  G.cash += net; G.lastTake = SV.take;
+/* A day ends and the month keeps the tally. Nothing is charged here: rent, wages and running
+   costs are a month's business and land together when the books close on the 26th. Splitting
+   them this way is what lets a player watch every day of a month or none of them without the
+   bill changing -- going faster must never cost you money, or the fast path is a trap. */
+function closeDay(auto){
+  const m = G.mo;
+  m.take += SV.take; m.profit += SV.profit; m.served += SV.served;
+  m.missed += SV.missed; m.tips += SV.tips; m.offstage += (SV.offstage || 0); m.days++;
+  SV.seen.forEach(k => { if(m.seen.indexOf(k) < 0) m.seen.push(k); });
   G.rep += (SV.missed > SV.served*0.4 ? -1 : 1);
   if(SV.tips > 0) G.rep += 1;
+  /* Wear comes from use, not the calendar: it is the busy days that take the floor apart. */
+  G.wear = (G.wear || 0) + SV.served/70;
+  /* The date of the day that just ended, taken before the calendar moves on -- the summary
+     was being headed with tomorrow, and "day - 1" is not a date once a month can end on the
+     28th, 29th, 30th or 31st. */
+  SV.dateWas = dateLine();
+  G.day++;
+  if(G.day > monthDays()){ closeMonth(auto); return; }
+  save(); dayScreen(auto);
+}
+
+/* Between days. Deliberately thin -- a full report after every one of twenty-six days would
+   make the month a chore, and the month is where the decisions are. It shows the day, the
+   running tally, and the two ways out. */
+function dayScreen(auto){
+  const M = G.mo;
+  const v = $("s-close"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", (SV.dateWas || dateLine())
+    + (SV.shutAt ? " · shut at " + SV.shutAt : "")
+    + (auto ? " · run by the counter" : "")));
+  sc.appendChild(el("div","big", SV.take >= (M.take / Math.max(1, M.days)) ? "A good day" : "A quiet day"));
+
+  const c = el("div","card");
+  const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
+  st("Today", money(SV.take) + " AED", "cash");
+  if(SV.lost) st("Went elsewhere when you shut", String(SV.lost), "bad");
+  if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
+  st("The month so far", money(M.take) + " AED", "cash");
+  st("Days left this month", String(monthDays() - G.day + 1));
+  sc.appendChild(c);
+  sc.appendChild(el("div","hint","Nothing is charged until the books close at the end of the "
+    + "month, so a day you watch and a day you hand over are worth the same."));
+
+  const on = el("button","btn","Open tomorrow"); on.type = "button";
+  on.onclick = () => runService(false); sc.appendChild(on);
+  const rest = el("button","btn sec","Run the rest of the month"); rest.type = "button";
+  rest.onclick = () => runRestOfMonth(); sc.appendChild(rest);
+  const ch = el("button","btn quiet","Change the board first"); ch.type = "button";
+  ch.onclick = screenPlan; sc.appendChild(ch);
+  v.appendChild(sc); show("close");
+}
+
+/* Hand the remaining days to the counter. They are resolved exactly as a watched day is,
+   minus the going-over-to-people you would have done, which is the only thing you lose. */
+function runRestOfMonth(){
+  let guard = 0;
+  while(G.day <= monthDays() && guard++ < 400){
+    const q = buildQueue();
+    SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
+          moment:null, visits:0, offstage:0};
+    q.forEach(c => { const r = serveOne(c);
+      if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; SV.offstage++;
+               if(c.reg){ if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k);
+                          regState(c.reg.k).warmth++; } }
+      else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
+    const m = G.mo;
+    m.take += SV.take; m.profit += SV.profit; m.served += SV.served;
+    m.missed += SV.missed; m.offstage += SV.offstage; m.days++;
+    SV.seen.forEach(k => { if(m.seen.indexOf(k) < 0) m.seen.push(k); });
+    G.wear = (G.wear || 0) + SV.served/70;
+    G.day++;
+  }
+  closeMonth(false);
+}
+
+/* The month's arithmetic, with nothing drawn. Split out so that months can be settled in a
+   loop by "run until something happens" -- which is the difference between a three-hundred
+   year game and twenty-one thousand taps. */
+function settleMonth(){
+  const M = G.mo;
+  const wages = staffWage();
+  const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
+  const rent = rentNow();                    // charged on LAST month's takings
+  const running = overheads(M.take);
+  /* A debt is serviced whether the café took anything or not -- that is the whole point of
+     owing money, and it is what makes borrowing a decision rather than free capital. If the
+     month cannot cover it you go into arrears, the rate hardens, and on the third missed
+     payment the bank takes what it can reach. */
+  let interest = 0, repaid = 0, seized = null;
+  const supply = supplyFee();
+  /* the bench bills whether the month was good or not, like anything else standing */
+  let labBill = 0, labMade = null;
+  if(G.lab){
+    labBill = G.lab.each;
+    G.lab.months--;
+    if(G.lab.months <= 0) labMade = labFinish();
+  }
+  const trading = M.profit + branch - rent - wages - running - supply - labBill;
+  if(G.debt > 0){
+    interest = Math.round(G.debt * G.debtRate);
+    const principal = Math.round(G.debt * 0.02);
+    const due = interest + principal;
+    if(G.cash + trading >= due){
+      repaid = principal; G.debt = Math.max(0, G.debt - principal); G.arrears = 0;
+    } else {
+      /* unpaid interest joins the balance; this is how a debt runs away from you */
+      G.debt += interest; G.arrears = (G.arrears || 0) + 1;
+      G.debtRate = Math.min(0.03, G.debtRate + 0.002);
+      interest = 0;
+      if(G.arrears >= 3){
+        if(G.branches.length){ const b = G.branches.pop(); seized = b.nm; }
+        else if(own("freehold")){ G.owned.freehold = 0; seized = "the freehold"; }
+        else { seized = "everything but the counter";
+               G.seats = Math.max(2, Math.round(G.seats/2));
+               G.slots = Math.max(2, G.slots - 2); }
+        G.debt = Math.round(G.debt * 0.55); G.arrears = 0;
+      }
+    }
+    if(G.debt === 0) G.debtRate = 0;
+  }
+  const net = trading - interest - repaid;
+  if(M.take > (G.best.take || 0)) G.best.take = M.take;
+  G.cash += net; G.lastTake = M.take;
+  /* A café with no loan could sit at minus twenty-one thousand indefinitely and nothing in
+     the game noticed -- the bank only bites when there is a debt to miss a payment on, so
+     not borrowing was a way of being immune to losing. A shortfall is money somebody else is
+     lending you whether you asked or not: it becomes debt, at a worse rate than you would
+     have been offered, and from there the arrears machinery already knows what to do. */
+  let overdrawn = 0;
+  if(G.cash < 0){
+    overdrawn = Math.round(-G.cash);
+    G.debt += overdrawn; G.cash = 0;
+    G.debtRate = Math.max(G.debtRate || 0, Math.min(0.03, offerRate() + 0.006));
+  }
 
   /* whose story moved */
   const beats = [];
@@ -1100,10 +1453,10 @@ function closeSeason(auto){
     const st = regState(r.k);
     if(st.done) return;
     if(!st.met){
-      if(SV.seen.indexOf(r.k) >= 0){ st.met = true; beats.push({r:r, intro:true}); }
+      if(M.seen.indexOf(r.k) >= 0){ st.met = true; beats.push({r:r, intro:true}); }
       return;
     }
-    if(SV.seen.indexOf(r.k) < 0) return;
+    if(M.seen.indexOf(r.k) < 0) return;
     /* Warmth climbs about two a season -- one for coming in, more when you went over -- so a
        gate of (beat+1)*2 meant five beats in five years. Thirty beats of writing were spent
        by 2001 in a game meant to run for thirty years, and after that the arcs recycled with
@@ -1113,13 +1466,17 @@ function closeSeason(auto){
        which is four minutes of a café where nothing happens to anybody -- and the people are
        the whole reason to be here. The first one lands almost at once and the rest spread
        out, so you are told what this is within a minute and still have somewhere to go. */
-    if(st.warmth < 4 + st.beat*17) return;
+    /* Warmth now accrues every trading day rather than once a season, so the old gates of
+       4/21/38/55 would fall in the first week. Scaled to the month -- the rhythm the player
+       actually feels, because the month is the spending round -- and then halved, because a
+       first play reported no story at all: chapter two used to sit eleven services away. */
+    if(st.warmth < (4 + st.beat*17) * MONTH_SCALE / 2) return;
     const b = r.beats[st.beat];
     if(b.need){
       /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant
          a recipe gate could never open, and the story sat there forever. */
       const ok = b.need === "quiet" ? G.quiet
-               : b.need === "cash2500" ? G.cash >= 2500
+               : b.need === "cash2500" ? G.cash >= 2500 * MONTH_SCALE
                : (own(b.need) > 0 || G.recipes.indexOf(b.need) >= 0);
       if(!ok){ beats.push({r:r, blocked:b.needT}); return; }
     }
@@ -1143,30 +1500,87 @@ function closeSeason(auto){
     }
   });
 
-  /* Wear comes from use, not from the calendar. A flat charge per season would land hardest
-     on a two-stool café that has served eleven people, which is exactly backwards: it is the
-     busy years that take the floor and the chairs apart. */
-  G.wear = (G.wear || 0) + SV.served/70;
-  G.season++;
-  if(G.season % 4 === 0){ G.year++; G.owner.age++; }
+  G.month++; G.day = 1;
+  if(G.month % 12 === 0){ G.year++; G.owner.age++; }
+  G.mo = {take:0, profit:0, served:0, missed:0, tips:0, days:0, offstage:0, seen:[]};
   save();
 
+  const ev = streetEvent();
+  const wonGoals = checkGoals();
+  /* What is worth stopping a fast-forward for. The first cut of this stopped every single
+     month -- six presses bought one year -- for two reasons, both worth naming. `beats`
+     carries blocked entries too, and a regular whose story is waiting on a fitting pushes one
+     every month for years; and an early café runs a thin month often, so `net < 0` was
+     constant. A story that MOVED is an event. A story that is still waiting is wallpaper.
+     And a bad month only matters when it is bad enough to be in trouble over. */
+  const moved = beats.filter(b => b.beat || b.intro).length;
+  const hurts = net < 0 && (G.cash + net < 0 || -net > Math.max(1, M.take) * 0.25);
+  const notable = !!(moved || arrivals.length || ev || wonGoals.length || labMade
+                     || seized || G.arrears || hurts || overdrawn
+                     || G.owner.age >= G.owner.dies);
+  return {M:M, net:net, rent:rent, wages:wages, running:running, supply:supply,
+          labBill:labBill, branch:branch, interest:interest, repaid:repaid, seized:seized,
+          overdrawn:overdrawn,
+          labMade:labMade, beats:beats, arrivals:arrivals, ev:ev, wonGoals:wonGoals,
+          notable:notable};
+}
+
+function closeMonth(auto){ monthScreen(settleMonth(), auto); }
+
+/* Six taps a month over three hundred years is twenty-one thousand six hundred taps, and
+   four of the six bought nothing in a month where nothing happened. This runs the café on
+   its own until something actually wants you -- a chapter, the street, an ambition, the
+   bench, the bank, a losing month, or the owner reaching the end -- and stops there. The
+   engine settles a month in well under a millisecond, so the only cost is the years. */
+function runUntil(){
+  let months = 0, last = null;
+  while(months < 600){
+    /* trade the whole month with nobody watching, then settle it */
+    while(G.day <= monthDays()){
+      const q = buildQueue();
+      SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
+            moment:null, visits:0, offstage:0};
+      q.forEach(c => { const r = serveOne(c);
+        if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++; SV.offstage++;
+                 if(c.reg){ if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k);
+                            regState(c.reg.k).warmth += trait().warm; } }
+        else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
+      const m = G.mo;
+      m.take += SV.take; m.profit += SV.profit; m.served += SV.served;
+      m.missed += SV.missed; m.offstage += SV.offstage; m.days++;
+      SV.seen.forEach(k => { if(m.seen.indexOf(k) < 0) m.seen.push(k); });
+      G.wear = (G.wear || 0) + SV.served/70;
+      G.day++;
+    }
+    last = settleMonth(); months++;
+    if(last.notable) break;
+  }
+  last.ranFor = months;
+  monthScreen(last, true);
+}
+
+function monthScreen(R, auto){
+  const {M, net, rent, wages, running, supply, labBill, branch, interest, repaid,
+         seized, labMade, beats, arrivals, ev, wonGoals, overdrawn} = R;
   const v = $("s-close"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
-  sc.appendChild(el("div","lbl", SEASONS[(G.season+3)%4].nm + " " + (G.season%4===0 ? G.year-1 : G.year)
+  const mName = MONTHS[(G.month + 11) % 12], mYear = (G.month % 12 === 0) ? G.year - 1 : G.year;
+  sc.appendChild(el("div","lbl", mName + " " + mYear + " · " + M.days + " days open"
     + (auto ? " · run by the manager" : "")));
-  sc.appendChild(el("div","big", net >= 0 ? "A good season" : "A thin season"));
+  sc.appendChild(el("div","big", net >= 0 ? "A good month" : "A thin month"));
+  if(R.ranFor > 1) sc.appendChild(el("div","hint", "You let " + (R.ranFor - 1)
+    + (R.ranFor === 2 ? " month" : " months") + " go by before this one."));
 
   const c = el("div","card");
   const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
     r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
-  st("Served", String(SV.served), "good");
+  st("Served", String(M.served), "good");
   /* the till counts everyone, so say plainly that most of them came and went while you
      were busy -- otherwise the takings look larger than the nine people you watched */
-  if(SV.offstage) st("Of those, came and went while you worked", String(SV.offstage));
-  if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
-  if(SV.tips) st("Tips", "+" + money(SV.tips), "cash");
-  st("Takings", money(SV.take) + " AED", "cash");
+  if(M.offstage) st("Of those, came and went while you worked", String(M.offstage));
+  if(M.missed) st("Left without ordering", String(M.missed), "bad");
+  if(M.tips) st("Tips", "+" + money(M.tips), "cash");
+  st("Takings", money(M.take) + " AED", "cash");
   if(branch) st("Branches", "+" + money(branch) + " AED", "cash");
   st("Running costs", "−" + money(running) + " AED", "bad");
   if(wearNow() >= 0.05)
@@ -1175,10 +1589,49 @@ function closeSeason(auto){
   if(!own("freehold") && G.lastTake > 400)
     st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
   if(wages) st("Wages", "−" + money(wages) + " AED", "bad");
+  if(supply) st(supplier().t, "−" + money(supply) + " AED", "bad");
+  if(labBill) st("The bench", "−" + money(labBill) + " AED", "bad");
+  if(interest) st("Interest on the loan", "−" + money(interest) + " AED", "bad");
+  if(repaid) st("Off the loan", "−" + money(repaid) + " AED", "bad");
+  if(G.debt > 0) st("Still owed", money(G.debt) + " AED", "bad");
+  if(overdrawn) st("Covered by the bank", money(overdrawn) + " AED", "bad");
+  if(G.arrears) st("Payment missed", G.arrears + " of 3", "bad");
   /* money() carries a hyphen for a negative; the lines above it all use a proper minus */
   st("Kept", (net>=0 ? "+" + money(net) : "−" + money(-net)) + " AED",
      net>=0 ? "good" : "bad");
   sc.appendChild(c);
+
+  if(seized){
+    const w = el("div","card"); w.style.borderColor = "var(--bad)";
+    w.appendChild(el("div","lbl","the bank"));
+    w.appendChild(el("div","beat","Three payments missed. They have taken " + seized
+      + ", set against what you owe. What is left of the debt still stands."));
+    sc.appendChild(w);
+  }
+  if(ev){
+    const c = el("div","card"); c.style.borderColor = "var(--amber-d)";
+    c.appendChild(el("div","lbl","the street"));
+    c.appendChild(el("div","mid-t", ev.t));
+    c.appendChild(el("div","beat", ev.d));
+    sc.appendChild(c);
+  }
+  if(labMade){
+    const c = el("div","card"); c.style.borderColor = "var(--amber-d)";
+    c.appendChild(el("div","lbl","the bench"));
+    c.appendChild(el("div","beat","It works. " + labMade + " goes into the cookbook under "
+      + G.owner.nm + "'s name, and onto the board whenever there is room for it."));
+    sc.appendChild(c);
+  }
+  wonGoals.forEach(w => {
+    const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
+    card.appendChild(el("div","lbl","an ambition"));
+    const row = el("div","stat");
+    row.appendChild(el("div","k", w.g.t));
+    row.appendChild(el("div","v cash", "+" + money(w.pay) + " AED"));
+    card.appendChild(row);
+    card.appendChild(el("div","hint", w.g.d));
+    sc.appendChild(card);
+  });
 
   beats.forEach(b => {
     const card = el("div","card");
@@ -1224,9 +1677,19 @@ function closeSeason(auto){
     go.textContent = G.owner.nm + " is getting old";
     go.onclick = succession; sc.appendChild(go);
   } else {
-    const go = el("button","btn","Spend, and open " + SEASONS[G.season%4].nm);
+    /* Was one forced route: report -> shop -> plan -> day, four taps to trade a month in
+       which you wanted to change nothing. Opening the next month is the primary button and
+       spending is optional beside it. */
+    const straight = el("button","btn","Open " + monthName()); straight.type = "button";
+    straight.onclick = () => runService(false);
+    sc.appendChild(straight);
+    const skip = el("button","btn sec","Run on until something happens"); skip.type = "button";
+    skip.onclick = runUntil; sc.appendChild(skip);
+    const go = el("button","btn sec","Spend " + money(G.cash) + " AED");
     go.type = "button"; go.onclick = () => screenShop("close");
     sc.appendChild(go);
+    const ch2 = el("button","btn quiet","Change the board first"); ch2.type = "button";
+    ch2.onclick = screenPlan; sc.appendChild(ch2);
   }
   sc.appendChild(el("div")).style.height = "14px";
   v.appendChild(sc);
@@ -1310,7 +1773,7 @@ function screenShop(from){
     b2.onclick = () => { G.cash -= cost; invent(); save(); screenShop(from); };
     row.appendChild(b2); sc.appendChild(row);
   }
-  const go = el("button","btn", from === "close" ? "Open " + SEASONS[G.season%4].nm : "Back to the café");
+  const go = el("button","btn", from === "close" ? "Open " + monthName() : "Back to the café");
   go.type = "button"; go.onclick = screenCafe; sc.appendChild(go);
   sc.appendChild(el("div")).style.height = "14px";
   v.appendChild(sc);
@@ -1370,8 +1833,66 @@ function invent(){
                    invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
                    tags:RECIPES[k].tags, ic:RECIPES[k].ic, sp:SPRITE[k]});
 }
+/* Starting again. Two taps, and the first one only asks -- confirm() is not used because a
+   WebView is allowed to suppress it, and a dynasty lost to a dialog that never appeared is
+   the one failure this must not have. */
+function askWipe(btn){
+  const box = el("div","card"); box.style.marginTop = "10px";
+  box.appendChild(el("div","lbl","Start again"));
+  const bits = [G.cookbook.length + (G.cookbook.length === 1 ? " recipe" : " recipes"),
+                G.seats + (G.seats === 1 ? " seat" : " seats")];
+  if(G.branches.length) bits.push(G.branches.length
+    + (G.branches.length === 1 ? " branch" : " branches"));
+  box.appendChild(el("div","hint",
+    "This deletes the café you have built since " + YEAR0 + " — " + bits.join(", ")
+    + ", and everyone in it — and opens an empty room again. It cannot be undone."));
+  /* Keeping is the prominent one. The player has already reached past the bottom of the hub
+     for an underlined link, so intent is not in doubt -- but one costs nothing and the other
+     cannot be undone, and the emphasis should follow the harm, not the intent. */
+  const no = el("button","btn","Keep my café"); no.type = "button";
+  no.onclick = screenCafe;
+  const yes = el("button","btn sec","Delete it and start again"); yes.type = "button";
+  yes.onclick = wipe;
+  const keep = el("button","btn quiet","Keep a copy of it first"); keep.type = "button";
+  keep.onclick = screenSave; box.appendChild(keep);
+  box.appendChild(no); box.appendChild(yes);
+  btn.replaceWith(box);
+}
+function wipe(){
+  /* invent() writes into the global RECIPES and SPRITE under "own<n>_<gen>", and those are
+     not part of G, so clearing the save does not clear them. Left alone, the next café
+     carries the last one's inventions in both tables -- and because gen is back to 1 its
+     first invention lands on a key that already exists and quietly overwrites it. */
+  Object.keys(RECIPES).forEach(k => {
+    if(/^own\d+_\d+$/.test(k)){ delete RECIPES[k]; delete SPRITE[k]; }
+  });
+  try{ localStorage.removeItem(SAVE); }catch(e){}
+  G = NEW(); SV = null;
+  save();
+  intro();
+}
+
 /* recipes invented by earlier generations have to be put back on load */
 function rehydrate(){
+  /* A save is written by whatever build the player last had, and every field added since is
+     simply missing from it. A café saved before ambitions existed came back with G.goals
+     undefined, threw on the first screen it drew and again on the first month it settled --
+     the player's dynasty was intact on disk and unplayable in the app.
+
+     Backfilling from NEW() rather than naming today's fields is the point: it fixes the
+     next five additions as well as these, which is the only version of this fix that stays
+     fixed. Only absent keys are filled, so nothing the player did is overwritten. */
+  const fresh = NEW();
+  Object.keys(fresh).forEach(k => { if(G[k] === undefined) G[k] = fresh[k]; });
+  ["mo","best"].forEach(k => {
+    if(!G[k] || typeof G[k] !== "object") G[k] = fresh[k];
+    else Object.keys(fresh[k]).forEach(j => { if(G[k][j] === undefined) G[k][j] = fresh[k][j]; });
+  });
+  /* owners predate traits; give an old one a character rather than a silent default */
+  if(G.owner && !G.owner.trait){
+    const t = pick(TRAITS); G.owner.trait = t.k; G.owner.traitT = t.t;
+  }
+
   (G.cookbook||[]).forEach(c => {
     if(c.invented && !RECIPES[c.k])
       RECIPES[c.k] = {nm:c.nm, ic:c.ic, cost:c.cost, price:c.price, tags:c.tags, buy:0};
@@ -1385,6 +1906,32 @@ function rehydrate(){
 }
 
 /* ============================== the regulars =============================== */
+/* Wages tracked the size of the room and nothing else, so a café that over-hired simply bled
+   and the player had no lever. Hiring was already a choice; leaving was not. */
+function staffCard(sc){
+  if(!G.staff.length) return;
+  sc.appendChild(el("div","lbl","Behind the counter — " + money(staffWage()) + " a month"));
+  G.staff.forEach((st, i) => {
+    const c = el("div","card");
+    const row = el("div","stat");
+    row.appendChild(el("div","k", st.nm + " · " + st.role));
+    row.appendChild(el("div","v bad", "−" + money(wageOf(st)) + " AED"));
+    c.appendChild(row);
+    const go = el("button","btn quiet","Let " + st.nm + " go"); go.type = "button";
+    go.onclick = () => {
+      G.staff.splice(i,1);
+      /* the shop sold them, so the shop has to know they have gone */
+      if(st.role === "manager"){ G.owned.manager = 0; G.canSkip = false; }
+      else G.owned.barista = Math.max(0, (G.owned.barista||1) - 1);
+      save(); screenPeople();
+    };
+    c.appendChild(go);
+    sc.appendChild(c);
+  });
+  sc.appendChild(el("div","hint","Hands set how many people you can get to in a day. Too few "
+    + "and they walk; too many and the wage bill eats the month."));
+}
+
 function screenPeople(){
   const v = $("s-people"); v.textContent = "";
   const bar = el("div","bar");
@@ -1409,6 +1956,7 @@ function screenPeople(){
     if(st.done) card.appendChild(el("div","lbl","— their story here is finished"));
     sc.appendChild(card);
   });
+  staffCard(sc);
   v.appendChild(sc);
   show("people");
 }
@@ -1434,15 +1982,32 @@ function succession(){
     + "and so do the regulars — though the ones who were old when you started will not be here "
     + "for your daughter, and the children who came in with their mothers will be the ones "
     + "propping up the counter."));
-  const go = el("button","btn","Hand over the keys"); go.type = "button";
+  /* Three children, and only one of them wants it enough to be handed it. Choosing is the
+     decision that makes a generation different from the last rather than a change of name. */
+  if(!G.heirs || !G.heirs.length) G.heirs = [makeHeir(), makeHeir(), makeHeir()];
+  sc.appendChild(el("div","lbl","Who takes it on"));
+  let picked = null;
+  const cards = [];
+  G.heirs.forEach(h => {
+    const t = TRAITS.find(x => x.k === h.trait) || TRAITS[0];
+    const c = el("div","pickr");
+    c.appendChild(el("div","t", h.nm + ", " + h.age + " — " + t.t));
+    c.appendChild(el("div","d", t.d));
+    c.appendChild(el("div","m", t.e));
+    c.onclick = () => { picked = h; cards.forEach(x => x.classList.remove("on"));
+                        c.classList.add("on"); go.disabled = false; };
+    cards.push(c); sc.appendChild(c);
+  });
+
+  const go = el("button","btn","Hand over the keys"); go.type = "button"; go.disabled = true;
   go.onclick = () => {
     G.gen++;
     /* The café passes whole. The money does not: there are other children, and they take
        their share. Without this a dynasty simply accumulates -- two million by year sixty,
        with nothing left to want. */
     G.cash = Math.round(G.cash * 0.45);
-    G.owner = {nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid"]),
-               age:26, dies:72+Math.floor(Math.random()*18)};
+    G.owner = picked || makeHeir();
+    G.heirs = null;
     /* the regulars who finished their arc move on; a new generation meets new people */
     REGULARS.forEach(r => { const st = regState(r.k);
       if(st.done){ G.regs[r.k] = {met:false, beat:0, warmth:0, done:false}; } });
@@ -1453,16 +2018,507 @@ function succession(){
   show("close");
 }
 
+/* ============================== keeping a dynasty ============================== */
+/* Three hundred years lives in one browser's localStorage on one device. Clearing site data,
+   a new phone, a reinstall -- any of them takes the lot, and there is nothing the player
+   could have done about it. A save is written out as text they can keep anywhere, and read
+   back from the same. Nothing leaves the device: this is a string on the screen, not an
+   upload, which is what lets it exist at all without touching what the privacy page says. */
+function saveText(){
+  try { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); }
+  catch(e){ return null; }
+}
+function loadText(t){
+  try {
+    const o = JSON.parse(decodeURIComponent(escape(atob(t.trim()))));
+    if(!o || !o.year || !o.owner) return "That does not look like a Café Life save.";
+    G = o; rehydrate(); save(); return null;
+  } catch(e){ return "That could not be read. Copy the whole line, including the end."; }
+}
+function screenSave(){
+  const v = $("s-goals"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", (G.cafeName || "the café") + " · " + dateLine()));
+  sc.appendChild(el("div","big","Keep this café"));
+  sc.appendChild(el("div","hint","Your café lives in this browser and nowhere else. Copy the "
+    + "text below and keep it somewhere — a note, an email to yourself — and you can bring "
+    + "this café back on any device. Nothing is sent anywhere; it is only text."));
+
+  const box = document.createElement("textarea");
+  box.className = "tin"; box.id = "save-out"; box.rows = 5; box.readOnly = true;
+  box.style.fontFamily = '"DM Mono", monospace'; box.style.fontSize = "11px";
+  box.value = saveText() || "This browser will not let the game read its own save.";
+  sc.appendChild(box);
+  const copy = el("button","btn","Select it all to copy"); copy.type = "button";
+  copy.onclick = () => { box.focus(); box.select(); };
+  sc.appendChild(copy);
+
+  sc.appendChild(el("div","lbl","Bring a café back"));
+  sc.appendChild(el("div","hint","Paste a saved café here. It replaces the one you are "
+    + "playing now, so keep that one first if you want it."));
+  const inp = document.createElement("textarea");
+  inp.className = "tin"; inp.id = "save-in"; inp.rows = 4;
+  inp.placeholder = "Paste here";
+  inp.style.fontFamily = '"DM Mono", monospace'; inp.style.fontSize = "11px";
+  sc.appendChild(inp);
+  const msg = el("div","hint",""); sc.appendChild(msg);
+  const put = el("button","btn sec","Bring it back"); put.type = "button";
+  put.onclick = () => {
+    if(!inp.value.trim()){ msg.textContent = "Nothing pasted yet."; return; }
+    const err = loadText(inp.value);
+    if(err){ msg.textContent = err; return; }
+    screenCafe();
+  };
+  sc.appendChild(put);
+
+  const back = el("button","btn quiet","Back to the café"); back.type = "button";
+  back.onclick = screenCafe; sc.appendChild(back);
+  v.appendChild(sc); show("goals");
+}
+
+/* ============================== the street ============================== */
+/* Three hundred years of the same street is the same year three hundred times. Things happen
+   to a shopping street on their own: a mall opens, the metro arrives, somebody opens opposite.
+   These land every few years, are permanent, and cut both ways -- which is what stops the
+   late game being a number going up. */
+const STREET = [
+  {k:"metro",  t:"The metro reaches the corner",
+   d:"A station entrance where the taxi rank was. Everybody who works in the towers walks past you now.",
+   f:g => { g.foot *= 1.35; }},
+  {k:"mall",   t:"A mall opens on the main road",
+   d:"Air conditioning, a food court and parking. The street is quieter on a Friday than it has ever been.",
+   f:g => { g.foot *= 0.78; }},
+  {k:"rival",  t:"Somebody opens opposite",
+   d:"Same idea, newer chairs. Half your walk-ins will try it at least once.",
+   f:g => { g.foot *= 0.86; }},
+  {k:"pedest", t:"They pedestrianise the street",
+   d:"No cars, tables allowed outside, and nobody in a hurry.",
+   f:g => { g.foot *= 1.22; g.dwell += 0.12; }},
+  {k:"tower",  t:"A tower goes up behind the souq",
+   d:"Four hundred flats where the yard used to be, and all of them want breakfast.",
+   f:g => { g.foot *= 1.18; }},
+  {k:"review", t:"The landlord reviews the lease",
+   d:"Nothing personal, he says. The street is worth more than it was.",
+   f:g => { g.rentCut = (g.rentCut || 1) * 1.25; }},
+  {k:"fame",   t:"A food writer comes in and does not say who she is",
+   d:"The piece runs on a Thursday. For a while, people come a long way for this.",
+   f:g => { g.rep += 14; g.foot *= 1.12; }},
+  {k:"works",  t:"They dig the road up",
+   d:"Eighteen months of hoardings and a temporary crossing fifty metres down.",
+   f:g => { g.foot *= 0.82; }}
+];
+function streetEvent(){
+  /* roughly one every three years, never twice the same, and never in the first year */
+  if(G.year < YEAR0 + 2) return null;
+  if(Math.random() > 0.028) return null;
+  G.street = G.street || [];
+  let left = STREET.filter(e => G.street.indexOf(e.k) < 0);
+  /* A hundred and twenty years used the whole list and then the street went quiet for the
+     remaining hundred and eighty. Streets do not stop happening: once they have all come
+     round, they come round again -- a second mall, another road dug up, a new rival in the
+     same doorway -- keeping only the last few out of the running so nothing repeats twice
+     in a row. */
+  if(!left.length){ G.street = G.street.slice(-3); left = STREET.filter(e => G.street.indexOf(e.k) < 0); }
+  if(!left.length) return null;
+  const e = pick(left);
+  G.street.push(e.k); e.f(G);
+  /* These multiply and they are permanent, and now that they recur there are twenty-odd of
+     them over three hundred years. Unbounded that is a geometric series -- the same shape as
+     the invention chain and the thirty-cup regular, both of which ran away before anyone
+     noticed. A street can get much better or much worse than it was; it cannot get eighty
+     times busier. */
+  G.foot = Math.max(0.4, Math.min(2.8, G.foot));
+  G.rentCut = Math.max(0.4, Math.min(2.6, G.rentCut || 1));
+  G.dwell = Math.min(0.9, G.dwell);
+  return e;
+}
+
+/* ============================== the family ============================== */
+/* A dynasty of interchangeable owners is one owner with different names, and three hundred
+   years of that is a spreadsheet. An heir is a person: each is better at one thing and worse
+   at another, and you pick which of them takes the keys. Those traits are read where they
+   would actually be felt -- what the cup costs, what people pay, how hard the room works,
+   what the bank thinks of you. */
+const TRAITS = [
+  {k:"grafter",  t:"the grafter",     d:"Up before the delivery and still there at close.",
+   e:"Works the floor like two people, and never learned to charge properly."},
+  {k:"trader",   t:"the trader",      d:"Knows what a sack is worth before it is opened.",
+   e:"Buys better than anyone in the family. Not much of a host."},
+  {k:"host",     t:"the host",        d:"Remembers every order and every name that goes with it.",
+   e:"The regulars come for them. The books are somebody else's problem."},
+  {k:"banker",   t:"the careful one",  d:"Reads the lease before signing and the rate before borrowing.",
+   e:"Money behaves around them. The room never changes much either."},
+  {k:"cook",     t:"the cook",        d:"Happiest at the bench with something half-finished.",
+   e:"Puts things on the board nobody else would have thought of."}
+];
+const TRAIT_FX = {
+  grafter: {hands:1,  cost:1.00, price:0.94, warm:1.0, rate:1.00},
+  trader:  {hands:0,  cost:0.88, price:1.00, warm:0.9, rate:1.00},
+  host:    {hands:0,  cost:1.00, price:1.04, warm:1.5, rate:1.00},
+  banker:  {hands:0,  cost:1.00, price:1.00, warm:1.0, rate:0.80},
+  cook:    {hands:0,  cost:1.00, price:1.10, warm:1.0, rate:1.00}
+};
+const trait = () => TRAIT_FX[(G.owner && G.owner.trait) || "grafter"] || TRAIT_FX.grafter;
+const heirNames = ["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid","Hessa",
+                   "Saif","Dana","Rashid","Fatima","Jassim"];
+function makeHeir(){
+  const t = pick(TRAITS);
+  return {nm:pick(heirNames), age:24 + Math.floor(Math.random()*6),
+          dies:72 + Math.floor(Math.random()*18), trait:t.k, traitT:t.t};
+}
+
+/* ============================== sourcing and the bench ============================== */
+/* Two holes this fills. There was nowhere for the café to exist outside its own four walls,
+   and there was nothing left to want once the room was full -- the ladder finished around
+   2007 and the next three hundred years were flat. Both are the same hole: money with
+   nothing to buy.
+
+   A supplier is a standing decision rather than a purchase. A cheaper cup and a better cup
+   pull against each other, and the good ones want a fee every month whether you use them or
+   not, so the choice keeps costing you something. */
+const SUPPLIERS = {
+  cc:    {t:"The cash and carry", d:"Whatever is on the pallet that week. No fee, no favours, "
+           + "and you pay the shelf price.",
+          cost:1.00, qual:0,    fee:0,    join:0},
+  whole: {t:"A wholesaler on the industrial road", d:"Bulk crates, a standing order and a van "
+           + "on Tuesdays. Cheaper in the cup, and it costs you whether you sell it or not.",
+          cost:0.86, qual:0,    fee:420,  join:900},
+  roast: {t:"A roaster who knows your name", d:"He cups the batch before it leaves. Dearer "
+           + "than the pallet, and people can taste the difference.",
+          cost:0.94, qual:0.12, fee:700,  join:2200},
+  estate:{t:"Direct from the estate", d:"A named farm, a named lot, shipped to you. The kind "
+           + "of supply a café builds a reputation on, at the kind of price that assumes one.",
+          cost:0.80, qual:0.26, fee:2600, join:11000}
+};
+const supplier = () => SUPPLIERS[G.supplier] || SUPPLIERS.cc;
+const supplyFee = () => Math.round(supplier().fee * infl() * FIXED);
+
+/* The bench. Inventing used to be one button in the shop: pay, and a dish appeared. It is a
+   project now -- you choose what you are working on, it takes months, and it bills you every
+   one of them. Each finished piece of work costs more than the last, which is the sink the
+   late game never had. */
+const labCost = () => Math.round((900 + G.labDone * 1400) * infl() * MONTH_SCALE);
+const labMonths = () => 3 + Math.min(5, G.labDone);
+const LAB_LINES = [
+  {k:"sweet",    t:"Something sweet",      d:"For the afternoon, and for people who came in with children."},
+  {k:"warm",     t:"Something warm",       d:"The winter board, and the early mornings."},
+  {k:"cold",     t:"Something cold",       d:"Summer is forty degrees and the street does not stop for it."},
+  {k:"savoury",  t:"Something savoury",    d:"People who come in at noon and want lunch, not cake."},
+  {k:"quick",    t:"Something quick",      d:"For the ones who will not sit down."}
+];
+
+function screenSupply(){
+  const v = $("s-supply"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", dateLine()));
+  sc.appendChild(el("div","big","Sourcing"));
+  sc.appendChild(el("div","hint","What goes in the cup, and who you get it from. A fee is "
+    + "charged every month the arrangement stands."));
+
+  Object.keys(SUPPLIERS).forEach(k => {
+    const sp = SUPPLIERS[k], here = G.supplier === k;
+    const join = Math.round(sp.join * infl() * MONTH_SCALE / 10);
+    const c = el("div","pickr" + (here ? " on" : ""));
+    c.appendChild(el("div","t", sp.t));
+    c.appendChild(el("div","d", sp.d));
+    c.appendChild(el("div","m",
+      (sp.cost < 1 ? Math.round((1-sp.cost)*100) + "% cheaper in the cup" : "shelf price")
+      + (sp.qual ? " · " + Math.round(sp.qual*100) + "% better" : "")
+      + (sp.fee ? " · " + money(Math.round(sp.fee*infl()*FIXED)) + " a month" : " · no fee")
+      + (here ? " · YOURS" : join ? " · " + money(join) + " to start" : "")));
+    if(!here) c.onclick = () => {
+      if(G.cash < join) return;
+      G.cash -= join; G.supplier = k; save(); screenSupply();
+    };
+    sc.appendChild(c);
+  });
+
+  sc.appendChild(el("div","lbl","The bench"));
+  if(G.lab){
+    const left = G.lab.months;
+    const c = el("div","card");
+    c.appendChild(el("div","t", G.lab.t));
+    c.appendChild(el("div","hint", left + (left === 1 ? " month to go." : " months to go.")
+      + " It bills " + money(Math.round(labCost()/labMonths())) + " each month until it is done."));
+    sc.appendChild(c);
+    const stop = el("button","btn quiet","Abandon the work"); stop.type = "button";
+    stop.onclick = () => { G.lab = null; save(); screenSupply(); };
+    sc.appendChild(stop);
+  } else {
+    sc.appendChild(el("div","hint","A new recipe of your own, worked out over "
+      + labMonths() + " months at " + money(labCost()) + " in total. The "
+      + (G.labDone ? "next one will cost more again." : "first is the cheapest you will ever do.")));
+    LAB_LINES.forEach(l => {
+      const c = el("div","pickr");
+      c.appendChild(el("div","t", l.t));
+      c.appendChild(el("div","d", l.d));
+      c.onclick = () => {
+        if(G.cash < Math.round(labCost()/labMonths())) return;
+        G.lab = {line:l.k, t:l.t, months:labMonths(), each:Math.round(labCost()/labMonths())};
+        save(); screenSupply();
+      };
+      sc.appendChild(c);
+    });
+  }
+  const back = el("button","btn sec","Back to the café"); back.type = "button";
+  back.onclick = screenCafe; sc.appendChild(back);
+  v.appendChild(sc); show("supply");
+}
+
+/* a finished piece of bench work, built on the invention machinery but aimed by the player */
+function labFinish(){
+  const line = G.lab.line;
+  const pool = INVENTABLE.filter(i => i.tags.indexOf(line) >= 0);
+  const inv = pool.length ? pick(pool) : pick(INVENTABLE);
+  const invented = {}; G.cookbook.forEach(c => { if(c.invented) invented[c.k] = 1; });
+  const stock = G.recipes.filter(k => !invented[k]);
+  const src = RECIPES[pick(stock.length ? stock : G.recipes)];
+  const k = "lab" + G.labDone + "_" + G.gen;
+  RECIPES[k] = {nm: pick(INV_A) + " " + inv.n, ic: src.ic,
+                cost: Math.round(src.cost * 1.05),
+                price: Math.round(src.price * 1.55), tags: inv.tags.slice(), buy:0};
+  SPRITE[k] = inv.sp;
+  G.recipes.push(k);
+  G.cookbook.push({k:k, nm:RECIPES[k].nm, by:G.owner.nm, year:G.year, gen:G.gen,
+                   invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
+                   tags:RECIPES[k].tags, ic:RECIPES[k].ic, sp:SPRITE[k]});
+  G.labDone++; G.lab = null;
+  return RECIPES[k].nm;
+}
+
+/* ============================== the bank ============================== */
+/* Until now there was no way to lose. Money only ever went up, spending was a shopping list,
+   and a decision you cannot get wrong is not a decision. Borrowing puts a floor under
+   expansion and a rope around your neck: the payment is due whether the month was good or
+   not, and a café that cannot pay goes into arrears, then loses what it built.
+
+   What you can borrow is what the café can service, not what you would like. */
+const borrowLimit = () => Math.max(0, Math.round(
+  (G.lastTake * 4 + G.seats * 220 * MONTH_SCALE + (own("freehold") ? 9000*MONTH_SCALE : 0))
+  - G.debt));
+const RATE_BASE = 0.011;
+/* a café with a record borrows cheaper than one without */
+const offerRate = () => Math.max(0.005, (RATE_BASE - Math.min(0.004, G.rep * 0.00012)
+                                 + (G.arrears ? 0.004 : 0)) * trait().rate);
+const monthlyDue = () => G.debt > 0
+  ? Math.round(G.debt * G.debtRate) + Math.round(G.debt * 0.02) : 0;
+
+function screenBank(){
+  const v = $("s-bank"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", dateLine()));
+  sc.appendChild(el("div","big", G.debt > 0 ? "You owe the bank" : "The bank"));
+
+  const c = el("div","card");
+  const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
+  st("In the till", money(G.cash) + " AED", "cash");
+  if(G.debt > 0){
+    st("Owed", money(G.debt) + " AED", "bad");
+    st("Interest", (G.debtRate*100).toFixed(1) + "% a month", "bad");
+    st("Due each month", money(monthlyDue()) + " AED", "bad");
+  }
+  if(G.arrears) st("Months in arrears", String(G.arrears), "bad");
+  st("They would lend you", money(borrowLimit()) + " AED");
+  st("At", (offerRate()*100).toFixed(1) + "% a month");
+  sc.appendChild(c);
+
+  if(G.arrears)
+    sc.appendChild(el("div","hint","You have missed a payment. Miss three and they take the "
+      + "café back — a branch first if you have one, then the freehold, then the keys."));
+  else
+    sc.appendChild(el("div","hint","A loan is paid back whether the month was good or not. "
+      + "Borrow against what the café already earns, not against what you hope it will."));
+
+  [0.25, 0.5, 1].forEach(frac => {
+    const amt = Math.round(borrowLimit() * frac / (100*MONTH_SCALE)) * 100 * MONTH_SCALE;
+    if(amt < 100*MONTH_SCALE) return;
+    const b = el("button","btn" + (frac === 1 ? " sec" : ""), "Borrow " + money(amt) + " AED");
+    b.type = "button";
+    b.onclick = () => {
+      /* one rate for the whole balance: a blended rate is a spreadsheet, not a decision */
+      G.debtRate = offerRate();
+      G.debt += amt; G.cash += amt; save(); screenBank();
+    };
+    sc.appendChild(b);
+  });
+  if(G.debt > 0 && G.cash > 0){
+    const pay = Math.min(G.cash, G.debt);
+    const b = el("button","btn sec","Pay off " + money(pay) + " AED now"); b.type = "button";
+    b.onclick = () => { G.cash -= pay; G.debt -= pay;
+                        if(G.debt <= 0){ G.debt = 0; G.debtRate = 0; G.arrears = 0; }
+                        save(); screenBank(); };
+    sc.appendChild(b);
+  }
+  const back = el("button","btn quiet","Back to the café"); back.type = "button";
+  back.onclick = screenCafe; sc.appendChild(back);
+  v.appendChild(sc); show("bank");
+}
+
+/* ============================== ambitions ============================== */
+/* A first play reported nothing to achieve, and it was right: the game had one "Next" card
+   and no notion of having arrived anywhere. These are the things a café owner would actually
+   be pleased about, checked when the books close. They pay out, because a goal that only
+   ticks a box is a list; and they are ordered so there is always a near one and a far one. */
+const GOALS = [
+  {k:"board4",  t:"Four things on the board",  d:"Room to put a morning and an afternoon on it at once.",
+   at:g => g.slots >= 4,                                  pay:g => goalPay(0.6)},
+  {k:"seats10", t:"Ten seats",                 d:"Enough that people stay rather than take it away.",
+   at:g => g.seats >= 10,                                 pay:g => goalPay(0.8)},
+  {k:"met3",    t:"Three regulars",            d:"Three people you know by name and by order.",
+   at:g => REGULARS.filter(r => regState(r.k).met).length >= 3, pay:g => goalPay(0.6)},
+  {k:"hire",    t:"A second pair of hands",    d:"Somebody else behind the counter.",
+   at:g => g.staff.length >= 1,                           pay:g => goalPay(0.9)},
+  {k:"debtfree",t:"Nothing owed to anybody",   d:"The loan cleared, the café yours outright.",
+   at:g => g.tenure === "loan" && g.debt === 0,           pay:g => goalPay(1.6)},
+  {k:"invent",  t:"A recipe of your own",      d:"Something in the cookbook under your name.",
+   at:g => g.cookbook.some(c => c.invented),              pay:g => goalPay(1.0)},
+  {k:"board8",  t:"A board you cannot fill",   d:"Every slot the wall will take.",
+   at:g => g.slots >= 8,                                  pay:g => goalPay(1.5)},
+  {k:"story2",  t:"Two stories seen through",  d:"Two people whose lives you followed to the end.",
+   at:g => REGULARS.filter(r => regState(r.k).done).length >= 2, pay:g => goalPay(1.6)},
+  {k:"branch",  t:"A second door",             d:"A café somewhere else with your name on it.",
+   at:g => g.branches.length >= 1,                        pay:g => goalPay(1.8)},
+  {k:"month50", t:"Fifty thousand in a month", d:"One month's takings past fifty thousand.",
+   at:g => g.best.take >= 50000,                          pay:g => goalPay(1.8)},
+  {k:"freehold",t:"Your own four walls",       d:"The freehold bought; no landlord at all.",
+   at:g => own("freehold") > 0,                           pay:g => goalPay(2.2)},
+  {k:"gen2",    t:"The keys handed on",        d:"A second generation behind the counter.",
+   at:g => g.gen >= 2,                                    pay:g => goalPay(2.5)},
+  {k:"gen4",    t:"A name on the street",      d:"Four generations of the same family in the same room.",
+   at:g => g.gen >= 4,                                    pay:g => goalPay(3.5)},
+  {k:"estate",  t:"Straight from the estate",  d:"A named farm and a named lot, shipped to your door.",
+   at:g => g.supplier === "estate",                       pay:g => goalPay(2.0)},
+  {k:"lab3",    t:"Three of your own",          d:"Three recipes worked out at the bench, not bought.",
+   at:g => g.labDone >= 3,                                pay:g => goalPay(2.2)},
+  {k:"century", t:"A hundred years",           d:"The café open a century after you took the keys.",
+   at:g => g.year >= YEAR0 + 100,                         pay:g => goalPay(5.0)}
+];
+/* An ambition paid a flat sum fixed at design time, and the first few were worth 10,000 to
+   15,000 against a month's takings of 1,695 -- eight months of revenue for reaching ten
+   seats, which flattens the early climb it is supposed to reward. Worse, the same sum is
+   loose change by 2100, so the far end stopped meaning anything at all.
+
+   Paid as a multiple of what the café actually takes in a month instead, with a floor so the
+   first ones are not trivial. The same number stays meaningful across three centuries. */
+const goalPay = x => Math.round(Math.max(90 * MONTH_SCALE, (G.lastTake || 0) * x));
+
+function checkGoals(){
+  const won = [];
+  GOALS.forEach(go => {
+    if(G.goals[go.k]) return;
+    if(!go.at(G)) return;
+    G.goals[go.k] = G.year;
+    const pay = go.pay(G); G.cash += pay; G.rep += 2;
+    won.push({g:go, pay:pay});
+  });
+  return won;
+}
+function screenGoals(){
+  const v = $("s-goals"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  const done = GOALS.filter(g => G.goals[g.k]).length;
+  sc.appendChild(el("div","lbl", done + " of " + GOALS.length + " · " + (G.cafeName || "the café")));
+  sc.appendChild(el("div","big","Ambitions"));
+  GOALS.forEach(go => {
+    const got = G.goals[go.k];
+    const c = el("div","card"); if(got) c.style.borderColor = "var(--amber-d)";
+    const row = el("div","stat");
+    row.appendChild(el("div","k", go.t));
+    row.appendChild(el("div","v " + (got ? "good" : ""), got ? String(got) : "+" + money(go.pay(G))));
+    c.appendChild(row);
+    c.appendChild(el("div","hint", go.d));
+    sc.appendChild(c);
+  });
+  const b = el("button","btn sec","Back to the café"); b.type = "button";
+  b.onclick = screenCafe; sc.appendChild(b);
+  v.appendChild(sc); show("goals");
+}
+
+/* ============================== setting up ============================== */
+/* The game used to begin with a café that was simply there, unnamed, owned by nobody in
+   particular. Three questions instead -- what it is called, who you are, and how you came by
+   the place -- and the third is a mechanical choice, not flavour: it sets the money you open
+   with, the rent, the state of the room, and whether you owe anybody anything. The loan start
+   is the debt system's first customer. */
+const TENURES = [
+  {k:"father", t:"Your father's shop",
+   d:"He kept it thirty years and it shows: the floor is worn and the machine is older than "
+    + "you. But the rent has not moved since 1979, and the people who came for him are still "
+    + "coming.",
+   m:"Less money · cheap rent · a worn room · one regular already knows you",
+   f:g => { g.cash = Math.round(380*MONTH_SCALE); g.rentCut = 0.55; g.wear = 22;
+            g.headStart = true; }},
+  {k:"bought", t:"Bought with everything you had",
+   d:"No landlord's favour and no debt. An empty room, a clean lease and nothing in the bank "
+    + "to fall back on.",
+   m:"A middling start · full rent · nothing owed",
+   f:g => { g.cash = Math.round(640*MONTH_SCALE); }},
+  {k:"loan", t:"On the bank's money",
+   d:"More to open with than either of the others, and a repayment every month whether the "
+    + "café takes anything or not. The room is fitted out properly from the first day.",
+   m:"Most money · full rent · a debt to service",
+   f:g => { g.cash = Math.round(1500*MONTH_SCALE); g.debt = Math.round(1200*MONTH_SCALE);
+            g.debtRate = 0.011; }}
+];
+
+function screenSetup(){
+  let name = "", who = "", pickK = null;
+  const v = $("s-cafe"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "26px";
+  sc.appendChild(el("div","lbl","A shopping street, " + YEAR0));
+  sc.appendChild(el("div","big","Open a café"));
+  sc.appendChild(el("div","hint","A unit on the corner, a machine, and whatever you can put on "
+    + "the board. What happens after that is yours."));
+
+  sc.appendChild(el("div","lbl","What is it called"));
+  const n1 = document.createElement("input");
+  n1.className = "tin"; n1.type = "text"; n1.maxLength = 28; n1.id = "setup-name";
+  n1.placeholder = pick(["The Corner","Karak House","Al Manara","Sadiq & Sons","The Blue Door"]);
+  sc.appendChild(n1);
+
+  sc.appendChild(el("div","lbl","And who are you"));
+  const n2 = document.createElement("input");
+  n2.className = "tin"; n2.type = "text"; n2.maxLength = 22; n2.id = "setup-owner";
+  n2.placeholder = pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]);
+  sc.appendChild(n2);
+
+  sc.appendChild(el("div","lbl","How you came by the place"));
+  const cards = [];
+  TENURES.forEach(t => {
+    const c = el("div","pickr");
+    c.appendChild(el("div","t", t.t));
+    c.appendChild(el("div","d", t.d));
+    c.appendChild(el("div","m", t.m));
+    c.onclick = () => { pickK = t.k; cards.forEach(x => x.classList.remove("on")); c.classList.add("on"); go.disabled = false; };
+    cards.push(c); sc.appendChild(c);
+  });
+
+  const go = el("button","btn","Take the keys"); go.type = "button"; go.disabled = true;
+  go.onclick = () => {
+    const t = TENURES.find(x => x.k === pickK); if(!t) return;
+    G.cafeName = (n1.value || n1.placeholder).trim().slice(0,28);
+    G.owner.nm = (n2.value || n2.placeholder).trim().slice(0,22);
+    G.tenure = t.k; t.f(G);
+    const mine = pick(TRAITS); G.owner.trait = mine.k; G.owner.traitT = mine.t;
+    /* somebody came for your father and still comes for you */
+    if(G.headStart){ const r = REGULARS[0]; G.regs[r.k] = {met:true, beat:0, warmth:18, done:false}; }
+    G.setup = true; save(); intro();
+  };
+  sc.appendChild(go);
+  v.appendChild(sc); show("cafe");
+}
+
 /* ============================== boot ============================== */
 function intro(){
   const v = $("s-cafe"); v.textContent = "";
-  const bar = el("div","bar"); bar.appendChild(el("div","pill","Spring 1996"));
+  const bar = el("div","bar"); bar.appendChild(el("div","pill", dateLine()));
   v.appendChild(bar);
   drawRoom(v, false);
   const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";
-  sc.appendChild(el("div","lbl","Café Life"));
+  sc.appendChild(el("div","lbl", G.cafeName || "Café Life"));
   sc.appendChild(el("div","big","A counter and two stools"));
-  [ "You have one machine, two recipes and four hundred and twenty dirhams. There is no "
+  [ "You have one machine, two recipes and " + money(G.cash) + " dirhams. There is no "
     + "clock and nothing here can be failed.",
     "Each season you choose what goes on the board — you will always own more recipes than "
     + "you have room to show, and the season moves what people want. Then you open, and you "
@@ -1478,5 +2534,5 @@ function intro(){
 }
 const prior = load();
 if(prior){ G = prior; rehydrate(); }
-G.seenIntro ? screenCafe() : intro();
+!G.setup ? screenSetup() : (G.seenIntro ? screenCafe() : intro());
 </script></body></html>

@@ -13,20 +13,25 @@ its own URL from the base name. They are skipped.
 import os, shutil, re, json, hashlib
 from PIL import Image
 
+# Anchored to the repository rather than the shell's working directory, for the same reason
+# tools/build-native.py is: a caller that is not standing in the repo root is not a mistake.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+R = lambda *p: os.path.join(ROOT, *p)
+
 def icons(into):
     """The home-screen icon, at the sizes iOS and Android each ask for."""
-    src = Image.open("app/resources/icon.png").convert("RGB")
+    src = Image.open(R("app/resources/icon.png")).convert("RGB")
     for px in (180, 192, 512):
         src.resize((px, px), Image.LANCZOS).save(os.path.join(into, "icon-%d.png" % px))
 
-SRC  = "art/sprites"
-OUT  = "dist"          # the web build, wrapped by the artifact platform
-APP  = "app/www"      # the same game as a whole document, for the native shell
-SITE = "site"         # the same document again, installable from a phone browser
+SRC  = R("art/sprites")
+OUT  = R("dist")          # the web build, wrapped by the artifact platform
+APP  = R("app/www")      # the same game as a whole document, for the native shell
+SITE = R("site")         # the same document again, installable from a phone browser
 SQ, WIDE = 128, 900
 # the service worker cache name: changes whenever the game does, so a deploy replaces it
 BUILD_ID = "cafe-life-" + hashlib.sha1(
-    open("prototype/cafelife.html", "rb").read()).hexdigest()[:10]
+    open(R("prototype/cafelife.html"), "rb").read()).hexdigest()[:10]
 
 def main():
     for d in (OUT, APP, SITE):
@@ -55,7 +60,7 @@ def main():
     # html, head, body, a reset and the phone's safe-area padding -- so the published file has
     # to be the contents of that document, not another whole one. Strip the wrapper, keep the
     # title, the font link and the style block, and point the sprite path at the packed copy.
-    html = open("prototype/cafelife.html", encoding="utf-8").read()
+    html = open(R("prototype/cafelife.html"), encoding="utf-8").read()
     before = html
     html = html.replace('const ART = "../art/sprites/";', 'const ART = "sprites/";')
     assert html != before, "ART constant not found -- did prototype/cafelife.html change?"
@@ -132,8 +137,9 @@ self.addEventListener("fetch", e => {
 
     total = sum(os.path.getsize(os.path.join(dp, f))
                 for dp, _, fs in os.walk(OUT) for f in fs)
+    rel = lambda p: os.path.relpath(p, ROOT)
     print("%d sprites, %.1f MB -> %s (artifact) and %s (native shell)"
-          % (n, total/1e6, OUT, APP))
-    print("     and %s (installable site, %s)" % (SITE, BUILD_ID))
+          % (n, total/1e6, rel(OUT), rel(APP)))
+    print("     and %s (installable site, %s)" % (rel(SITE), BUILD_ID))
 
 main()

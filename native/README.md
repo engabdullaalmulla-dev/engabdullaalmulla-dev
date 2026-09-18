@@ -50,7 +50,25 @@ WebP rather than PNG because the sprites are 7.5MB as PNG, which base64 encodes 
 single JavaScript module; the same images are 2.1MB as WebP at a quality that does not read
 as lossy. WebP has been supported in WKWebView since iOS 14 and this targets iOS 15.
 
-`src/webapp/html.js` is generated and git-ignored. Do not edit it.
+`src/webapp/html.js` is generated. Do not edit it — edit `prototype/cafelife.html` or the art
+and run `npm run webapp`.
+
+**It is committed, deliberately, and it must stay committed.** It used to be git-ignored, which
+would have broken `eas build` on the very first attempt. EAS resolves the upload root with
+`git rev-parse --show-toplevel` and ships the *tracked* files from there; its git client uses
+`.easignore` only to delete files from that clone, never to add one back (`vcs/clients/git.js`
+— "`.easignore` exists, deleting files that should be ignored"). So an ignored, untracked file
+simply never arrives, and `App.js` imports this one on line 4. Metro would have failed to
+resolve it and the build would have died before signing.
+
+Marble avoids the same trap from the other direction, with an `eas-build-post-install` hook
+that regenerates its bundle on the build server. That does not port cleanly here: this
+bundle is built by `tools/build-native.py`, which needs Pillow, and an EAS macOS runner has no
+Pillow. Regenerating on the server is the tidier end state — it makes a stale bundle
+impossible — but it needs a working `pip install` on the runner, so it is a change to make
+*after* a build has gone through, not before. Until then the cost is a 3.4 MB blob in history
+each time the game or the art changes, and `npm run build:testflight` regenerates it
+immediately before building so what ships is never stale.
 
 ## The origin is not cosmetic
 

@@ -15,10 +15,13 @@
  * Run: NODE_PATH=<playwright> node tools/check-native.js
  */
 const { chromium } = require('playwright');
+const path = require('path');
+// the repo, not wherever the shell happens to be standing
+const ROOT = path.dirname(__dirname);
 const ORIGIN = 'https://app.cafelife.local/';
 
 (async () => {
-  const { HTML } = await import('file://' + process.cwd() + '/native/src/webapp/html.js');
+  const { HTML } = await import('file://' + path.join(ROOT, 'native/src/webapp/html.js'));
   const fails = [];
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 } });
