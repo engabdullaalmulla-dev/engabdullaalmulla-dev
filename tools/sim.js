@@ -33,7 +33,7 @@ const ORDER = [
   const b = await chromium.launch();
   const p = await b.newPage();
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
-  await p.goto('file://' + process.cwd() + '/prototype/cafelife.html');
+  await p.goto('file://' + require('path').join(require('path').dirname(__dirname), 'prototype/cafelife.html'));
   await p.waitForTimeout(300);
 
   const res = await p.evaluate(([YEARS, RUNS, POLICY, ORDER]) => {
