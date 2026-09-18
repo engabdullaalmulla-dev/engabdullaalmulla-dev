@@ -1172,6 +1172,20 @@ function runService(auto){
   foot.appendChild(el("div","hint","You have time to go over to " + visitsToday() + " people this "
     + "day. It is worth almost nothing on the till and it is the only thing that moves "
     + "anyone's story."));
+  /* You open the day and you close it. Pulling the shutters down early ends trade where it
+     stands -- whoever had not come in yet does not, and that is the cost. Worth having
+     because a day you have already read is a day you should be able to end, and because a
+     café that can only ever run to closing time is not one you are running. */
+  const shut = el("button","btn quiet","Pull the shutters down"); shut.type = "button";
+  shut.onclick = ev => {
+    ev.stopPropagation();
+    if(!SV || SV.done) return;
+    SV.done = true; clearTimeout(SV.timer);
+    SV.shutAt = clockAt(Math.min(1, (SV.tick || 0) / DAY_TICKS));
+    SV.lost = SV.q.length - SV.i;
+    closeDay(false);
+  };
+  foot.appendChild(shut);
   v.appendChild(foot);
   /* tapping the day itself hurries it; tapping a guest is still going over to them */
   v.onclick = ev => { if(ev.target.closest(".g") || ev.target.closest("#sv-moment")) return;
@@ -1308,6 +1322,10 @@ function closeDay(auto){
   if(SV.tips > 0) G.rep += 1;
   /* Wear comes from use, not the calendar: it is the busy days that take the floor apart. */
   G.wear = (G.wear || 0) + SV.served/70;
+  /* The date of the day that just ended, taken before the calendar moves on -- the summary
+     was being headed with tomorrow, and "day - 1" is not a date once a month can end on the
+     28th, 29th, 30th or 31st. */
+  SV.dateWas = dateLine();
   G.day++;
   if(G.day > monthDays()){ closeMonth(auto); return; }
   save(); dayScreen(auto);
@@ -1320,7 +1338,8 @@ function dayScreen(auto){
   const M = G.mo;
   const v = $("s-close"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
-  sc.appendChild(el("div","lbl", dateLine()
+  sc.appendChild(el("div","lbl", (SV.dateWas || dateLine())
+    + (SV.shutAt ? " · shut at " + SV.shutAt : "")
     + (auto ? " · run by the counter" : "")));
   sc.appendChild(el("div","big", SV.take >= (M.take / Math.max(1, M.days)) ? "A good day" : "A quiet day"));
 
@@ -1328,6 +1347,7 @@ function dayScreen(auto){
   const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
     r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
   st("Today", money(SV.take) + " AED", "cash");
+  if(SV.lost) st("Went elsewhere when you shut", String(SV.lost), "bad");
   if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
   st("The month so far", money(M.take) + " AED", "cash");
   st("Days left this month", String(monthDays() - G.day + 1));
