@@ -441,13 +441,51 @@ function faceArt(r, px, aged){
 const WALKIN = ["p1","p2","p7","p8","p10","p12",
                 "p16","p18","p20","p23","p25","p26"];
 
+/* ---- the clock -------------------------------------------------------------------------
+   The unit used to be a season: four a year, and one watched service was three months of
+   trade. The numbers never said that. buildQueue makes eight to sixteen people, which is a
+   day's custom, so the calendar was mislabelling what you were watching -- and because the
+   owner aged once every four services, the whole family-legacy system sat 184 services away
+   and nobody ever saw it.
+
+   A trading DAY is now what you watch, hour by hour from OPEN to CLOSE. A MONTH is 26
+   trading days and it is the accounting period: rent, wages and the spending round. Twelve
+   months make a year and a dynasty runs for three hundred of them. You can watch every day
+   of a month or hand the rest of it to the counter; either way the trade is counted the
+   same, so nobody is taxed for wanting to go faster.
+
+   The recurring costs are unchanged in substance: they were written against one service, and
+   one service is a day, so they are charged per day and land on the month's bill together. */
+const OPEN = 7, CLOSE = 22;
+const MONTH_DAYS = 26;                       // the café is shut the rest of the month
+/* What a standing monthly charge is worth against a month of trade. NOT MONTH_DAYS: the
+   proportional costs already ride the month's takings, so multiplying the fixed ones by the
+   full day count charged for the same thing twice and bankrupted the café by 1999 however
+   well it traded. Derived from the early months -- rent has to be felt and survivable. */
+const FIXED = 5;
+const YEAR0 = 1996, LEGACY_YEARS = 300;
+const MONTHS = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+const seasonIdx = () => Math.floor((G.month % 12) / 3) % 4;
+const season = () => SEASONS[seasonIdx()];
+const monthName = () => MONTHS[G.month % 12];
+const dateLine = () => monthName() + " " + G.year;
+const pad2 = n => (n < 10 ? "0" : "") + n;
+/* the shutters go up at seven; a day's queue is spread across the trading hours */
+const clockAt = frac => {
+  const h = OPEN + (CLOSE - OPEN) * Math.min(1, Math.max(0, frac));
+  return pad2(Math.floor(h)) + ":" + pad2(Math.floor((h % 1) * 60 / 15) * 15);
+};
+
 /* ============================== state ============================== */
 function NEW(){
   return {
-    year:1996, season:0, gen:1, week:0,
+    year:YEAR0, month:0, day:1, gen:1,
+    /* the month in progress: days already traded, and what they took */
+    mo:{take:0, profit:0, served:0, missed:0, tips:0, days:0, offstage:0, seen:[]},
     owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
            dies:72+Math.floor(Math.random()*18)},
-    cash:640, rent:90,
+    cash:640*MONTH_DAYS, rent:90,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
@@ -458,17 +496,16 @@ function NEW(){
 }
 let G = NEW();
 let SV = null;                                     // the live service
-const SAVE = "cafelife_mgmt_1";
+const SAVE = "cafelife_mgmt_2";
 function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(G)); }catch(e){} }
 function load(){ try{ const r=localStorage.getItem(SAVE); if(!r) return null;
                       const p=JSON.parse(r); return (p&&p.year)?p:null; }catch(e){ return null; } }
 
-const season = () => SEASONS[G.season % 4];
 const own = k => G.owned[k] || 0;
 /* Rent used to inflate at 2% against prices at 1.8%. Nobody chose that: it was a quiet
    squeeze that compounded for thirty years and it is why the café slid backwards however
    well it was run. The two rates now match. */
-const infl = () => 1 + (G.year - 1996) * 0.018;
+const infl = () => 1 + (G.year - YEAR0) * 0.018;
 /* G.mood and G.ac were set by the radio, the plants and the air conditioning and then read
    by nothing at all -- 1,140 AED of shop items that did exactly what the barista did before
    it was fixed, which is nothing. A room people like is a room they sit in longer, so mood
@@ -478,7 +515,7 @@ const dwellNow = () => G.dwell + G.mood * 0.015;
 /* Summer is forty degrees. Without shade or cooling the street simply does not stop, and
    that is the season the awning and the air conditioning are sold against. */
 function heatNow(){
-  if(G.season % 4 !== 1) return 1;
+  if(seasonIdx() !== 1) return 1;
   if(G.ac) return 1;
   return own("awning") ? 0.88 : 0.72;
 }
@@ -490,13 +527,18 @@ function heatNow(){
    running costs ate half of everything and the first five years went nowhere. Rent belongs
    mostly on the size of the room and the trade going through it, not on a flat charge for
    having a door. */
-const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl()
+/* Every fixed cost below was written against one service. One service is a trading day, and
+   the bill is now settled monthly against MONTH_DAYS of them, so the standing charges carry
+   that factor. The shares taken off takings (the landlord's 7%, the 15% of running costs)
+   need no factor at all -- they scale with the month because the takings do. */
+const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl() * FIXED
                         + (own("freehold") ? 0 : G.lastTake * 0.07));
 /* A wage was a fixed 120 or 260 a season whatever the café had become, so by 2020 the whole
    payroll was 716 against takings of 35,664 -- two per cent, where a real café spends about a
    third. A barista in a thirty-two seat room is not doing the same job as a barista in a room
    with two stools, and is not paid the same either. */
-const wageOf = s => Math.round((s.role === "manager" ? 220 + G.seats*40 : 100 + G.seats*18) * infl());
+const wageOf = s => Math.round((s.role === "manager" ? 220 + G.seats*40 : 100 + G.seats*18)
+                               * infl() * FIXED);
 const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
 
 /* You can only get to so many people yourself. Everyone past that waits, gives up and walks,
@@ -507,19 +549,21 @@ const staffWage = () => G.staff.reduce((a,s) => a + wageOf(s), 0);
    goes on power, water, gas, cleaning, licences, insurance and the things that break. It
    scales with how much you are doing and how big the room is, and it is on the close screen
    by name, because a player who cannot see a cost cannot plan around it. */
-const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl());
+const overheads = take => Math.round(take * 0.15 + G.seats * 3 * infl() * FIXED);
 
 /* Everything in here is wearing out: the machine, the chairs, the paint, the floor by the
    door. A café that is never done up loses people slowly, and the bill for doing it up grows
    with the place -- which is the sink the late game did not have. Money that sits still stops
    being a score and becomes the thing that keeps the room alive. */
 const wearNow = () => Math.min(0.34, (G.wear || 0) / 100);
-const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl()
-                                  + G.lastTake * 1.6);
+/* lastTake is a month now rather than a day, so the share of it here drops by the same
+   factor it gained -- otherwise doing the place up costs more than a branch. */
+const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl() * FIXED
+                                  + G.lastTake * 1.6 / MONTH_DAYS * 8);
 
 const SERVE_EACH = 42;
 const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
-const costOf = k => RECIPES[k].cost * (1 + (G.year-1996)*0.016);
+const costOf = k => RECIPES[k].cost * (1 + (G.year-YEAR0)*0.016);
 /* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
 function costOfItem(k, have){
   const it = ITEMS[k];
@@ -527,7 +571,9 @@ function costOfItem(k, have){
      seats to eight took fifteen seasons with nothing else happening in them. Filling a room
      should feel like filling a room. */
   if(it.dyn) return it.dyn();               // priced off the café it is being spent on
-  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32)) * infl());
+  /* Priced against what the café earns, and it now earns a month at a time. */
+  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32))
+                    * infl() * MONTH_DAYS);
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
 function show(n){ ["cafe","plan","serve","close","shop","people"]
@@ -537,7 +583,7 @@ function show(n){ ["cafe","plan","serve","close","shop","people"]
 function boardHas(tag){ return G.board.some(k => RECIPES[k].tags.indexOf(tag) >= 0); }
 function priceOf(k){
   const r = RECIPES[k];
-  let p = r.price * (1 + G.priceLift) * (1 + (G.year-1996)*0.018);
+  let p = r.price * (1 + G.priceLift) * (1 + (G.year-YEAR0)*0.018);
   if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
   if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
   if(r.tags.indexOf("cold")>=0) p *= (1 + G.coldLift);
@@ -565,7 +611,7 @@ function roomPlate(){
   if(grown){
     if(G.year < 2000)  return "room_1990s";
     if(G.year >= 2030) return "room_2030s";
-    const s = G.season % 4;
+    const s = seasonIdx();
     if(s === 1) return "room_summer";
     if(s === 2) return "room_night";
     if(s === 3) return "room_rain";
@@ -662,11 +708,13 @@ function nextThing(){
      decade having never once widened it, which is the central tension of the game never
      firing. It outranks everything else the moment there is something in the book that cannot
      fit on the board. */
-  if(G.recipes.length > G.slots && own("slot") < ITEMS.slot.max){
+  if(G.board.length >= G.slots && own("slot") < ITEMS.slot.max){
     const c = costOfItem("slot", own("slot"));
     const over = G.recipes.length - G.slots;
     out.push({at: Math.min(1, G.cash/c), title: "A bigger board",
-      note: over + (over === 1 ? " recipe you own will not fit on it. " : " recipes you own will not fit on it. ")
+      note: (over > 0 ? over + (over === 1 ? " recipe you own will not fit on it. "
+                                           : " recipes you own will not fit on it. ")
+                      : "It is full, and there are more recipes to be had. ")
             + (G.cash >= c ? "You can widen it now." : money(c - G.cash) + " AED to go."),
       icon: sprite(ITEM_SPRITE["slot"], 40, ITEMS.slot.ic), w: 1.25});
   }
@@ -695,11 +743,11 @@ function nextThing(){
 function screenCafe(){
   const v = $("s-cafe"); v.textContent = "";
   const bar = el("div","bar");
-  bar.appendChild(el("div","pill", season().nm + " " + G.year));
+  bar.appendChild(el("div","pill", dateLine() + " · day " + G.day));
   bar.appendChild(el("div","grow"));
   bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
   v.appendChild(bar);
-  drawRoom(v, G.season === 3);
+  drawRoom(v, seasonIdx() === 3);
 
   const sc = el("div","scroll pad"); sc.style.paddingTop = "14px";
 
@@ -796,7 +844,7 @@ function screenCafe(){
      the public support page had to say so. Kept quiet and deliberately awkward to reach: it
      is the last thing on the hub, it does not exist until a season has closed, and the first
      tap only asks. */
-  if(G.year > 1996 || G.season > 0){
+  if(G.year > YEAR0 || G.month > 0 || G.day > 1){
     const again = el("button","btn quiet","Start a new café"); again.type = "button";
     again.onclick = () => askWipe(again);
     sc.appendChild(again);
@@ -1000,7 +1048,7 @@ function runService(auto){
       if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*MANAGER_CUT); SV.served++;
                if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
       else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
-    closeSeason(true); return;
+    closeDay(true); return;
   }
 
   /* every regular who came, then enough walk-ins to fill the scene */
@@ -1019,7 +1067,8 @@ function runService(auto){
   SV.q = shown;
   const v = $("s-serve"); v.textContent = "";
   const top = el("div","svc-top");
-  top.appendChild(el("div","lbl", season().nm + " " + G.year));
+  top.appendChild(el("div","lbl", dateLine() + " · day " + G.day + " of " + MONTH_DAYS));
+  const cl = el("div","lbl"); cl.id = "sv-clock"; cl.textContent = clockAt(0); top.appendChild(cl);
   const take = el("div","mid-t cash","0 AED"); take.id = "sv-take"; top.appendChild(take);
   v.appendChild(top);
   const vis = el("div","visits"); vis.id = "sv-visits"; v.appendChild(vis);
@@ -1029,7 +1078,7 @@ function runService(auto){
   const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
   const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
   foot.appendChild(el("div","hint","You have time to go over to " + VISITS + " people this "
-    + "season. It is worth almost nothing on the till and it is the only thing that moves "
+    + "day. It is worth almost nothing on the till and it is the only thing that moves "
     + "anyone's story."));
   v.appendChild(foot);
   show("serve");
@@ -1049,7 +1098,7 @@ function paintVisits(){
 
 function step(){
   if(SV.moment) return;
-  if(SV.i >= SV.q.length){ clearInterval(SV.timer); setTimeout(() => closeSeason(false), 700); return; }
+  if(SV.i >= SV.q.length){ clearInterval(SV.timer); setTimeout(() => closeDay(false), 700); return; }
   const c = SV.q[SV.i++];
   const r = serveOne(c);
   const list = $("sv-list");
@@ -1090,7 +1139,9 @@ function step(){
   list.insertBefore(g, list.firstChild);
   while(list.children.length > CAST) list.lastChild.remove();
   $("sv-take").textContent = money(SV.take) + " AED";
-  $("sv-tick").style.width = Math.round(SV.i/SV.q.length*100) + "%";
+  const through = SV.i/SV.q.length;
+  $("sv-tick").style.width = Math.round(through*100) + "%";
+  $("sv-clock").textContent = clockAt(through);   // the shutters go up at seven, down at ten
 
   if(SV.i === Math.floor(SV.q.length*0.45) && Math.random() < 0.75) doMoment();
 }
@@ -1113,15 +1164,84 @@ function doMoment(){
 }
 
 /* ============================== closing the season ============================== */
-function closeSeason(auto){
-  const wages = staffWage();
-  const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
-  const rent = rentNow();                    // charged on LAST season's takings
-  const running = overheads(SV.take);
-  const net = SV.profit + branch - rent - wages - running;
-  G.cash += net; G.lastTake = SV.take;
+/* A day ends and the month keeps the tally. Nothing is charged here: rent, wages and running
+   costs are a month's business and land together when the books close on the 26th. Splitting
+   them this way is what lets a player watch every day of a month or none of them without the
+   bill changing -- going faster must never cost you money, or the fast path is a trap. */
+function closeDay(auto){
+  const m = G.mo;
+  m.take += SV.take; m.profit += SV.profit; m.served += SV.served;
+  m.missed += SV.missed; m.tips += SV.tips; m.offstage += (SV.offstage || 0); m.days++;
+  SV.seen.forEach(k => { if(m.seen.indexOf(k) < 0) m.seen.push(k); });
   G.rep += (SV.missed > SV.served*0.4 ? -1 : 1);
   if(SV.tips > 0) G.rep += 1;
+  /* Wear comes from use, not the calendar: it is the busy days that take the floor apart. */
+  G.wear = (G.wear || 0) + SV.served/70;
+  G.day++;
+  if(G.day > MONTH_DAYS){ closeMonth(auto); return; }
+  save(); dayScreen(auto);
+}
+
+/* Between days. Deliberately thin -- a full report after every one of twenty-six days would
+   make the month a chore, and the month is where the decisions are. It shows the day, the
+   running tally, and the two ways out. */
+function dayScreen(auto){
+  const M = G.mo;
+  const v = $("s-close"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", dateLine() + " · day " + (G.day - 1) + " of " + MONTH_DAYS
+    + (auto ? " · run by the counter" : "")));
+  sc.appendChild(el("div","big", SV.take >= (M.take / Math.max(1, M.days)) ? "A good day" : "A quiet day"));
+
+  const c = el("div","card");
+  const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
+  st("Today", money(SV.take) + " AED", "cash");
+  if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
+  st("The month so far", money(M.take) + " AED", "cash");
+  st("Days left to trade", String(MONTH_DAYS - G.day + 1));
+  sc.appendChild(c);
+  sc.appendChild(el("div","hint","Nothing is charged until the books close at the end of the "
+    + "month, so a day you watch and a day you hand over are worth the same."));
+
+  const on = el("button","btn","Open tomorrow"); on.type = "button";
+  on.onclick = () => { screenPlan(); }; sc.appendChild(on);
+  const rest = el("button","btn sec","Run the rest of the month"); rest.type = "button";
+  rest.onclick = () => runRestOfMonth(); sc.appendChild(rest);
+  v.appendChild(sc); show("close");
+}
+
+/* Hand the remaining days to the counter. They are resolved exactly as a watched day is,
+   minus the going-over-to-people you would have done, which is the only thing you lose. */
+function runRestOfMonth(){
+  let guard = 0;
+  while(G.day <= MONTH_DAYS && guard++ < 400){
+    const q = buildQueue();
+    SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
+          moment:null, visits:0, offstage:q.length};
+    q.forEach(c => { const r = serveOne(c);
+      if(r.k){ SV.take += r.pay; SV.profit += r.profit; SV.served++;
+               if(c.reg){ if(SV.seen.indexOf(c.reg.k)<0) SV.seen.push(c.reg.k);
+                          regState(c.reg.k).warmth++; } }
+      else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
+    const m = G.mo;
+    m.take += SV.take; m.profit += SV.profit; m.served += SV.served;
+    m.missed += SV.missed; m.offstage += SV.offstage; m.days++;
+    SV.seen.forEach(k => { if(m.seen.indexOf(k) < 0) m.seen.push(k); });
+    G.wear = (G.wear || 0) + SV.served/70;
+    G.day++;
+  }
+  closeMonth(false);
+}
+
+function closeMonth(auto){
+  const M = G.mo;
+  const wages = staffWage();
+  const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
+  const rent = rentNow();                    // charged on LAST month's takings
+  const running = overheads(M.take);
+  const net = M.profit + branch - rent - wages - running;
+  G.cash += net; G.lastTake = M.take;
 
   /* whose story moved */
   const beats = [];
@@ -1129,10 +1249,10 @@ function closeSeason(auto){
     const st = regState(r.k);
     if(st.done) return;
     if(!st.met){
-      if(SV.seen.indexOf(r.k) >= 0){ st.met = true; beats.push({r:r, intro:true}); }
+      if(M.seen.indexOf(r.k) >= 0){ st.met = true; beats.push({r:r, intro:true}); }
       return;
     }
-    if(SV.seen.indexOf(r.k) < 0) return;
+    if(M.seen.indexOf(r.k) < 0) return;
     /* Warmth climbs about two a season -- one for coming in, more when you went over -- so a
        gate of (beat+1)*2 meant five beats in five years. Thirty beats of writing were spent
        by 2001 in a game meant to run for thirty years, and after that the arcs recycled with
@@ -1142,13 +1262,17 @@ function closeSeason(auto){
        which is four minutes of a café where nothing happens to anybody -- and the people are
        the whole reason to be here. The first one lands almost at once and the rest spread
        out, so you are told what this is within a minute and still have somewhere to go. */
-    if(st.warmth < 4 + st.beat*17) return;
+    /* Warmth now accrues every trading day rather than once a season, so the old gates of
+       4/21/38/55 would fall in the first week. Scaled to the month -- the rhythm the player
+       actually feels, because the month is the spending round -- and then halved, because a
+       first play reported no story at all: chapter two used to sit eleven services away. */
+    if(st.warmth < (4 + st.beat*17) * MONTH_DAYS / 2) return;
     const b = r.beats[st.beat];
     if(b.need){
       /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant
          a recipe gate could never open, and the story sat there forever. */
       const ok = b.need === "quiet" ? G.quiet
-               : b.need === "cash2500" ? G.cash >= 2500
+               : b.need === "cash2500" ? G.cash >= 2500 * MONTH_DAYS
                : (own(b.need) > 0 || G.recipes.indexOf(b.need) >= 0);
       if(!ok){ beats.push({r:r, blocked:b.needT}); return; }
     }
@@ -1172,30 +1296,28 @@ function closeSeason(auto){
     }
   });
 
-  /* Wear comes from use, not from the calendar. A flat charge per season would land hardest
-     on a two-stool café that has served eleven people, which is exactly backwards: it is the
-     busy years that take the floor and the chairs apart. */
-  G.wear = (G.wear || 0) + SV.served/70;
-  G.season++;
-  if(G.season % 4 === 0){ G.year++; G.owner.age++; }
+  G.month++; G.day = 1;
+  if(G.month % 12 === 0){ G.year++; G.owner.age++; }
+  G.mo = {take:0, profit:0, served:0, missed:0, tips:0, days:0, offstage:0, seen:[]};
   save();
 
   const v = $("s-close"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
-  sc.appendChild(el("div","lbl", SEASONS[(G.season+3)%4].nm + " " + (G.season%4===0 ? G.year-1 : G.year)
+  const mName = MONTHS[(G.month + 11) % 12], mYear = (G.month % 12 === 0) ? G.year - 1 : G.year;
+  sc.appendChild(el("div","lbl", mName + " " + mYear + " · " + M.days + " days open"
     + (auto ? " · run by the manager" : "")));
-  sc.appendChild(el("div","big", net >= 0 ? "A good season" : "A thin season"));
+  sc.appendChild(el("div","big", net >= 0 ? "A good month" : "A thin month"));
 
   const c = el("div","card");
   const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
     r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
-  st("Served", String(SV.served), "good");
+  st("Served", String(M.served), "good");
   /* the till counts everyone, so say plainly that most of them came and went while you
      were busy -- otherwise the takings look larger than the nine people you watched */
-  if(SV.offstage) st("Of those, came and went while you worked", String(SV.offstage));
-  if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
-  if(SV.tips) st("Tips", "+" + money(SV.tips), "cash");
-  st("Takings", money(SV.take) + " AED", "cash");
+  if(M.offstage) st("Of those, came and went while you worked", String(M.offstage));
+  if(M.missed) st("Left without ordering", String(M.missed), "bad");
+  if(M.tips) st("Tips", "+" + money(M.tips), "cash");
+  st("Takings", money(M.take) + " AED", "cash");
   if(branch) st("Branches", "+" + money(branch) + " AED", "cash");
   st("Running costs", "−" + money(running) + " AED", "bad");
   if(wearNow() >= 0.05)
@@ -1253,7 +1375,7 @@ function closeSeason(auto){
     go.textContent = G.owner.nm + " is getting old";
     go.onclick = succession; sc.appendChild(go);
   } else {
-    const go = el("button","btn","Spend, and open " + SEASONS[G.season%4].nm);
+    const go = el("button","btn","Spend, and open " + monthName());
     go.type = "button"; go.onclick = () => screenShop("close");
     sc.appendChild(go);
   }
@@ -1339,7 +1461,7 @@ function screenShop(from){
     b2.onclick = () => { G.cash -= cost; invent(); save(); screenShop(from); };
     row.appendChild(b2); sc.appendChild(row);
   }
-  const go = el("button","btn", from === "close" ? "Open " + SEASONS[G.season%4].nm : "Back to the café");
+  const go = el("button","btn", from === "close" ? "Open " + monthName() : "Back to the café");
   go.type = "button"; go.onclick = screenCafe; sc.appendChild(go);
   sc.appendChild(el("div")).style.height = "14px";
   v.appendChild(sc);
@@ -1528,7 +1650,7 @@ function intro(){
   const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";
   sc.appendChild(el("div","lbl","Café Life"));
   sc.appendChild(el("div","big","A counter and two stools"));
-  [ "You have one machine, two recipes and six hundred and forty dirhams. There is no "
+  [ "You have one machine, two recipes and " + money(G.cash) + " dirhams. There is no "
     + "clock and nothing here can be failed.",
     "Each season you choose what goes on the board — you will always own more recipes than "
     + "you have room to show, and the season moves what people want. Then you open, and you "
