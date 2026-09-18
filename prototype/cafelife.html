@@ -655,6 +655,21 @@ function nextThing(){
                 : "Put " + RECIPES[r.usual].nm + " on the board and they will come.",
               icon: f, w: 1.0});
   });
+  /* The board is the whole game -- you own more than you can show -- and nothing ever said it
+     could grow. "On the board, 2 of 2" reads as a fact about the world rather than an
+     invitation, and "A bigger board" sat ninth in the shop behind stools, plants and the
+     radio, while this card steered everyone at seats instead. A player could reach the second
+     decade having never once widened it, which is the central tension of the game never
+     firing. It outranks everything else the moment there is something in the book that cannot
+     fit on the board. */
+  if(G.recipes.length > G.slots && own("slot") < ITEMS.slot.max){
+    const c = costOfItem("slot", own("slot"));
+    const over = G.recipes.length - G.slots;
+    out.push({at: Math.min(1, G.cash/c), title: "A bigger board",
+      note: over + (over === 1 ? " recipe you own will not fit on it. " : " recipes you own will not fit on it. ")
+            + (G.cash >= c ? "You can widen it now." : money(c - G.cash) + " AED to go."),
+      icon: sprite(ITEM_SPRITE["slot"], 40, ITEMS.slot.ic), w: 1.25});
+  }
   /* the next thing that visibly changes the room */
   const seatGoal = G.seats < 4 ? 4 : G.seats < 6 ? 6 : G.seats < 10 ? 10 : 0;
   if(seatGoal) out.push({at: G.seats/seatGoal, title: seatGoal + " seats",
@@ -714,7 +729,8 @@ function screenCafe(){
   }
 
   const c = el("div","card"); c.style.marginTop = "14px";
-  c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots));
+  c.appendChild(el("div","lbl","On the board — " + G.board.length + " of " + G.slots
+    + (G.recipes.length > G.slots ? " · " + (G.recipes.length - G.slots) + " waiting" : "")));
   G.board.forEach(k => {
     const r = RECIPES[k], d = el("div","dish");
     d.style.cursor = "default";
