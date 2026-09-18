@@ -499,8 +499,8 @@ function NEW(){
     owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
            dies:72+Math.floor(Math.random()*18)},
     cash:640*MONTH_DAYS, rent:90,
-    setup:false, cafeName:"", tenure:null, debt:0, debtRate:0,
-    goals:{}, best:{take:0}, arrears:0,
+    setup:false, cafeName:"", tenure:null, debt:0, debtRate:0, heirs:null,
+    goals:{}, best:{take:0}, arrears:0, street:[],
     supplier:"cc", lab:null, labDone:0,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
@@ -578,8 +578,8 @@ const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) *
                                   + G.lastTake * 1.6 / MONTH_DAYS * 8);
 
 const SERVE_EACH = 42;
-const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
-const costOf = k => RECIPES[k].cost * (1 + (G.year-YEAR0)*0.016) * supplier().cost;
+const hands = () => 1 + baristas() + (own("manager") ? 1 : 0) + trait().hands;
+const costOf = k => RECIPES[k].cost * (1 + (G.year-YEAR0)*0.016) * supplier().cost * trait().cost;
 /* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
 function costOfItem(k, have){
   const it = ITEMS[k];
@@ -605,7 +605,7 @@ function show(n){ ["cafe","plan","serve","close","shop","people","goals","bank",
 function boardHas(tag){ return G.board.some(k => RECIPES[k].tags.indexOf(tag) >= 0); }
 function priceOf(k){
   const r = RECIPES[k];
-  let p = r.price * (1 + G.priceLift) * (1 + (G.year-YEAR0)*0.018) * (1 + supplier().qual);
+  let p = r.price * (1 + G.priceLift) * (1 + (G.year-YEAR0)*0.018) * (1 + supplier().qual) * trait().price;
   if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
   if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
   if(r.tags.indexOf("cold")>=0) p *= (1 + G.coldLift);
@@ -775,7 +775,8 @@ function screenCafe(){
   const sc = el("div","scroll pad"); sc.style.paddingTop = "14px";
 
   const head = el("div");
-  head.appendChild(el("div","lbl", "Generation " + G.gen + " · " + G.owner.nm + ", " + G.owner.age));
+  head.appendChild(el("div","lbl", "Generation " + G.gen + " · " + G.owner.nm + ", " + G.owner.age
+    + (G.owner.traitT ? " · " + G.owner.traitT : "")));
   head.appendChild(el("div","big", season().nm));
   head.appendChild(el("div","hint", season().note));
   sc.appendChild(head);
@@ -859,7 +860,7 @@ function screenCafe(){
   const shop = el("button","btn sec","Spend " + money(G.cash) + " AED"); shop.type="button";
   shop.onclick = () => screenShop("build"); sc.appendChild(shop);
   if(met.length){
-    const pp = el("button","btn sec","The regulars"); pp.type="button";
+    const pp = el("button","btn sec", G.staff.length ? "The regulars and the staff" : "The regulars"); pp.type="button";
     pp.onclick = screenPeople; sc.appendChild(pp);
   }
   const amb = el("button","btn sec","Ambitions — " + GOALS.filter(g=>G.goals[g.k]).length
@@ -1083,7 +1084,7 @@ function runService(auto){
   if(auto){
     q.forEach(c => { const r = serveOne(c);
       if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*MANAGER_CUT); SV.served++;
-               if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth++; } }
+               if(c.reg){ SV.seen.push(c.reg.k); regState(c.reg.k).warmth += trait().warm; } }
       else { SV.missed++; if(c.reg) regState(c.reg.k).warmth--; } });
     closeDay(true); return;
   }
@@ -1444,6 +1445,14 @@ function closeMonth(auto){
       + ", set against what you owe. What is left of the debt still stands."));
     sc.appendChild(w);
   }
+  const ev = streetEvent();
+  if(ev){
+    const c = el("div","card"); c.style.borderColor = "var(--amber-d)";
+    c.appendChild(el("div","lbl","the street"));
+    c.appendChild(el("div","mid-t", ev.t));
+    c.appendChild(el("div","beat", ev.d));
+    sc.appendChild(c);
+  }
   if(labMade){
     const c = el("div","card"); c.style.borderColor = "var(--amber-d)";
     c.appendChild(el("div","lbl","the bench"));
@@ -1704,6 +1713,32 @@ function rehydrate(){
 }
 
 /* ============================== the regulars =============================== */
+/* Wages tracked the size of the room and nothing else, so a café that over-hired simply bled
+   and the player had no lever. Hiring was already a choice; leaving was not. */
+function staffCard(sc){
+  if(!G.staff.length) return;
+  sc.appendChild(el("div","lbl","Behind the counter — " + money(staffWage()) + " a month"));
+  G.staff.forEach((st, i) => {
+    const c = el("div","card");
+    const row = el("div","stat");
+    row.appendChild(el("div","k", st.nm + " · " + st.role));
+    row.appendChild(el("div","v bad", "−" + money(wageOf(st)) + " AED"));
+    c.appendChild(row);
+    const go = el("button","btn quiet","Let " + st.nm + " go"); go.type = "button";
+    go.onclick = () => {
+      G.staff.splice(i,1);
+      /* the shop sold them, so the shop has to know they have gone */
+      if(st.role === "manager"){ G.owned.manager = 0; G.canSkip = false; }
+      else G.owned.barista = Math.max(0, (G.owned.barista||1) - 1);
+      save(); screenPeople();
+    };
+    c.appendChild(go);
+    sc.appendChild(c);
+  });
+  sc.appendChild(el("div","hint","Hands set how many people you can get to in a day. Too few "
+    + "and they walk; too many and the wage bill eats the month."));
+}
+
 function screenPeople(){
   const v = $("s-people"); v.textContent = "";
   const bar = el("div","bar");
@@ -1728,6 +1763,7 @@ function screenPeople(){
     if(st.done) card.appendChild(el("div","lbl","— their story here is finished"));
     sc.appendChild(card);
   });
+  staffCard(sc);
   v.appendChild(sc);
   show("people");
 }
@@ -1753,15 +1789,32 @@ function succession(){
     + "and so do the regulars — though the ones who were old when you started will not be here "
     + "for your daughter, and the children who came in with their mothers will be the ones "
     + "propping up the counter."));
-  const go = el("button","btn","Hand over the keys"); go.type = "button";
+  /* Three children, and only one of them wants it enough to be handed it. Choosing is the
+     decision that makes a generation different from the last rather than a change of name. */
+  if(!G.heirs || !G.heirs.length) G.heirs = [makeHeir(), makeHeir(), makeHeir()];
+  sc.appendChild(el("div","lbl","Who takes it on"));
+  let picked = null;
+  const cards = [];
+  G.heirs.forEach(h => {
+    const t = TRAITS.find(x => x.k === h.trait) || TRAITS[0];
+    const c = el("div","pickr");
+    c.appendChild(el("div","t", h.nm + ", " + h.age + " — " + t.t));
+    c.appendChild(el("div","d", t.d));
+    c.appendChild(el("div","m", t.e));
+    c.onclick = () => { picked = h; cards.forEach(x => x.classList.remove("on"));
+                        c.classList.add("on"); go.disabled = false; };
+    cards.push(c); sc.appendChild(c);
+  });
+
+  const go = el("button","btn","Hand over the keys"); go.type = "button"; go.disabled = true;
   go.onclick = () => {
     G.gen++;
     /* The café passes whole. The money does not: there are other children, and they take
        their share. Without this a dynasty simply accumulates -- two million by year sixty,
        with nothing left to want. */
     G.cash = Math.round(G.cash * 0.45);
-    G.owner = {nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid"]),
-               age:26, dies:72+Math.floor(Math.random()*18)};
+    G.owner = picked || makeHeir();
+    G.heirs = null;
     /* the regulars who finished their arc move on; a new generation meets new people */
     REGULARS.forEach(r => { const st = regState(r.k);
       if(st.done){ G.regs[r.k] = {met:false, beat:0, warmth:0, done:false}; } });
@@ -1770,6 +1823,97 @@ function succession(){
   sc.appendChild(go);
   v.appendChild(sc);
   show("close");
+}
+
+/* ============================== the street ============================== */
+/* Three hundred years of the same street is the same year three hundred times. Things happen
+   to a shopping street on their own: a mall opens, the metro arrives, somebody opens opposite.
+   These land every few years, are permanent, and cut both ways -- which is what stops the
+   late game being a number going up. */
+const STREET = [
+  {k:"metro",  t:"The metro reaches the corner",
+   d:"A station entrance where the taxi rank was. Everybody who works in the towers walks past you now.",
+   f:g => { g.foot *= 1.35; }},
+  {k:"mall",   t:"A mall opens on the main road",
+   d:"Air conditioning, a food court and parking. The street is quieter on a Friday than it has ever been.",
+   f:g => { g.foot *= 0.78; }},
+  {k:"rival",  t:"Somebody opens opposite",
+   d:"Same idea, newer chairs. Half your walk-ins will try it at least once.",
+   f:g => { g.foot *= 0.86; }},
+  {k:"pedest", t:"They pedestrianise the street",
+   d:"No cars, tables allowed outside, and nobody in a hurry.",
+   f:g => { g.foot *= 1.22; g.dwell += 0.12; }},
+  {k:"tower",  t:"A tower goes up behind the souq",
+   d:"Four hundred flats where the yard used to be, and all of them want breakfast.",
+   f:g => { g.foot *= 1.18; }},
+  {k:"review", t:"The landlord reviews the lease",
+   d:"Nothing personal, he says. The street is worth more than it was.",
+   f:g => { g.rentCut = (g.rentCut || 1) * 1.25; }},
+  {k:"fame",   t:"A food writer comes in and does not say who she is",
+   d:"The piece runs on a Thursday. For a while, people come a long way for this.",
+   f:g => { g.rep += 14; g.foot *= 1.12; }},
+  {k:"works",  t:"They dig the road up",
+   d:"Eighteen months of hoardings and a temporary crossing fifty metres down.",
+   f:g => { g.foot *= 0.82; }}
+];
+function streetEvent(){
+  /* roughly one every three years, never twice the same, and never in the first year */
+  if(G.year < YEAR0 + 2) return null;
+  if(Math.random() > 0.028) return null;
+  G.street = G.street || [];
+  let left = STREET.filter(e => G.street.indexOf(e.k) < 0);
+  /* A hundred and twenty years used the whole list and then the street went quiet for the
+     remaining hundred and eighty. Streets do not stop happening: once they have all come
+     round, they come round again -- a second mall, another road dug up, a new rival in the
+     same doorway -- keeping only the last few out of the running so nothing repeats twice
+     in a row. */
+  if(!left.length){ G.street = G.street.slice(-3); left = STREET.filter(e => G.street.indexOf(e.k) < 0); }
+  if(!left.length) return null;
+  const e = pick(left);
+  G.street.push(e.k); e.f(G);
+  /* These multiply and they are permanent, and now that they recur there are twenty-odd of
+     them over three hundred years. Unbounded that is a geometric series -- the same shape as
+     the invention chain and the thirty-cup regular, both of which ran away before anyone
+     noticed. A street can get much better or much worse than it was; it cannot get eighty
+     times busier. */
+  G.foot = Math.max(0.4, Math.min(2.8, G.foot));
+  G.rentCut = Math.max(0.4, Math.min(2.6, G.rentCut || 1));
+  G.dwell = Math.min(0.9, G.dwell);
+  return e;
+}
+
+/* ============================== the family ============================== */
+/* A dynasty of interchangeable owners is one owner with different names, and three hundred
+   years of that is a spreadsheet. An heir is a person: each is better at one thing and worse
+   at another, and you pick which of them takes the keys. Those traits are read where they
+   would actually be felt -- what the cup costs, what people pay, how hard the room works,
+   what the bank thinks of you. */
+const TRAITS = [
+  {k:"grafter",  t:"the grafter",     d:"Up before the delivery and still there at close.",
+   e:"Works the floor like two people, and never learned to charge properly."},
+  {k:"trader",   t:"the trader",      d:"Knows what a sack is worth before it is opened.",
+   e:"Buys better than anyone in the family. Not much of a host."},
+  {k:"host",     t:"the host",        d:"Remembers every order and every name that goes with it.",
+   e:"The regulars come for them. The books are somebody else's problem."},
+  {k:"banker",   t:"the careful one",  d:"Reads the lease before signing and the rate before borrowing.",
+   e:"Money behaves around them. The room never changes much either."},
+  {k:"cook",     t:"the cook",        d:"Happiest at the bench with something half-finished.",
+   e:"Puts things on the board nobody else would have thought of."}
+];
+const TRAIT_FX = {
+  grafter: {hands:1,  cost:1.00, price:0.94, warm:1.0, rate:1.00},
+  trader:  {hands:0,  cost:0.88, price:1.00, warm:0.9, rate:1.00},
+  host:    {hands:0,  cost:1.00, price:1.04, warm:1.5, rate:1.00},
+  banker:  {hands:0,  cost:1.00, price:1.00, warm:1.0, rate:0.80},
+  cook:    {hands:0,  cost:1.00, price:1.10, warm:1.0, rate:1.00}
+};
+const trait = () => TRAIT_FX[(G.owner && G.owner.trait) || "grafter"] || TRAIT_FX.grafter;
+const heirNames = ["Amina","Yusuf","Layla","Omar","Mariam","Tarek","Noor","Khalid","Hessa",
+                   "Saif","Dana","Rashid","Fatima","Jassim"];
+function makeHeir(){
+  const t = pick(TRAITS);
+  return {nm:pick(heirNames), age:24 + Math.floor(Math.random()*6),
+          dies:72 + Math.floor(Math.random()*18), trait:t.k, traitT:t.t};
 }
 
 /* ============================== sourcing and the bench ============================== */
@@ -1903,8 +2047,8 @@ const borrowLimit = () => Math.max(0, Math.round(
   - G.debt));
 const RATE_BASE = 0.011;
 /* a café with a record borrows cheaper than one without */
-const offerRate = () => Math.max(0.006, RATE_BASE - Math.min(0.004, G.rep * 0.00012)
-                                 + (G.arrears ? 0.004 : 0));
+const offerRate = () => Math.max(0.005, (RATE_BASE - Math.min(0.004, G.rep * 0.00012)
+                                 + (G.arrears ? 0.004 : 0)) * trait().rate);
 const monthlyDue = () => G.debt > 0
   ? Math.round(G.debt * G.debtRate) + Math.round(G.debt * 0.02) : 0;
 
@@ -2096,6 +2240,7 @@ function screenSetup(){
     G.cafeName = (n1.value || n1.placeholder).trim().slice(0,28);
     G.owner.nm = (n2.value || n2.placeholder).trim().slice(0,22);
     G.tenure = t.k; t.f(G);
+    const mine = pick(TRAITS); G.owner.trait = mine.k; G.owner.traitT = mine.t;
     /* somebody came for your father and still comes for you */
     if(G.headStart){ const r = REGULARS[0]; G.regs[r.k] = {met:true, beat:0, warmth:18, done:false}; }
     G.setup = true; save(); intro();
