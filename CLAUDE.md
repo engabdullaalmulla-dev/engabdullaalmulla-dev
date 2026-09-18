@@ -45,6 +45,7 @@ python3 tools/build-web.py           # -> dist/, app/www/, site/      (web + PWA
 
 # deterministic game checks (no browser)
 node tools/test-engine.cjs
+node tools/test-hosting.cjs
 node tools/test-access.cjs
 node tools/test-persistence.cjs
 node native/tests/saveBridge.cjs
@@ -67,7 +68,7 @@ not always true: `npm run webapp` executes from `native/`, and relative paths br
 ### The release gate is not optional
 
 `tools/check-native.js` asserts three things that have each failed before: the embedded game fetches
-**nothing** at runtime, all 140 sprites decode, and a dynasty survives a reload at a real
+**nothing** at runtime, all 146 sprites decode, and a dynasty survives a reload at a real
 https origin. The privacy policy published at `barmajja.com/games/cafe-life/privacy.html`
 states the no-network claim **as verified fact on the strength of this gate**. If anything ever
 makes the app reach the network, that page has to change before the build ships — and no
@@ -75,7 +76,7 @@ analytics may be added, not even temporarily for a playtest. Build 8 adds native
 purchases outside the offline WebView. Publish `docs/privacy-purchase-update.md` with the
 existing publisher details before release; the public policy has not yet been updated.
 
-## Architecture of the daily rebuild (build 8)
+## Architecture of the daily rebuild (build 9)
 
 The sections below supersede the watched-day / monthly waiting model from build 5. The
 canonical HTML loads local modules which the build tools embed into one offline document:
@@ -126,7 +127,7 @@ restore calls are the only deliberate network exception; no analytics or account
 `CafeEngine.exportSave` and `importSave` share versioned validation. The legacy
 `cafelife_mgmt_2` save must be preserved when migrating. Validate imported data before
 writing either current or backup saves; never overwrite a usable save with malformed data.
-Build 8 retains the version-6 save format and upgrades older compatible saves with unselected
+Build 9 retains the version-6 save format and upgrades older compatible saves with unselected
 brief offers, an empty keepsake collection and empty relationship records where absent. `cafelife_daily_6_library` stores explicit café snapshots; opening a
 snapshot, importing a save or beginning another café first preserves the active café there.
 The separate `cafelife_daily_6_before_restore` archive also remains available for export.
@@ -171,7 +172,7 @@ Expo + EAS, in `native/`. `app/` is an abandoned Capacitor attempt and
 `.github/workflows/ios-testflight.yml` is its abandoned pipeline — neither is the route;
 `docs/testflight.md` explains why and carries the working commands.
 
-Build 8 uses app version `1.1`, iOS build number `8`, Expo SDK 57 (`~57.0.24`), React 19.2.3
+Build 9 uses app version `1.1`, iOS build number `9`, Expo SDK 57 (`~57.0.24`), React 19.2.3
 and React Native 0.86.3. Native file selection, sharing and haptics use the matching Expo
 modules. Native haptics now have supported iOS and Android paths with a silent fallback.
 
@@ -192,3 +193,9 @@ Apple account.
 
 Several older docs (`docs/cafe-life.md`, `design-spec.md`, `requirements.md`) still describe
 the pre-rewrite season-based game and are stale.
+
+## Build 9 hosting contract
+
+`hosting` is an additive version-6 save field. Three optional occasions have two approaches each, exactly three guests with frozen familiar/discovery/sharing intentions, six permanent decorative objects and wall/shelf/corner positions. `PREPARE_OCCASION` uses owned recipes and a free room arrangement; it spends nothing. Manual and delegated service share the same resolver, rewards and relationship rules. No extra hosting cash bonus, timer or attendance requirement exists. Earned objects remain through saves and succession; replaced displays return to the collection. Old story choices migrate only represented objects.
+
+The first-year access boundary settles the last hosted day once and permits viewing, arranging and exporting the earned keepsake. It blocks the next trading day until native ownership is verified. Hosting does not grant entitlement. `hostingText` adapts current participants to descendant families, while earned memory text remains frozen. See [build 9 handoff](docs/build9-handoff.md) for scope and verification; later projects, separate venue operations and deeper successors remain planned.

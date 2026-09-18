@@ -79,6 +79,25 @@
       age: age - descendantGeneration * 28, art: person.art, usual: person.usual
     }};
   }
+  function hostingText(state, value) {
+    const inactive = list('characters').map(person => ({person, status: personStatus(state, person.id)})).filter(item => !item.status.active);
+    return Object.fromEntries(['en', 'ar'].map(lang => {
+      let text = localized(value, lang);
+      if (inactive.length) {
+        const names = new Map();
+        inactive.forEach(({person, status}) => {
+          const family = localized(status.descendant.name, lang);
+          names.set(localized(person.name, lang), family);
+          // Protect already hydrated family names so the helper is safe to apply twice.
+          names.set(family, family);
+        });
+        const alternatives = [...names.keys()].sort((a, b) => b.length - a.length).map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+        const tokens = new RegExp('(^|[^\\p{L}\\p{N}\\p{M}_])(' + alternatives + ')(?=$|[^\\p{L}\\p{N}\\p{M}_])', 'gu');
+        text = text.replace(tokens, (_, prefix, name) => prefix + names.get(name));
+      }
+      return [lang, text];
+    }));
+  }
   function allRecipes(state) { return list('recipes').filter(r => state.recipes.includes(r.id)).concat(state.customRecipes); }
   function recipe(state, id) { return find('recipes', id) || state.customRecipes.find(r => r.id === id) || null; }
   const RELATIONSHIP_LEVELS = [
@@ -111,13 +130,82 @@
     };
     return state.menu.slice().sort((a, b) => score(b) - score(a) || a.localeCompare(b))[0];
   }
+  const DISPLAY_SLOTS = ['wall', 'shelf', 'corner'];
+  function occasionPlan(plan) {
+    if (!plan) return null;
+    const occasion = find('occasions', plan.occasionId);
+    const approach = occasion && occasion.approaches.find(item => item.id === plan.approachId);
+    return approach ? {occasion, approach} : null;
+  }
+  function newHosting(state) {
+    const owned = list('decorations').filter(item => item.legacyChoices && Object.entries(item.legacyChoices).some(([id, choices]) =>
+      (Array.isArray(choices) ? choices : [choices]).includes((state.storyChoices || {})[id]))).map(item => item.id);
+    return {plan: null, owned, displays: {wall: null, shelf: null, corner: null}, completed: {}, last: null};
+  }
+  function hostingPlan(state) {
+    const active = state.phase !== 'planning' && state.service && state.service.hosting;
+    const selected = active || state.hosting && state.hosting.plan;
+    const plan = occasionPlan(selected);
+    return plan ? clone(plan) : null;
+  }
+  function intentionMatch(state, characterId, intention, recipeId) {
+    const person = find('characters', characterId); const dish = recipe(state, recipeId);
+    if (!person || !dish) return false;
+    const remembered = relationshipStatus(state, characterId).rememberedPreferences;
+    if (intention === 'familiar') return recipeId === person.usual || remembered.includes(recipeId) || (dish.tags || []).includes('familiar');
+    if (intention === 'discovery') return recipeId !== person.usual && !remembered.includes(recipeId);
+    return intention === 'sharing' && (dish.tags || []).includes('sharing');
+  }
+  function hostingScore(state, characterId, intention, recipeId, tags) {
+    const person = find('characters', characterId); const dish = recipe(state, recipeId);
+    const remembered = relationshipStatus(state, characterId).rememberedPreferences;
+    return Number(intentionMatch(state, characterId, intention, recipeId)) * 100 +
+      (intention === 'discovery' ? Number(!!dish.custom) * 12 : Number(recipeId === person.usual) * 12 + Number(remembered.includes(recipeId)) * 6) +
+      (person.tags || []).filter(tag => (dish.tags || []).includes(tag)).length * 3 +
+      (tags || []).filter(tag => (dish.tags || []).includes(tag)).length * 2;
+  }
+  function hostingMenu(state) {
+    const plan = hostingPlan(state);
+    if (!plan) return state.menu.slice();
+    const {approach} = plan; const owned = allRecipes(state).map(item => item.id); const selected = [];
+    approach.guestIds.forEach((id, index) => {
+      const intention = approach.intentions[index];
+      const recommended = owned.slice().sort((a, b) => hostingScore(state, id, intention, b, approach.tags) - hostingScore(state, id, intention, a, approach.tags) || a.localeCompare(b))[0];
+      if (recommended && !selected.includes(recommended) && selected.length < state.boardSlots) selected.push(recommended);
+    });
+    const score = id => approach.guestIds.reduce((sum, characterId, index) => sum + hostingScore(state, characterId, approach.intentions[index], id, approach.tags), 0);
+    owned.sort((a, b) => score(b) - score(a) || a.localeCompare(b)).forEach(id => { if (!selected.includes(id) && selected.length < state.boardSlots) selected.push(id); });
+    return selected;
+  }
+  function hostingMatch(state, guest, recipeId) {
+    return !!(state.service && state.service.hosting && guest && Array.isArray(guest.matchRecipes) && guest.matchRecipes.includes(recipeId));
+  }
+  function settleHosting(state, effects) {
+    const snapshot = state.service.hosting;
+    if (!snapshot) return null;
+    const {occasion, approach} = occasionPlan(snapshot);
+    const decorationId = approach.decorationId;
+    const newDecoration = !state.hosting.owned.includes(decorationId);
+    if (newDecoration) state.hosting.owned.push(decorationId);
+    state.hosting.completed[approach.id] = Math.min(MAX_CASH, (state.hosting.completed[approach.id] || 0) + 1);
+    const result = {occasionId: occasion.id, approachId: approach.id, date: state.date, day: state.day, decorationId, newDecoration,
+      served: state.service.guests.map(guest => ({characterId: guest.characterId, recipeId: guest.servedRecipe, intention: guest.intention,
+        matched: hostingMatch(state, guest, guest.servedRecipe)}))};
+    state.hosting.last = clone(result);
+    memory(state, 'hosting:' + approach.id, hostingText(state, approach.outcome || approach.name), {kind: 'hosting', occasionId: occasion.id, approachId: approach.id, decorationId});
+    record(state, 'hosting', {occasionId: occasion.id, approachId: approach.id, decorationId, newDecoration});
+    effects.push(Object.assign({type: 'hosting'}, clone(result)));
+    return result;
+  }
   function resolveService(state, guest, recipeId, effects) {
     if (guest.servedRecipe !== null) return;
     guest.servedRecipe = recipeId;
     const relationship = state.relationships[guest.characterId];
     const match = serviceMatch(state, guest.characterId, recipeId);
     const previousLevel = relationshipStatus(state, guest.characterId).bondLevel;
-    const points = match === 'usual' ? 3 : match === 'liked' ? 2 : 0;
+    const hosted = !!(state.service && state.service.hosting);
+    const matched = hosted ? hostingMatch(state, guest, recipeId) : match !== 'different';
+    const points = hosted ? (matched ? 3 : 0) : match === 'usual' ? 3 : match === 'liked' ? 2 : 0;
     const satisfactionAwarded = Math.min(100 - relationship.satisfaction, points);
     const remembered = points > 0 && !relationship.rememberedPreferences.includes(recipeId);
     relationship.meetings = Math.min(MAX_CASH, relationship.meetings + 1);
@@ -132,7 +220,7 @@
         ar: 'تتذكر عائلة ' + localized(person.name, 'ar') + ' ترحيبك: ' + RELATIONSHIP_LEVELS[bondLevel].ar + '.'
       }, {kind: 'people', characterId: guest.characterId, bondLevel});
     }
-    effects.push({type: 'relationship', id: guest.characterId, recipeId, match, satisfactionAwarded, remembered, bondLevel});
+    effects.push(Object.assign({type: 'relationship', id: guest.characterId, recipeId, match, satisfactionAwarded, remembered, bondLevel}, hosted ? {intention: guest.intention, matched} : {}));
   }
   function briefReference(kind, target) { return {id: kind + ':' + target, kind, target}; }
   function briefOptions(state) {
@@ -270,10 +358,11 @@
       upgrades: [], venues: home ? [home.id] : [], venue: home ? home.id : 'home', boardSlots: 3, seats: 8, staff: [],
       generation: 1, heir: null, knowledge: [], memories: [], history: [], storiesDone: [], storyChoices: {},
       pendingStory: null, service: null, lastDay: null, ambitionsDone: [], reputation: 0, briefs: null, keepsakes: [],
-      identity: {people: 0, recipe: 0, street: 0}, relationships: newRelationships(), daysRun: 0, totalServed: 0,
+      identity: {people: 0, recipe: 0, street: 0}, relationships: newRelationships(), hosting: null, daysRun: 0, totalServed: 0,
       monthly: {month: '1994-01', days: 0, sales: 0, costs: 0, profit: 0, customers: 0}, accounts: [],
       settings: {music: true, sfx: true, haptics: true, reducedMotion: false, textSize: 'normal', theme: 'light'}, legacy: null
     };
+    state.hosting = newHosting(state);
     resetBriefs(state);
     record(state, 'founded', {origin});
     return state;
@@ -378,16 +467,21 @@
     if (state.phase !== 'planning') return false;
     const people = list('characters');
     const offset = hash(state.date + ':' + state.venue) % people.length;
-    const guests = Array.from({length: 4}, (_, index) => {
-      const person = people[(offset + index) % people.length];
+    const hosted = hostingPlan(state);
+    const guests = Array.from({length: hosted ? hosted.approach.guestIds.length : 4}, (_, index) => {
+      const person = hosted ? find('characters', hosted.approach.guestIds[index]) : people[(offset + index) % people.length];
       const status = personStatus(state, person.id);
-      return {id: state.day + ':' + index, characterId: person.id, usual: person.usual,
+      const intention = hosted && hosted.approach.intentions[index];
+      const hostingGuest = hosted ? {intention, rememberedAtOpen: relationshipStatus(state, person.id).rememberedPreferences, matchRecipes: state.menu.filter(id => intentionMatch(state, person.id, intention, id))} : {};
+      const recommended = hosted ? state.menu.slice().sort((a, b) => hostingScore(state, person.id, intention, b, hosted.approach.tags) - hostingScore(state, person.id, intention, a, hosted.approach.tags) || a.localeCompare(b))[0] : recommendedRecipe(state, person);
+      return Object.assign({id: state.day + ':' + index, characterId: person.id, usual: person.usual,
         name: status.active ? clone(person.name) : status.descendant.name,
         descendant: !status.active, personId: status.active ? person.id : status.descendant.id,
-        recommended: recommendedRecipe(state, person), servedRecipe: null};
+        recommended, servedRecipe: null}, hostingGuest);
     });
     state.service = {date: state.date, day: state.day, menu: state.menu.slice(), layout: state.layout,
       supplier: state.supplier, venue: state.venue, seats: state.seats, guests, index: 0, manual: 0, forecast: planningForecast(state),
+      hosting: hosted ? {occasionId: hosted.occasion.id, approachId: hosted.approach.id, displays: clone(state.hosting.displays)} : null,
       brief: state.briefs.selectedId ? briefProgress(state, state.briefs.options.find(option => option.id === state.briefs.selectedId), state) : null};
     state.phase = 'open';
     effects.push({type: 'open'});
@@ -419,6 +513,7 @@
     state.phase = 'closed';
     state.service.guests.forEach(guest => { if (guest.servedRecipe === null) resolveService(state, guest, guest.recommended, effects); });
     state.service.index = state.service.guests.length;
+    result.hosting = settleHosting(state, effects);
     rollMonth(state);
     state.monthly.days++;
     ['sales', 'costs', 'profit', 'customers'].forEach(key => { state.monthly[key] = money(state.monthly[key] + result[key]); });
@@ -432,6 +527,7 @@
     rollMonth(state);
     state.day++;
     state.phase = 'planning';
+    if (state.service && state.service.hosting) state.hosting.plan = null;
     state.service = null;
     unlockForDay(state, effects);
     resetBriefs(state);
@@ -470,7 +566,36 @@
       if (!state.briefs || state.briefs.date !== state.date) resetBriefs(state);
       if (!state.keepsakes) state.keepsakes = [];
       if (!state.relationships) state.relationships = newRelationships();
+      if (!state.hosting) state.hosting = newHosting(state);
       switch (action.type) {
+        case 'SELECT_OCCASION': {
+          if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
+          const plan = occasionPlan(action);
+          if (!plan) { error = 'INVALID_OCCASION'; break; }
+          state.hosting.plan = {occasionId: plan.occasion.id, approachId: plan.approach.id};
+          effects.push({type: 'occasionSelected', occasionId: plan.occasion.id, approachId: plan.approach.id}); break;
+        }
+        case 'CLEAR_OCCASION':
+          if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
+          state.hosting.plan = null; break;
+        case 'PREPARE_OCCASION': {
+          if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
+          const plan = hostingPlan(state);
+          if (!plan) { error = 'INVALID_OCCASION'; break; }
+          state.menu = hostingMenu(state); state.layout = plan.approach.layout;
+          effects.push({type: 'occasionPrepared', occasionId: plan.occasion.id, approachId: plan.approach.id}); break;
+        }
+        case 'PLACE_DECORATION': {
+          const decoration = find('decorations', action.id);
+          if (!decoration || !DISPLAY_SLOTS.includes(action.slot)) { error = 'INVALID_DECORATION'; break; }
+          if (!state.hosting.owned.includes(action.id)) { error = 'NOT_OWNED'; break; }
+          DISPLAY_SLOTS.forEach(slot => { if (state.hosting.displays[slot] === action.id) state.hosting.displays[slot] = null; });
+          state.hosting.displays[action.slot] = action.id;
+          effects.push({type: 'decoration', id: action.id, slot: action.slot}); break;
+        }
+        case 'CLEAR_DISPLAY':
+          if (!DISPLAY_SLOTS.includes(action.slot)) { error = 'INVALID_DECORATION'; break; }
+          state.hosting.displays[action.slot] = null; break;
         case 'SELECT_BRIEF':
           if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
           if (!state.briefs.options.some(option => option.id === action.id)) { error = 'INVALID_BRIEF'; break; }
@@ -512,7 +637,7 @@
           if (!state.service.menu.includes(action.recipeId)) { error = 'INVALID_RECIPE'; break; }
           resolveService(state, guest, action.recipeId, effects);
           state.service.index++; state.service.manual++;
-          effects.push({type: 'serve', id: guest.characterId, recipeId: action.recipeId, usual: action.recipeId === guest.usual, match: serviceMatch(state, guest.characterId, action.recipeId)});
+          effects.push(Object.assign({type: 'serve', id: guest.characterId, recipeId: action.recipeId, usual: action.recipeId === guest.usual, match: serviceMatch(state, guest.characterId, action.recipeId)}, state.service.hosting ? {intention: guest.intention, matched: hostingMatch(state, guest, action.recipeId)} : {}));
           break;
         }
         case 'CLOSE_DAY': closeDay(state, effects); break;
@@ -544,6 +669,7 @@
           if (choice.recipe) grantRecipe(state, choice.recipe, effects);
           memory(state, story.id, choice.memory || choice.result || story.title, {kind: choice.kind || 'people', storyId: story.id, choiceId: choice.id});
           record(state, 'story', {id: story.id, choiceId: choice.id});
+          newHosting(state).owned.forEach(id => { if (!state.hosting.owned.includes(id)) { state.hosting.owned.push(id); effects.push({type: 'decorationEarned', id}); } });
           effects.push({type: 'story', id: story.id, choiceId: choice.id, amount: reward}); break;
         }
         case 'CREATE_RECIPE': error = createRecipe(state, action, effects); break;
@@ -666,9 +792,46 @@
         Object.keys(relationship).every(key => ['meetings', 'satisfaction', 'rememberedPreferences', 'lastServedRecipe'].includes(key)));
       requireValue(validInt(relationship.meetings) && validInt(relationship.satisfaction, 100) && relationship.satisfaction <= relationship.meetings * 3);
       requireValue(ids(relationship.rememberedPreferences, raw.recipes.concat(customIds), raw.recipes.length + customIds.length) && relationship.rememberedPreferences.length <= relationship.meetings);
-      requireValue(relationship.rememberedPreferences.every(recipeId => serviceMatch(raw, id, recipeId) !== 'different'));
+      // A successful hosted discovery may broaden somebody's tastes beyond their original tags.
+      requireValue(!relationship.rememberedPreferences.length || relationship.satisfaction > 0);
       requireValue(relationship.meetings === 0 ? relationship.lastServedRecipe === null && relationship.satisfaction === 0 : raw.recipes.concat(customIds).includes(relationship.lastServedRecipe));
     });
+    // Hosting is additive: old cafés retain ordinary in-progress guests exactly as saved.
+    if (!Object.hasOwn(raw, 'hosting')) raw.hosting = newHosting(raw);
+    const host = raw.hosting;
+    const hostKeys = ['plan', 'owned', 'displays', 'completed', 'last'];
+    const approaches = list('occasions').flatMap(item => item.approaches);
+    const validPlan = plan => plan === null || (plan && typeof plan === 'object' && !Array.isArray(plan) &&
+      Object.keys(plan).length === 2 && Object.keys(plan).every(key => ['occasionId', 'approachId'].includes(key)) && !!occasionPlan(plan));
+    const validDisplays = displays => displays && typeof displays === 'object' && !Array.isArray(displays) &&
+      Object.keys(displays).length === DISPLAY_SLOTS.length && Object.keys(displays).every(slot => DISPLAY_SLOTS.includes(slot)) &&
+      DISPLAY_SLOTS.every(slot => displays[slot] === null || host.owned.includes(displays[slot])) &&
+      unique(Object.values(displays).filter(Boolean)).length === Object.values(displays).filter(Boolean).length;
+    requireValue(host && typeof host === 'object' && !Array.isArray(host) && Object.keys(host).length === hostKeys.length && Object.keys(host).every(key => hostKeys.includes(key)));
+    requireValue(validPlan(host.plan) && ids(host.owned, list('decorations').map(item => item.id), list('decorations').length) && validDisplays(host.displays));
+    requireValue(host.completed && typeof host.completed === 'object' && !Array.isArray(host.completed) && Object.keys(host.completed).every(id => {
+      const approach = approaches.find(item => item.id === id);
+      return approach && validInt(host.completed[id]) && host.completed[id] > 0 && host.owned.includes(approach.decorationId);
+    }));
+    requireValue(Object.values(host.completed).reduce((sum, count) => sum + count, 0) <= raw.daysRun);
+    const storySouvenirs = newHosting(raw).owned;
+    requireValue(host.owned.every(id => { const decoration = find('decorations', id); return host.completed[decoration.approachId] || storySouvenirs.includes(id); }));
+    requireValue((Object.keys(host.completed).length === 0) === (host.last === null));
+    const validHostingResult = result => {
+      if (result === null) return true;
+      if (!result || typeof result !== 'object' || Array.isArray(result) || Object.keys(result).length !== 7 ||
+        Object.keys(result).some(key => !['occasionId', 'approachId', 'date', 'day', 'decorationId', 'newDecoration', 'served'].includes(key))) return false;
+      const plan = occasionPlan(result);
+      if (!plan || result.decorationId !== plan.approach.decorationId || !host.owned.includes(result.decorationId) || !host.completed[result.approachId] ||
+        typeof result.newDecoration !== 'boolean' || !validInt(result.day) || result.day < 1 || result.day > raw.day) return false;
+      try { if (parseDate(result.date).getTime() > parseDate(raw.date).getTime()) return false; } catch (_) { return false; }
+      return Array.isArray(result.served) && result.served.length === plan.approach.guestIds.length && result.served.every((guest, index) =>
+        guest && typeof guest === 'object' && !Array.isArray(guest) && Object.keys(guest).length === 4 &&
+        Object.keys(guest).every(key => ['characterId', 'recipeId', 'intention', 'matched'].includes(key)) &&
+        guest.characterId === plan.approach.guestIds[index] && guest.intention === plan.approach.intentions[index] &&
+        raw.recipes.concat(customIds).includes(guest.recipeId) && typeof guest.matched === 'boolean');
+    };
+    requireValue(validHostingResult(host.last));
     requireValue(Array.isArray(raw.memories) && raw.memories.length <= 10000 && raw.memories.every(m => m && typeof m.id === 'string' && m.text && typeof m.text.en === 'string' && typeof m.text.ar === 'string'));
     requireValue(Array.isArray(raw.history) && raw.history.length <= 500 && raw.history.every(h => h && typeof h.type === 'string' && typeof h.date === 'string'));
     requireValue(raw.settings && ['music', 'sfx', 'haptics', 'reducedMotion'].every(key => typeof raw.settings[key] === 'boolean') && ['normal', 'large', 'larger'].includes(raw.settings.textSize) && ['auto', 'light', 'dark'].includes(raw.settings.theme));
@@ -722,8 +885,31 @@
       const service = raw.service;
       requireValue(service && service.day === raw.day && service.date === raw.date && ids(service.menu, raw.recipes.concat(customIds), 8) && service.menu.length > 0);
       requireValue((service.layout === undefined || !!find('layouts', service.layout)) && (service.supplier === undefined || !!find('suppliers', service.supplier)) && (service.venue === undefined || raw.venues.includes(service.venue)) && (service.seats === undefined || (validInt(service.seats, 32) && service.seats > 0)));
-      requireValue(Array.isArray(service.guests) && service.guests.length === 4 && validInt(service.index, 4) && validInt(service.manual, 4) && service.manual <= service.index);
+      if (!Object.hasOwn(service, 'hosting')) service.hosting = null;
+      const hosted = service.hosting;
+      requireValue(hosted === null || (hosted && typeof hosted === 'object' && !Array.isArray(hosted) && Object.keys(hosted).length === 3 &&
+        Object.keys(hosted).every(key => ['occasionId', 'approachId', 'displays'].includes(key)) && !!occasionPlan(hosted) && validDisplays(hosted.displays) &&
+        host.plan && host.plan.occasionId === hosted.occasionId && host.plan.approachId === hosted.approachId));
+      requireValue(hosted !== null || host.plan === null);
+      const guestCount = hosted ? occasionPlan(hosted).approach.guestIds.length : 4;
+      requireValue(Array.isArray(service.guests) && service.guests.length === guestCount && validInt(service.index, guestCount) && validInt(service.manual, guestCount) && service.manual <= service.index);
       requireValue(service.guests.every(g => g && find('characters', g.characterId) && service.menu.includes(g.recommended) && (g.servedRecipe === null || service.menu.includes(g.servedRecipe))));
+      if (hosted) service.guests.forEach((guest, index) => {
+        const {approach} = occasionPlan(hosted); const person = find('characters', guest.characterId);
+        requireValue(Object.keys(guest).length === 11 && Object.keys(guest).every(key => ['id', 'characterId', 'usual', 'name', 'descendant', 'personId', 'recommended', 'servedRecipe', 'intention', 'rememberedAtOpen', 'matchRecipes'].includes(key)));
+        requireValue(guest.characterId === approach.guestIds[index] && guest.intention === approach.intentions[index] &&
+          guest.id === raw.day + ':' + index && guest.usual === person.usual &&
+          guest.name && ['en', 'ar'].every(lang => typeof guest.name[lang] === 'string' && guest.name[lang].length <= 100) &&
+          typeof guest.descendant === 'boolean' && typeof guest.personId === 'string' && guest.personId.length <= 100 &&
+          ids(guest.rememberedAtOpen, raw.relationships[guest.characterId].rememberedPreferences, raw.recipes.length + customIds.length) &&
+          ids(guest.matchRecipes, service.menu, service.menu.length));
+        const relationship = Object.assign({}, raw.relationships[guest.characterId], {rememberedPreferences: guest.rememberedAtOpen});
+        const atOpening = Object.assign({}, raw, {relationships: Object.assign({}, raw.relationships, {[guest.characterId]: relationship})});
+        const expectedMatches = service.menu.filter(id => intentionMatch(atOpening, guest.characterId, guest.intention, id));
+        requireValue(JSON.stringify(guest.matchRecipes) === JSON.stringify(expectedMatches));
+        const expectedRecommendation = service.menu.slice().sort((a, b) => hostingScore(atOpening, guest.characterId, guest.intention, b, approach.tags) - hostingScore(atOpening, guest.characterId, guest.intention, a, approach.tags) || a.localeCompare(b))[0];
+        requireValue(guest.recommended === expectedRecommendation);
+      });
       requireValue(service.guests.every((g, index) => index < service.index ? g.servedRecipe !== null : g.servedRecipe === null));
       requireValue(validForecast(service.forecast));
       if (!Object.hasOwn(service, 'brief')) service.brief = null;
@@ -733,11 +919,21 @@
         const expected = briefProgress(raw, brief.options.find(option => option.id === brief.selectedId), service);
         requireValue(expected.progress === service.brief.progress && expected.targetCount === service.brief.targetCount && expected.ready === service.brief.ready);
       }
-      if (raw.phase === 'closed') requireValue(validForecast(raw.lastDay) && raw.lastDay.day === raw.day && service.index === 4);
+      if (raw.phase === 'closed') requireValue(validForecast(raw.lastDay) && raw.lastDay.day === raw.day && service.index === guestCount);
     } else requireValue(raw.service === null);
     if (raw.lastDay !== null) {
       requireValue(validForecast(raw.lastDay));
       if (!Object.hasOwn(raw.lastDay, 'brief')) raw.lastDay.brief = null;
+      if (!Object.hasOwn(raw.lastDay, 'hosting')) raw.lastDay.hosting = null;
+      requireValue(validHostingResult(raw.lastDay.hosting));
+      if (raw.lastDay.hosting) requireValue(raw.lastDay.hosting.date === raw.lastDay.date && raw.lastDay.hosting.day === raw.lastDay.day && JSON.stringify(raw.lastDay.hosting) === JSON.stringify(host.last));
+      if (raw.phase === 'closed') {
+        requireValue(!!raw.service.hosting === !!raw.lastDay.hosting);
+        if (raw.service.hosting) {
+          const served = raw.service.guests.map(guest => ({characterId: guest.characterId, recipeId: guest.servedRecipe, intention: guest.intention, matched: hostingMatch(raw, guest, guest.servedRecipe)}));
+          requireValue(raw.lastDay.hosting.approachId === raw.service.hosting.approachId && JSON.stringify(raw.lastDay.hosting.served) === JSON.stringify(served));
+        }
+      }
       requireValue(validBriefSnapshot(raw.lastDay.brief, true));
       if (raw.phase === 'closed') requireValue(JSON.stringify(raw.lastDay.brief) === JSON.stringify(raw.service.brief));
     }
@@ -819,6 +1015,6 @@
     record(state, 'imported', {date});
     return validate(state);
   }
-  return Object.freeze({VERSION, SAVE_FORMAT, STAFF, BRIEF_STAMPS, RELATIONSHIP_LEVELS, dailyBriefs, briefStatus, relationshipStatus, serviceMatch, newGame, dispatch, forecast, availableStories, currentGuest, allRecipes, recipe, personStatus,
+  return Object.freeze({VERSION, SAVE_FORMAT, STAFF, BRIEF_STAMPS, RELATIONSHIP_LEVELS, DISPLAY_SLOTS, hostingText, hostingPlan, hostingMenu, hostingMatch, dailyBriefs, briefStatus, relationshipStatus, serviceMatch, newGame, dispatch, forecast, availableStories, currentGuest, allRecipes, recipe, personStatus,
     validate, exportSave, importSave, migrateLegacy, advanceDate, seasonFor});
 }));

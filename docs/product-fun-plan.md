@@ -1,20 +1,30 @@
 # Café Life — make running the café worth coming back to
 
-Product plan, 18 September 2026, based on the actual build 8 engine and interface. This document proposes the next gameplay work; the features below are not implemented by writing this plan. The first in-game year stays free, with the intended AED 19.99 one-time full-game unlock. No real-time waits, energy, ads, lost abilities or attendance obligations.
+Product plan, updated 18 September 2026 for build 9. The first hosting slice is now implemented: three occasions, six approaches, six painted permanent keepsakes and three room display positions. The sections below retain the larger product roadmap; they are not a claim that the whole plan is complete. The first in-game year stays free, with the intended AED 19.99 one-time full-game unlock. No real-time waits, energy, ads, lost abilities or attendance obligations.
+
+## Implemented in build 9
+
+- Mariam's reunion, the illustrated tasting and Noor's neighbourhood exhibition each offer two approaches. Invitations do not expire, preparation uses owned dishes, and every approach can be completed from a new café with no cash. Ordinary trading remains available.
+- Hosted days have three guests with familiar, discovery and sharing intentions. The chosen approach changes the guest mix, suggested menu and layout, service requests, reactions and outcome. Discovery can add an enjoyed recipe to a guest's remembered preferences. Serving remains dish selection; pouring and plating gestures are later work.
+- Each approach awards its own painted keepsake. The reunion photograph, picnic hamper, illustrated menu, recipe notebook, neighbourhood watercolor and shared boat sketch remain owned across saves and succession. Repeat hosting does not duplicate an object or award an extra cash bonus.
+- Owned keepsakes can be placed or rearranged immediately in the wall, shelf or gathering-corner position and appear in the café scene. Replacing an object returns it to the collection. These are three defined positions, not free furniture placement. Four represented earlier story rewards migrate into the collection without inventing completed occasions or visits.
+- The closing screen presents the selected approach, guest responses, keepsake and an immediately available next invitation before the accounts. Manual service and instant or partial delegation share the same resolver and produce the same outcome for the same decisions. English and Arabic content and controls are implemented.
+
+The deterministic checks cover all six approaches, zero-cash continuity, delegation parity, interrupted-service saves, permanent collections, migration and malformed-save rejection. Build 9 has 90 passing JavaScript checks; localization checks cover 1,531 English/Arabic pairs and 249 literal UI keys. These checks establish behavior and content coverage, not enjoyment, physical-device accessibility or seven-day replay value. Updated private-preview publication is tracked separately from source implementation.
 
 ## The problem to solve
 
-The present service has four guests, with the usual dish worth more relationship progress than a liked dish or a different one. The interface reveals those matches. Once understood, this is an obvious-answer sequence. The top bond arrives after ten usual orders. Ordinary trade is already resolved from the opening plan, so extra tapping cannot change its financial result.
+The build 8 baseline had four guests, with the usual dish worth more relationship progress than a liked dish or a different one. The interface revealed those matches. Once understood, this became an obvious-answer sequence. The top bond arrived after ten usual orders. Ordinary trade is already resolved from the opening plan, so extra tapping cannot change its financial result. Build 9 adds hosted intentions and visible consequences; outside playtests must establish whether that creates worthwhile decisions.
 
 Daily briefs offer useful direction, but can become a checklist satisfied by the same broad menu. All twenty catalogue recipes become available by game day 27. Story branches now exist, but their outcomes mostly change cash, identity, recipes and text memories. A photograph, sign or garden described in a story generally never appears in the room. Later venues share operational assets and generations reuse event templates.
 
 The improvement should make the player say: “I chose what sort of day to host, the people responded, and my café looks different because of it.”
 
-## The next playable build: hosting and visible ownership
+## Hosting and visible ownership: initial slice and expansion
 
-Start with three fully connected occasions: a reunion, an illustrated tasting and a neighbourhood exhibition. Each has two authored approaches. Implement and test the complete path from the morning invitation through planning, guest moments, a visible keepsake and an actionable follow-up. Then expand to six occasion patterns if people deliberately replay the initial ones.
+Build 9 connects the initial reunion, illustrated tasting and neighbourhood exhibition from the morning invitation through planning, guest moments, a visible keepsake and a follow-up invitation. Each has two authored approaches. Test whether players deliberately replay these initial occasions before expanding to six patterns.
 
-The six-pattern target is below. These are authored patterns with alternatives, not a claim of hundreds of unique days.
+The six-pattern target is below. The first three have an implemented hosting loop; their broader ambitions, such as deeper recipe-book feedback, remain subject to the roadmap. The final three patterns are not implemented. These are authored patterns with alternatives, not a claim of hundreds of unique days.
 
 | Occasion | Approach one | Approach two | What must actually differ |
 | --- | --- | --- | --- |
@@ -103,7 +113,7 @@ Keep one purchase, clear native pricing, Restore Purchases and preserved progres
 
 ## Order of work and acceptance
 
-1. **Hosting prototype:** three occasions, two approaches each, short service moments, delegation parity, three display positions and visible consequence-based results. Check fresh saves, older saves, mid-service restore, English/Arabic, reduced motion and accessibility controls.
+1. **Hosting prototype — implemented in build 9:** three occasions, two approaches each, intention-based dish selection, delegation parity, three display positions and visible consequence-based results. Deterministic save, migration, continuity and parity checks pass. Complete physical-device checks for English/Arabic, reduced motion, audio and accessibility controls.
 2. **Uncoached opening test:** eight outside players, including Arabic-first players and people who do not normally play management games. Observe the exact point they lose interest. Look for players choosing a different approach on replay and explaining what changed without prompting.
 3. **Expand proven systems:** the other three occasion patterns, recipe feedback, projects, and then venue/successor depth. Add variety where testing reveals repetition. Do not use longer prices, timers or grind to disguise exhausted content.
 4. **Unrestricted week test:** voluntary play across at least 168 elapsed hours, using diaries/interviews and no gameplay analytics or return reminders. Measure actual returns, repeated activities, session length, reasons to stop and willingness to pay for the exact tested build. Six occasion patterns alone are not evidence of a week's entertainment.

@@ -26,7 +26,15 @@ The private browser development preview remains freely playable and cannot take 
 
 ## What still determines whether this is worth selling
 
-The concrete gameplay sequence and examples are in [the product fun plan](product-fun-plan.md); the matching outside-test protocol is in [playtest.md](playtest.md). These planned features are not part of build 8.
+The concrete gameplay sequence and remaining roadmap are in [the product fun plan](product-fun-plan.md); the matching outside-test protocol is in [playtest.md](playtest.md). Build 9 implements the first hosting slice described below. Later projects, distinct venue operation and successor situations remain future work.
+
+### Work implemented in build 9
+
+- Three optional, non-expiring occasions — a reunion, illustrated tasting and neighbourhood exhibition — each have two approaches. Every approach works immediately with a new café's existing resources, including at zero cash. Ordinary trade remains available.
+- The six approaches change guest groups, familiar/discovery/sharing service intentions, suggested menus and layouts, reactions and closing outcomes. A hosted discovery can become a remembered preference. Manual, instant and partial delegation use the same settlement rules and earn the same outcomes for the same decisions.
+- Six new painted permanent keepsakes give the approaches visible results: a reunion photograph, picnic hamper, illustrated menu, recipe notebook, neighbourhood watercolor and shared boat sketch. Players place or rearrange owned objects in three defined positions — wall, shelf and gathering corner — without spending cash or losing displaced objects. The objects appear in the café scene and persist through saves and succession.
+- The closing result leads with the hosted occasion, guest responses and keepsake, then offers a next invitation that can be pursued immediately. Existing represented story rewards migrate into the collection without fabricating hosted-day counts. All new content and controls support English and Arabic.
+- The JavaScript suites contain 90 passing checks, including 13 hosting checks and eight access checks. Localization checks cover 1,531 English/Arabic pairs and 249 literal UI keys. These are deterministic behavior and content checks; they do not prove enjoyment, device accessibility or willingness to pay. Private-preview publication is tracked separately.
 
 ### Play value — release gate, not a content-count claim
 
@@ -36,7 +44,7 @@ Use eight first-time players for the opening. Target at least six understanding 
 
 Then recruit a small consenting group for seven elapsed days. No reminders, attendance rewards, timed chapters or analytics are added to the app. Use voluntary diaries and interviews. Count a week-return only at or after 168 hours from first play. Ask whether the exact tested build is worth AED 19.99, what they wanted to return for, and what became repetitive. Finishing rapidly is allowed. If later play is exhausted or uninteresting, add new decisions and consequences rather than slowing the player.
 
-The service interaction is still dish selection, not a complete drink-making minigame. Rooms are still three arrangements, not free furniture placement. Venues still share operational assets, and inheritance still uses a small fixed heir set. These are deliberate remaining scope limits, not completed features. Prioritise stronger service variety, café personalisation and later-generation situations if testing exposes them as reasons not to buy.
+The service interaction is still dish selection, now with hosting intentions and responses; a complete drink-making interaction is not implemented. Rooms have the existing three layouts plus three souvenir display positions, not free furniture placement. Venues still share operational assets, and inheritance still uses a small fixed heir set. Multi-step projects, independent venue plans and deeper successor situations remain unimplemented. The six keepsakes and six hosting approaches are a testable first slice, not evidence of a week's entertainment. Prioritise stronger service variety, café personalisation and later-generation situations if testing exposes them as reasons not to buy.
 
 ### Commercial release gates
 

@@ -667,5 +667,145 @@
     ambition('next-generation', 'The keys change hands', 'المفاتيح تنتقل إلى جيل جديد', 'Begin the next generation without losing what you built.', 'ابدأ الجيل التالي مع الاحتفاظ بكلّ ما بنيته.', 'generation', 2, 400),
     ambition('hundred-guests', 'A hundred welcomes', 'مئة ترحيب', 'Welcome one hundred guests across your café days.', 'استقبل مئة ضيف خلال أيام المقهى.', 'served', 100, 150)
   ];
-  return { recipes, characters, stories, events, upgrades, layouts, suppliers, heirs, venues, ambitions };
+  // Hosting is deliberately replayable: these invitations have no dates, fees or prerequisites.
+  // Each approach supplies three distinct guest moments and a permanent, purely decorative object.
+  const hostIntentions = [
+    {
+      id: 'familiar', name: L('A familiar welcome', 'ترحيب بطعم مألوف'),
+      description: L('Choose their usual, a remembered favourite or a familiar recipe.', 'قدّم طلبه المعتاد، أو وصفة أحبّها من قبل، أو نكهة مألوفة.'),
+      request: L('Something comforting today. Do you remember what I like?', 'اليوم خاطري في طعم أعرفه. تتذكّر ما أحب؟'),
+      success: L('Yes, {dish}. That feels like being welcomed back.', 'نعم، {dish}. هذا طعم الرجعة إلى مكان أعرفه.'),
+      fallback: L('{dish} is a change from my usual. There is room for a different kind of welcome.', '{dish} تغيير عن طلبي المعتاد. حتى الترحيب له أكثر من طعم.')
+    },
+    {
+      id: 'discovery', name: L('Try a new taste', 'نجرب طعماً جديداً'),
+      description: L('Offer something beyond their usual and remembered favourites. A house creation works too.', 'اقترح شيئاً غير طلبه المعتاد ووصفاته المفضّلة. ويمكنك اختيار وصفة من ابتكارك.'),
+      request: L('Pick something I would not order for myself. I feel curious.', 'اختَر لي شيئاً لا أطلبه عادة. اليوم عندي فضول أجرب.'),
+      success: L('I would not have thought to ask for {dish}. Now I will remember it.', 'ما كنت سأفكّر في طلب {dish}. الآن لن أنساه.'),
+      fallback: L('I know {dish}. A familiar taste today; we can explore another one next time.', 'أعرف {dish}. نكهة مألوفة اليوم، ونجرّب غيرها في لقاء قادم.')
+    },
+    {
+      id: 'sharing', name: L('Something for the table', 'شيء يجمع الطاولة'),
+      description: L('Choose a recipe made for sharing. One generous suggestion brings the table together.', 'اختر وصفة تصلح للمشاركة. اقتراح كريم يجمع من حول الطاولة.'),
+      request: L('What would you put in the middle so everyone can have a taste?', 'ماذا تضع في وسط الطاولة حتى يذوق الجميع؟'),
+      success: L('{dish} belongs in the middle. Let everyone try a little.', 'مكان {dish} في وسط الطاولة. كلّ واحد يذوق قليلاً.'),
+      fallback: L('I will start with {dish}. Next time, let us choose something for the whole table.', 'أبدأ بـ{dish}. وفي المرة القادمة نختار شيئاً للطاولة كلّها.')
+    }
+  ];
+
+  const occasions = [
+    {
+      id: 'reunion', hostId: 'mariam', name: L('Mariam’s reunion', 'لقاء مريم'), art: 'p4',
+      invitation: L('Mariam brings an old photograph. Old friends, new neighbours: bring them to one table, or send them out with a picnic?', 'تحضر مريم صورة قديمة. أصدقاء من زمان وجيران جدد: نجمعهم حول طاولة، أم نجهّز لهم نزهة؟'),
+      approaches: [
+        {
+          id: 'reunion-breakfast', name: L('Bring everyone to breakfast', 'نجمع الجميع على الفطور'),
+          description: L('Familiar favourites, a plate to share and one unexpected recommendation.', 'نكهات مألوفة وطبق للمشاركة واقتراح يفاجئ أحدهم.'),
+          tags: ['sharing', 'familiar'], layout: 'communal',
+          guestIds: ['mariam', 'grandmother', 'hassan'], intentions: ['familiar', 'sharing', 'discovery'],
+          opening: L('Mariam pulls the chairs together. Um Saeed makes room in the middle; Hassan asks to try something different.', 'تقرّب مريم الكراسي. تفسح أم سعيد مكاناً وسط الطاولة، ومن حسن طلب لتجربة طعم مختلف.'),
+          outcome: L('The photograph starts the stories; your breakfast gives them somewhere to stay. Mariam leaves a framed copy for the café.', 'تبدأ الحكايات مع الصورة وتطول على فطورك. تترك مريم نسخة في إطار للمقهى.'),
+          followUp: L('They disagree about what to order next. Let Um Saeed turn those opinions into a tasting.', 'اختلفوا على طلب اللقاء القادم. دع أم سعيد تحوّل الآراء إلى جلسة تذوّق.'),
+          nextOccasionId: 'tasting', decorationId: 'reunion-photo'
+        },
+        {
+          id: 'reunion-picnic', name: L('Pack a neighbourhood picnic', 'نجهّز نزهة لأهل الحي'),
+          description: L('Food to share, quick favourites and a new taste to take outside.', 'طعام للمشاركة وخيارات سريعة وطعم جديد يصحبهم إلى الخارج.'),
+          tags: ['quick', 'sharing'], layout: 'express',
+          guestIds: ['hassan', 'mariam', 'salma'], intentions: ['sharing', 'discovery', 'familiar'],
+          opening: L('Hassan spreads out the picnic cloth. Mariam asks for a surprise; Salma wants a familiar favourite beside the flowers.', 'مفرش النزهة من حسن. تطلب مريم مفاجأة، وتريد سلمى نكهة مألوفة بجانب الزهور.'),
+          outcome: L('They bring the empty hamper back with a flower tucked into its handle. “Keep it here,” says Mariam. “We will need it again.”', 'يعيدون السلة فارغة، وقد وضعوا زهرة عند المقبض. تقول مريم: «خلّها عندك، سنحتاجها من جديد».'),
+          followUp: L('Salma spotted a little corner worth drawing. Invite Noor to make an exhibition of the neighbourhood.', 'لمحت سلمى ركناً يستحقّ الرسم. ادعُ نور لتقيم معرضاً من تفاصيل الحي.'),
+          nextOccasionId: 'exhibition', decorationId: 'picnic-hamper'
+        }
+      ]
+    },
+    {
+      id: 'tasting', hostId: 'grandmother', name: L('The illustrated tasting', 'جلسة تذوّق مصوّرة'), art: 'p12',
+      invitation: L('Um Saeed has opinions; Noor has a pencil. Put familiar recipes in new company, or introduce the café’s less familiar tastes.', 'لدى أم سعيد آراء، ولدى نور قلم. نقدّم الوصفات المألوفة بصحبة جديدة، أم نعرّفهم إلى نكهات أقلّ شهرة في المقهى؟'),
+      approaches: [
+        {
+          id: 'tasting-pairings', name: L('Give familiar recipes new company', 'صحبة جديدة للوصفات المألوفة'),
+          description: L('Start with comfort, suggest something to share, then invite one guest to explore.', 'نبدأ بالمألوف، ثم نقترح ما نتشاركه، وندعو أحد الضيوف لتجربة جديدة.'),
+          tags: ['familiar', 'warm'], layout: 'quiet',
+          guestIds: ['grandmother', 'hassan', 'noor'], intentions: ['familiar', 'sharing', 'discovery'],
+          opening: L('Um Saeed wants a familiar starting point. Hassan thinks the table should share; Noor leaves a blank space for a surprise.', 'تريد أم سعيد بداية مألوفة. اقتراح حسن أن نتشارك الطعام، وتترك نور مساحة فارغة لمفاجأة.'),
+          outcome: L('Noor draws each suggestion around a little table. Um Saeed adds a few notes. Their illustrated menu is yours to display.', 'ترسم نور الاقتراحات حول طاولة صغيرة، وتضيف أم سعيد بعض الملاحظات. قائمة التذوّق المصوّرة لك لتعرضها في المقهى.'),
+          followUp: L('Mariam wants to try your suggestions with friends. Choose a reunion and decide how to welcome them.', 'تريد مريم تجربة اقتراحاتك مع أصدقائها. اختر لقاءً وقرّر كيف تستقبلهم.'),
+          nextOccasionId: 'reunion', decorationId: 'illustrated-menu'
+        },
+        {
+          id: 'tasting-discovery', name: L('Introduce the house favourites', 'نعرّفهم إلى اختيارات الدار'),
+          description: L('Offer someone a new taste, keep another guest comfortable and finish with something to share. Any owned recipe can take part.', 'نقدّم طعماً جديداً لأحدهم، ومألوفاً لآخر، ثم ما يجمع الطاولة. يمكنك الاختيار من وصفاتك الحالية.'),
+          tags: ['special', 'sharing'], layout: 'communal',
+          guestIds: ['noor', 'grandmother', 'omar'], intentions: ['discovery', 'familiar', 'sharing'],
+          opening: L('Noor is ready for a recommendation. Um Saeed asks for a familiar anchor; Omar asks for something to share with the table.', 'نور مستعدّة لاقتراح جديد. تطلب أم سعيد نكهة مألوفة، ومن عمر طلب لشيء تتشاركه الطاولة.'),
+          outcome: L('Three voices fill a page with tasting notes. Noor sketches the cups; Um Saeed circles the useful comments. Keep their page beside your recipes.', 'تمتلئ صفحة بملاحظات ثلاثة ضيوف. ترسم نور الأكواب، وتضع أم سعيد دوائر حول الملاحظات المفيدة. احتفظ بالصفحة بجانب وصفاتك.'),
+          followUp: L('Noor thinks the tasting notes belong in a little show. Host an exhibition and choose how people take part.', 'ترى نور أن أوراق التذوّق تستحقّ معرضاً صغيراً. استضف المعرض واختر كيف يشارك الناس.'),
+          nextOccasionId: 'exhibition', decorationId: 'tasting-notes'
+        }
+      ]
+    },
+    {
+      id: 'exhibition', hostId: 'noor', name: L('Noor’s neighbourhood exhibition', 'معرض نور للحي'), art: 'p5',
+      invitation: L('Noor brings a drawing of the little street and a handful of pencils. A quiet viewing, or a table where everyone adds a line?', 'تحضر نور رسماً للشارع الصغير وحفنة أقلام. نتأمّل الرسم على مهل، أم نجلس حول طاولة ليضيف كلّ شخص خطاً؟'),
+      approaches: [
+        {
+          id: 'exhibition-viewing', name: L('Look slowly, sip slowly', 'نتأمّل ونرتشف على مهل'),
+          description: L('A quiet corner, thoughtful recommendations and a shared taste for visitors comparing the details.', 'ركن هادئ واقتراحات على مهل وطعم يتشاركه الزوّار وهم يتأمّلون التفاصيل.'),
+          tags: ['warm', 'familiar'], layout: 'quiet',
+          guestIds: ['noor', 'salma', 'hassan'], intentions: ['familiar', 'discovery', 'sharing'],
+          opening: L('Noor puts the street drawing by the window. Salma looks for the flower shop; Hassan claims the tiny bicycle.', 'تضع نور رسم الشارع قرب النافذة. تبحث سلمى عن محلّ الزهور، ويأتي التأكيد من حسن: «هذه الدراجة لنا!».'),
+          outcome: L('People find their own corners in Noor’s drawing. A framed print stays in the café, with the little bicycle still in place.', 'يجد كلّ شخص ركنه في رسم نور. تترك نسخة في إطار للمقهى، والدراجة الصغيرة ما زالت في مكانها.'),
+          followUp: L('Salma wonders what the drawing would taste like. Invite Um Saeed and put together an illustrated tasting.', 'تتساءل سلمى: لو كان للرسم طعم، كيف سيكون؟ ادعُ أم سعيد وأعدّ جلسة تذوّق مصوّرة.'),
+          nextOccasionId: 'tasting', decorationId: 'street-landscape'
+        },
+        {
+          id: 'exhibition-drawing', name: L('Let everyone add a line', 'كلّ شخص يضيف خطاً'),
+          description: L('Pencils across the table, easy plates to share and room for a surprising recommendation.', 'أقلام على الطاولة وأطباق سهلة للمشاركة ومساحة لاقتراح غير متوقّع.'),
+          tags: ['sharing', 'quick'], layout: 'communal',
+          guestIds: ['omar', 'noor', 'mariam'], intentions: ['discovery', 'sharing', 'familiar'],
+          opening: L('Noor draws a boat, then passes the pencil. Omar adds a sail; Mariam makes space for far too many passengers.', 'ترسم نور قارباً ثم تمرّر القلم. الشراع من عمر، والمساحة الإضافية من مريم لركّاب أكثر ممّا يحتمل القارب.'),
+          outcome: L('The boat would never float, but everyone wants a place in it. Noor pins the shared sketch to a little display board for your café.', 'لن يطفو هذا القارب أبداً، لكن الجميع يريد مكاناً فيه. تثبّت نور الرسم المشترك على لوحة صغيرة لمقهاك.'),
+          followUp: L('Mariam counts the passengers and laughs. “That is our next gathering.” Host their reunion at the table or outdoors.', 'تعدّ مريم الركّاب وتضحك: «هؤلاء ضيوف لقائنا القادم». اجمعهم حول الطاولة أو جهّز لهم نزهة.'),
+          nextOccasionId: 'reunion', decorationId: 'shared-sketch'
+        }
+      ]
+    }
+  ];
+
+  const decorations = [
+    {
+      id: 'reunion-photo', name: L('The reunion photograph', 'صورة اللقاء'), art: 'host_photo', preferredSlot: 'wall',
+      description: L('A framed reminder of a table worth coming back to. Mariam made sure the café kept a copy.', 'صورة في إطار تذكّر بطاولة تستحقّ العودة. حرصت مريم على أن يحتفظ المقهى بنسخة.'),
+      occasionId: 'reunion', approachId: 'reunion-breakfast', legacyChoices: { 'mariam-1': ['breakfast'] }
+    },
+    {
+      id: 'picnic-hamper', name: L('The picnic hamper', 'سلة النزهة'), art: 'host_picnic', preferredSlot: 'corner',
+      description: L('An empty hamper, a folded cloth and one flower. Ready for another outing whenever you are.', 'سلة فارغة ومفرش مطويّ وزهرة واحدة. جاهزة لنزهة أخرى متى أحببت.'),
+      occasionId: 'reunion', approachId: 'reunion-picnic'
+    },
+    {
+      id: 'illustrated-menu', name: L('The illustrated menu', 'القائمة المصوّرة'), art: 'host_menu', preferredSlot: 'shelf',
+      description: L('Little drawings beside the café’s suggestions. A conversation starter that fits on a shelf.', 'رسومات صغيرة بجانب اقتراحات المقهى. بداية حديث تجد مكانها على الرفّ.'),
+      occasionId: 'tasting', approachId: 'tasting-pairings', legacyChoices: { 'noor-2': ['cups'] }
+    },
+    {
+      id: 'tasting-notes', name: L('The tasting notes', 'أوراق التذوّق'), art: 'host_recipe', preferredSlot: 'shelf',
+      description: L('Cup sketches, useful comments and three different opinions. A little page with room for the next idea.', 'رسومات أكواب وملاحظات مفيدة وثلاثة آراء مختلفة. صفحة صغيرة تتّسع لفكرة قادمة.'),
+      occasionId: 'tasting', approachId: 'tasting-discovery'
+    },
+    {
+      id: 'street-landscape', name: L('The little street drawing', 'رسم الشارع الصغير'), art: 'host_landscape', preferredSlot: 'wall',
+      description: L('Noor’s view of an ordinary street, complete with a bicycle someone is very proud of.', 'الشارع العادي بعيني نور، وفيه دراجة يعتزّ بها صاحبها كثيراً.'),
+      occasionId: 'exhibition', approachId: 'exhibition-viewing', legacyChoices: { 'noor-1': ['gallery'] }
+    },
+    {
+      id: 'shared-sketch', name: L('The impossible boat', 'القارب العجيب'), art: 'host_sketch', preferredSlot: 'corner',
+      description: L('A boat drawn without a single shipbuilder. Noor gave it a place among the best work on display.', 'قارب رُسم دون أن يكون بيننا صانع سفن. منحته نور مكاناً بجانب أفضل الأعمال المعروضة.'),
+      occasionId: 'exhibition', approachId: 'exhibition-drawing', legacyChoices: { 'noor-2': ['workshop'] }
+    }
+  ];
+
+  return { recipes, characters, stories, events, upgrades, layouts, suppliers, heirs, venues, ambitions, hostIntentions, occasions, decorations };
 });
