@@ -23,12 +23,18 @@
 > - EAS build profiles `development` / `preview` / `testflight` / `production`, where
 >   `testflight` extends production signing on its own update channel
 >
-> **The one thing that does not transfer.** That game embeds itself as a single HTML string
-> (`native/src/webapp/html.js`, 1.26 MB) because a WebView given `source={{ html }}` has no
-> origin and cannot fetch siblings. Café Life is **7.6 MB of PNG sprites**, which base64
-> encodes to about 10 MB in one JavaScript string. The sprites have to be bundled assets
-> loaded over `file://` or through `expo-asset` instead. That is a solved problem, but it is
-> a different mechanism and it has not been built or tested here.
+> **The part that needed its own answer — now solved.** That game embeds itself as a single
+> HTML string (`native/src/webapp/html.js`, 1.26 MB) because a WebView given
+> `source={{ html }}` has no origin and cannot fetch siblings. Café Life is **7.6 MB of PNG
+> sprites**, which base64 encodes to about 10 MB in one JavaScript string — too much.
+>
+> `tools/build-native.py` re-encodes them to WebP at the size the game actually draws them,
+> which brings all 140 sprites down to **3.42 MB** in one string, with the typefaces inlined
+> too. So the single-string architecture does transfer after all, and no `expo-asset` or
+> `file://` mechanism was needed. Proven end to end: `expo export --platform ios` produces an
+> 8.3 MB Hermes bundle, and `tools/check-native.js` loads the packaged game at a real https
+> origin and confirms 140 sprites decode, nothing is fetched, and a dynasty survives a
+> relaunch.
 >
 > **The Expo shell now exists**, in [`native/`](../native/), mirroring that architecture.
 > `native/README.md` is the build route. In short: `npm run webapp`, the release gate, then
@@ -82,6 +88,35 @@
 > built by `tools/build-native.py`, which imports Pillow, and an EAS macOS runner has none.
 > Worth doing later — a server-side rebuild makes a stale bundle impossible — but not as an
 > untested change standing between here and a first build.
+>
+> ### What the other repositories actually do, command for command
+>
+> `marble-ultimate-football/docs/11-ios-release.md` is explicit, and it is the same command
+> this repository already has in `npm run build:testflight`:
+>
+> ```sh
+> cd native
+> npx eas-cli build --platform ios --profile testflight
+> ```
+>
+> No `--local` flag — it appears nowhere in that repository except a `.gitignore` line. The
+> audit's phrase "Local EAS build" means the build was *invoked* from the operator's machine
+> against EAS's cloud builders, not built on the Mac. So no Mac is needed for the build
+> itself, only an Expo login.
+>
+> Two rules from that document that are not obvious and cost a failed run each:
+>
+> - **"Building, uploading and submitting are separate actions."** The release gate does none
+>   of them.
+> - **Do not pass `--what-to-test` to `eas submit`.** On this account's Expo plan, EAS rejects
+>   the changelog parameter *before* scheduling the submission, so the whole submit fails.
+>   Add the testing notes in App Store Connect after the build has processed. The `submit`
+>   script here already omits it; do not add it.
+>
+> That repository also keeps a dated audit per TestFlight build under `docs/audit/`, recording
+> the profile, build number, signing and provisioning result, the archive size and SHA-256,
+> Apple's delivery UUID and the tester-availability readback. Worth copying once there is a
+> build to record.
 >
 > ### Neither shipped app builds from CI
 >
