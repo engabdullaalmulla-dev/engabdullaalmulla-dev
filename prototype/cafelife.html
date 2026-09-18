@@ -879,6 +879,8 @@ function screenCafe(){
      is the last thing on the hub, it does not exist until a season has closed, and the first
      tap only asks. */
   if(G.year > YEAR0 || G.month > 0 || G.day > 1){
+    const keep = el("button","btn quiet","Keep or restore this café"); keep.type = "button";
+    keep.onclick = screenSave; sc.appendChild(keep);
     const again = el("button","btn quiet","Start a new café"); again.type = "button";
     again.onclick = () => askWipe(again);
     sc.appendChild(again);
@@ -1114,6 +1116,8 @@ function runService(auto){
   paintVisits();
   const tick = el("div","tick"); const ti = el("i"); ti.id = "sv-tick"; tick.appendChild(ti);
   v.appendChild(tick);
+  const mslot = el("div"); mslot.id = "sv-moment"; mslot.style.padding = "0 16px";
+  v.appendChild(mslot);
   const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
   const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
   foot.appendChild(el("div","hint","You have time to go over to " + visitsToday() + " people this "
@@ -1121,8 +1125,7 @@ function runService(auto){
     + "anyone's story."));
   v.appendChild(foot);
   /* tapping the day itself hurries it; tapping a guest is still going over to them */
-  v.onclick = ev => { if(SV.moment) return;
-                      if(ev.target.closest(".g")) return;
+  v.onclick = ev => { if(ev.target.closest(".g") || ev.target.closest("#sv-moment")) return;
                       pump(true); };
   show("serve");
   step(); pump(false);
@@ -1161,7 +1164,6 @@ function pump(now){
   SV.timer = setTimeout(() => { step(); pump(false); }, gap);
 }
 function step(){
-  if(SV.moment) return;
   if(SV.i >= SV.q.length){ SV.done = true; clearTimeout(SV.timer);
                            setTimeout(() => closeDay(false), 520); return; }
   const c = SV.q[SV.i++];
@@ -1211,21 +1213,36 @@ function step(){
   if(SV.i === Math.floor(SV.q.length*0.45) && Math.random() < 0.75) doMoment();
 }
 
+/* A moment used to stop the day dead until it was answered. That was tolerable when a
+   customer took 620ms and a day ran a quarter of a minute; a day is 2.9 seconds now, so a
+   full-stop modal is most of it, and it interrupted the one thing the retiming was for.
+
+   It sits above the counter instead and the day carries on underneath. Answer it while the
+   room fills, or do not -- an unanswered moment is a thing you let pass, which is a real
+   answer and costs nothing. It lives outside the guest list so the crowd cannot scroll it
+   away, and tapping it never counts as hurrying the day along. */
 function doMoment(){
   const m = pick(MOMENTS);
   SV.moment = m;
-  const list = $("sv-list");
+  const slot = $("sv-moment"); if(!slot) return;
+  slot.textContent = "";
   const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
-  card.appendChild(el("div","lbl","A moment"));
+  card.style.marginBottom = "8px";
+  card.appendChild(el("div","lbl","A moment · while you work"));
   card.appendChild(el("div","hint", m.t));
   m.o.forEach((o,i) => {
-    const b = el("button","btn" + (i ? " sec" : "")); b.type = "button"; b.textContent = o.l;
-    b.onclick = () => { const out = o.f(G); card.remove(); SV.moment = null;
-      const n = el("div","card"); n.appendChild(el("div","hint", out));
-      list.insertBefore(n, list.firstChild); save(); };
+    const b = el("button","btn sm" + (i ? " sec" : "")); b.type = "button"; b.textContent = o.l;
+    b.style.marginRight = "6px"; b.style.marginTop = "6px";
+    b.onclick = ev => { ev.stopPropagation();
+      const out = o.f(G); SV.moment = null;
+      slot.textContent = "";
+      const n = el("div","card"); n.style.marginBottom = "8px";
+      n.appendChild(el("div","hint", out)); slot.appendChild(n);
+      setTimeout(() => { if(slot) slot.textContent = ""; }, 2200);
+      save(); };
     card.appendChild(b);
   });
-  list.insertBefore(card, list.firstChild);
+  slot.appendChild(card);
 }
 
 /* ============================== closing the season ============================== */
@@ -1767,6 +1784,8 @@ function askWipe(btn){
   no.onclick = screenCafe;
   const yes = el("button","btn sec","Delete it and start again"); yes.type = "button";
   yes.onclick = wipe;
+  const keep = el("button","btn quiet","Keep a copy of it first"); keep.type = "button";
+  keep.onclick = screenSave; box.appendChild(keep);
   box.appendChild(no); box.appendChild(yes);
   btn.replaceWith(box);
 }
@@ -1928,6 +1947,64 @@ function succession(){
   sc.appendChild(go);
   v.appendChild(sc);
   show("close");
+}
+
+/* ============================== keeping a dynasty ============================== */
+/* Three hundred years lives in one browser's localStorage on one device. Clearing site data,
+   a new phone, a reinstall -- any of them takes the lot, and there is nothing the player
+   could have done about it. A save is written out as text they can keep anywhere, and read
+   back from the same. Nothing leaves the device: this is a string on the screen, not an
+   upload, which is what lets it exist at all without touching what the privacy page says. */
+function saveText(){
+  try { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); }
+  catch(e){ return null; }
+}
+function loadText(t){
+  try {
+    const o = JSON.parse(decodeURIComponent(escape(atob(t.trim()))));
+    if(!o || !o.year || !o.owner) return "That does not look like a Café Life save.";
+    G = o; rehydrate(); save(); return null;
+  } catch(e){ return "That could not be read. Copy the whole line, including the end."; }
+}
+function screenSave(){
+  const v = $("s-goals"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", (G.cafeName || "the café") + " · " + dateLine()));
+  sc.appendChild(el("div","big","Keep this café"));
+  sc.appendChild(el("div","hint","Your café lives in this browser and nowhere else. Copy the "
+    + "text below and keep it somewhere — a note, an email to yourself — and you can bring "
+    + "this café back on any device. Nothing is sent anywhere; it is only text."));
+
+  const box = document.createElement("textarea");
+  box.className = "tin"; box.id = "save-out"; box.rows = 5; box.readOnly = true;
+  box.style.fontFamily = '"DM Mono", monospace'; box.style.fontSize = "11px";
+  box.value = saveText() || "This browser will not let the game read its own save.";
+  sc.appendChild(box);
+  const copy = el("button","btn","Select it all to copy"); copy.type = "button";
+  copy.onclick = () => { box.focus(); box.select(); };
+  sc.appendChild(copy);
+
+  sc.appendChild(el("div","lbl","Bring a café back"));
+  sc.appendChild(el("div","hint","Paste a saved café here. It replaces the one you are "
+    + "playing now, so keep that one first if you want it."));
+  const inp = document.createElement("textarea");
+  inp.className = "tin"; inp.id = "save-in"; inp.rows = 4;
+  inp.placeholder = "Paste here";
+  inp.style.fontFamily = '"DM Mono", monospace'; inp.style.fontSize = "11px";
+  sc.appendChild(inp);
+  const msg = el("div","hint",""); sc.appendChild(msg);
+  const put = el("button","btn sec","Bring it back"); put.type = "button";
+  put.onclick = () => {
+    if(!inp.value.trim()){ msg.textContent = "Nothing pasted yet."; return; }
+    const err = loadText(inp.value);
+    if(err){ msg.textContent = err; return; }
+    screenCafe();
+  };
+  sc.appendChild(put);
+
+  const back = el("button","btn quiet","Back to the café"); back.type = "button";
+  back.onclick = screenCafe; sc.appendChild(back);
+  v.appendChild(sc); show("goals");
 }
 
 /* ============================== the street ============================== */
