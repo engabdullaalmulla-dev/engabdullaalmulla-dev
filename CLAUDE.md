@@ -16,13 +16,15 @@ keep it that way.
 
 ## The one rule that shapes everything
 
-**`prototype/cafelife.html` is the only copy of the game.** It is a single self-contained
-HTML document — markup, CSS and the whole engine in one `<script>`. Every other playable
-artefact in the repository is generated from it, and none of them should ever be hand-edited:
+**The authored game is `prototype/cafelife.html` plus `prototype/game/*.js`.** The daily
+rebuild separates deterministic rules, bilingual content and audio from the presentation.
+Build tools inline those local scripts, fonts and artwork into the same offline native
+document. Generated playable artefacts must never be hand-edited. Node tests exercise the
+same authored rules used by the game; no duplicate simulation economy is permitted.
 
 ```
-prototype/cafelife.html          the game — edit this
-  ├── tools/build-native.py  ->  native/src/webapp/html.js   (one 3.5MB string, for the app)
+prototype/cafelife.html          authored UI, with prototype/game/*.js
+  ├── tools/build-native.py  ->  native/src/webapp/html.js   (one embedded string, for the app)
   └── tools/build-web.py     ->  dist/, app/www/, site/      (all three git-ignored)
 ```
 
@@ -33,19 +35,21 @@ follow that convention**; it is a complete document. Do not run `build.sh` again
 
 ## Commands
 
-No root `package.json`. Python tools need Pillow; JS tools need Playwright resolvable —
-in this environment that means `NODE_PATH=/opt/node22/lib/node_modules`.
+No root `package.json`. Python tools need Pillow. The engine tests have no external JS
+dependencies; the full browser release gate uses the Playwright dev dependency in `native/`.
 
 ```bash
 # rebuild the bundles after changing the game
 python3 tools/build-native.py        # -> native/src/webapp/html.js   (the app)
 python3 tools/build-web.py           # -> dist/, app/www/, site/      (web + PWA)
 
-# the release gate — run before any build is worth shipping
-NODE_PATH=/opt/node22/lib/node_modules node tools/check-native.js
+# deterministic game checks (no browser)
+node tools/test-engine.cjs
+node tools/check-localization.cjs
+node tools/check-native.js --static
 
-# the economy bot: [years] [runs] [policy: saver|good|greedy]
-NODE_PATH=/opt/node22/lib/node_modules node tools/sim.js 40 4 saver
+# complete release gate — includes browser checks
+node tools/check-native.js
 
 # the iOS app
 cd native && npm install
@@ -53,7 +57,7 @@ npm run webapp                       # regenerate the bundle
 npm run build:testflight             # needs eas login + eas init first
 ```
 
-All four tools resolve paths from their own location, so they run from any directory. That was
+The tools resolve paths from their own location, so they run from any directory. That was
 not always true: `npm run webapp` executes from `native/`, and relative paths broke it.
 
 ### The release gate is not optional
@@ -65,48 +69,58 @@ states the no-network claim **as verified fact on the strength of this gate**. I
 makes the app reach the network, that page has to change before the build ships — and no
 analytics may be added, not even temporarily for a playtest.
 
-## Architecture of the game itself
+## Architecture of the daily rebuild (build 6)
 
-Reading `prototype/cafelife.html` top to bottom is the fastest way in; it is ordered
-data → helpers → screens → boot. The parts that are not obvious from one screen:
+The sections below supersede the watched-day / monthly waiting model from build 5. The
+canonical HTML loads local modules which the build tools embed into one offline document:
 
-**Time.** A trading **day** is what the player watches: ten hours, 07:00–17:00, at 2.4s an
-hour, so a day runs 24 seconds. The day is driven by *the clock*, not the queue — `tock()`
-advances a fixed ten-minute slice and serves whoever is due in it (`SV.at` holds each
-arrival's time, laid out with a morning rush and an evening). A **month** is the accounting
-period and the spending round. The calendar is the **real** calendar from 1 January 1994:
-real month lengths, the real leap rule, real weekdays.
+- `prototype/game/content.js`: authored English/Arabic catalogues, stories and choices.
+- `prototype/game/engine.js`: shared deterministic game rules, no DOM or clocks.
+- `prototype/game/audio.js`: original procedural music and sound effects; gesture-unlocked.
+- `prototype/game/i18n.js`: English/Arabic interface strings.
+- `prototype/game/ui.js` and `styles.css`: presentation, persistence and interaction.
 
-**`MONTH_SCALE` vs `monthDays()` are not interchangeable.** `MONTH_SCALE` (30) is a fixed
-economic constant for anything priced against a month of trade; `monthDays()` is the real
-length of the month in hand. Using `monthDays()` for a price makes a stool cost less in
-February, which is a bug, not a season.
+**Time and continuity.** Plan a day, open immediately, serve individual guests or delegate
+instantly, then read the day's result and continue. Gameplay must never depend on a wall
+clock. The real calendar and UAE seasons remain. Decisions cannot require waiting for
+research, construction, staff or energy. Optional manual service and instant delegation
+must share the exact same simulation and settlement rules.
 
-**`settleMonth()` / `monthScreen()` are deliberately separate.** `settleMonth()` does the
-arithmetic and returns what happened (including `notable`); `monthScreen()` draws it. That
-split is what lets `runUntil()` settle months in a loop until something wants the player.
+**Economy and permanent progress.** No forced bankruptcy, repossession, automatic debt,
+passive cash loss or succession haircut. Daily operating costs reduce that day's take-home,
+floored at zero. Only explicit purchases spend saved cash. Owned capabilities persist.
 
-**Saves.** One `localStorage` key (`cafelife_mgmt_2`), and `rehydrate()` backfills any field
-missing from an older save by diffing against `NEW()`. Add new state to `NEW()` and it is
-covered; name fields individually and old saves will crash. Bump the key only when the shape
-changes incompatibly.
+**Saves.** New saves use `cafelife_daily_6`, with `cafelife_daily_6_backup` for recovery.
+`CafeEngine.exportSave` and `importSave` share versioned validation. The legacy
+`cafelife_mgmt_2` save must be preserved when migrating. Validate imported data before
+writing either current or backup saves; never overwrite a usable save with malformed data.
 
-**Two long-standing failure modes to watch for.** Both runaways this game has had were
-geometric series that looked fine locally: inventions priced off other inventions, and a
-`visitsFor` that returned a season's worth of cups per customer after the unit became a day.
-Anything that multiplies a persistent value — `foot`, `rentCut`, prices — needs a clamp.
+**Audio.** `CafeAudio` has `unlock`, `configure`, `play`, `stop` and `resume`. Music and
+sound effects have independent switches. Native lifecycle and document visibility suspend
+sound. All sound is synthesised locally; there are no audio downloads or tracking calls.
+
+**Locales.** The whole interface and content support English and Arabic. Arabic uses RTL
+layout and local system fonts; no remote font fallback is allowed. Native loading/retry and
+installed app names are translated as well. The UI informs the shell with a language message.
 
 ## Measuring changes
 
-**Do not tune the economy by reading the code.** `tools/sim.js` plays hundreds of years and
-prints the curve, when each unlock became affordable versus when it was bought, overdrafts and
-repossessions. It was once broken and silent — reporting "never" for nearly every unlock while
-looking like a result — so if its output seems implausible, suspect the bot before the game.
+`node tools/test-engine.cjs` exercises the actual authored engine, including daily income,
+manual/delegated parity, zero-cash continuity, the calendar, saves and permanent progress.
+`node tools/check-localization.cjs` checks English/Arabic pairs, interpolation placeholders,
+UI lookup keys and translated installed-app metadata. The old `tools/sim.js` targets the retired build-5 globals and must not be used to measure
+the rebuilt game's economy.
 
-For anything visual or interactive, drive it in a browser rather than trusting the diff. Faults
-found only that way include: a month reporting 172 served with 234 "of those", a day summary
-headed with tomorrow's date, a double-tap running two days at once, and ten seconds of empty
-room at the start of a day.
+`node tools/check-native.js --static` checks bundled JavaScript, source freshness, all image
+payloads, offline resource restrictions and engine save roundtrips without starting a browser.
+The default `node tools/check-native.js` additionally performs the browser release gate at the
+native https origin, decodes all sprites and verifies a saved Arabic dynasty survives reload.
+Install that gate's browser once with `cd native && npm install && npm run check:setup`.
+`npm run build:testflight` rebuilds the bundle and requires the engine and full release gate.
+
+A static pass alone is not a browser pass. For visual or interactive changes, inspect English
+and Arabic in a browser and test the real app on iPhone, including audio, VoiceOver and larger
+text. Save migration, gesture-unlocked audio and lifecycle recovery require device validation.
 
 ## The iOS route
 

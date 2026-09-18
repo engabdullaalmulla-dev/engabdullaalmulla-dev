@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "حياة المقهى",
+    "CFBundleName": "حياة المقهى"
+  },
+  "android": {
+    "app_name": "حياة المقهى"
+  }
+}

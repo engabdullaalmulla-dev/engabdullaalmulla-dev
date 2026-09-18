@@ -1,19 +1,25 @@
 {
   "name": "cafe-life-native",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "main": "index.js",
   "scripts": {
     "webapp": "python3 ../tools/build-native.py",
     "start": "npm run webapp && expo start",
     "ios": "npm run webapp && expo run:ios",
-    "build:testflight": "npm run webapp && npx eas-cli build --platform ios --profile testflight",
-    "submit": "npx eas-cli submit --platform ios --profile production"
+    "build:testflight": "npm run webapp && npm run check && npx eas-cli build --platform ios --profile testflight",
+    "submit": "npx eas-cli submit --platform ios --profile production",
+    "check": "node ../tools/test-engine.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js",
+    "check:static": "node ../tools/test-engine.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js --static",
+    "check:setup": "playwright install chromium"
   },
   "dependencies": {
     "expo": "~57.0.23",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
   }
 }

@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Café Life",
+    "CFBundleName": "Café Life"
+  },
+  "android": {
+    "app_name": "Café Life"
+  }
+}
