@@ -53,6 +53,16 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
 .btn.quiet{background:none;border:0;color:var(--dim);font-size:13px;text-decoration:underline;
   text-underline-offset:3px}
 .btn.quiet:active{background:none;color:var(--cream)}
+.tin{width:100%;box-sizing:border-box;background:var(--panel-2);border:1px solid var(--edge-2);
+  border-radius:12px;color:var(--cream);font:600 17px/1.3 inherit;padding:13px 14px;margin:8px 0 2px}
+.tin:focus{outline:2px solid var(--amber);outline-offset:1px}
+.pickr{border:1px solid var(--edge);border-radius:14px;background:var(--panel);padding:13px 14px;
+  margin-top:9px;cursor:pointer}
+.pickr.on{border-color:var(--amber);background:var(--panel-2)}
+.pickr .t{font-weight:700;font-size:15px}
+.pickr .d{color:var(--dim);font-size:12.5px;line-height:1.5;margin-top:4px}
+.pickr .m{color:var(--amber);font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin-top:7px}
 .tabs{display:flex;gap:6px;padding:0 16px 10px;flex:none}
 .tab{flex:1;padding:9px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);
      font-size:12px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
@@ -486,6 +496,7 @@ function NEW(){
     owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
            dies:72+Math.floor(Math.random()*18)},
     cash:640*MONTH_DAYS, rent:90,
+    setup:false, cafeName:"", tenure:null, debt:0, debtRate:0,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
@@ -531,7 +542,7 @@ function heatNow(){
    the bill is now settled monthly against MONTH_DAYS of them, so the standing charges carry
    that factor. The shares taken off takings (the landlord's 7%, the 15% of running costs)
    need no factor at all -- they scale with the month because the takings do. */
-const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl() * FIXED
+const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl() * FIXED * (G.rentCut || 1)
                         + (own("freehold") ? 0 : G.lastTake * 0.07));
 /* A wage was a fixed 120 or 260 a season whatever the café had become, so by 2020 the whole
    payroll was 716 against takings of 35,664 -- two per cent, where a real café spends about a
@@ -744,6 +755,7 @@ function screenCafe(){
   const v = $("s-cafe"); v.textContent = "";
   const bar = el("div","bar");
   bar.appendChild(el("div","pill", dateLine() + " · day " + G.day));
+  if(G.cafeName) bar.appendChild(el("div","pill", G.cafeName));
   bar.appendChild(el("div","grow"));
   bar.appendChild(el("div","pill cash", money(G.cash) + " AED"));
   v.appendChild(bar);
@@ -1042,7 +1054,7 @@ const CAST = 9;
 function runService(auto){
   const q = buildQueue();
   SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null,
-        visits:VISITS, offstage:0};
+        visits:visitsToday(), maxVisits:visitsToday(), offstage:0};
   if(auto){
     q.forEach(c => { const r = serveOne(c);
       if(r.k){ SV.take += r.pay; SV.profit += Math.round(r.profit*MANAGER_CUT); SV.served++;
@@ -1077,28 +1089,54 @@ function runService(auto){
   v.appendChild(tick);
   const list = el("div","guests"); list.id = "sv-list"; v.appendChild(list);
   const foot = el("div","pad"); foot.style.padding = "0 16px 14px";
-  foot.appendChild(el("div","hint","You have time to go over to " + VISITS + " people this "
+  foot.appendChild(el("div","hint","You have time to go over to " + visitsToday() + " people this "
     + "day. It is worth almost nothing on the till and it is the only thing that moves "
     + "anyone's story."));
   v.appendChild(foot);
+  /* tapping the day itself hurries it; tapping a guest is still going over to them */
+  v.onclick = ev => { if(SV.moment) return;
+                      if(ev.target.closest(".g")) return;
+                      pump(true); };
   show("serve");
-  SV.timer = setInterval(step, 620);
-  step();
+  step(); pump(false);
 }
 
 /* Three, because two is not a choice and five is everyone. */
+/* Three was three whatever the café had become, so the one thing you actually do in a day
+   never grew with the place. It is the hands on the floor: a room with staff can spare more
+   of them for going over to people. */
+const visitsToday = () => Math.min(7, 2 + hands());
+
+/* The day used to tick at a flat 620ms, which is ten to fifteen seconds of watching a list
+   drain -- the opposite of instant. It now runs at roughly a third of that, and the pace
+   moves with the trading hours so a day has a shape: a rush when the shutters go up, a lull
+   after lunch, a second rush in the evening. Tapping anywhere hurries it along, so nobody
+   who wants the month back has to sit through the afternoon. */
+const DAY_PACE = through =>
+    through < 0.22 ? 190          // 07:00-10:00, the morning rush
+  : through < 0.50 ? 260          // through lunch
+  : through < 0.72 ? 340          // the flat part of the afternoon
+  :                  220;         // evening, and the last hour before the shutters
 const VISITS = 3;
 function paintVisits(){
   const el2 = $("sv-visits"); if(!el2) return;
   el2.textContent = "";
-  for(let i = 0; i < VISITS; i++)
+  for(let i = 0; i < (SV.maxVisits || visitsToday()); i++)
     el2.appendChild(el("i", i < SV.visits ? "on" : ""));
   el2.appendChild(el("span","lbl", SV.visits ? SV.visits + " left to visit" : "no time left today"));
 }
 
+/* setInterval cannot change its own rate, and the day's pace has to move with the hours. */
+function pump(now){
+  clearTimeout(SV.timer);
+  if(!SV || SV.done) return;
+  const gap = now ? 40 : DAY_PACE(SV.i / Math.max(1, SV.q.length));
+  SV.timer = setTimeout(() => { step(); pump(false); }, gap);
+}
 function step(){
   if(SV.moment) return;
-  if(SV.i >= SV.q.length){ clearInterval(SV.timer); setTimeout(() => closeDay(false), 700); return; }
+  if(SV.i >= SV.q.length){ SV.done = true; clearTimeout(SV.timer);
+                           setTimeout(() => closeDay(false), 520); return; }
   const c = SV.q[SV.i++];
   const r = serveOne(c);
   const list = $("sv-list");
@@ -1240,7 +1278,18 @@ function closeMonth(auto){
   const branch = G.branches.reduce((a,b) => a + branchTake(b), 0);
   const rent = rentNow();                    // charged on LAST month's takings
   const running = overheads(M.take);
-  const net = M.profit + branch - rent - wages - running;
+  /* A debt is serviced whether the café took anything or not -- that is the whole point of
+     owing money, and it is what makes the loan start a decision rather than free capital.
+     Interest first, then whatever is left of the payment comes off the principal. */
+  let interest = 0, repaid = 0;
+  if(G.debt > 0){
+    interest = Math.round(G.debt * G.debtRate);
+    const due = Math.round(G.debt * 0.02) + interest;
+    repaid = Math.max(0, due - interest);
+    G.debt = Math.max(0, G.debt - repaid);
+    if(G.debt === 0) G.debtRate = 0;
+  }
+  const net = M.profit + branch - rent - wages - running - interest - repaid;
   G.cash += net; G.lastTake = M.take;
 
   /* whose story moved */
@@ -1326,6 +1375,9 @@ function closeMonth(auto){
   if(!own("freehold") && G.lastTake > 400)
     st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
   if(wages) st("Wages", "−" + money(wages) + " AED", "bad");
+  if(interest) st("Interest on the loan", "−" + money(interest) + " AED", "bad");
+  if(repaid) st("Off the loan", "−" + money(repaid) + " AED", "bad");
+  if(G.debt > 0) st("Still owed", money(G.debt) + " AED", "bad");
   /* money() carries a hyphen for a negative; the lines above it all use a proper minus */
   st("Kept", (net>=0 ? "+" + money(net) : "−" + money(-net)) + " AED",
      net>=0 ? "good" : "bad");
@@ -1641,6 +1693,79 @@ function succession(){
   show("close");
 }
 
+/* ============================== setting up ============================== */
+/* The game used to begin with a café that was simply there, unnamed, owned by nobody in
+   particular. Three questions instead -- what it is called, who you are, and how you came by
+   the place -- and the third is a mechanical choice, not flavour: it sets the money you open
+   with, the rent, the state of the room, and whether you owe anybody anything. The loan start
+   is the debt system's first customer. */
+const TENURES = [
+  {k:"father", t:"Your father's shop",
+   d:"He kept it thirty years and it shows: the floor is worn and the machine is older than "
+    + "you. But the rent has not moved since 1979, and the people who came for him are still "
+    + "coming.",
+   m:"Less money · cheap rent · a worn room · one regular already knows you",
+   f:g => { g.cash = Math.round(380*MONTH_DAYS); g.rentCut = 0.55; g.wear = 22;
+            g.headStart = true; }},
+  {k:"bought", t:"Bought with everything you had",
+   d:"No landlord's favour and no debt. An empty room, a clean lease and nothing in the bank "
+    + "to fall back on.",
+   m:"A middling start · full rent · nothing owed",
+   f:g => { g.cash = Math.round(640*MONTH_DAYS); }},
+  {k:"loan", t:"On the bank's money",
+   d:"More to open with than either of the others, and a repayment every month whether the "
+    + "café takes anything or not. The room is fitted out properly from the first day.",
+   m:"Most money · full rent · a debt to service",
+   f:g => { g.cash = Math.round(1500*MONTH_DAYS); g.debt = Math.round(1200*MONTH_DAYS);
+            g.debtRate = 0.011; }}
+];
+
+function screenSetup(){
+  let name = "", who = "", pickK = null;
+  const v = $("s-cafe"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "26px";
+  sc.appendChild(el("div","lbl","A shopping street, 1996"));
+  sc.appendChild(el("div","big","Open a café"));
+  sc.appendChild(el("div","hint","A unit on the corner, a machine, and whatever you can put on "
+    + "the board. What happens after that is yours."));
+
+  sc.appendChild(el("div","lbl","What is it called"));
+  const n1 = document.createElement("input");
+  n1.className = "tin"; n1.type = "text"; n1.maxLength = 28; n1.id = "setup-name";
+  n1.placeholder = pick(["The Corner","Karak House","Al Manara","Sadiq & Sons","The Blue Door"]);
+  sc.appendChild(n1);
+
+  sc.appendChild(el("div","lbl","And who are you"));
+  const n2 = document.createElement("input");
+  n2.className = "tin"; n2.type = "text"; n2.maxLength = 22; n2.id = "setup-owner";
+  n2.placeholder = pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]);
+  sc.appendChild(n2);
+
+  sc.appendChild(el("div","lbl","How you came by the place"));
+  const cards = [];
+  TENURES.forEach(t => {
+    const c = el("div","pickr");
+    c.appendChild(el("div","t", t.t));
+    c.appendChild(el("div","d", t.d));
+    c.appendChild(el("div","m", t.m));
+    c.onclick = () => { pickK = t.k; cards.forEach(x => x.classList.remove("on")); c.classList.add("on"); go.disabled = false; };
+    cards.push(c); sc.appendChild(c);
+  });
+
+  const go = el("button","btn","Take the keys"); go.type = "button"; go.disabled = true;
+  go.onclick = () => {
+    const t = TENURES.find(x => x.k === pickK); if(!t) return;
+    G.cafeName = (n1.value || n1.placeholder).trim().slice(0,28);
+    G.owner.nm = (n2.value || n2.placeholder).trim().slice(0,22);
+    G.tenure = t.k; t.f(G);
+    /* somebody came for your father and still comes for you */
+    if(G.headStart){ const r = REGULARS[0]; G.regs[r.k] = {met:true, beat:0, warmth:18, done:false}; }
+    G.setup = true; save(); intro();
+  };
+  sc.appendChild(go);
+  v.appendChild(sc); show("cafe");
+}
+
 /* ============================== boot ============================== */
 function intro(){
   const v = $("s-cafe"); v.textContent = "";
@@ -1648,7 +1773,7 @@ function intro(){
   v.appendChild(bar);
   drawRoom(v, false);
   const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";
-  sc.appendChild(el("div","lbl","Café Life"));
+  sc.appendChild(el("div","lbl", G.cafeName || "Café Life"));
   sc.appendChild(el("div","big","A counter and two stools"));
   [ "You have one machine, two recipes and " + money(G.cash) + " dirhams. There is no "
     + "clock and nothing here can be failed.",
@@ -1666,5 +1791,5 @@ function intro(){
 }
 const prior = load();
 if(prior){ G = prior; rehydrate(); }
-G.seenIntro ? screenCafe() : intro();
+!G.setup ? screenSetup() : (G.seenIntro ? screenCafe() : intro());
 </script></body></html>
