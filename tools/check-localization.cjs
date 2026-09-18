@@ -30,6 +30,7 @@ function visit(value, location) {
 visit(content, 'content');
 const E = require('../prototype/game/engine.js');
 visit(E.BRIEF_STAMPS, 'briefStamps');
+visit(E.RELATIONSHIP_LEVELS, 'relationships');
 const kinds = new Set();let sample=E.newGame();
 for(let day=0;day<30;day++){for(const brief of E.dailyBriefs(sample)){if(!kinds.has(brief.kind)){visit(brief, 'dailyBrief.'+brief.kind);kinds.add(brief.kind);}}sample=E.dispatch(sample,{type:'JUMP',days:1}).state;}
 assert.equal(kinds.size,E.BRIEF_STAMPS.length,'A brief kind was not covered by localization');

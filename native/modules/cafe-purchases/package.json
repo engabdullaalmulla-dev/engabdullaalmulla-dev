@@ -1,0 +1,7 @@
+{
+  "name": "cafe-purchases",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Café Life native StoreKit 2 non-consumable unlock",
+  "license": "UNLICENSED"
+}

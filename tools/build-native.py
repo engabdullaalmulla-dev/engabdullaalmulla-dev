@@ -65,7 +65,7 @@ def bundle():
                   inline_script, html, flags=re.I)
     if re.search(r'<script\b[^>]*\bsrc\s*=', html, re.I):
         raise ValueError("A script source was not embedded")
-    for required in ("game/content.js", "game/engine.js", "game/audio.js", "game/i18n.js", "game/persistence.js", "game/ui.js"):
+    for required in ("game/content.js", "game/engine.js", "game/audio.js", "game/i18n.js", "game/persistence.js", "game/access.js", "game/ui.js"):
         if "prototype/" + required not in embedded:
             raise ValueError("Missing authored module: " + required)
 

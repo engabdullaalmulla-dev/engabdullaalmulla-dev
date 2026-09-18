@@ -39,6 +39,15 @@ test('catalogues, translations and all narrative references are complete', () =>
     assert(story.choices.length >= 2, story.id + ' lacks meaningful choice');
     assert(story.choices.some(choice => !choice.cost), story.id + ' lacks a free route');
     if (story.requires) assert(C.stories.concat(C.events).some(s => s.id === story.requires), story.id + ' dependency missing');
+    if (story.requiresChoices) Object.entries(story.requiresChoices).forEach(([id, choices]) => {
+      const prerequisite = C.stories.concat(C.events).find(s => s.id === id);
+      assert(prerequisite, story.id + ' choice prerequisite missing');
+      (Array.isArray(choices) ? choices : [choices]).forEach(choiceId => assert(prerequisite.choices.some(choice => choice.id === choiceId), story.id + ' prerequisite choice missing'));
+    });
+    if (story.requiresRelationships) Object.entries(story.requiresRelationships).forEach(([id, minimum]) => {
+      assert(C.characters.some(person => person.id === id), story.id + ' relationship character missing');
+      assert(Number.isInteger(minimum) && minimum > 0 && minimum <= 100, story.id + ' invalid relationship requirement');
+    });
     story.choices.forEach(choice => { if (choice.recipe) assert(C.recipes.some(r => r.id === choice.recipe), choice.recipe + ' missing reward'); });
   });
 });
@@ -79,6 +88,8 @@ test('manual service and instant delegation pay precisely the same amount', () =
   assert.equal(manual.lastDay.profit, delegated.lastDay.profit);
   assert.equal(manual.totalServed, delegated.totalServed);
   assert.deepEqual(manual.ambitionsDone, delegated.ambitionsDone);
+  assert.deepEqual(manual.relationships, delegated.relationships);
+  assert.deepEqual(manual.memories, delegated.memories);
   assert.equal(manual.service.manual, 4);
   assert.equal(delegated.service.manual, 0);
   assert.deepEqual(E.validate(manual), manual);
@@ -534,6 +545,210 @@ test('malformed brief selections, snapshots and collections are rejected atomica
   const double = copy(closed); double.lastDay.brief.rewardEarned *= 2;
   assert.throws(() => E.importSave(JSON.stringify(double)));
   assert.equal(E.exportSave(initial), saved);
+});
+
+test('serving preferences creates permanent relationship consequences without changing the day’s money', () => {
+  const start = act(E.newGame(), 'SET_MENU', {ids: ['karak', 'mint', 'regag']});
+  const opened = act(start, 'OPEN_DAY');
+  assert.equal(E.currentGuest(opened).characterId, 'omar');
+  assert.equal(E.serviceMatch(opened, 'omar', 'regag'), 'liked');
+  assert.equal(E.serviceMatch(opened, 'omar', 'karak'), 'different');
+  const liked = act(opened, 'SERVE', {recipeId: 'regag'});
+  const different = act(opened, 'SERVE', {recipeId: 'karak'});
+  const goodRelationship = E.relationshipStatus(liked, 'omar');
+  assert.equal(goodRelationship.meetings, 1);
+  assert.equal(goodRelationship.satisfaction, 2);
+  assert.deepEqual(goodRelationship.rememberedPreferences, ['regag']);
+  assert.equal(goodRelationship.lastServedRecipe, 'regag');
+  assert.equal(E.relationshipStatus(different, 'omar').satisfaction, 0);
+  assert.equal(E.relationshipStatus(different, 'omar').meetings, 1);
+  assert.deepEqual(E.relationshipStatus(different, 'omar').rememberedPreferences, []);
+  assert.equal(act(liked, 'CLOSE_DAY').cash, act(different, 'CLOSE_DAY').cash);
+  let usual = opened;
+  while (E.currentGuest(usual).characterId !== 'noor') usual = act(usual, 'SERVE', {recipeId: E.currentGuest(usual).recommended});
+  usual = act(usual, 'SERVE', {recipeId: 'mint'});
+  assert.equal(E.relationshipStatus(usual, 'noor').satisfaction, 3);
+  assert.equal(E.relationshipStatus(usual, 'noor').bondLevel, 1);
+  assert(usual.memories.some(item => item.id === 'bond:noor:1'));
+  assert.deepEqual(E.validate(usual), usual);
+  assert.equal(E.relationshipStatus(usual, 'unknown'), null);
+});
+
+test('delegation remembers exactly the same guests as manual recommendations and never counts them twice', () => {
+  let start = act(E.newGame(), 'SET_MENU', {ids: ['karak', 'mint', 'regag']});
+  let manual = act(start, 'OPEN_DAY');
+  const automatic = act(start, 'CLOSE_DAY');
+  const initialGuests = copy(manual.service.guests);
+  for (const guest of initialGuests) manual = act(manual, 'SERVE', {recipeId: guest.recommended});
+  const rememberedBeforeClosing = copy(manual.relationships);
+  manual = act(manual, 'CLOSE_DAY');
+  assert.deepEqual(manual.relationships, rememberedBeforeClosing);
+  assert.deepEqual(manual.relationships, automatic.relationships);
+  assert.deepEqual(manual.memories, automatic.memories);
+  assert.equal(manual.cash, automatic.cash);
+  assert.deepEqual(act(automatic, 'CLOSE_DAY'), automatic);
+  let partial = act(start, 'OPEN_DAY');
+  partial = act(partial, 'SERVE', {recipeId: E.currentGuest(partial).recommended});
+  partial = E.importSave(E.exportSave(partial));
+  partial = act(partial, 'CLOSE_DAY');
+  assert.deepEqual(partial.relationships, automatic.relationships);
+  assert.equal(Object.values(partial.relationships).reduce((sum, relationship) => sum + relationship.meetings, 0), 4);
+  const reordered = act(act(start, 'SET_MENU', {ids: start.menu.slice().reverse()}), 'OPEN_DAY');
+  assert.deepEqual(reordered.service.guests.map(guest => guest.recommended), initialGuests.map(guest => guest.recommended));
+});
+
+test('bonds never decay, cash stays bounded, and descendants inherit the café’s remembered preferences', () => {
+  let state = act(E.newGame(), 'SET_MENU', {ids: ['karak', 'mint', 'regag']});
+  state = act(state, 'JUMP', {days: 120});
+  const before = copy(state.relationships);
+  assert(Object.values(before).some(relationship => relationship.satisfaction === 100));
+  state = act(state, 'SET_MENU', {ids: ['karak']});
+  state = act(state, 'JUMP', {days: 60});
+  C.characters.forEach(person => {
+    assert(state.relationships[person.id].satisfaction >= before[person.id].satisfaction);
+    before[person.id].rememberedPreferences.forEach(id => assert(state.relationships[person.id].rememberedPreferences.includes(id)));
+  });
+  const inherited = copy(state.relationships);
+  state = act(state, 'SUCCESSION', {id: C.heirs[0].id});
+  state = act(state, 'SUCCESSION', {id: C.heirs[0].id});
+  state = act(state, 'SUCCESSION', {id: C.heirs[0].id});
+  state = act(state, 'SUCCESSION', {id: C.heirs[0].id});
+  assert.deepEqual(state.relationships, inherited);
+  const opened = act(state, 'OPEN_DAY');
+  assert(opened.service.guests.every(guest => guest.descendant));
+  state = act(opened, 'CLOSE_DAY');
+  opened.service.guests.forEach(guest => assert.equal(state.relationships[guest.characterId].meetings, inherited[guest.characterId].meetings + 1));
+  assert(Object.values(state.relationships).every(relationship => relationship.satisfaction <= 100));
+  assert.deepEqual(E.importSave(E.exportSave(state)), state);
+  E.RELATIONSHIP_LEVELS.forEach(label => assert(label.en && /[\u0600-\u06ff]/.test(label.ar)));
+});
+
+test('older v6 saves gain empty relationship memory without fabricating already-served visits', () => {
+  const initial = E.newGame();
+  const opened = act(initial, 'OPEN_DAY');
+  const partial = act(opened, 'SERVE', {recipeId: E.currentGuest(opened).recommended});
+  const closed = act(initial, 'CLOSE_DAY');
+  for (const source of [initial, partial, closed]) {
+    const old = copy(source); delete old.relationships;
+    const restored = E.importSave(JSON.stringify(old));
+    assert.deepEqual(restored.relationships, E.newGame().relationships);
+    assert.equal(restored.cash, source.cash);
+    assert.deepEqual(restored.memories, source.memories);
+    assert.deepEqual(restored.service, source.service);
+    const after = act(restored, 'CLOSE_DAY');
+    const expectedVisits = source.phase === 'closed' ? 0 : source.phase === 'open' ? 3 : 4;
+    assert.equal(Object.values(after.relationships).reduce((sum, relationship) => sum + relationship.meetings, 0), expectedVisits);
+    assert.deepEqual(E.importSave(E.exportSave(after)), after);
+  }
+});
+
+test('malformed relationship memory is rejected before replacing the live café', () => {
+  const initial = act(E.newGame(), 'CLOSE_DAY'); const saved = E.exportSave(initial);
+  const changes = [
+    state => { state.relationships = null; },
+    state => { delete state.relationships.mariam; },
+    state => { state.relationships.unknown = copy(state.relationships.mariam); },
+    state => { state.relationships.mariam.meetings = -1; },
+    state => { state.relationships.mariam.satisfaction = 101; },
+    state => { state.relationships.mariam.satisfaction = 3.5; },
+    state => { state.relationships.mariam.lastServedRecipe = 'unknown'; },
+    state => { state.relationships.mariam.rememberedPreferences = ['karak', 'karak']; },
+    state => { state.relationships.noor.rememberedPreferences = ['karak']; },
+    state => { state.relationships.mariam.freeCash = 1000; }
+  ];
+  changes.forEach(change => { const invalid = copy(initial); change(invalid); assert.throws(() => E.importSave(JSON.stringify(invalid))); });
+  assert.equal(E.exportSave(initial), saved);
+});
+
+test('each regular’s earlier choice opens its own later scene and rejects the other branch', () => {
+  const followups = C.stories.filter(story => story.requiresChoices);
+  assert(followups.length >= 12, 'six regulars need at least two distinct follow-up paths');
+  followups.forEach(followup => {
+    const [[prerequisiteId, accepted]] = Object.entries(followup.requiresChoices);
+    const acceptedIds = Array.isArray(accepted) ? accepted : [accepted];
+    const prerequisite = C.stories.find(story => story.id === prerequisiteId);
+    const other = prerequisite.choices.find(choice => !acceptedIds.includes(choice.id));
+    assert(other, followup.id + ' must distinguish at least one decision');
+    const start = act(E.newGame(), 'JUMP', {days: followup.minDay - 1});
+    assert(!E.availableStories(start).some(story => story.id === followup.id));
+    const wrong = act(start, 'CHOOSE', {storyId: prerequisite.id, choiceId: other.id});
+    assert(!E.availableStories(wrong).some(story => story.id === followup.id));
+    const rejected = E.dispatch(wrong, {type: 'CHOOSE', storyId: followup.id, choiceId: followup.choices[0].id});
+    assert.equal(rejected.error, 'STORY_UNAVAILABLE');
+    assert.equal(rejected.state, wrong);
+    acceptedIds.forEach(choiceId => {
+      let selected = act(start, 'CHOOSE', {storyId: prerequisite.id, choiceId});
+      assert(E.availableStories(selected).some(story => story.id === followup.id), followup.id + ' did not follow ' + choiceId);
+      selected = act(selected, 'CHOOSE', {storyId: followup.id, choiceId: followup.choices[0].id});
+      assert(selected.memories.some(item => item.storyId === followup.id));
+      assert.equal(E.dispatch(selected, {type: 'CHOOSE', storyId: followup.id, choiceId: followup.choices[1].id}).error, 'STORY_UNAVAILABLE');
+      assert.deepEqual(E.importSave(E.exportSave(selected)), selected);
+    });
+  });
+});
+
+test('second-year choices change later scenes and each generation follows its own decisions', () => {
+  const routes = [
+    ['kitchen', 'guides', 'kitchen-guides'], ['kitchen', 'exchange', 'kitchen-exchange'],
+    ['street', 'table', 'street-table'], ['street', 'walk', 'street-walk']
+  ];
+  const routeIds = routes.map(route => route[2]);
+  routes.forEach(([direction, method, expectedScene]) => {
+    let state = act(E.newGame(), 'JUMP', {days: 509});
+    state = act(state, 'CHOOSE', {storyId: 'first-year-together', choiceId: direction});
+    const planningScene = 'second-year-' + direction;
+    assert(E.availableStories(state).some(story => story.id === planningScene));
+    assert(!E.availableStories(state).some(story => story.id === 'second-year-' + (direction === 'kitchen' ? 'street' : 'kitchen')));
+    state = act(state, 'CHOOSE', {storyId: planningScene, choiceId: method});
+    assert.deepEqual(E.availableStories(state).filter(story => routeIds.includes(story.id)).map(story => story.id), [expectedScene]);
+    const variant = C.events.find(story => story.id === expectedScene);
+    state = act(state, 'CHOOSE', {storyId: variant.id, choiceId: variant.choices[0].id});
+    state = act(state, 'JUMP', {days: 190});
+    const nextVolume = direction === 'kitchen' ? 'kitchen-next-volume' : 'street-next-map';
+    assert(E.availableStories(state).some(story => story.id === nextVolume));
+    assert(!E.availableStories(state).some(story => story.id === (direction === 'kitchen' ? 'street-next-map' : 'kitchen-next-volume')));
+    state = act(state, 'SUCCESSION', {id: C.heirs[0].id});
+    assert(!E.availableStories(state).some(story => /^second-year-(kitchen|street)@g2$/.test(story.id)), 'ancestor’s choice must not decide the next generation');
+    const newDirection = direction === 'kitchen' ? 'street' : 'kitchen';
+    state = act(state, 'CHOOSE', {storyId: 'first-year-together@g2', choiceId: newDirection});
+    assert(E.availableStories(state).some(story => story.id === 'second-year-' + newDirection + '@g2'));
+    assert(!E.availableStories(state).some(story => story.id === planningScene + '@g2'));
+    state = act(state, 'CHOOSE', {storyId: 'second-year-' + newDirection + '@g2', choiceId: newDirection === 'street' ? 'table' : 'guides'});
+    const generatedVariant = (newDirection === 'street' ? 'street-table' : 'kitchen-guides') + '@g2';
+    assert(E.availableStories(state).some(story => story.id === generatedVariant));
+    assert.equal(state.storyChoices['first-year-together'], direction);
+    assert.equal(state.storyChoices['first-year-together@g2'], newDirection);
+    assert.deepEqual(E.importSave(E.exportSave(state)), state);
+  });
+});
+
+test('remembered preferences open optional personal scenes while an unmet bond never blocks another day', () => {
+  const bonuses = C.stories.filter(story => story.requiresRelationships);
+  assert(bonuses.length >= 2);
+  bonuses.forEach(bonus => {
+    const [[characterId, minimum]] = Object.entries(bonus.requiresRelationships);
+    const person = C.characters.find(person => person.id === characterId);
+    let state = E.newGame();
+    state = act(state, 'CREATE_RECIPE', {name: 'A cool floral cup', base: 'fruit', flavour: 'rose', temperature: 'cold'});
+    const unmatched = E.allRecipes(state).find(dish => E.serviceMatch(state, characterId, dish.id) === 'different');
+    assert(unmatched);
+    state = act(state, 'SET_MENU', {ids: [unmatched.id]});
+    state = act(state, 'JUMP', {days: bonus.minDay - 1});
+    const prerequisite = C.stories.find(story => story.id === bonus.requires);
+    state = act(state, 'CHOOSE', {storyId: prerequisite.id, choiceId: prerequisite.choices[0].id});
+    assert.equal(E.relationshipStatus(state, characterId).satisfaction, 0);
+    assert(!E.availableStories(state).some(story => story.id === bonus.id));
+    assert.equal(E.dispatch(state, {type: 'CHOOSE', storyId: bonus.id, choiceId: bonus.choices[0].id}).error, 'STORY_UNAVAILABLE');
+    state = act(state, 'NEXT_DAY');
+    assert.equal(state.day, bonus.minDay + 1);
+    state = act(state, 'SET_MENU', {ids: [person.usual]});
+    for (let attempts = 0; E.relationshipStatus(state, characterId).satisfaction < minimum && attempts < 12; attempts++) state = act(state, 'NEXT_DAY');
+    assert(E.relationshipStatus(state, characterId).satisfaction >= minimum);
+    assert(E.availableStories(state).some(story => story.id === bonus.id));
+    state = act(state, 'CHOOSE', {storyId: bonus.id, choiceId: bonus.choices[0].id});
+    assert(state.memories.some(item => item.storyId === bonus.id));
+    assert.deepEqual(E.importSave(E.exportSave(state)), state);
+  });
 });
 
 process.stdout.write('\n' + passed + ' engine checks passed.\n');

@@ -1,0 +1,28 @@
+{
+  "identifier": "E5DBED34-271C-47B6-9D5A-D18F8C1CED61",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "19.99",
+      "familyShareable": false,
+      "internalID": "1000001",
+      "localizations": [
+        { "description": "Continue every café beyond its first year with one purchase.", "displayName": "Full Café Life", "locale": "en_US" },
+        { "description": "تابع كل مقهى بعد عامه الأول بعملية شراء واحدة.", "displayName": "حياة المقهى الكاملة", "locale": "ar_SA" }
+      ],
+      "productID": "com.almulla.cafelife.fullgame",
+      "referenceName": "Full Cafe Life — local test only",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "ARE",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": { "major": 3, "minor": 0 }
+}

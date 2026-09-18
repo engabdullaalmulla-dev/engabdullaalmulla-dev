@@ -54,7 +54,7 @@ function staticGate() {
   }
   assert(sandbox.BRAND_DATA?.icon && sandbox.BRAND_DATA?.logo, 'Icon and logo are required');
   const modules = {};
-  for (const name of ['content', 'engine', 'audio', 'i18n', 'persistence', 'ui']) {
+  for (const name of ['content', 'engine', 'audio', 'i18n', 'persistence', 'access', 'ui']) {
     const script = scripts.find(script => script.attrs.includes('game/' + name + '.js'));
     assert(script, 'Missing bundled game module: ' + name);
     assert(!/\b(?:fetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon\s*\(|import\s*\()/m.test(script.source), 'Network API in authored game module: ' + name);

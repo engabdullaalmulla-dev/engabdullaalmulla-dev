@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, NativeModules, Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { requireOptionalNativeModule } from 'expo';
 import * as Haptics from 'expo-haptics';
 import { Directory, File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import { HTML } from './src/webapp/html.js';
 import SaveBridge from './src/saveBridge';
+import PurchaseBridge from './src/purchaseBridge';
+
+// Expo Go and the web preview cannot purchase. Only the compiled iOS module can.
+const Purchases = Platform.OS === 'ios' ? requireOptionalNativeModule('CafePurchases') : null;
 
 // A stable secure origin gives local saves a persistent partition. No request is made to it.
 const ORIGIN = 'https://app.cafelife.local/';
@@ -34,6 +39,12 @@ export default function App() {
   const [theme, setTheme] = useState('light');
   const fileBusy = useRef(false);
   const lastHaptic = useRef(0);
+  const purchaseController = useRef(null);
+  if (!purchaseController.current) {
+    purchaseController.current = PurchaseBridge.createController(Purchases, detail => {
+      web.current?.injectJavaScript(PurchaseBridge.resultScript(detail));
+    });
+  }
   const copy = COPY[language];
   const palette = PALETTES[theme];
 
@@ -42,10 +53,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const purchases = Purchases?.addListener('onEntitlementChange', detail => purchaseController.current.update(detail));
     const listener = AppState.addEventListener('change', state => {
       web.current?.injectJavaScript(`window.CafeAudio?.${state === 'active' ? 'resume' : 'stop'}(); true;`);
+      if (state === 'active') void purchaseController.current.request({ type: 'purchaseStatus', requestId: 'native-update' });
     });
-    return () => listener.remove();
+    return () => { listener.remove(); purchases?.remove(); };
   }, []);
 
   const fileRequest = useCallback(async data => {
@@ -79,10 +92,14 @@ export default function App() {
   }, [copy.export]);
 
   const message = useCallback(event => {
+    const purchase = PurchaseBridge.parseMessage(event.nativeEvent.data);
+    if (purchase) { void purchaseController.current.request(purchase); return; }
     const data = SaveBridge.parseMessage(event.nativeEvent.data);
     if (!data) return;
     if (data.type === 'language') setLanguage(data.language);
     if (data.type === 'appearance') setTheme(data.theme);
+    // The web UI requests purchaseStatus once at startup; ready is emitted on
+    // every render and must never trigger another catalogue request.
     if (data.type === 'ready') { setReady(true); setError(false); }
     if (data.type === 'exportSave' || data.type === 'pickSave') { void fileRequest(data); return; }
     if (data.type === 'haptic' && AppState.currentState === 'active' && Date.now() - lastHaptic.current > 70) {
@@ -113,7 +130,7 @@ export default function App() {
         showsVerticalScrollIndicator={false}
         domStorageEnabled
         javaScriptEnabled
-        injectedJavaScriptBeforeContentLoaded={`window.CAFE_NATIVE_LANGUAGE=${JSON.stringify(language)};window.CAFE_NATIVE_CAPABILITIES={saveFiles:true,haptics:true};true;`}
+        injectedJavaScriptBeforeContentLoaded={`window.CAFE_NATIVE_LANGUAGE=${JSON.stringify(language)};window.CAFE_NATIVE_CAPABILITIES={saveFiles:true,haptics:true,purchases:${Boolean(Purchases)}};true;`}
         onShouldStartLoadWithRequest={request => request.url === 'about:blank' || request.url === ORIGIN || request.url.startsWith(ORIGIN + '#')}
         setSupportMultipleWindows={false}
         allowsInlineMediaPlayback

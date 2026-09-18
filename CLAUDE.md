@@ -45,8 +45,10 @@ python3 tools/build-web.py           # -> dist/, app/www/, site/      (web + PWA
 
 # deterministic game checks (no browser)
 node tools/test-engine.cjs
+node tools/test-access.cjs
 node tools/test-persistence.cjs
 node native/tests/saveBridge.cjs
+node native/tests/purchaseBridge.cjs
 node tools/check-localization.cjs
 node tools/check-native.js --static
 
@@ -64,14 +66,16 @@ not always true: `npm run webapp` executes from `native/`, and relative paths br
 
 ### The release gate is not optional
 
-`tools/check-native.js` asserts three things that have each failed before: the bundle fetches
+`tools/check-native.js` asserts three things that have each failed before: the embedded game fetches
 **nothing** at runtime, all 140 sprites decode, and a dynasty survives a reload at a real
 https origin. The privacy policy published at `barmajja.com/games/cafe-life/privacy.html`
 states the no-network claim **as verified fact on the strength of this gate**. If anything ever
 makes the app reach the network, that page has to change before the build ships — and no
-analytics may be added, not even temporarily for a playtest.
+analytics may be added, not even temporarily for a playtest. Build 8 adds native StoreKit
+purchases outside the offline WebView. Publish `docs/privacy-purchase-update.md` with the
+existing publisher details before release; the public policy has not yet been updated.
 
-## Architecture of the daily rebuild (build 7)
+## Architecture of the daily rebuild (build 8)
 
 The sections below supersede the watched-day / monthly waiting model from build 5. The
 canonical HTML loads local modules which the build tools embed into one offline document:
@@ -81,9 +85,10 @@ canonical HTML loads local modules which the build tools embed into one offline 
 - `prototype/game/audio.js`: original procedural music and sound effects; gesture-unlocked.
 - `prototype/game/i18n.js`: English/Arabic interface strings.
 - `prototype/game/persistence.js`: validated local saves, recovery, the saved-café library and replacement transactions.
+- `prototype/game/access.js`: first in-game year boundary, separate from café saves and native ownership.
 - `prototype/game/ui.js` and `styles.css`: presentation and interaction.
 
-These are six authored JavaScript modules. The native shell's file-sharing bridge is separate
+These are seven authored JavaScript modules. The native shell's file-sharing bridge is separate
 in `native/src/saveBridge.js`; it returns chosen text for review and never applies a save itself.
 
 **Time and continuity.** Plan a day, open immediately, serve individual guests or delegate
@@ -96,19 +101,33 @@ must share the exact same simulation and settlement rules.
 from eight kinds: warm, cool, familiar, sharing, variety, regular, room and supplier. A brief
 uses the plan at opening; completion and its reward settle once with that same trading day.
 Its keepsake stamp survives saves and succession. Offers rotate by played date, never by
-real-world waiting. The authored story inventory is 24 founding chapters plus 32 street
-events, with 130 choices across 56 scenes. Recurring templates are not additional scenes.
+real-world waiting. The authored story inventory is 38 character scenes and 47 street
+events, with 188 choices across 85 scenes. Alternative branches count separately; a single
+café cannot encounter all alternatives. See `docs/build8-content-notes.md`. Recurring templates are not additional scenes.
 
 **Economy and permanent progress.** No forced bankruptcy, repossession, automatic debt,
 passive cash loss or succession haircut. Daily operating costs reduce that day's take-home,
 floored at zero. Only explicit purchases spend saved cash. Owned capabilities persist.
 
+**Relationships and decisions.** Each regular remembers visits, enjoyed dishes and a
+permanent bond. Manual and delegated service use the same preference resolver. Choice and
+relationship prerequisites can open different later scenes; optional bond scenes never
+block normal play. Relationships do not decay across time or succession.
+
+**Full-game access.** The first in-game year (1994) is free. The planned unlock is AED 19.99
+once, with the real price supplied by StoreKit. `access.js` guards advancement and succession
+without altering the save. Native StoreKit 2 verifies the non-consumable
+`com.almulla.cafelife.fullgame`; this product still needs App Store Connect configuration.
+The browser is an explicitly labelled unrestricted development preview and cannot charge.
+Never infer ownership from a save, localStorage or caller-supplied flags. Native purchase and
+restore calls are the only deliberate network exception; no analytics or accounts.
+
 **Saves.** New saves use `cafelife_daily_6`, with `cafelife_daily_6_backup` for recovery.
 `CafeEngine.exportSave` and `importSave` share versioned validation. The legacy
 `cafelife_mgmt_2` save must be preserved when migrating. Validate imported data before
 writing either current or backup saves; never overwrite a usable save with malformed data.
-Build 7 retains the version-6 save format and upgrades older compatible saves with unselected
-brief offers and an empty keepsake collection. `cafelife_daily_6_library` stores explicit café snapshots; opening a
+Build 8 retains the version-6 save format and upgrades older compatible saves with unselected
+brief offers, an empty keepsake collection and empty relationship records where absent. `cafelife_daily_6_library` stores explicit café snapshots; opening a
 snapshot, importing a save or beginning another café first preserves the active café there.
 The separate `cafelife_daily_6_before_restore` archive also remains available for export.
 Storage failures must leave the current in-memory café available and display an export route.
@@ -152,7 +171,7 @@ Expo + EAS, in `native/`. `app/` is an abandoned Capacitor attempt and
 `.github/workflows/ios-testflight.yml` is its abandoned pipeline — neither is the route;
 `docs/testflight.md` explains why and carries the working commands.
 
-Build 7 uses app version `1.1`, iOS build number `7`, Expo SDK 57 (`~57.0.24`), React 19.2.3
+Build 8 uses app version `1.1`, iOS build number `8`, Expo SDK 57 (`~57.0.24`), React 19.2.3
 and React Native 0.86.3. Native file selection, sharing and haptics use the matching Expo
 modules. Native haptics now have supported iOS and Android paths with a silent fallback.
 
@@ -167,7 +186,8 @@ Apple account.
 
 - `docs/testflight.md` — the shipping route, the house conventions, and what each was learned from
 - `docs/playtest.md` — who to send the game to, what to say (nothing), what to ask
-- `docs/build7-handoff.md` — current build scope, test evidence and remaining release checks
+- `docs/build8-handoff.md` — current build scope, test evidence and remaining release checks
+- `docs/premium-release-plan.md` — purchase contract and remaining commercial/play-value gates
 - `art/art-brief-2.md`, `art/pipeline/` — how sprites are cut and aged
 
 Several older docs (`docs/cafe-life.md`, `design-spec.md`, `requirements.md`) still describe

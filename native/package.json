@@ -9,8 +9,8 @@
     "ios": "npm run webapp && expo run:ios",
     "build:testflight": "npm run webapp && npm run check && npx eas-cli build --platform ios --profile testflight",
     "submit": "npx eas-cli submit --platform ios --profile production",
-    "check": "node ../tools/test-engine.cjs && node ../tools/test-persistence.cjs && node tests/saveBridge.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js",
-    "check:static": "node ../tools/test-engine.cjs && node ../tools/test-persistence.cjs && node tests/saveBridge.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js --static",
+    "check": "node ../tools/test-engine.cjs && node ../tools/test-access.cjs && node ../tools/test-persistence.cjs && node tests/saveBridge.cjs && node tests/purchaseBridge.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js",
+    "check:static": "node ../tools/test-engine.cjs && node ../tools/test-access.cjs && node ../tools/test-persistence.cjs && node tests/saveBridge.cjs && node tests/purchaseBridge.cjs && node ../tools/check-localization.cjs && node ../tools/check-native.js --static",
     "check:setup": "playwright install chromium"
   },
   "dependencies": {
@@ -25,5 +25,10 @@
   },
   "devDependencies": {
     "playwright": "1.63.0"
+  },
+  "expo": {
+    "autolinking": {
+      "nativeModulesDir": "./modules"
+    }
   }
 }

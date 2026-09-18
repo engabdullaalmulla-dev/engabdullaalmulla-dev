@@ -18,3 +18,6 @@ body[data-text=larger] .shell-header .identity{grid-column:2;grid-row:1}
 body[data-text=larger] .shell-header .icon-button{grid-column:3;grid-row:1}
 body[data-text=larger] .shell-header .money{grid-column:2 / 4;grid-row:2;text-align:start;display:flex;gap:12px;flex-wrap:wrap;white-space:normal;overflow-wrap:anywhere}
 body[data-text=larger] .shell-header .money small{margin-top:0;align-self:center}
+
+.trial-note{padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:.78rem;line-height:1.55;color:var(--accent);background:var(--soft)}
+.relationship-badge{display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-size:.68rem;line-height:1.5;margin-top:6px}.relationship-badge svg{width:14px;height:14px}.guest-taste{margin-top:6px}.relationship-card{margin-top:18px;margin-bottom:16px;background:var(--soft)}.relationship-card>.relationship-badge{font-size:.82rem;font-weight:600}.remembered-dishes{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.remembered-dishes span{flex:1;min-width:78px;text-align:center;font-size:.67rem}.remembered-dishes img{width:48px;height:48px;object-fit:contain;margin:auto}.unlock-art{text-align:center;padding:15px 0}.unlock-art img{height:105px;width:105px;object-fit:contain;margin:0 auto 18px}.unlock-art .title{max-width:390px;margin:10px auto 0}

@@ -81,6 +81,59 @@
   }
   function allRecipes(state) { return list('recipes').filter(r => state.recipes.includes(r.id)).concat(state.customRecipes); }
   function recipe(state, id) { return find('recipes', id) || state.customRecipes.find(r => r.id === id) || null; }
+  const RELATIONSHIP_LEVELS = [
+    {en: 'Getting acquainted', ar: 'بداية التعارف'},
+    {en: 'Familiar face', ar: 'وجه مألوف'},
+    {en: 'Trusted host', ar: 'مضيف موثوق'},
+    {en: 'Part of the family', ar: 'فرد من العائلة'}
+  ];
+  function emptyRelationship() { return {meetings: 0, satisfaction: 0, rememberedPreferences: [], lastServedRecipe: null}; }
+  function newRelationships() { return Object.fromEntries(list('characters').map(person => [person.id, emptyRelationship()])); }
+  function relationshipStatus(state, characterId) {
+    if (!find('characters', characterId)) return null;
+    const relationship = state.relationships && state.relationships[characterId] || emptyRelationship();
+    const bondLevel = relationship.satisfaction >= 30 ? 3 : relationship.satisfaction >= 12 ? 2 : relationship.satisfaction >= 3 ? 1 : 0;
+    return Object.assign({characterId}, clone(relationship), {bondLevel, bondLabel: clone(RELATIONSHIP_LEVELS[bondLevel])});
+  }
+  function serviceMatch(state, characterId, recipeId) {
+    const person = find('characters', characterId); const dish = recipe(state, recipeId);
+    if (!person || !dish) return 'different';
+    if (person.usual === recipeId) return 'usual';
+    return (person.tags || []).some(tag => (dish.tags || []).includes(tag)) ? 'liked' : 'different';
+  }
+  function recommendedRecipe(state, person) {
+    // The counter uses the same preferences the player can read. Menu order cannot reroll its advice.
+    if (state.menu.includes(person.usual)) return person.usual;
+    const remembered = relationshipStatus(state, person.id).rememberedPreferences;
+    const score = id => {
+      const dish = recipe(state, id);
+      return (person.tags || []).filter(tag => (dish.tags || []).includes(tag)).length * 2 + Number(remembered.includes(id));
+    };
+    return state.menu.slice().sort((a, b) => score(b) - score(a) || a.localeCompare(b))[0];
+  }
+  function resolveService(state, guest, recipeId, effects) {
+    if (guest.servedRecipe !== null) return;
+    guest.servedRecipe = recipeId;
+    const relationship = state.relationships[guest.characterId];
+    const match = serviceMatch(state, guest.characterId, recipeId);
+    const previousLevel = relationshipStatus(state, guest.characterId).bondLevel;
+    const points = match === 'usual' ? 3 : match === 'liked' ? 2 : 0;
+    const satisfactionAwarded = Math.min(100 - relationship.satisfaction, points);
+    const remembered = points > 0 && !relationship.rememberedPreferences.includes(recipeId);
+    relationship.meetings = Math.min(MAX_CASH, relationship.meetings + 1);
+    relationship.satisfaction += satisfactionAwarded;
+    relationship.lastServedRecipe = recipeId;
+    if (remembered) relationship.rememberedPreferences.push(recipeId);
+    const bondLevel = relationshipStatus(state, guest.characterId).bondLevel;
+    if (bondLevel > previousLevel) {
+      const person = find('characters', guest.characterId);
+      memory(state, 'bond:' + guest.characterId + ':' + bondLevel, {
+        en: localized(person.name, 'en') + '’s family remembers your welcome: ' + RELATIONSHIP_LEVELS[bondLevel].en + '.',
+        ar: 'تتذكر عائلة ' + localized(person.name, 'ar') + ' ترحيبك: ' + RELATIONSHIP_LEVELS[bondLevel].ar + '.'
+      }, {kind: 'people', characterId: guest.characterId, bondLevel});
+    }
+    effects.push({type: 'relationship', id: guest.characterId, recipeId, match, satisfactionAwarded, remembered, bondLevel});
+  }
   function briefReference(kind, target) { return {id: kind + ':' + target, kind, target}; }
   function briefOptions(state) {
     const dishes = allRecipes(state).slice().sort((a, b) => a.id.localeCompare(b.id));
@@ -217,7 +270,7 @@
       upgrades: [], venues: home ? [home.id] : [], venue: home ? home.id : 'home', boardSlots: 3, seats: 8, staff: [],
       generation: 1, heir: null, knowledge: [], memories: [], history: [], storiesDone: [], storyChoices: {},
       pendingStory: null, service: null, lastDay: null, ambitionsDone: [], reputation: 0, briefs: null, keepsakes: [],
-      identity: {people: 0, recipe: 0, street: 0}, daysRun: 0, totalServed: 0,
+      identity: {people: 0, recipe: 0, street: 0}, relationships: newRelationships(), daysRun: 0, totalServed: 0,
       monthly: {month: '1994-01', days: 0, sales: 0, costs: 0, profit: 0, customers: 0}, accounts: [],
       settings: {music: true, sfx: true, haptics: true, reducedMotion: false, textSize: 'normal', theme: 'light'}, legacy: null
     };
@@ -284,7 +337,8 @@
   function generationEvents(state) {
     return list('events').map(event => state.generation === 1 ? event : Object.assign({}, event, {
       id: event.id + '@g' + state.generation, templateId: event.id,
-      requires: event.requires ? (Array.isArray(event.requires) ? event.requires : [event.requires]).map(id => find('events', id) ? id + '@g' + state.generation : id) : undefined
+      requires: event.requires ? (Array.isArray(event.requires) ? event.requires : [event.requires]).map(id => find('events', id) ? id + '@g' + state.generation : id) : undefined,
+      requiresChoices: event.requiresChoices ? Object.fromEntries(Object.entries(event.requiresChoices).map(([id, choices]) => [find('events', id) ? id + '@g' + state.generation : id, choices])) : undefined
     }));
   }
   function storyTemplate(id) {
@@ -294,6 +348,12 @@
   function eligibleStory(state, story) {
     if (!story || state.storiesDone.includes(story.id)) return false;
     if (story.requires && !(Array.isArray(story.requires) ? story.requires : [story.requires]).every(id => state.storiesDone.includes(id))) return false;
+    if (story.requiresChoices && !Object.entries(story.requiresChoices).every(([id, choices]) =>
+      state.storiesDone.includes(id) && (Array.isArray(choices) ? choices : [choices]).includes(state.storyChoices[id]))) return false;
+    if (story.requiresRelationships && !Object.entries(story.requiresRelationships).every(([id, minimum]) => {
+      const relationship = relationshipStatus(state, id);
+      return relationship && relationship.satisfaction >= minimum;
+    })) return false;
     if ((story.minDay || story.day || 1) > state.day) return false;
     if (story.generation && state.generation < story.generation) return false;
     if (story.venue && !state.venues.includes(story.venue)) return false;
@@ -324,7 +384,7 @@
       return {id: state.day + ':' + index, characterId: person.id, usual: person.usual,
         name: status.active ? clone(person.name) : status.descendant.name,
         descendant: !status.active, personId: status.active ? person.id : status.descendant.id,
-        recommended: state.menu.includes(person.usual) ? person.usual : state.menu[(index + state.day) % state.menu.length], servedRecipe: null};
+        recommended: recommendedRecipe(state, person), servedRecipe: null};
     });
     state.service = {date: state.date, day: state.day, menu: state.menu.slice(), layout: state.layout,
       supplier: state.supplier, venue: state.venue, seats: state.seats, guests, index: 0, manual: 0, forecast: planningForecast(state),
@@ -357,7 +417,7 @@
     state.totalServed += result.customers;
     state.lastDay = result;
     state.phase = 'closed';
-    state.service.guests.forEach(guest => { if (!guest.servedRecipe) guest.servedRecipe = guest.recommended; });
+    state.service.guests.forEach(guest => { if (guest.servedRecipe === null) resolveService(state, guest, guest.recommended, effects); });
     state.service.index = state.service.guests.length;
     rollMonth(state);
     state.monthly.days++;
@@ -409,6 +469,7 @@
     try {
       if (!state.briefs || state.briefs.date !== state.date) resetBriefs(state);
       if (!state.keepsakes) state.keepsakes = [];
+      if (!state.relationships) state.relationships = newRelationships();
       switch (action.type) {
         case 'SELECT_BRIEF':
           if (state.phase !== 'planning') { error = 'INVALID_PHASE'; break; }
@@ -449,9 +510,9 @@
           const guest = state.service.guests[state.service.index];
           if (!guest) { error = 'NO_GUEST'; break; }
           if (!state.service.menu.includes(action.recipeId)) { error = 'INVALID_RECIPE'; break; }
-          guest.servedRecipe = action.recipeId;
+          resolveService(state, guest, action.recipeId, effects);
           state.service.index++; state.service.manual++;
-          effects.push({type: 'serve', id: guest.characterId, recipeId: action.recipeId, usual: action.recipeId === guest.usual});
+          effects.push({type: 'serve', id: guest.characterId, recipeId: action.recipeId, usual: action.recipeId === guest.usual, match: serviceMatch(state, guest.characterId, action.recipeId)});
           break;
         }
         case 'CLOSE_DAY': closeDay(state, effects); break;
@@ -594,6 +655,20 @@
     requireValue(raw.pendingStory === null || validStoryId(raw.pendingStory));
     requireValue(validInt(raw.daysRun) && validInt(raw.totalServed) && validNumber(raw.reputation, 100));
     requireValue(raw.identity && ['people', 'recipe', 'street'].every(key => validNumber(raw.identity[key], 100)));
+    // Older v6 cafés begin remembering from this update. Replaying history would invent visits.
+    if (!Object.hasOwn(raw, 'relationships')) raw.relationships = newRelationships();
+    const characterIds = list('characters').map(person => person.id);
+    requireValue(raw.relationships && typeof raw.relationships === 'object' && !Array.isArray(raw.relationships));
+    requireValue(Object.keys(raw.relationships).length === characterIds.length && Object.keys(raw.relationships).every(id => characterIds.includes(id)));
+    characterIds.forEach(id => {
+      const relationship = raw.relationships[id];
+      requireValue(relationship && typeof relationship === 'object' && !Array.isArray(relationship) && Object.keys(relationship).length === 4 &&
+        Object.keys(relationship).every(key => ['meetings', 'satisfaction', 'rememberedPreferences', 'lastServedRecipe'].includes(key)));
+      requireValue(validInt(relationship.meetings) && validInt(relationship.satisfaction, 100) && relationship.satisfaction <= relationship.meetings * 3);
+      requireValue(ids(relationship.rememberedPreferences, raw.recipes.concat(customIds), raw.recipes.length + customIds.length) && relationship.rememberedPreferences.length <= relationship.meetings);
+      requireValue(relationship.rememberedPreferences.every(recipeId => serviceMatch(raw, id, recipeId) !== 'different'));
+      requireValue(relationship.meetings === 0 ? relationship.lastServedRecipe === null && relationship.satisfaction === 0 : raw.recipes.concat(customIds).includes(relationship.lastServedRecipe));
+    });
     requireValue(Array.isArray(raw.memories) && raw.memories.length <= 10000 && raw.memories.every(m => m && typeof m.id === 'string' && m.text && typeof m.text.en === 'string' && typeof m.text.ar === 'string'));
     requireValue(Array.isArray(raw.history) && raw.history.length <= 500 && raw.history.every(h => h && typeof h.type === 'string' && typeof h.date === 'string'));
     requireValue(raw.settings && ['music', 'sfx', 'haptics', 'reducedMotion'].every(key => typeof raw.settings[key] === 'boolean') && ['normal', 'large', 'larger'].includes(raw.settings.textSize) && ['auto', 'light', 'dark'].includes(raw.settings.theme));
@@ -744,6 +819,6 @@
     record(state, 'imported', {date});
     return validate(state);
   }
-  return Object.freeze({VERSION, SAVE_FORMAT, STAFF, BRIEF_STAMPS, dailyBriefs, briefStatus, newGame, dispatch, forecast, availableStories, currentGuest, allRecipes, recipe, personStatus,
+  return Object.freeze({VERSION, SAVE_FORMAT, STAFF, BRIEF_STAMPS, RELATIONSHIP_LEVELS, dailyBriefs, briefStatus, relationshipStatus, serviceMatch, newGame, dispatch, forecast, availableStories, currentGuest, allRecipes, recipe, personStatus,
     validate, exportSave, importSave, migrateLegacy, advanceDate, seasonFor});
 }));
