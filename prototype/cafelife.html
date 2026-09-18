@@ -179,6 +179,8 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
   <section class="screen" id="s-close" hidden></section>
   <section class="screen" id="s-shop" hidden></section>
   <section class="screen" id="s-people" hidden></section>
+  <section class="screen" id="s-goals" hidden></section>
+  <section class="screen" id="s-bank" hidden></section>
 </div>
 <script>
 /* ============================================================================
@@ -497,6 +499,7 @@ function NEW(){
            dies:72+Math.floor(Math.random()*18)},
     cash:640*MONTH_DAYS, rent:90,
     setup:false, cafeName:"", tenure:null, debt:0, debtRate:0,
+    goals:{}, best:{take:0}, arrears:0,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
@@ -582,12 +585,18 @@ function costOfItem(k, have){
      seats to eight took fifteen seasons with nothing else happening in them. Filling a room
      should feel like filling a room. */
   if(it.dyn) return it.dyn();               // priced off the café it is being spent on
-  /* Priced against what the café earns, and it now earns a month at a time. */
-  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : (1 + have*0.32))
+  /* Priced against what the café earns, and it now earns a month at a time.
+
+     The step used to be linear (1 + have*0.32), which was tuned against four spending rounds
+     a year. There are twelve now, and a month's profit compounds, so the whole ladder -- every
+     seat, every board slot -- was bought out by 1998 and the next three hundred years had
+     nothing left to want. A geometric step keeps the far end of the ladder out of reach for
+     as long as the near end is worth climbing. */
+  return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : Math.pow(1.42, have))
                     * infl() * MONTH_DAYS);
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
-function show(n){ ["cafe","plan","serve","close","shop","people"]
+function show(n){ ["cafe","plan","serve","close","shop","people","goals","bank"]
   .forEach(v => $("s-"+v).hidden = (v!==n)); }
 
 /* how appealing today's board is to a walk-in wanting `tag` */
@@ -851,6 +860,12 @@ function screenCafe(){
     const pp = el("button","btn sec","The regulars"); pp.type="button";
     pp.onclick = screenPeople; sc.appendChild(pp);
   }
+  const amb = el("button","btn sec","Ambitions — " + GOALS.filter(g=>G.goals[g.k]).length
+    + " of " + GOALS.length); amb.type="button";
+  amb.onclick = screenGoals; sc.appendChild(amb);
+  const bk = el("button","btn sec", G.debt > 0
+    ? "The bank — " + money(G.debt) + " owed" : "The bank"); bk.type="button";
+  bk.onclick = screenBank; sc.appendChild(bk);
 
   /* A café you can run for thirty years with no way to begin another one is a dead end, and
      the public support page had to say so. Kept quiet and deliberately awkward to reach: it
@@ -973,13 +988,17 @@ function branchTake(br){
 }
 
 function visitsFor(c){
-  /* One shown face is that person's whole season, so a regular is worth many cups. It was
-     up to eighty, and four of the six have a premium usual -- Khalid drinks saffron karak --
-     so six faces could turn over more than the hundred and sixty strangers behind them, and
-     the café's income stopped having anything to do with how many seats it had. Thirty is
-     still most weeks of a season and still worth far more than a passer-by. */
-  if(c.reg) return Math.min(30, 9 + regState(c.reg.k).warmth*2);
-  return 1 + Math.floor(Math.random()*3);
+  /* A shown face used to stand for that person's whole season, so a regular was worth up to
+     thirty cups. The unit is a day now. Nobody drinks thirty karaks between seven and ten at
+     night, and pretending they did is what made the takings run away: trade went from 3,918
+     a month to 120,000 inside two years, six faces out-earning the hundred and sixty
+     strangers behind them, and the whole thirty-year ladder was bought out by 1998.
+
+     A day is a day. A regular comes in, has one, and on a good terms has another or brings
+     somebody. Warmth still pays -- it just pays in people coming back tomorrow, which is
+     what buildQueue already counts, rather than in one person drinking a month's worth. */
+  if(c.reg) return 1 + Math.min(2, Math.floor(regState(c.reg.k).warmth / 45));
+  return Math.random() < 0.22 ? 2 : 1;
 }
 /* A barista's card says "Serves alongside you" and for a long time that was simply untrue:
    nothing read G.staff except the wage bill, so hiring one cost 120 a season, rising with
@@ -1279,17 +1298,35 @@ function closeMonth(auto){
   const rent = rentNow();                    // charged on LAST month's takings
   const running = overheads(M.take);
   /* A debt is serviced whether the café took anything or not -- that is the whole point of
-     owing money, and it is what makes the loan start a decision rather than free capital.
-     Interest first, then whatever is left of the payment comes off the principal. */
-  let interest = 0, repaid = 0;
+     owing money, and it is what makes borrowing a decision rather than free capital. If the
+     month cannot cover it you go into arrears, the rate hardens, and on the third missed
+     payment the bank takes what it can reach. */
+  let interest = 0, repaid = 0, seized = null;
+  const trading = M.profit + branch - rent - wages - running;
   if(G.debt > 0){
     interest = Math.round(G.debt * G.debtRate);
-    const due = Math.round(G.debt * 0.02) + interest;
-    repaid = Math.max(0, due - interest);
-    G.debt = Math.max(0, G.debt - repaid);
+    const principal = Math.round(G.debt * 0.02);
+    const due = interest + principal;
+    if(G.cash + trading >= due){
+      repaid = principal; G.debt = Math.max(0, G.debt - principal); G.arrears = 0;
+    } else {
+      /* unpaid interest joins the balance; this is how a debt runs away from you */
+      G.debt += interest; G.arrears = (G.arrears || 0) + 1;
+      G.debtRate = Math.min(0.03, G.debtRate + 0.002);
+      interest = 0;
+      if(G.arrears >= 3){
+        if(G.branches.length){ const b = G.branches.pop(); seized = b.nm; }
+        else if(own("freehold")){ G.owned.freehold = 0; seized = "the freehold"; }
+        else { seized = "everything but the counter";
+               G.seats = Math.max(2, Math.round(G.seats/2));
+               G.slots = Math.max(2, G.slots - 2); }
+        G.debt = Math.round(G.debt * 0.55); G.arrears = 0;
+      }
+    }
     if(G.debt === 0) G.debtRate = 0;
   }
-  const net = M.profit + branch - rent - wages - running - interest - repaid;
+  const net = trading - interest - repaid;
+  if(M.take > (G.best.take || 0)) G.best.take = M.take;
   G.cash += net; G.lastTake = M.take;
 
   /* whose story moved */
@@ -1378,10 +1415,29 @@ function closeMonth(auto){
   if(interest) st("Interest on the loan", "−" + money(interest) + " AED", "bad");
   if(repaid) st("Off the loan", "−" + money(repaid) + " AED", "bad");
   if(G.debt > 0) st("Still owed", money(G.debt) + " AED", "bad");
+  if(G.arrears) st("Payment missed", G.arrears + " of 3", "bad");
   /* money() carries a hyphen for a negative; the lines above it all use a proper minus */
   st("Kept", (net>=0 ? "+" + money(net) : "−" + money(-net)) + " AED",
      net>=0 ? "good" : "bad");
   sc.appendChild(c);
+
+  if(seized){
+    const w = el("div","card"); w.style.borderColor = "var(--bad)";
+    w.appendChild(el("div","lbl","the bank"));
+    w.appendChild(el("div","beat","Three payments missed. They have taken " + seized
+      + ", set against what you owe. What is left of the debt still stands."));
+    sc.appendChild(w);
+  }
+  checkGoals().forEach(w => {
+    const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
+    card.appendChild(el("div","lbl","an ambition"));
+    const row = el("div","stat");
+    row.appendChild(el("div","k", w.g.t));
+    row.appendChild(el("div","v cash", "+" + money(w.pay) + " AED"));
+    card.appendChild(row);
+    card.appendChild(el("div","hint", w.g.d));
+    sc.appendChild(card);
+  });
 
   beats.forEach(b => {
     const card = el("div","card");
@@ -1691,6 +1747,142 @@ function succession(){
   sc.appendChild(go);
   v.appendChild(sc);
   show("close");
+}
+
+/* ============================== the bank ============================== */
+/* Until now there was no way to lose. Money only ever went up, spending was a shopping list,
+   and a decision you cannot get wrong is not a decision. Borrowing puts a floor under
+   expansion and a rope around your neck: the payment is due whether the month was good or
+   not, and a café that cannot pay goes into arrears, then loses what it built.
+
+   What you can borrow is what the café can service, not what you would like. */
+const borrowLimit = () => Math.max(0, Math.round(
+  (G.lastTake * 4 + G.seats * 220 * MONTH_DAYS + (own("freehold") ? 9000*MONTH_DAYS : 0))
+  - G.debt));
+const RATE_BASE = 0.011;
+/* a café with a record borrows cheaper than one without */
+const offerRate = () => Math.max(0.006, RATE_BASE - Math.min(0.004, G.rep * 0.00012)
+                                 + (G.arrears ? 0.004 : 0));
+const monthlyDue = () => G.debt > 0
+  ? Math.round(G.debt * G.debtRate) + Math.round(G.debt * 0.02) : 0;
+
+function screenBank(){
+  const v = $("s-bank"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", dateLine()));
+  sc.appendChild(el("div","big", G.debt > 0 ? "You owe the bank" : "The bank"));
+
+  const c = el("div","card");
+  const st = (k,val,cls) => { const r = el("div","stat"); r.appendChild(el("div","k",k));
+    r.appendChild(el("div","v " + (cls||""), val)); c.appendChild(r); };
+  st("In the till", money(G.cash) + " AED", "cash");
+  if(G.debt > 0){
+    st("Owed", money(G.debt) + " AED", "bad");
+    st("Interest", (G.debtRate*100).toFixed(1) + "% a month", "bad");
+    st("Due each month", money(monthlyDue()) + " AED", "bad");
+  }
+  if(G.arrears) st("Months in arrears", String(G.arrears), "bad");
+  st("They would lend you", money(borrowLimit()) + " AED");
+  st("At", (offerRate()*100).toFixed(1) + "% a month");
+  sc.appendChild(c);
+
+  if(G.arrears)
+    sc.appendChild(el("div","hint","You have missed a payment. Miss three and they take the "
+      + "café back — a branch first if you have one, then the freehold, then the keys."));
+  else
+    sc.appendChild(el("div","hint","A loan is paid back whether the month was good or not. "
+      + "Borrow against what the café already earns, not against what you hope it will."));
+
+  [0.25, 0.5, 1].forEach(frac => {
+    const amt = Math.round(borrowLimit() * frac / (100*MONTH_DAYS)) * 100 * MONTH_DAYS;
+    if(amt < 100*MONTH_DAYS) return;
+    const b = el("button","btn" + (frac === 1 ? " sec" : ""), "Borrow " + money(amt) + " AED");
+    b.type = "button";
+    b.onclick = () => {
+      /* one rate for the whole balance: a blended rate is a spreadsheet, not a decision */
+      G.debtRate = offerRate();
+      G.debt += amt; G.cash += amt; save(); screenBank();
+    };
+    sc.appendChild(b);
+  });
+  if(G.debt > 0 && G.cash > 0){
+    const pay = Math.min(G.cash, G.debt);
+    const b = el("button","btn sec","Pay off " + money(pay) + " AED now"); b.type = "button";
+    b.onclick = () => { G.cash -= pay; G.debt -= pay;
+                        if(G.debt <= 0){ G.debt = 0; G.debtRate = 0; G.arrears = 0; }
+                        save(); screenBank(); };
+    sc.appendChild(b);
+  }
+  const back = el("button","btn quiet","Back to the café"); back.type = "button";
+  back.onclick = screenCafe; sc.appendChild(back);
+  v.appendChild(sc); show("bank");
+}
+
+/* ============================== ambitions ============================== */
+/* A first play reported nothing to achieve, and it was right: the game had one "Next" card
+   and no notion of having arrived anywhere. These are the things a café owner would actually
+   be pleased about, checked when the books close. They pay out, because a goal that only
+   ticks a box is a list; and they are ordered so there is always a near one and a far one. */
+const GOALS = [
+  {k:"board4",  t:"Four things on the board",  d:"Room to put a morning and an afternoon on it at once.",
+   at:g => g.slots >= 4,                                  pay:g => 400*MONTH_DAYS},
+  {k:"seats10", t:"Ten seats",                 d:"Enough that people stay rather than take it away.",
+   at:g => g.seats >= 10,                                 pay:g => 500*MONTH_DAYS},
+  {k:"met3",    t:"Three regulars",            d:"Three people you know by name and by order.",
+   at:g => REGULARS.filter(r => regState(r.k).met).length >= 3, pay:g => 400*MONTH_DAYS},
+  {k:"hire",    t:"A second pair of hands",    d:"Somebody else behind the counter.",
+   at:g => g.staff.length >= 1,                           pay:g => 600*MONTH_DAYS},
+  {k:"debtfree",t:"Nothing owed to anybody",   d:"The loan cleared, the café yours outright.",
+   at:g => g.tenure === "loan" && g.debt === 0,           pay:g => 1200*MONTH_DAYS},
+  {k:"invent",  t:"A recipe of your own",      d:"Something in the cookbook under your name.",
+   at:g => g.cookbook.some(c => c.invented),              pay:g => 800*MONTH_DAYS},
+  {k:"board8",  t:"A board you cannot fill",   d:"Every slot the wall will take.",
+   at:g => g.slots >= 8,                                  pay:g => 1500*MONTH_DAYS},
+  {k:"story2",  t:"Two stories seen through",  d:"Two people whose lives you followed to the end.",
+   at:g => REGULARS.filter(r => regState(r.k).done).length >= 2, pay:g => 1600*MONTH_DAYS},
+  {k:"branch",  t:"A second door",             d:"A café somewhere else with your name on it.",
+   at:g => g.branches.length >= 1,                        pay:g => 2000*MONTH_DAYS},
+  {k:"month50", t:"Fifty thousand in a month", d:"One month's takings past fifty thousand.",
+   at:g => g.best.take >= 50000,                          pay:g => 2500*MONTH_DAYS},
+  {k:"freehold",t:"Your own four walls",       d:"The freehold bought; no landlord at all.",
+   at:g => own("freehold") > 0,                           pay:g => 4000*MONTH_DAYS},
+  {k:"gen2",    t:"The keys handed on",        d:"A second generation behind the counter.",
+   at:g => g.gen >= 2,                                    pay:g => 5000*MONTH_DAYS},
+  {k:"gen4",    t:"A name on the street",      d:"Four generations of the same family in the same room.",
+   at:g => g.gen >= 4,                                    pay:g => 15000*MONTH_DAYS},
+  {k:"century", t:"A hundred years",           d:"The café open a century after you took the keys.",
+   at:g => g.year >= YEAR0 + 100,                         pay:g => 40000*MONTH_DAYS}
+];
+function checkGoals(){
+  const won = [];
+  GOALS.forEach(go => {
+    if(G.goals[go.k]) return;
+    if(!go.at(G)) return;
+    G.goals[go.k] = G.year;
+    const pay = go.pay(G); G.cash += pay; G.rep += 2;
+    won.push({g:go, pay:pay});
+  });
+  return won;
+}
+function screenGoals(){
+  const v = $("s-goals"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  const done = GOALS.filter(g => G.goals[g.k]).length;
+  sc.appendChild(el("div","lbl", done + " of " + GOALS.length + " · " + (G.cafeName || "the café")));
+  sc.appendChild(el("div","big","Ambitions"));
+  GOALS.forEach(go => {
+    const got = G.goals[go.k];
+    const c = el("div","card"); if(got) c.style.borderColor = "var(--amber-d)";
+    const row = el("div","stat");
+    row.appendChild(el("div","k", go.t));
+    row.appendChild(el("div","v " + (got ? "good" : ""), got ? String(got) : "+" + money(go.pay(G))));
+    c.appendChild(row);
+    c.appendChild(el("div","hint", go.d));
+    sc.appendChild(c);
+  });
+  const b = el("button","btn sec","Back to the café"); b.type = "button";
+  b.onclick = screenCafe; sc.appendChild(b);
+  v.appendChild(sc); show("goals");
 }
 
 /* ============================== setting up ============================== */
