@@ -181,6 +181,7 @@ body{background:var(--bg);color:var(--cream);font-family:"DM Sans",system-ui,san
   <section class="screen" id="s-people" hidden></section>
   <section class="screen" id="s-goals" hidden></section>
   <section class="screen" id="s-bank" hidden></section>
+  <section class="screen" id="s-supply" hidden></section>
 </div>
 <script>
 /* ============================================================================
@@ -500,6 +501,7 @@ function NEW(){
     cash:640*MONTH_DAYS, rent:90,
     setup:false, cafeName:"", tenure:null, debt:0, debtRate:0,
     goals:{}, best:{take:0}, arrears:0,
+    supplier:"cc", lab:null, labDone:0,
     recipes:["karak","mint"], board:["karak","mint"], slots:2,
     owned:{}, seats:2, foot:1, rep:0, mood:0, dwell:0, margin:0.5, priceLift:0,
     sweetLift:0, coffeeLift:0, coldLift:0, warmLift:0,
@@ -577,7 +579,7 @@ const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) *
 
 const SERVE_EACH = 42;
 const hands = () => 1 + baristas() + (own("manager") ? 1 : 0);
-const costOf = k => RECIPES[k].cost * (1 + (G.year-YEAR0)*0.016);
+const costOf = k => RECIPES[k].cost * (1 + (G.year-YEAR0)*0.016) * supplier().cost;
 /* an item with `pow` compounds instead of stepping, so it stays a sink at any scale */
 function costOfItem(k, have){
   const it = ITEMS[k];
@@ -596,14 +598,14 @@ function costOfItem(k, have){
                     * infl() * MONTH_DAYS);
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
-function show(n){ ["cafe","plan","serve","close","shop","people","goals","bank"]
+function show(n){ ["cafe","plan","serve","close","shop","people","goals","bank","supply"]
   .forEach(v => $("s-"+v).hidden = (v!==n)); }
 
 /* how appealing today's board is to a walk-in wanting `tag` */
 function boardHas(tag){ return G.board.some(k => RECIPES[k].tags.indexOf(tag) >= 0); }
 function priceOf(k){
   const r = RECIPES[k];
-  let p = r.price * (1 + G.priceLift) * (1 + (G.year-YEAR0)*0.018);
+  let p = r.price * (1 + G.priceLift) * (1 + (G.year-YEAR0)*0.018) * (1 + supplier().qual);
   if(r.tags.indexOf("sweet")>=0) p *= (1 + G.sweetLift);
   if(k==="espresso"||k==="latte"||k==="iced"||k==="affogato") p *= (1 + G.coffeeLift);
   if(r.tags.indexOf("cold")>=0) p *= (1 + G.coldLift);
@@ -866,6 +868,10 @@ function screenCafe(){
   const bk = el("button","btn sec", G.debt > 0
     ? "The bank — " + money(G.debt) + " owed" : "The bank"); bk.type="button";
   bk.onclick = screenBank; sc.appendChild(bk);
+  const sup = el("button","btn sec", G.lab
+    ? "Sourcing — the bench, " + G.lab.months + " to go"
+    : "Sourcing — " + supplier().t.replace(/^(The|A) /,"")); sup.type="button";
+  sup.onclick = screenSupply; sc.appendChild(sup);
 
   /* A café you can run for thirty years with no way to begin another one is a dead end, and
      the public support page had to say so. Kept quiet and deliberately awkward to reach: it
@@ -1302,7 +1308,15 @@ function closeMonth(auto){
      month cannot cover it you go into arrears, the rate hardens, and on the third missed
      payment the bank takes what it can reach. */
   let interest = 0, repaid = 0, seized = null;
-  const trading = M.profit + branch - rent - wages - running;
+  const supply = supplyFee();
+  /* the bench bills whether the month was good or not, like anything else standing */
+  let labBill = 0, labMade = null;
+  if(G.lab){
+    labBill = G.lab.each;
+    G.lab.months--;
+    if(G.lab.months <= 0) labMade = labFinish();
+  }
+  const trading = M.profit + branch - rent - wages - running - supply - labBill;
   if(G.debt > 0){
     interest = Math.round(G.debt * G.debtRate);
     const principal = Math.round(G.debt * 0.02);
@@ -1412,6 +1426,8 @@ function closeMonth(auto){
   if(!own("freehold") && G.lastTake > 400)
     st("  the landlord's share", "−" + money(G.lastTake*0.07) + " AED", "bad");
   if(wages) st("Wages", "−" + money(wages) + " AED", "bad");
+  if(supply) st(supplier().t, "−" + money(supply) + " AED", "bad");
+  if(labBill) st("The bench", "−" + money(labBill) + " AED", "bad");
   if(interest) st("Interest on the loan", "−" + money(interest) + " AED", "bad");
   if(repaid) st("Off the loan", "−" + money(repaid) + " AED", "bad");
   if(G.debt > 0) st("Still owed", money(G.debt) + " AED", "bad");
@@ -1427,6 +1443,13 @@ function closeMonth(auto){
     w.appendChild(el("div","beat","Three payments missed. They have taken " + seized
       + ", set against what you owe. What is left of the debt still stands."));
     sc.appendChild(w);
+  }
+  if(labMade){
+    const c = el("div","card"); c.style.borderColor = "var(--amber-d)";
+    c.appendChild(el("div","lbl","the bench"));
+    c.appendChild(el("div","beat","It works. " + labMade + " goes into the cookbook under "
+      + G.owner.nm + "'s name, and onto the board whenever there is room for it."));
+    sc.appendChild(c);
   }
   checkGoals().forEach(w => {
     const card = el("div","card"); card.style.borderColor = "var(--amber-d)";
@@ -1749,6 +1772,125 @@ function succession(){
   show("close");
 }
 
+/* ============================== sourcing and the bench ============================== */
+/* Two holes this fills. There was nowhere for the café to exist outside its own four walls,
+   and there was nothing left to want once the room was full -- the ladder finished around
+   2007 and the next three hundred years were flat. Both are the same hole: money with
+   nothing to buy.
+
+   A supplier is a standing decision rather than a purchase. A cheaper cup and a better cup
+   pull against each other, and the good ones want a fee every month whether you use them or
+   not, so the choice keeps costing you something. */
+const SUPPLIERS = {
+  cc:    {t:"The cash and carry", d:"Whatever is on the pallet that week. No fee, no favours, "
+           + "and you pay the shelf price.",
+          cost:1.00, qual:0,    fee:0,    join:0},
+  whole: {t:"A wholesaler on the industrial road", d:"Bulk crates, a standing order and a van "
+           + "on Tuesdays. Cheaper in the cup, and it costs you whether you sell it or not.",
+          cost:0.86, qual:0,    fee:420,  join:900},
+  roast: {t:"A roaster who knows your name", d:"He cups the batch before it leaves. Dearer "
+           + "than the pallet, and people can taste the difference.",
+          cost:0.94, qual:0.12, fee:700,  join:2200},
+  estate:{t:"Direct from the estate", d:"A named farm, a named lot, shipped to you. The kind "
+           + "of supply a café builds a reputation on, at the kind of price that assumes one.",
+          cost:0.80, qual:0.26, fee:2600, join:11000}
+};
+const supplier = () => SUPPLIERS[G.supplier] || SUPPLIERS.cc;
+const supplyFee = () => Math.round(supplier().fee * infl() * FIXED);
+
+/* The bench. Inventing used to be one button in the shop: pay, and a dish appeared. It is a
+   project now -- you choose what you are working on, it takes months, and it bills you every
+   one of them. Each finished piece of work costs more than the last, which is the sink the
+   late game never had. */
+const labCost = () => Math.round((900 + G.labDone * 1400) * infl() * MONTH_DAYS);
+const labMonths = () => 3 + Math.min(5, G.labDone);
+const LAB_LINES = [
+  {k:"sweet",    t:"Something sweet",      d:"For the afternoon, and for people who came in with children."},
+  {k:"warm",     t:"Something warm",       d:"The winter board, and the early mornings."},
+  {k:"cold",     t:"Something cold",       d:"Summer is forty degrees and the street does not stop for it."},
+  {k:"savoury",  t:"Something savoury",    d:"People who come in at noon and want lunch, not cake."},
+  {k:"quick",    t:"Something quick",      d:"For the ones who will not sit down."}
+];
+
+function screenSupply(){
+  const v = $("s-supply"); v.textContent = "";
+  const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
+  sc.appendChild(el("div","lbl", dateLine()));
+  sc.appendChild(el("div","big","Sourcing"));
+  sc.appendChild(el("div","hint","What goes in the cup, and who you get it from. A fee is "
+    + "charged every month the arrangement stands."));
+
+  Object.keys(SUPPLIERS).forEach(k => {
+    const sp = SUPPLIERS[k], here = G.supplier === k;
+    const join = Math.round(sp.join * infl() * MONTH_DAYS / 10);
+    const c = el("div","pickr" + (here ? " on" : ""));
+    c.appendChild(el("div","t", sp.t));
+    c.appendChild(el("div","d", sp.d));
+    c.appendChild(el("div","m",
+      (sp.cost < 1 ? Math.round((1-sp.cost)*100) + "% cheaper in the cup" : "shelf price")
+      + (sp.qual ? " · " + Math.round(sp.qual*100) + "% better" : "")
+      + (sp.fee ? " · " + money(Math.round(sp.fee*infl()*FIXED)) + " a month" : " · no fee")
+      + (here ? " · YOURS" : join ? " · " + money(join) + " to start" : "")));
+    if(!here) c.onclick = () => {
+      if(G.cash < join) return;
+      G.cash -= join; G.supplier = k; save(); screenSupply();
+    };
+    sc.appendChild(c);
+  });
+
+  sc.appendChild(el("div","lbl","The bench"));
+  if(G.lab){
+    const left = G.lab.months;
+    const c = el("div","card");
+    c.appendChild(el("div","t", G.lab.t));
+    c.appendChild(el("div","hint", left + (left === 1 ? " month to go." : " months to go.")
+      + " It bills " + money(Math.round(labCost()/labMonths())) + " each month until it is done."));
+    sc.appendChild(c);
+    const stop = el("button","btn quiet","Abandon the work"); stop.type = "button";
+    stop.onclick = () => { G.lab = null; save(); screenSupply(); };
+    sc.appendChild(stop);
+  } else {
+    sc.appendChild(el("div","hint","A new recipe of your own, worked out over "
+      + labMonths() + " months at " + money(labCost()) + " in total. The "
+      + (G.labDone ? "next one will cost more again." : "first is the cheapest you will ever do.")));
+    LAB_LINES.forEach(l => {
+      const c = el("div","pickr");
+      c.appendChild(el("div","t", l.t));
+      c.appendChild(el("div","d", l.d));
+      c.onclick = () => {
+        if(G.cash < Math.round(labCost()/labMonths())) return;
+        G.lab = {line:l.k, t:l.t, months:labMonths(), each:Math.round(labCost()/labMonths())};
+        save(); screenSupply();
+      };
+      sc.appendChild(c);
+    });
+  }
+  const back = el("button","btn sec","Back to the café"); back.type = "button";
+  back.onclick = screenCafe; sc.appendChild(back);
+  v.appendChild(sc); show("supply");
+}
+
+/* a finished piece of bench work, built on the invention machinery but aimed by the player */
+function labFinish(){
+  const line = G.lab.line;
+  const pool = INVENTABLE.filter(i => i.tags.indexOf(line) >= 0);
+  const inv = pool.length ? pick(pool) : pick(INVENTABLE);
+  const invented = {}; G.cookbook.forEach(c => { if(c.invented) invented[c.k] = 1; });
+  const stock = G.recipes.filter(k => !invented[k]);
+  const src = RECIPES[pick(stock.length ? stock : G.recipes)];
+  const k = "lab" + G.labDone + "_" + G.gen;
+  RECIPES[k] = {nm: pick(INV_A) + " " + inv.n, ic: src.ic,
+                cost: Math.round(src.cost * 1.05),
+                price: Math.round(src.price * 1.55), tags: inv.tags.slice(), buy:0};
+  SPRITE[k] = inv.sp;
+  G.recipes.push(k);
+  G.cookbook.push({k:k, nm:RECIPES[k].nm, by:G.owner.nm, year:G.year, gen:G.gen,
+                   invented:true, price:RECIPES[k].price, cost:RECIPES[k].cost,
+                   tags:RECIPES[k].tags, ic:RECIPES[k].ic, sp:SPRITE[k]});
+  G.labDone++; G.lab = null;
+  return RECIPES[k].nm;
+}
+
 /* ============================== the bank ============================== */
 /* Until now there was no way to lose. Money only ever went up, spending was a shopping list,
    and a decision you cannot get wrong is not a decision. Borrowing puts a floor under
@@ -1850,6 +1992,10 @@ const GOALS = [
    at:g => g.gen >= 2,                                    pay:g => 5000*MONTH_DAYS},
   {k:"gen4",    t:"A name on the street",      d:"Four generations of the same family in the same room.",
    at:g => g.gen >= 4,                                    pay:g => 15000*MONTH_DAYS},
+  {k:"estate",  t:"Straight from the estate",  d:"A named farm and a named lot, shipped to your door.",
+   at:g => g.supplier === "estate",                       pay:g => 6000*MONTH_DAYS},
+  {k:"lab3",    t:"Three of your own",          d:"Three recipes worked out at the bench, not bought.",
+   at:g => g.labDone >= 3,                                pay:g => 7000*MONTH_DAYS},
   {k:"century", t:"A hundred years",           d:"The café open a century after you took the keys.",
    at:g => g.year >= YEAR0 + 100,                         pay:g => 40000*MONTH_DAYS}
 ];
