@@ -1349,6 +1349,17 @@ function settleMonth(){
   const net = trading - interest - repaid;
   if(M.take > (G.best.take || 0)) G.best.take = M.take;
   G.cash += net; G.lastTake = M.take;
+  /* A café with no loan could sit at minus twenty-one thousand indefinitely and nothing in
+     the game noticed -- the bank only bites when there is a debt to miss a payment on, so
+     not borrowing was a way of being immune to losing. A shortfall is money somebody else is
+     lending you whether you asked or not: it becomes debt, at a worse rate than you would
+     have been offered, and from there the arrears machinery already knows what to do. */
+  let overdrawn = 0;
+  if(G.cash < 0){
+    overdrawn = Math.round(-G.cash);
+    G.debt += overdrawn; G.cash = 0;
+    G.debtRate = Math.max(G.debtRate || 0, Math.min(0.03, offerRate() + 0.006));
+  }
 
   /* whose story moved */
   const beats = [];
@@ -1419,9 +1430,11 @@ function settleMonth(){
   const moved = beats.filter(b => b.beat || b.intro).length;
   const hurts = net < 0 && (G.cash + net < 0 || -net > Math.max(1, M.take) * 0.25);
   const notable = !!(moved || arrivals.length || ev || wonGoals.length || labMade
-                     || seized || G.arrears || hurts || G.owner.age >= G.owner.dies);
+                     || seized || G.arrears || hurts || overdrawn
+                     || G.owner.age >= G.owner.dies);
   return {M:M, net:net, rent:rent, wages:wages, running:running, supply:supply,
           labBill:labBill, branch:branch, interest:interest, repaid:repaid, seized:seized,
+          overdrawn:overdrawn,
           labMade:labMade, beats:beats, arrivals:arrivals, ev:ev, wonGoals:wonGoals,
           notable:notable};
 }
@@ -1462,7 +1475,7 @@ function runUntil(){
 
 function monthScreen(R, auto){
   const {M, net, rent, wages, running, supply, labBill, branch, interest, repaid,
-         seized, labMade, beats, arrivals, ev, wonGoals} = R;
+         seized, labMade, beats, arrivals, ev, wonGoals, overdrawn} = R;
   const v = $("s-close"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
   const mName = MONTHS[(G.month + 11) % 12], mYear = (G.month % 12 === 0) ? G.year - 1 : G.year;
@@ -1495,6 +1508,7 @@ function monthScreen(R, auto){
   if(interest) st("Interest on the loan", "−" + money(interest) + " AED", "bad");
   if(repaid) st("Off the loan", "−" + money(repaid) + " AED", "bad");
   if(G.debt > 0) st("Still owed", money(G.debt) + " AED", "bad");
+  if(overdrawn) st("Covered by the bank", money(overdrawn) + " AED", "bad");
   if(G.arrears) st("Payment missed", G.arrears + " of 3", "bad");
   /* money() carries a hyphen for a negative; the lines above it all use a proper minus */
   st("Kept", (net>=0 ? "+" + money(net) : "−" + money(-net)) + " AED",
@@ -1772,6 +1786,25 @@ function wipe(){
 
 /* recipes invented by earlier generations have to be put back on load */
 function rehydrate(){
+  /* A save is written by whatever build the player last had, and every field added since is
+     simply missing from it. A café saved before ambitions existed came back with G.goals
+     undefined, threw on the first screen it drew and again on the first month it settled --
+     the player's dynasty was intact on disk and unplayable in the app.
+
+     Backfilling from NEW() rather than naming today's fields is the point: it fixes the
+     next five additions as well as these, which is the only version of this fix that stays
+     fixed. Only absent keys are filled, so nothing the player did is overwritten. */
+  const fresh = NEW();
+  Object.keys(fresh).forEach(k => { if(G[k] === undefined) G[k] = fresh[k]; });
+  ["mo","best"].forEach(k => {
+    if(!G[k] || typeof G[k] !== "object") G[k] = fresh[k];
+    else Object.keys(fresh[k]).forEach(j => { if(G[k][j] === undefined) G[k][j] = fresh[k][j]; });
+  });
+  /* owners predate traits; give an old one a character rather than a silent default */
+  if(G.owner && !G.owner.trait){
+    const t = pick(TRAITS); G.owner.trait = t.k; G.owner.traitT = t.t;
+  }
+
   (G.cookbook||[]).forEach(c => {
     if(c.invented && !RECIPES[c.k])
       RECIPES[c.k] = {nm:c.nm, ic:c.ic, cost:c.cost, price:c.price, tags:c.tags, buy:0};
@@ -2183,38 +2216,47 @@ function screenBank(){
    ticks a box is a list; and they are ordered so there is always a near one and a far one. */
 const GOALS = [
   {k:"board4",  t:"Four things on the board",  d:"Room to put a morning and an afternoon on it at once.",
-   at:g => g.slots >= 4,                                  pay:g => 400*MONTH_DAYS},
+   at:g => g.slots >= 4,                                  pay:g => goalPay(0.6)},
   {k:"seats10", t:"Ten seats",                 d:"Enough that people stay rather than take it away.",
-   at:g => g.seats >= 10,                                 pay:g => 500*MONTH_DAYS},
+   at:g => g.seats >= 10,                                 pay:g => goalPay(0.8)},
   {k:"met3",    t:"Three regulars",            d:"Three people you know by name and by order.",
-   at:g => REGULARS.filter(r => regState(r.k).met).length >= 3, pay:g => 400*MONTH_DAYS},
+   at:g => REGULARS.filter(r => regState(r.k).met).length >= 3, pay:g => goalPay(0.6)},
   {k:"hire",    t:"A second pair of hands",    d:"Somebody else behind the counter.",
-   at:g => g.staff.length >= 1,                           pay:g => 600*MONTH_DAYS},
+   at:g => g.staff.length >= 1,                           pay:g => goalPay(0.9)},
   {k:"debtfree",t:"Nothing owed to anybody",   d:"The loan cleared, the café yours outright.",
-   at:g => g.tenure === "loan" && g.debt === 0,           pay:g => 1200*MONTH_DAYS},
+   at:g => g.tenure === "loan" && g.debt === 0,           pay:g => goalPay(1.6)},
   {k:"invent",  t:"A recipe of your own",      d:"Something in the cookbook under your name.",
-   at:g => g.cookbook.some(c => c.invented),              pay:g => 800*MONTH_DAYS},
+   at:g => g.cookbook.some(c => c.invented),              pay:g => goalPay(1.0)},
   {k:"board8",  t:"A board you cannot fill",   d:"Every slot the wall will take.",
-   at:g => g.slots >= 8,                                  pay:g => 1500*MONTH_DAYS},
+   at:g => g.slots >= 8,                                  pay:g => goalPay(1.5)},
   {k:"story2",  t:"Two stories seen through",  d:"Two people whose lives you followed to the end.",
-   at:g => REGULARS.filter(r => regState(r.k).done).length >= 2, pay:g => 1600*MONTH_DAYS},
+   at:g => REGULARS.filter(r => regState(r.k).done).length >= 2, pay:g => goalPay(1.6)},
   {k:"branch",  t:"A second door",             d:"A café somewhere else with your name on it.",
-   at:g => g.branches.length >= 1,                        pay:g => 2000*MONTH_DAYS},
+   at:g => g.branches.length >= 1,                        pay:g => goalPay(1.8)},
   {k:"month50", t:"Fifty thousand in a month", d:"One month's takings past fifty thousand.",
-   at:g => g.best.take >= 50000,                          pay:g => 2500*MONTH_DAYS},
+   at:g => g.best.take >= 50000,                          pay:g => goalPay(1.8)},
   {k:"freehold",t:"Your own four walls",       d:"The freehold bought; no landlord at all.",
-   at:g => own("freehold") > 0,                           pay:g => 4000*MONTH_DAYS},
+   at:g => own("freehold") > 0,                           pay:g => goalPay(2.2)},
   {k:"gen2",    t:"The keys handed on",        d:"A second generation behind the counter.",
-   at:g => g.gen >= 2,                                    pay:g => 5000*MONTH_DAYS},
+   at:g => g.gen >= 2,                                    pay:g => goalPay(2.5)},
   {k:"gen4",    t:"A name on the street",      d:"Four generations of the same family in the same room.",
-   at:g => g.gen >= 4,                                    pay:g => 15000*MONTH_DAYS},
+   at:g => g.gen >= 4,                                    pay:g => goalPay(3.5)},
   {k:"estate",  t:"Straight from the estate",  d:"A named farm and a named lot, shipped to your door.",
-   at:g => g.supplier === "estate",                       pay:g => 6000*MONTH_DAYS},
+   at:g => g.supplier === "estate",                       pay:g => goalPay(2.0)},
   {k:"lab3",    t:"Three of your own",          d:"Three recipes worked out at the bench, not bought.",
-   at:g => g.labDone >= 3,                                pay:g => 7000*MONTH_DAYS},
+   at:g => g.labDone >= 3,                                pay:g => goalPay(2.2)},
   {k:"century", t:"A hundred years",           d:"The café open a century after you took the keys.",
-   at:g => g.year >= YEAR0 + 100,                         pay:g => 40000*MONTH_DAYS}
+   at:g => g.year >= YEAR0 + 100,                         pay:g => goalPay(5.0)}
 ];
+/* An ambition paid a flat sum fixed at design time, and the first few were worth 10,000 to
+   15,000 against a month's takings of 1,695 -- eight months of revenue for reaching ten
+   seats, which flattens the early climb it is supposed to reward. Worse, the same sum is
+   loose change by 2100, so the far end stopped meaning anything at all.
+
+   Paid as a multiple of what the café actually takes in a month instead, with a floor so the
+   first ones are not trivial. The same number stays meaningful across three centuries. */
+const goalPay = x => Math.round(Math.max(90 * MONTH_DAYS, (G.lastTake || 0) * x));
+
 function checkGoals(){
   const won = [];
   GOALS.forEach(go => {
