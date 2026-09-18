@@ -456,38 +456,63 @@ const WALKIN = ["p1","p2","p7","p8","p10","p12",
 
 /* ---- the clock -------------------------------------------------------------------------
    The unit used to be a season: four a year, and one watched service was three months of
-   trade. The numbers never said that. buildQueue makes eight to sixteen people, which is a
-   day's custom, so the calendar was mislabelling what you were watching -- and because the
-   owner aged once every four services, the whole family-legacy system sat 184 services away
-   and nobody ever saw it.
+   trade. buildQueue makes a day's custom, not three months of it, so the calendar was
+   mislabelling what you were watching -- and because the owner aged once every four services,
+   the family-legacy system sat 184 services away and nobody ever saw it.
 
-   A trading DAY is now what you watch, hour by hour from OPEN to CLOSE. A MONTH is 26
-   trading days and it is the accounting period: rent, wages and the spending round. Twelve
-   months make a year and a dynasty runs for three hundred of them. You can watch every day
-   of a month or hand the rest of it to the counter; either way the trade is counted the
-   same, so nobody is taxed for wanting to go faster.
+   A trading DAY is what you watch, hour by hour. A MONTH is the accounting period: rent,
+   wages and the spending round. Twelve months make a year and a dynasty runs three hundred.
+   You can watch every day of a month or hand the rest to the counter; either way the trade
+   is counted the same, so nobody is taxed for going faster.
 
-   The recurring costs are unchanged in substance: they were written against one service, and
-   one service is a day, so they are charged per day and land on the month's bill together. */
-const OPEN = 7, CLOSE = 22;
-const MONTH_DAYS = 26;                       // the café is shut the rest of the month
-/* What a standing monthly charge is worth against a month of trade. NOT MONTH_DAYS: the
-   proportional costs already ride the month's takings, so multiplying the fixed ones by the
-   full day count charged for the same thing twice and bankrupted the café by 1999 however
-   well it traded. Derived from the early months -- rent has to be felt and survivable. */
+   Ten trading hours, and an hour takes 2.4 seconds, so a day runs 24 seconds -- long enough
+   to be a day you sat through rather than a list that flickered past. The clock is driven by
+   the clock and not by the queue: it advances a fixed slice of an hour each tick and serves
+   whoever turns up in that slice. A quiet Tuesday and a heaving Friday both take a day, and
+   the busy one feels busy because more people come through the same hours. */
+const OPEN = 7, CLOSE = 17;                  // shutters up at seven, down at five
+const HOUR_MS = 2400;                        // what an hour of trading takes to watch
+const DAY_TICKS = 60;                        // the day is drawn in sixty slices
+const TICK_MS = Math.round((CLOSE - OPEN) * HOUR_MS / DAY_TICKS);   // 400ms = ten minutes
+
+/* The calendar is the real one. February is 28 days, or 29 in a leap year, and a leap year
+   is every fourth except a century that is not a fourth century -- so 2000 was one and 2100,
+   2200 and 2300 are not. All three of those fall inside a three-hundred-year dynasty that
+   starts in 1994, which is why the rule has to be the real rule and not "every four years". */
+const MONTH_LEN = [31,28,31,30,31,30,31,31,30,31,30,31];
+const isLeap = y => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+const daysIn = (y, m) => (m === 1 && isLeap(y)) ? 29 : MONTH_LEN[m];
+const monthDays = () => daysIn(G.year, G.month % 12);
+
+/* What a standing charge, a shop price or an ambition is worth against a month of trade.
+   Deliberately a constant and NOT the length of the month in hand: rent may be lighter in
+   February, but a stool costing less in February than in July is a bug, not a season. */
+const MONTH_SCALE = 30;
+/* The fixed costs do not ride the month's takings the way the proportional ones do, so
+   multiplying them by a full day count charged for the same thing twice and bankrupted the
+   café by 1999 however well it traded. Derived from the early months instead. */
 const FIXED = 5;
-const YEAR0 = 1996, LEGACY_YEARS = 300;
+
+const YEAR0 = 1994, LEGACY_YEARS = 300;
 const MONTHS = ["January","February","March","April","May","June",
                 "July","August","September","October","November","December"];
+const DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const seasonIdx = () => Math.floor((G.month % 12) / 3) % 4;
 const season = () => SEASONS[seasonIdx()];
 const monthName = () => MONTHS[G.month % 12];
-const dateLine = () => monthName() + " " + G.year;
+/* Zeller, so the weekday shown is the one it really was: 1 January 1994 was a Saturday. */
+function weekdayOf(y, m, d){
+  const t = [0,3,2,5,0,3,5,1,4,6,2,4];
+  const yy = m < 2 ? y - 1 : y;
+  return (((yy + Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) + t[m] + d) % 7) + 7) % 7;
+}
+const dayName = () => DAYNAMES[weekdayOf(G.year, G.month % 12, G.day)];
+const dateLine = () => dayName().slice(0,3) + " " + G.day + " " + monthName().slice(0,3)
+                     + " " + G.year;
 const pad2 = n => (n < 10 ? "0" : "") + n;
-/* the shutters go up at seven; a day's queue is spread across the trading hours */
 const clockAt = frac => {
   const h = OPEN + (CLOSE - OPEN) * Math.min(1, Math.max(0, frac));
-  return pad2(Math.floor(h)) + ":" + pad2(Math.floor((h % 1) * 60 / 15) * 15);
+  return pad2(Math.floor(h)) + ":" + pad2(Math.floor((h % 1) * 60 / 5) * 5);
 };
 
 /* ============================== state ============================== */
@@ -498,7 +523,7 @@ function NEW(){
     mo:{take:0, profit:0, served:0, missed:0, tips:0, days:0, offstage:0, seen:[]},
     owner:{nm:pick(["Amina","Yusuf","Layla","Omar","Mariam","Tarek"]), age:26,
            dies:72+Math.floor(Math.random()*18)},
-    cash:640*MONTH_DAYS, rent:90,
+    cash:640*MONTH_SCALE, rent:90,
     setup:false, cafeName:"", tenure:null, debt:0, debtRate:0, heirs:null,
     goals:{}, best:{take:0}, arrears:0, street:[],
     supplier:"cc", lab:null, labDone:0,
@@ -544,7 +569,7 @@ function heatNow(){
    mostly on the size of the room and the trade going through it, not on a flat charge for
    having a door. */
 /* Every fixed cost below was written against one service. One service is a trading day, and
-   the bill is now settled monthly against MONTH_DAYS of them, so the standing charges carry
+   the bill is now settled monthly against a month of them, so the standing charges carry
    that factor. The shares taken off takings (the landlord's 7%, the 15% of running costs)
    need no factor at all -- they scale with the month because the takings do. */
 const rentNow = () => Math.round((34 + G.seats*11 + G.branches.length*130) * infl() * FIXED * (G.rentCut || 1)
@@ -575,7 +600,7 @@ const wearNow = () => Math.min(0.34, (G.wear || 0) / 100);
 /* lastTake is a month now rather than a day, so the share of it here drops by the same
    factor it gained -- otherwise doing the place up costs more than a branch. */
 const doUpCost = () => Math.round((200 + G.seats*120 + G.branches.length*2400) * infl() * FIXED
-                                  + G.lastTake * 1.6 / MONTH_DAYS * 8);
+                                  + G.lastTake * 1.6 / MONTH_SCALE * 8);
 
 const SERVE_EACH = 42;
 const hands = () => 1 + baristas() + (own("manager") ? 1 : 0) + trait().hands;
@@ -595,7 +620,7 @@ function costOfItem(k, have){
      nothing left to want. A geometric step keeps the far end of the ladder out of reach for
      as long as the near end is worth climbing. */
   return Math.round(it.cost * (it.pow ? Math.pow(it.pow, have) : Math.pow(1.42, have))
-                    * infl() * MONTH_DAYS);
+                    * infl() * MONTH_SCALE);
 }
 const regState = k => (G.regs[k] = G.regs[k] || {met:false, beat:0, warmth:0, done:false});
 function show(n){ ["cafe","plan","serve","close","shop","people","goals","bank","supply"]
@@ -1080,6 +1105,10 @@ const MANAGER_CUT = 0.72;
 const CAST = 9;
 
 function runService(auto){
+  /* A second tap on "open" while a day was already running started another one on top of it:
+     two tick chains, two sets of customers, and a day that took twice as long and counted
+     everything twice. Cheap to do by accident on a phone. */
+  if(!auto && SV && !SV.done && SV.q){ return; }
   const q = buildQueue();
   SV = {q:q, i:0, take:0, profit:0, served:0, missed:0, seen:[], tips:0, moment:null,
         visits:visitsToday(), maxVisits:visitsToday(), offstage:0};
@@ -1106,9 +1135,29 @@ function runService(auto){
     else SV.missed++;
   });
   SV.q = shown;
+  /* When each of them comes through the door, as a fraction of the trading day. A café is
+     not a uniform stream: it is busy when the offices open, quiet after lunch, and busy
+     again before the shutters come down. */
+  SV.at = shown.map(() => {
+    const r = Math.random();
+    const u = r < 0.42 ? Math.pow(Math.random(), 1.7) * 0.34          // the morning rush
+            : r < 0.72 ? 0.34 + Math.random() * 0.34                  // through the middle
+            : 0.68 + Math.pow(Math.random(), 0.7) * 0.32;             // the evening
+    return Math.min(0.99, u);
+  }).sort((x,y) => x - y);
+  /* Left purely to chance, a quiet café can deal nine people none of whom arrive in the first
+     third of the day: eight seconds of an empty room with the shutters up, which reads as
+     broken rather than quiet. Somebody is always waiting when a café opens, and no gap runs
+     longer than about four seconds -- a slow day should feel slow, not stopped. */
+  if(SV.at.length){
+    SV.at[0] = Math.min(SV.at[0], 0.03);
+    for(let i = 1; i < SV.at.length; i++)
+      SV.at[i] = Math.min(SV.at[i], SV.at[i-1] + 0.17);
+  }
+  SV.tick = 0;
   const v = $("s-serve"); v.textContent = "";
   const top = el("div","svc-top");
-  top.appendChild(el("div","lbl", dateLine() + " · day " + G.day + " of " + MONTH_DAYS));
+  top.appendChild(el("div","lbl", dateLine()));
   const cl = el("div","lbl"); cl.id = "sv-clock"; cl.textContent = clockAt(0); top.appendChild(cl);
   const take = el("div","mid-t cash","0 AED"); take.id = "sv-take"; top.appendChild(take);
   v.appendChild(top);
@@ -1128,7 +1177,7 @@ function runService(auto){
   v.onclick = ev => { if(ev.target.closest(".g") || ev.target.closest("#sv-moment")) return;
                       pump(true); };
   show("serve");
-  step(); pump(false);
+  pump(false);
 }
 
 /* Three, because two is not a choice and five is everyone. */
@@ -1137,16 +1186,6 @@ function runService(auto){
    of them for going over to people. */
 const visitsToday = () => Math.min(7, 2 + hands());
 
-/* The day used to tick at a flat 620ms, which is ten to fifteen seconds of watching a list
-   drain -- the opposite of instant. It now runs at roughly a third of that, and the pace
-   moves with the trading hours so a day has a shape: a rush when the shutters go up, a lull
-   after lunch, a second rush in the evening. Tapping anywhere hurries it along, so nobody
-   who wants the month back has to sit through the afternoon. */
-const DAY_PACE = through =>
-    through < 0.22 ? 190          // 07:00-10:00, the morning rush
-  : through < 0.50 ? 260          // through lunch
-  : through < 0.72 ? 340          // the flat part of the afternoon
-  :                  220;         // evening, and the last hour before the shutters
 const VISITS = 3;
 function paintVisits(){
   const el2 = $("sv-visits"); if(!el2) return;
@@ -1156,16 +1195,31 @@ function paintVisits(){
   el2.appendChild(el("span","lbl", SV.visits ? SV.visits + " left to visit" : "no time left today"));
 }
 
-/* setInterval cannot change its own rate, and the day's pace has to move with the hours. */
+/* The day is driven by the clock. Each tick is ten minutes of trading and the queue is laid
+   out across the opening hours beforehand, so the day always takes its 24 seconds whether
+   eleven people come or a hundred and sixty -- and the busy one feels busy because more of
+   them arrive in the same ten minutes. Tapping hurries the clock, not the queue. */
 function pump(now){
   clearTimeout(SV.timer);
   if(!SV || SV.done) return;
-  const gap = now ? 40 : DAY_PACE(SV.i / Math.max(1, SV.q.length));
-  SV.timer = setTimeout(() => { step(); pump(false); }, gap);
+  SV.timer = setTimeout(() => { tock(); pump(false); }, now ? 55 : TICK_MS);
+}
+
+/* one slice of the day: advance the clock, serve whoever is due in it */
+function tock(){
+  SV.tick = (SV.tick || 0) + 1;
+  const through = Math.min(1, SV.tick / DAY_TICKS);
+  while(SV.i < SV.q.length && (SV.at[SV.i] <= through || SV.tick >= DAY_TICKS)) step();
+  $("sv-clock").textContent = clockAt(through);
+  $("sv-tick").style.width = Math.round(through*100) + "%";
+  if(SV.tick >= DAY_TICKS && SV.i >= SV.q.length){
+    SV.done = true; clearTimeout(SV.timer);
+    setTimeout(() => closeDay(false), 520);
+  }
+  if(!SV.momentDone && through >= 0.4 && Math.random() < 0.5){ SV.momentDone = true; doMoment(); }
 }
 function step(){
-  if(SV.i >= SV.q.length){ SV.done = true; clearTimeout(SV.timer);
-                           setTimeout(() => closeDay(false), 520); return; }
+  if(SV.i >= SV.q.length) return;
   const c = SV.q[SV.i++];
   const r = serveOne(c);
   const list = $("sv-list");
@@ -1206,11 +1260,6 @@ function step(){
   list.insertBefore(g, list.firstChild);
   while(list.children.length > CAST) list.lastChild.remove();
   $("sv-take").textContent = money(SV.take) + " AED";
-  const through = SV.i/SV.q.length;
-  $("sv-tick").style.width = Math.round(through*100) + "%";
-  $("sv-clock").textContent = clockAt(through);   // the shutters go up at seven, down at ten
-
-  if(SV.i === Math.floor(SV.q.length*0.45) && Math.random() < 0.75) doMoment();
 }
 
 /* A moment used to stop the day dead until it was answered. That was tolerable when a
@@ -1260,7 +1309,7 @@ function closeDay(auto){
   /* Wear comes from use, not the calendar: it is the busy days that take the floor apart. */
   G.wear = (G.wear || 0) + SV.served/70;
   G.day++;
-  if(G.day > MONTH_DAYS){ closeMonth(auto); return; }
+  if(G.day > monthDays()){ closeMonth(auto); return; }
   save(); dayScreen(auto);
 }
 
@@ -1271,7 +1320,7 @@ function dayScreen(auto){
   const M = G.mo;
   const v = $("s-close"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "18px";
-  sc.appendChild(el("div","lbl", dateLine() + " · day " + (G.day - 1) + " of " + MONTH_DAYS
+  sc.appendChild(el("div","lbl", dateLine()
     + (auto ? " · run by the counter" : "")));
   sc.appendChild(el("div","big", SV.take >= (M.take / Math.max(1, M.days)) ? "A good day" : "A quiet day"));
 
@@ -1281,7 +1330,7 @@ function dayScreen(auto){
   st("Today", money(SV.take) + " AED", "cash");
   if(SV.missed) st("Left without ordering", String(SV.missed), "bad");
   st("The month so far", money(M.take) + " AED", "cash");
-  st("Days left to trade", String(MONTH_DAYS - G.day + 1));
+  st("Days left this month", String(monthDays() - G.day + 1));
   sc.appendChild(c);
   sc.appendChild(el("div","hint","Nothing is charged until the books close at the end of the "
     + "month, so a day you watch and a day you hand over are worth the same."));
@@ -1299,7 +1348,7 @@ function dayScreen(auto){
    minus the going-over-to-people you would have done, which is the only thing you lose. */
 function runRestOfMonth(){
   let guard = 0;
-  while(G.day <= MONTH_DAYS && guard++ < 400){
+  while(G.day <= monthDays() && guard++ < 400){
     const q = buildQueue();
     SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
           moment:null, visits:0, offstage:0};
@@ -1401,13 +1450,13 @@ function settleMonth(){
        4/21/38/55 would fall in the first week. Scaled to the month -- the rhythm the player
        actually feels, because the month is the spending round -- and then halved, because a
        first play reported no story at all: chapter two used to sit eleven services away. */
-    if(st.warmth < (4 + st.beat*17) * MONTH_DAYS / 2) return;
+    if(st.warmth < (4 + st.beat*17) * MONTH_SCALE / 2) return;
     const b = r.beats[st.beat];
     if(b.need){
       /* a gate can name a room, a fitting OR a recipe -- checking only G.owned meant
          a recipe gate could never open, and the story sat there forever. */
       const ok = b.need === "quiet" ? G.quiet
-               : b.need === "cash2500" ? G.cash >= 2500 * MONTH_DAYS
+               : b.need === "cash2500" ? G.cash >= 2500 * MONTH_SCALE
                : (own(b.need) > 0 || G.recipes.indexOf(b.need) >= 0);
       if(!ok){ beats.push({r:r, blocked:b.needT}); return; }
     }
@@ -1467,7 +1516,7 @@ function runUntil(){
   let months = 0, last = null;
   while(months < 600){
     /* trade the whole month with nobody watching, then settle it */
-    while(G.day <= MONTH_DAYS){
+    while(G.day <= monthDays()){
       const q = buildQueue();
       SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
             moment:null, visits:0, offstage:0};
@@ -1775,7 +1824,7 @@ function askWipe(btn){
   if(G.branches.length) bits.push(G.branches.length
     + (G.branches.length === 1 ? " branch" : " branches"));
   box.appendChild(el("div","hint",
-    "This deletes the café you have built since 1996 — " + bits.join(", ")
+    "This deletes the café you have built since " + YEAR0 + " — " + bits.join(", ")
     + ", and everyone in it — and opens an empty room again. It cannot be undone."));
   /* Keeping is the prominent one. The player has already reached past the bottom of the hub
      for an underlined link, so intent is not in doubt -- but one costs nothing and the other
@@ -2128,7 +2177,7 @@ const supplyFee = () => Math.round(supplier().fee * infl() * FIXED);
    project now -- you choose what you are working on, it takes months, and it bills you every
    one of them. Each finished piece of work costs more than the last, which is the sink the
    late game never had. */
-const labCost = () => Math.round((900 + G.labDone * 1400) * infl() * MONTH_DAYS);
+const labCost = () => Math.round((900 + G.labDone * 1400) * infl() * MONTH_SCALE);
 const labMonths = () => 3 + Math.min(5, G.labDone);
 const LAB_LINES = [
   {k:"sweet",    t:"Something sweet",      d:"For the afternoon, and for people who came in with children."},
@@ -2148,7 +2197,7 @@ function screenSupply(){
 
   Object.keys(SUPPLIERS).forEach(k => {
     const sp = SUPPLIERS[k], here = G.supplier === k;
-    const join = Math.round(sp.join * infl() * MONTH_DAYS / 10);
+    const join = Math.round(sp.join * infl() * MONTH_SCALE / 10);
     const c = el("div","pickr" + (here ? " on" : ""));
     c.appendChild(el("div","t", sp.t));
     c.appendChild(el("div","d", sp.d));
@@ -2225,7 +2274,7 @@ function labFinish(){
 
    What you can borrow is what the café can service, not what you would like. */
 const borrowLimit = () => Math.max(0, Math.round(
-  (G.lastTake * 4 + G.seats * 220 * MONTH_DAYS + (own("freehold") ? 9000*MONTH_DAYS : 0))
+  (G.lastTake * 4 + G.seats * 220 * MONTH_SCALE + (own("freehold") ? 9000*MONTH_SCALE : 0))
   - G.debt));
 const RATE_BASE = 0.011;
 /* a café with a record borrows cheaper than one without */
@@ -2262,8 +2311,8 @@ function screenBank(){
       + "Borrow against what the café already earns, not against what you hope it will."));
 
   [0.25, 0.5, 1].forEach(frac => {
-    const amt = Math.round(borrowLimit() * frac / (100*MONTH_DAYS)) * 100 * MONTH_DAYS;
-    if(amt < 100*MONTH_DAYS) return;
+    const amt = Math.round(borrowLimit() * frac / (100*MONTH_SCALE)) * 100 * MONTH_SCALE;
+    if(amt < 100*MONTH_SCALE) return;
     const b = el("button","btn" + (frac === 1 ? " sec" : ""), "Borrow " + money(amt) + " AED");
     b.type = "button";
     b.onclick = () => {
@@ -2332,7 +2381,7 @@ const GOALS = [
 
    Paid as a multiple of what the café actually takes in a month instead, with a floor so the
    first ones are not trivial. The same number stays meaningful across three centuries. */
-const goalPay = x => Math.round(Math.max(90 * MONTH_DAYS, (G.lastTake || 0) * x));
+const goalPay = x => Math.round(Math.max(90 * MONTH_SCALE, (G.lastTake || 0) * x));
 
 function checkGoals(){
   const won = [];
@@ -2378,18 +2427,18 @@ const TENURES = [
     + "you. But the rent has not moved since 1979, and the people who came for him are still "
     + "coming.",
    m:"Less money · cheap rent · a worn room · one regular already knows you",
-   f:g => { g.cash = Math.round(380*MONTH_DAYS); g.rentCut = 0.55; g.wear = 22;
+   f:g => { g.cash = Math.round(380*MONTH_SCALE); g.rentCut = 0.55; g.wear = 22;
             g.headStart = true; }},
   {k:"bought", t:"Bought with everything you had",
    d:"No landlord's favour and no debt. An empty room, a clean lease and nothing in the bank "
     + "to fall back on.",
    m:"A middling start · full rent · nothing owed",
-   f:g => { g.cash = Math.round(640*MONTH_DAYS); }},
+   f:g => { g.cash = Math.round(640*MONTH_SCALE); }},
   {k:"loan", t:"On the bank's money",
    d:"More to open with than either of the others, and a repayment every month whether the "
     + "café takes anything or not. The room is fitted out properly from the first day.",
    m:"Most money · full rent · a debt to service",
-   f:g => { g.cash = Math.round(1500*MONTH_DAYS); g.debt = Math.round(1200*MONTH_DAYS);
+   f:g => { g.cash = Math.round(1500*MONTH_SCALE); g.debt = Math.round(1200*MONTH_SCALE);
             g.debtRate = 0.011; }}
 ];
 
@@ -2397,7 +2446,7 @@ function screenSetup(){
   let name = "", who = "", pickK = null;
   const v = $("s-cafe"); v.textContent = "";
   const sc = el("div","scroll pad"); sc.style.paddingTop = "26px";
-  sc.appendChild(el("div","lbl","A shopping street, 1996"));
+  sc.appendChild(el("div","lbl","A shopping street, " + YEAR0));
   sc.appendChild(el("div","big","Open a café"));
   sc.appendChild(el("div","hint","A unit on the corner, a machine, and whatever you can put on "
     + "the board. What happens after that is yours."));
@@ -2443,7 +2492,7 @@ function screenSetup(){
 /* ============================== boot ============================== */
 function intro(){
   const v = $("s-cafe"); v.textContent = "";
-  const bar = el("div","bar"); bar.appendChild(el("div","pill","Spring 1996"));
+  const bar = el("div","bar"); bar.appendChild(el("div","pill", dateLine()));
   v.appendChild(bar);
   drawRoom(v, false);
   const sc = el("div","scroll pad"); sc.style.paddingTop = "16px";

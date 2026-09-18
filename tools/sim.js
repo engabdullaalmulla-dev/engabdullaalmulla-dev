@@ -53,7 +53,7 @@ const ORDER = [
           .filter(k => RECIPES[k].buy > 0 && G.recipes.indexOf(k) < 0)
           .sort((a,b) => RECIPES[a].buy - RECIPES[b].buy)[0];
         if(!next) return;
-        const price = Math.round(RECIPES[next].buy * infl() * MONTH_DAYS);
+        const price = Math.round(RECIPES[next].buy * infl() * MONTH_SCALE);
         if(price > G.cash * 0.4) return;
         G.cash -= price; G.recipes.push(next);
         bought["recipe:" + next] = 1;
@@ -68,7 +68,7 @@ const ORDER = [
       const now = order.indexOf(G.supplier);
       const next = order[now + 1] || (G.supplier === "cc" ? "whole" : null);
       if(!next) return;
-      const join = Math.round(SUPPLIERS[next].join * infl() * MONTH_DAYS / 10);
+      const join = Math.round(SUPPLIERS[next].join * infl() * MONTH_SCALE / 10);
       const fee  = Math.round(SUPPLIERS[next].fee * infl() * FIXED);
       // only if a month's takings can carry the standing fee several times over
       if(G.cash > join * 2 && G.lastTake > fee * 4){
@@ -124,7 +124,7 @@ const ORDER = [
     /* One month, traded day by day with nobody watching, then settled -- the same path the
        game takes when the player hands the rest of the month over. */
     function playMonth(){
-      while(G.day <= MONTH_DAYS){
+      while(G.day <= monthDays()){
         const q = buildQueue();
         SV = {q:q, i:q.length, take:0, profit:0, served:0, missed:0, seen:[], tips:0,
               moment:null, visits:0, offstage:0};
@@ -146,7 +146,7 @@ const ORDER = [
       /* A player at the counter goes over to people; a bot cannot tap. Tips and the rep that
          comes with them are worth roughly what those visits would have earned. */
       if(POLICY !== "greedy" && served){
-        G.cash += Math.round(visitsToday() * MONTH_DAYS * (take/served * 0.04 + 2));
+        G.cash += Math.round(visitsToday() * monthDays() * (take/served * 0.04 + 2));
         G.rep += 1;
       }
       return r;
