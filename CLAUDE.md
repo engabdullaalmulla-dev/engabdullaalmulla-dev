@@ -152,7 +152,8 @@ failures and recovery. `node native/tests/saveBridge.cjs` checks the native file
 contract, payload bounds, cancellation, exact text preservation and temporary-file cleanup.
 `node tools/check-localization.cjs` checks English/Arabic pairs, interpolation placeholders,
 UI lookup keys and translated installed-app metadata. The old `tools/sim.js` targets the retired build-5 globals and must not be used to measure
-the rebuilt game's economy.
+the rebuilt game's economy. Measure it through the engine itself instead: `dispatch` is pure,
+so a delegated year (`CLOSE_DAY` then `NEXT_DAY`, 365 times) runs headless in about a second.
 
 `node tools/check-native.js --static` checks bundled JavaScript, source freshness, all image
 payloads, offline resource restrictions and engine save roundtrips without starting a browser.
@@ -176,18 +177,49 @@ Build 9 uses app version `1.1`, iOS build number `9`, Expo SDK 57 (`~57.0.24`), 
 and React Native 0.86.3. Native file selection, sharing and haptics use the matching Expo
 modules. Native haptics now have supported iOS and Android paths with a silent fallback.
 
-`native/src/webapp/html.js` is **committed deliberately**. EAS ships the tracked files from
-`git rev-parse --show-toplevel`, and `.easignore` only ever *deletes* from that clone — so an
-ignored bundle simply never arrives and Metro fails to resolve `App.js`'s import.
+`native/src/webapp/html.js` is **committed deliberately**. EAS archives the *working tree* from
+the repository root minus whatever is ignored — not only the tracked files: build 3 carried a
+build number that existed only in an uncommitted `app.json`. So an ignored bundle never
+arrives and Metro fails to resolve `App.js`'s import.
+
+**`.easignore` at the repository root replaces every `.gitignore` for EAS** — while it exists,
+none of them are read. It excludes all but `native/` and restates `native/.gitignore`. Keep the
+restated `native/ios/` anchored: unanchored, it would also drop
+`native/modules/cafe-purchases/ios/`, the StoreKit module. Measure the upload after editing it
+(32 files, about 8 MB); unmeasured, it once went to 829 MB, and once to 444 MB because an inline
+`# comment` became part of a pattern — this syntax has no inline comments.
+
+**Building and uploading.** Build on the Mac with `eas build --local` (the Expo free plan's
+monthly cloud builds run out; `npm run build:testflight` builds in the cloud), then upload
+with `xcrun altool --upload-app … --p8-file-path …`, not `eas submit`. The Apple team is at its
+limit of three distribution certificates: reuse one, never create one. The signing details
+(Expo owner, project id) live in the operator's local `native/app.json` and are never committed
+here. The user-level `apple-release` agent holds the rest; `docs/testflight.md` has the detail.
+
+**Before any purchase-enabled build reaches testers:** the non-consumable
+`com.almulla.cafelife.fullgame` must exist in App Store Connect, and the live privacy page must
+be replaced with `docs/privacy-purchase-update.md` — it still says the app has no purchases.
 
 `.github/workflows/pages.yml` publishes the installable PWA so a playtest need not wait on an
 Apple account.
+
+## Agents
+
+Three project agents in `.claude/agents/`: **`release-checker`** (the gates, and inspecting a
+built `.ipa` — including why the game looks missing from the Hermes bundle when it is not),
+**`design-reviewer`** (render and look, in English and Arabic) and **`economy-analyst`** (measures
+the economy through the engine's own `dispatch`). Building, signing and uploading is
+**`apple-release`**, a user-level agent on the operator's Mac, because its constraints — the
+Apple team's certificate limit, the shared Expo build quota, one Mac — are shared with the
+other apps. The watched-day design they were first written against is preserved on the
+`claude/build5-record` branch, which is what shipped as TestFlight build 5.
 
 ## Docs that are load-bearing
 
 - `docs/testflight.md` — the shipping route, the house conventions, and what each was learned from
 - `docs/playtest.md` — who to send the game to, what to say (nothing), what to ask
-- `docs/build8-handoff.md` — current build scope, test evidence and remaining release checks
+- `docs/build9-handoff.md` — current build scope, test evidence and remaining release checks
+  (`docs/build8-handoff.md` for the purchase work before it)
 - `docs/premium-release-plan.md` — purchase contract and remaining commercial/play-value gates
 - `art/art-brief-2.md`, `art/pipeline/` — how sprites are cut and aged
 
