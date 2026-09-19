@@ -1,6 +1,11 @@
 # Privacy copy for the purchase-enabled release
 
-Draft to replace the currently published no-network/no-purchases assertions before build 8 or a later purchase-enabled version is released. This file is not evidence that the public policy has been updated. Retain the actual publisher identity, contact details and policy URL from the existing published policy.
+**Published 19 September 2026** at `https://www.barmajja.com/games/cafe-life/privacy.html`, in
+English and Arabic, with the existing publisher identity, contact address and support-mail
+retention (barmajja repository, PR #2). The live page adds one line this draft does not have:
+the purchase arrives with version 1.1, and earlier test builds (TestFlight 4 and 5) contain no
+purchase and connect to nothing. It also keeps a dated record of the change. The text below is
+the draft as written; the live page is the authority.
 
 ## English
 

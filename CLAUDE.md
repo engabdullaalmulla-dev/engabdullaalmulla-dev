@@ -73,8 +73,10 @@ https origin. The privacy policy published at `barmajja.com/games/cafe-life/priv
 states the no-network claim **as verified fact on the strength of this gate**. If anything ever
 makes the app reach the network, that page has to change before the build ships — and no
 analytics may be added, not even temporarily for a playtest. Build 8 adds native StoreKit
-purchases outside the offline WebView. Publish `docs/privacy-purchase-update.md` with the
-existing publisher details before release; the public policy has not yet been updated.
+purchases outside the offline WebView. The public policy was updated for it on 19 Sep 2026
+(`barmajja.com/games/cafe-life/privacy.html`, English and Arabic): the game still fetches
+nothing, and purchase and restore through Apple are the one stated exception. Anything else
+that reaches the network needs that page changed first.
 
 ## Architecture of the daily rebuild (build 9)
 
@@ -197,8 +199,8 @@ limit of three distribution certificates: reuse one, never create one. The signi
 here. The user-level `apple-release` agent holds the rest; `docs/testflight.md` has the detail.
 
 **Before any purchase-enabled build reaches testers:** the non-consumable
-`com.almulla.cafelife.fullgame` must exist in App Store Connect, and the live privacy page must
-be replaced with `docs/privacy-purchase-update.md` — it still says the app has no purchases.
+`com.almulla.cafelife.fullgame` must exist in App Store Connect — it does not yet. The live
+privacy page was already updated for the purchase on 19 Sep 2026.
 
 `.github/workflows/pages.yml` publishes the installable PWA so a playtest need not wait on an
 Apple account.

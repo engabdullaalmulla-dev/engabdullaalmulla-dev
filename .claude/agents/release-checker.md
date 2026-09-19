@@ -42,12 +42,12 @@ is a finding, because whatever ships is the committed file.
 1. **The game reaches no network.** The offline WebView document fetches nothing; the gate
    asserts it, and the published privacy policy states it as fact. Any `fetch`, remote font,
    image or analytics SDK blocks the release until that page changes first.
-2. **Purchases are the one exception, and they are not live yet.** Native StoreKit 2 in
-   `native/modules/cafe-purchases` is the only deliberate network use. **A purchase-enabled
-   build must not reach testers until** the non-consumable `com.almulla.cafelife.fullgame`
-   exists in App Store Connect *and* the live privacy page has been replaced with
-   `docs/privacy-purchase-update.md` — it still says the app has no purchases. Check both;
-   neither is visible from the repository.
+2. **Purchases are the one exception, and they are not on sale yet.** Native StoreKit 2 in
+   `native/modules/cafe-purchases` is the only deliberate network use, and the live privacy
+   page has described it since 19 Sep 2026. **A purchase-enabled build must not reach testers
+   until** the non-consumable `com.almulla.cafelife.fullgame` exists in App Store Connect —
+   check `/v1/apps/<id>/inAppPurchasesV2`; it is not visible from the repository. If a change
+   adds any *other* network use, the privacy page must change before it ships.
 
 Ownership is never inferred from a save, `localStorage` or a caller-supplied flag. A native
 build containing any developer unlock is not releasable.
